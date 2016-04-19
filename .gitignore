@@ -12,7 +12,7 @@
 .deps
 *root
 BatchMerger
-*eps
+*.eps
 MainFullReco
 MainInvMass
 *gz
