@@ -1,0 +1,50 @@
+cmake_minimum_required(VERSION 2.8)
+
+
+#check for ENV variables that are needed
+IF(NOT DEFINED ENV{ROOTSYS})
+   MESSAGE(FATAL_ERROR "You did not set the environment variable ROOTSYS. Please check your ROOT configuration.") 
+ENDIF(NOT DEFINED ENV{ROOTSYS})
+#IF(NOT DEFINED ENV{GENFIT})
+#   MESSAGE(FATAL_ERROR "You did not set the environment variable GENFIT.") 
+#ENDIF(NOT DEFINED ENV{GENFIT})
+
+
+INCLUDE_DIRECTORIES($ENV{ROOTSYS}/include  ${GENFIT}/core ${GENFIT}/RKTrackRep ${GENFIT}/RKTrackRepXY ${GENFIT}/LSLtrackRep ${GENFIT}/SlTrackRep ${GENFIT}/hyphi)
+
+AUX_SOURCE_DIRECTORY($ENV{GENFIT}/hyphi GENFIT_HYPHI_SRCS)
+
+#SET(GENFIT_HYPHI_SRCS HypDchRecoHit.cxx WireHit.cxx HypDchRecoHit2.cxx GFHypRecoHit.cxx GFHypFieldMap_new.cxx)
+
+SET(GENFIT_HYPHI_HEADERS HypDchRecoHit.h WireHit.h HypDchRecoHit2.h GFHypRecoHit.h GFHypFieldMap_new.h HypPixHit.h StripHit.h)
+
+set(GENFIT_HYPHI_LINKDEF  genfitHypHILinkDef.h)
+set(GENFIT_HYPHI_DICTIONARY genfitHypHIDict.cxx) 
+
+FIND_PROGRAM(ROOT_CINT_EXECUTABLE
+	NAMES rootcint
+	PATHS $ENV{ROOTSYS}/bin
+	NO_DEFAULT_PATH)
+
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/${GENFIT_HYPHI_DICTIONARY}
+	COMMAND ${ROOT_CINT_EXECUTABLE}
+      	ARGS -f ${CMAKE_BINARY_DIR}/${GENFIT_HYPHI_DICTIONARY} -c -DHAVE_CONFIG_H  -I${GENFIT}/core -I${GENFIT}/RKTrackRep -I${GENFIT}/RKTrackRepXY -I${GENFIT}/LSLTrackRep -I${GENFIT}/SlTrackRep -I${GENFIT}/hyphi
+        ${GENFIT_HYPHI_HEADERS} ${GENFIT_HYPHI_LINKDEF}
+      	DEPENDS ${GENFIT_HYPHI_HEADERS} ${GENFIT_HYPHI_LINKDEF})
+
+SET(GENFIT_HYPHI_SRCS ${GENFIT_HYPHI_SRCS} ${CMAKE_BINARY_DIR}/${GENFIT_HYPHI_DICTIONARY})
+
+
+################ install ###################
+
+#add ROOT lib
+Execute_process(COMMAND root-config --glibs --cflags
+	OUTPUT_VARIABLE ROOT_LIBS
+    	OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+
+
+ADD_LIBRARY(genfitHypHI SHARED ${GENFIT_HYPHI_SRCS})
+TARGET_LINK_LIBRARIES(genfitHypHI ${ROOT_LIBS} -lGeom -L${GENFITLIBDIR} -lgenfit -lgenfitLSL -lgenfitRK -lgenfitRKXY -lgenfitSlTrackRep)
+INSTALL(TARGETS genfitHypHI DESTINATION ${GENFITLIBINSTALLDIR} )
+
