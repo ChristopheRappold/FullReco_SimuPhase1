@@ -617,11 +617,17 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
        	  TDirectory* dirTemp = fout->mkdir(nameDir.c_str(),nameDir.c_str());
        	  dirTemp->cd();
 	  for(auto htemp : momEff)
-	    htemp->Write();
+	    if(htemp!=nullptr)
+	      htemp->Write();
+
 	  for(auto htemp : angleEff)
-	    htemp->Write();
+	    if(htemp!=nullptr)
+	      htemp->Write();
+
 	  for(auto htemp : rapEff)
-	    htemp->Write();
+	    if(htemp!=nullptr)
+	      htemp->Write();
+
 	  if(it_momRes!=h_MomAccReco.end())
 	    it_momRes->second->Write();
 	}
