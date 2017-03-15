@@ -78,7 +78,20 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type,const std:
   std::cout<<" *** > Loading Fieldmap ";
 
   Field = new FrsSolenoidHypField();
-  dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("CDS_logR_0");
+  
+  bool isWasa = false;
+  for(auto nameGeo : name_GeoVolumes)
+    if(nameGeo == "WASA")
+      {
+	isWasa = true;
+	std::cout<<"!> Wasa geometry found !\n";
+	break;
+      }
+
+  if(isWasa==false)
+    dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("CDS_logR_0");
+  else
+    dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("INNER_1");
   
   bool inTelsa = false;
   //GFFieldManager::getInstance()->init(new GFHypFieldMap_new(true,-0.750533/0.8016*facFRS,inTelsa,false,1.,Field));
