@@ -40,6 +40,10 @@ public :
   Int_t NFwdtracker;
   Int_t NRpc;
   Int_t NFmf2;
+  Int_t NPsfe;
+  Int_t NPsbe;
+  Int_t NPsce;
+  
   TClonesArray* InSi; //->
   TClonesArray* CDC; //->
   TClonesArray* CDH; //->
@@ -47,6 +51,10 @@ public :
   TClonesArray* RPC; //->
   TClonesArray* FMF2; //->
 
+  TClonesArray* PSFE; //->
+  TClonesArray* PSBE; //->
+  TClonesArray* PSCE; //->
+  
   Int_t Ntrack;
   TClonesArray* fTrack; //->
 
@@ -59,9 +67,13 @@ public :
   static TClonesArray* gRPC; //!
   static TClonesArray* gFMF2; //!
 
+  static TClonesArray* gPSFE; //!
+  static TClonesArray* gPSBE; //!
+  static TClonesArray* gPSCE; //!
+
   static TClonesArray* gfTrack; //! 
   
-  ClassDef(MCAnaEventG4Sol,1)
+  ClassDef(MCAnaEventG4Sol,2)
 };
 
 #endif
