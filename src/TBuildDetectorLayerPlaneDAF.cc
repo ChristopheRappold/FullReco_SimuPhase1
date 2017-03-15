@@ -13,7 +13,7 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
 {
   cout<<"TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF"<<endl;  
 
-  std::vector<std::string> tempName = {"HypHI_InSi_log0","HypHI_InSi_log1","HypHI_InSi_log2","HypHI_InSi_log3","CDC_log0","CDC_log1","CDC_log2","CDC_log3","CDC_log4","CDC_log5","CDC_log6","CDC_log7","CDC_log8","CDC_log9","CDC_log10","CDC_log11","CDC_log12","CDC_log13","CDC_log14","CDH_log","HypHI_TrackFwd_log","HypHI_TrackFwd_logDummy1","HypHI_TrackFwd_logDummy2","HypHI_RPC_l_log","HypHI_RPC_h_log","FMF2_log"};
+  std::vector<std::string> tempName = {"HypHI_InSi_log0","HypHI_InSi_log1","HypHI_InSi_log2","HypHI_InSi_log3","PSFE","MG01","MG02","MG03","MG04","MG05","MG06","MG07","MG08","MG09","MG10","MG11","MG12","MG13","MG14","MG15","MG16","MG17","PSCE","PSBE","CDC_log0","CDC_log1","CDC_log2","CDC_log3","CDC_log4","CDC_log5","CDC_log6","CDC_log7","CDC_log8","CDC_log9","CDC_log10","CDC_log11","CDC_log12","CDC_log13","CDC_log14","CDH_log","HypHI_TrackFwd_log","HypHI_TrackFwd_logDummy1","HypHI_TrackFwd_logDummy2","HypHI_RPC_l_log","HypHI_RPC_h_log","FMF2_log"};
 
   for(size_t iName = 0; iName < att.InputPar.nameDet->size();++iName)
     {
@@ -436,11 +436,25 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 	      if(TypeDet >= G4Sol::CDC_layer0 && TypeDet <= G4Sol::CDC_layer14)
 		fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoords, TypeDet, LayerID );
 
+	      if(TypeDet >= G4Sol::MG01 && TypeDet <= G4Sol::MG17)
+		fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoords, TypeDet, LayerID );
+	      
 	      if(TypeDet == G4Sol::CDHBar)
 		fillOutHit(OutTree->CDH, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
 
 	      if(TypeDet == G4Sol::RPC_l || TypeDet == G4Sol::RPC_h)
 		fillOutHit(OutTree->RPC, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+
+	      if(TypeDet == G4Sol::PSFE)
+		fillOutHit(OutTree->PSFE, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+
+	      if(TypeDet == G4Sol::PSCE)
+		fillOutHit(OutTree->PSCE, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+	      
+	      if(TypeDet == G4Sol::PSBE)
+		fillOutHit(OutTree->PSBE, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+
+	      
 	    }
 	      
 	}
@@ -454,6 +468,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   OutTree->NRpc = OutTree->RPC->GetEntries();
   OutTree->NFwdtracker = OutTree->FwdTracker->GetEntries();
   OutTree->NFmf2 = OutTree->FMF2->GetEntries();
+  OutTree->NPsbe = OutTree->PSBE->GetEntries();
+  OutTree->NPsfe = OutTree->PSFE->GetEntries();
+  OutTree->NPsce = OutTree->PSCE->GetEntries();
 
 #ifdef DEBUG_BUILD
   std::cout<<"done !"<<std::endl;
