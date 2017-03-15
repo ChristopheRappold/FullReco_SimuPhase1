@@ -27,7 +27,7 @@ OutPutOpt     = -o
 
 #CXX           = g++
 CXXFLAGS      = -O2 -fPIC -g -std=c++1y #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
-LIBS          = -L./Genfit2_v1/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
+LIBS          = -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
 LDFLAGS       = -O
 SOFLAGS       = -shared
 
@@ -40,7 +40,7 @@ ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
 
-GENFITV2FLAGS = -I./Genfit2_v1/include
+GENFITV2FLAGS = -I./Genfit2_v2/include
 
 
 CXXFLAGS     += $(ROOTCFLAGS) $(GENFITV2FLAGS) -I/opt/local/include #-I./boost
@@ -51,7 +51,7 @@ LIB_MERGER =  $(ROOTLIBS) -lAna_Event -lAna_Event_Out
 LIB_PROFILING = #-L/home/christophe/Workspace/gperftools-2.4/lib -ltcmalloc #-lprofiler
 
 .SUFFIXES : .$(HeadSuf) .$(DictSuf) .$(ObjSuf) .$(SrcSuf) .$(DictObjSuf)
-.PHONY : clean libGenfit2_v1.so libEventG4Sol.so print clean_all check-syntax
+.PHONY : clean libGenfit2_v2.so libEventG4Sol.so print clean_all check-syntax
 
 DEPEND        = makedepend $(CXXFLAGS)
 
@@ -74,9 +74,9 @@ Objects_Proc_genfit_dep = $(patsubst %.cc,%.o,$(Sources_Proc_genfit_dep))
 # MathObj = MathematicalTools.o
 # MathSo = libHyphiMathTools.$(DllSuf)
 
-all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v1.so libMCEvent.so $(Bindir)/MainSimu
+all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libMCEvent.so $(Bindir)/MainSimu
 
-$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v1.so
+$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so
 	$(CXX) $(CXXFLAGS)  -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING)
 
 # $(Bindir)/BatchMerger: BatchMerger.o libAnaEventOut.so libAna_Event.so
@@ -98,6 +98,22 @@ ifeq ($(ROOTVERSION),6)
 	ln -sf $(FromLibdir)/Genfit2_v1/lib/utilitiesRootDict_rdict.pcm $(Bindir)/lib/
 endif
 	@echo "---> $@ done"
+
+libGenfit2_v2.so :
+	make -C Genfit2_v2/build
+	make -C Genfit2_v2/build install
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/libgenfit2.$(DllSuf).2.0 $(Bindir)/lib/
+ifeq ($(ROOTVERSION),6)
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/coreRootDict_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/eventDisplayRootDict_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/fittersRootDict_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/GBLRootDict_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/measurementsRootDict_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/trackRepsRootDict_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/utilitiesRootDict_rdict.pcm $(Bindir)/lib/
+endif
+	@echo "---> $@ done"
+
 
 
 libFairBase.so :
