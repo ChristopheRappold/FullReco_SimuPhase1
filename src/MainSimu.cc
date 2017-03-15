@@ -47,6 +47,7 @@ static struct option optlong[] =
     {"num",1,NULL,'n'},
     {"event",1,NULL,'e'},
     {"start",1,NULL,'s'},
+    {"geo",1,NULL,'g'}
   };
 
 int main(int argc,char** argv)
@@ -57,7 +58,7 @@ int main(int argc,char** argv)
       std::cout << "!> Wrong number of parameters!\n";
       std::cout << "!> Example of use:\n";
       std::cout << "!> " << argv[0];
-      std::cout << " [-g] [--simu] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [--scaling FieldScalingFactor] [-k FieldScalingFactor] [-t EventList] [--select EventList] [-h] OutputFile RootInputFile_withParObj [RootInputFiles....] \n";
+      std::cout << "[-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [--scaling FieldScalingFactor] [-k FieldScalingFactor] [-t EventList] [--select EventList] [-h] OutputFile RootInputFile_withParObj [RootInputFiles....] \n";
       std::exit(1);
     }
 
@@ -72,6 +73,7 @@ int main(int argc,char** argv)
   TString file_conf;
   bool Mocadi = false;
   bool HypHI = false;
+  std::string nameGeo("./geo/GeoSolenoid.root");
   //int type_hyp = 0;
   while ((option_char = getopt_long (argc,argv,"+hc:n:e:s:",optlong,NULL)) != EOF)
     switch (option_char)
@@ -81,7 +83,8 @@ int main(int argc,char** argv)
       case 'n': std::cout<<"fraction of event "<<optarg<<std::endl; Nb_fraction=std::atoi(optarg); break;
       case 'e': std::cout<<"Nb Event "<<optarg<<std::endl; Nb_event=std::atoi(optarg); break;
       case 's': std::cout<<"Start Event "<<optarg<<std::endl; Start=std::atoi(optarg); break;
-      case '?': std::cerr <<"usage: "<<argv[0]<<" [-g] [--simu] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [--scaling FieldScalingFactor] [-k FieldScalingFactor] [-h]  OutputFile RootInputFile_withParObj [RootInputFiles....]"<<std::endl; std::exit(1);
+      case 'g': std::cout<<"Geometry field :"<<optarg<<std::endl; nameGeo= std::string(optarg); break;
+      case '?': std::cerr <<"usage: "<<argv[0]<<" [-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [--scaling FieldScalingFactor] [-k FieldScalingFactor] [-h]  OutputFile RootInputFile_withParObj [RootInputFiles....]"<<std::endl; std::exit(1);
       }
 	
   std::string name_in,name_out;
@@ -89,7 +92,7 @@ int main(int argc,char** argv)
   if(optind == argc )
     {
 		
-      std::cerr <<"usage: "<<argv[0]<<" [-g] [--simu] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [--scaling FieldScalingFactor] [-k FieldScalingFactor] [-h]  OutputFile RootInputFile_withParObj [RootInputFiles....]"<<std::endl;
+      std::cerr <<"usage: "<<argv[0]<<" [-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [--scaling FieldScalingFactor] [-k FieldScalingFactor] [-h]  OutputFile RootInputFile_withParObj [RootInputFiles....]"<<std::endl;
       std::cerr <<" input and output Rootfile are missing !"<<optind<<" "<<argc<<std::endl;
       std::exit(1);
     }
@@ -125,7 +128,7 @@ int main(int argc,char** argv)
 
 
 
-  TGeoManager::Import("./geo/GeoSolenoid.root"); // FOR Kalman_DAF
+  TGeoManager::Import(nameGeo.c_str()); // FOR Kalman_DAF
 
   TDatabasePDG::Instance()->AddParticle("deuteron","deuteron",1.875613,kTRUE,0.,1.*3.,"Ions",10000);
   TDatabasePDG::Instance()->AddParticle("triton","triton",2.80925,kTRUE,0.,1.*3.,"Ions",10001);
