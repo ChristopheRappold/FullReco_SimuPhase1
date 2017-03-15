@@ -372,8 +372,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	  std::string nameSel(nameParHist);
 	  nameSel+=nameH;
 	  nameSel+="_Acc";
-	  std::string nameSel2 [4] = {nameSel+"CDH",nameSel+"RPC",nameSel+"FMF2",nameSel+"Det"};
-	  std::vector<TH1F*> tempHist(5,nullptr);
+	  std::string nameSel2 [7] = {nameSel+"CDH",nameSel+"RPC",nameSel+"FMF2",nameSel+"PSCE",nameSel+"PSBE",nameSel+"PSFE",nameSel+"Det"};
+	  std::vector<TH1F*> tempHist(8,nullptr);
 	  double binMin = 0.;
 	  double binMax = 10.;
 	  auto it_binMinMax = ParBin.find(namePar);
@@ -387,6 +387,9 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	  tempHist[2] = new TH1F(nameSel2[1].c_str(),nameSel2[1].c_str(),20,binMin,binMax);
 	  tempHist[3] = new TH1F(nameSel2[2].c_str(),nameSel2[2].c_str(),20,binMin,binMax);
 	  tempHist[4] = new TH1F(nameSel2[3].c_str(),nameSel2[3].c_str(),20,binMin,binMax);
+	  tempHist[5] = new TH1F(nameSel2[4].c_str(),nameSel2[4].c_str(),20,binMin,binMax);
+	  tempHist[6] = new TH1F(nameSel2[5].c_str(),nameSel2[5].c_str(),20,binMin,binMax);
+	  tempHist[7] = new TH1F(nameSel2[6].c_str(),nameSel2[6].c_str(),20,binMin,binMax);
 	  h_Acc.insert(std::make_pair(pdg,tempHist));
 	  return tempHist[0];
 	}
@@ -505,6 +508,113 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	}
 	
       
+
+      for(Int_t id = 0; id< event->PSCE->GetEntries();++id)
+	{
+	  const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->PSCE->At(id)));
+	  int TrackID = MChit.MC_id;
+	  for(auto MCpar : TempData)
+	    if(TrackID == MCpar.MC_id)
+	      {
+		auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+		h_Acceptance->Fill(PDG_particle->GetName(),"PSCE",1);
+		h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
+		auto it_momAcc = h_MomAcc.find(MChit.Pdg);
+		it_momAcc->second[4]->Fill(MCpar.MomMass.P());
+		it_momAcc->second[7]->Fill(MCpar.MomMass.P());
+		auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
+		it_angleAcc->second[4]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
+		it_YAcc->second[4]->Fill(MCpar.MomMass.Rapidity());
+		it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
+		if(MCpar.Mother_id>=0)
+		  {
+		    h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
+		    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
+		    it_momAcc2->second[4]->Fill(MCpar.MomMass.P());
+		    it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
+		    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
+		    it_angleAcc2->second[4]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		    it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		  }
+
+
+	      }
+	  
+	}
+      
+      for(Int_t id = 0; id< event->PSBE->GetEntries();++id)
+	{
+	  const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->PSBE->At(id)));
+	  int TrackID = MChit.MC_id;
+	  for(auto MCpar : TempData)
+	    if(TrackID == MCpar.MC_id)
+	      {
+		auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+		h_Acceptance->Fill(PDG_particle->GetName(),"PSBE",1);
+		//h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
+		auto it_momAcc = h_MomAcc.find(MChit.Pdg);
+		it_momAcc->second[5]->Fill(MCpar.MomMass.P());
+		//it_momAcc->second[7]->Fill(MCpar.MomMass.P());
+		auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
+		it_angleAcc->second[5]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		//it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
+		it_YAcc->second[5]->Fill(MCpar.MomMass.Rapidity());
+		//it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
+		if(MCpar.Mother_id>=0)
+		  {
+		    //h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
+		    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
+		    it_momAcc2->second[5]->Fill(MCpar.MomMass.P());
+		    //it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
+		    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
+		    it_angleAcc2->second[5]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		    //it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		  }
+	      }
+	  
+	}
+
+      
+      for(Int_t id = 0; id< event->PSFE->GetEntries();++id)
+	{
+	  const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->PSFE->At(id)));
+	  int TrackID = MChit.MC_id;
+	  for(auto MCpar : TempData)
+	    if(TrackID == MCpar.MC_id)
+	      {
+		auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+		h_Acceptance->Fill(PDG_particle->GetName(),"PSFE",1);
+		//h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
+		auto it_momAcc = h_MomAcc.find(MChit.Pdg);
+		it_momAcc->second[6]->Fill(MCpar.MomMass.P());
+		//it_momAcc->second[7]->Fill(MCpar.MomMass.P());
+		auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
+		it_angleAcc->second[6]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		//it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
+		it_YAcc->second[6]->Fill(MCpar.MomMass.Rapidity());
+		//it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
+		if(MCpar.Mother_id>=0)
+		  {
+		    //h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
+		    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
+		    it_momAcc2->second[6]->Fill(MCpar.MomMass.P());
+		    //it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
+		    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
+		    it_angleAcc2->second[6]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		    //it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		  }
+	      }
+	  
+	}
+
+
+
+
+
       
       for(Int_t id = 0; id< event->fTrack->GetEntries();++id)
 	{
