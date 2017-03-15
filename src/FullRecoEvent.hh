@@ -29,7 +29,7 @@ typedef std::map<MomRef, std::vector<double>,CompMomRef > map_mom3;
 
 namespace G4Sol
 {
-  enum SolDet : int {InSi0=0, InSi1, InSi2, InSi3 /*3*/, CDC_layer0 /*4*/, CDC_layer1, CDC_layer2, CDC_layer3, CDC_layer4, CDC_layer5, CDC_layer6, CDC_layer7, CDC_layer8, CDC_layer9, CDC_layer10, CDC_layer11, CDC_layer12, CDC_layer13, CDC_layer14 /*18*/, CDHBar /*19*/, TrFwd0 /*20*/, TrFwd1, TrFwd2 /*22*/, RPC_l /*23*/, RPC_h /*24*/, FMF2Stop0 /*25*/, FMF2Stop1, FMF2Stop2 /*27*/, SIZEOF_G4SOLDETTYPE};
+  enum SolDet : int {InSi0=0, InSi1, InSi2, InSi3 /*3*/, PSFE /*4*/, MG01 /*5*/, MG02, MG03, MG04, MG05, MG06, MG07, MG08,MG09, MG10, MG11, MG12,MG13, MG14, MG15, MG16, MG17 /*21*/, PSCE /*22*/, PSBE /*23*/, CDC_layer0 /*4 - 24*/, CDC_layer1, CDC_layer2, CDC_layer3, CDC_layer4, CDC_layer5, CDC_layer6, CDC_layer7, CDC_layer8, CDC_layer9, CDC_layer10, CDC_layer11, CDC_layer12, CDC_layer13, CDC_layer14 /*18 - 38*/, CDHBar /*19 - 39*/, TrFwd0 /*20 - 40*/, TrFwd1, TrFwd2 /*22 - 42*/, RPC_l /*23 - 43*/, RPC_h /*24 - 44*/, FMF2Stop0 /*25 - 45*/, FMF2Stop1, FMF2Stop2 /*27 - 47*/, SIZEOF_G4SOLDETTYPE};
 }
 
 
