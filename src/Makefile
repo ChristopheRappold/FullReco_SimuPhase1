@@ -31,9 +31,9 @@ LIBS          = -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
 LDFLAGS       = -O
 SOFLAGS       = -shared
 
-CXX = g++
-CC = gcc
-LD = g++
+CXX = clang++-4.0 #g++
+CC =  clang-4.0 #gcc
+LD = clang++-4.0 #g++
 
 
 ROOTCFLAGS   := $(shell root-config --cflags)
@@ -60,13 +60,16 @@ Sources = MainSimu.cc FullRecoEvent.cc Ana_Hist.cc
 Headers = $(patsubst %.cc,%.hh,$(Sources))
 Objects = $(patsubst %.cc,%.o,$(Sources))
 
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBayesFinder.cc
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
 
 Sources_Proc_genfit_dep = THyphiAttributes.cc FullRecoTask.cc TKalmanFilter_DAF.cc 
 Objects_Proc_genfit_dep = $(patsubst %.cc,%.o,$(Sources_Proc_genfit_dep))
+
+CHK_SOURCES += $(Sources) $(Sources_Proc) $(Sources_Proc_genfit_dep) 
+CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 
 #Objects_Proc_old_genfit = $(patsubst %.cc,%.o,$(Sources_Proc_old_genfit))
 
@@ -102,7 +105,7 @@ endif
 libGenfit2_v2.so :
 	make -C Genfit2_v2/build
 	make -C Genfit2_v2/build install
-	ln -sf $(FromLibdir)/Genfit2_v2/lib/libgenfit2.$(DllSuf).2.0 $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/libgenfit2.$(DllSuf).2.1 $(Bindir)/lib/
 ifeq ($(ROOTVERSION),6)
 	ln -sf $(FromLibdir)/Genfit2_v2/lib/coreRootDict_rdict.pcm $(Bindir)/lib/
 	ln -sf $(FromLibdir)/Genfit2_v2/lib/eventDisplayRootDict_rdict.pcm $(Bindir)/lib/
@@ -173,10 +176,10 @@ clean:
 	rm -f $(Bindir)/BatchMerger $(Bindir)/MainSimu $(Bindir)/*.so $(Bindir)/lib/*.so $(Bindir)/lib/*.pcm $(Bindir)/lib/*.dylib *.$(DictpSuf).* *.o *.so *.dylib *pcm
 
 clean_all: clean
-	make -C Genfit2_v1/build clean
+	make -C Genfit2_v2/build clean
 	make -C EventG4Sol clean_all
 	make -C FairBase clean_all
-
+	make -C Ana_Event clean_all
 print :
 	@echo "################################################################################"
 	@echo "#                                                                               "
@@ -185,8 +188,8 @@ print :
 	@echo "################################################################################"
 
 check-syntax:
-	$(CXX) $(CXXFLAGS) -Wall -Wextra -fsyntax-only $(CHK_SOURCES)
-
+#	$(CXX) $(CXXFLAGS) -Wall -Wextra -fsyntax-only $(CHK_SOURCES)
+	clang-tidy-4.0 $(CHK_SOURCES) $(CHK_HEADERS) -config='' -- -std=c++14 -I/usr/include/c++/5/ -I/home/christophe/root-6/include -I./Genfit2_v2/include
 #depend:
 #	 makedepend -f- -- $(CXXFLAGS) -- *.cc > Fullrec.depends
 #-include Fullrec.depends
