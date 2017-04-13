@@ -35,6 +35,7 @@ public :
   TClonesArray* fMC_Particle; //->
 
   Int_t NInSi;
+  Int_t NTr;
   Int_t NCdc;
   Int_t NCdh;
   Int_t NFwdtracker;
@@ -45,6 +46,7 @@ public :
   Int_t NPsce;
   
   TClonesArray* InSi; //->
+  TClonesArray* TR; //->
   TClonesArray* CDC; //->
   TClonesArray* CDH; //->
   TClonesArray* FwdTracker; //->
@@ -61,6 +63,7 @@ public :
   static TClonesArray* gMC_Particle; //!
   
   static TClonesArray* gInSi; //!
+  static TClonesArray* gTR; //!
   static TClonesArray* gCDC; //!
   static TClonesArray* gCDH; //!
   static TClonesArray* gFwdTracker; //!
@@ -73,7 +76,7 @@ public :
 
   static TClonesArray* gfTrack; //! 
   
-  ClassDef(MCAnaEventG4Sol,2)
+  ClassDef(MCAnaEventG4Sol,3)
 };
 
 #endif

@@ -7,6 +7,7 @@ ClassImp(MCAnaEventG4Sol)
 TClonesArray *MCAnaEventG4Sol::gMC_Particle = 0;
 
 TClonesArray *MCAnaEventG4Sol::gInSi = 0;
+TClonesArray *MCAnaEventG4Sol::gTR = 0;
 TClonesArray *MCAnaEventG4Sol::gCDC = 0;
 TClonesArray *MCAnaEventG4Sol::gCDH = 0;
 TClonesArray *MCAnaEventG4Sol::gFwdTracker = 0;
@@ -24,6 +25,7 @@ MCAnaEventG4Sol::MCAnaEventG4Sol()//:TObject()
   if(!gMC_Particle) gMC_Particle = new TClonesArray("TMcParticle",10);
 
   if(!gInSi) gInSi = new TClonesArray("TMcHit",20);
+  if(!gTR) gTR = new TClonesArray("TMcHit",20);
   if(!gCDC) gCDC = new TClonesArray("TMcHit",20);
   if(!gCDH) gCDH = new TClonesArray("TMcHit",20);
   if(!gFwdTracker) gFwdTracker = new TClonesArray("TMcHit",20);
@@ -39,6 +41,7 @@ MCAnaEventG4Sol::MCAnaEventG4Sol()//:TObject()
 
 
   InSi = gInSi;
+  TR = gTR;
   CDC = gCDC;
   CDH = gCDH;
   FwdTracker = gFwdTracker;
@@ -56,6 +59,7 @@ MCAnaEventG4Sol::MCAnaEventG4Sol()//:TObject()
   Nmc=0;
  
   NInSi=0;
+  NTr=0;
   NCdc=0;
   NCdh=0;
   NFwdtracker=0;
@@ -85,6 +89,7 @@ void MCAnaEventG4Sol::Clear(Option_t *option)
   fMC_Particle->Clear("C");
 
   InSi->Clear("C");
+  TR->Clear("C");
   CDC->Clear("C");
   CDH->Clear("C");
   FwdTracker->Clear("C");
@@ -107,6 +112,7 @@ void MCAnaEventG4Sol::Reset()
   delete gfTrack; gfTrack = 0;
 
   delete gInSi; gInSi = 0;
+  delete gTR; gTR = 0;
   delete gCDC; gCDC = 0;
   delete gCDH; gCDH = 0;
   delete gFwdTracker; gFwdTracker = 0;
@@ -124,6 +130,7 @@ int MCAnaEventG4Sol::Setup()
   Nmc=0;
  
   NInSi=0;
+  NTr=0;
   NCdc=0;
   NCdh=0;
   NFwdtracker=0;
