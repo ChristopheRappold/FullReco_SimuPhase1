@@ -235,7 +235,16 @@ void FrsSolenoidHypField::SetPositionFromGeoManager(const TString& name_node)
   TGeoNode* mother = gGeoManager->GetTopNode();
   TObjArray* ListNodes = mother->GetNodes();
   TGeoNodeMatrix* Solenoid_node = dynamic_cast<TGeoNodeMatrix*>(ListNodes->FindObject(name_node));
-
+  TGeoMatrix* tempMatrix = nullptr;
+  if(Solenoid_node == nullptr && ListNodes->GetEntries()==1)
+    {
+      TGeoNodeMatrix* tempMother = dynamic_cast<TGeoNodeMatrix*>(ListNodes->At(0));
+      tempMatrix = (TGeoMatrix*) tempMother->GetMatrix();
+      
+      ListNodes = tempMother->GetNodes();
+      Solenoid_node = dynamic_cast<TGeoNodeMatrix*>(ListNodes->FindObject(name_node));
+    }
+  
   TGeoTube* tempMag = (TGeoTube*) Solenoid_node->GetVolume()->GetShape();
   TGeoMatrix* MagneticField = (TGeoMatrix*) Solenoid_node->GetMatrix();
   
@@ -246,7 +255,14 @@ void FrsSolenoidHypField::SetPositionFromGeoManager(const TString& name_node)
 
   Double_t lloc[]={0.,0.,0.};
   Double_t lmaster[]={0.,0.,0.};
-  MagneticField->LocalToMaster(lloc,lmaster);
+  if(tempMatrix==nullptr)
+    MagneticField->LocalToMaster(lloc,lmaster);
+  else
+    {
+      TGeoHMatrix h = (*tempMatrix)*(*MagneticField);
+      h.LocalToMaster(lloc,lmaster);
+    }
+
   fPosX = lmaster[0];
   fPosY = lmaster[1];
   fPosZ = lmaster[2];
