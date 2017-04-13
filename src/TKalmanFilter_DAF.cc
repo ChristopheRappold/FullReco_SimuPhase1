@@ -136,28 +136,40 @@ int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
       int TrackID = TrackRes.first;
       const ResSolDAF& FitRes = TrackRes.second;
       auto TInfo = RecoEvent.TrackInfo.find(TrackID);
+      auto IsDecay = RecoEvent.TrackMother.find(TrackID);
+      int Decay = IsDecay == RecoEvent.TrackMother.end() ? 0 : 1;
 
-      THyphiTrack *OutTrack = dynamic_cast<THyphiTrack*>(OutTree->fTrack->ConstructedAt(OutTree->fTrack->GetEntries()));
+      THyphiTrack* OutTrack = dynamic_cast<THyphiTrack*>(OutTree->fTrack->ConstructedAt(OutTree->fTrack->GetEntries()));
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(FitRes.pdg_guess);
       OutTrack->type = PDG_particle->GetName();
-      OutTrack->MC_status = TrackID;
+      OutTrack->MC_status = TrackID + 10000 * Decay;
       OutTrack->Chi2 = FitRes.chi2;
       OutTrack->Chi2_X = FitRes.ndf;
+      OutTrack->Chi2_Y = FitRes.firstHit;
       OutTrack->Mass = FitRes.mass;
       OutTrack->pdgcode = FitRes.pdg_guess;
-      OutTrack->MomMass.SetXYZM(FitRes.momX,FitRes.momY,FitRes.momZ,FitRes.mass);
-      OutTrack->Mom.SetXYZ(FitRes.momX,FitRes.momY,FitRes.momZ);
+      OutTrack->MomMass.SetXYZM(FitRes.momX, FitRes.momY, FitRes.momZ, FitRes.mass);
+      OutTrack->Mom.SetXYZ(FitRes.momX, FitRes.momY, FitRes.momZ);
 
       OutTrack->BarId = FitRes.lastHit;
       OutTrack->Charge = FitRes.charge;
       OutTrack->dE = TInfo->second[FitRes.lastHit].Eloss;
       OutTrack->Beta = FitRes.beta;
-      OutTrack->RefPoint.SetXYZ(FitRes.posX,FitRes.posY,FitRes.posZ);
+      OutTrack->RefPoint.SetXYZ(FitRes.posX, FitRes.posY, FitRes.posZ);
       OutTrack->Pval2 = FitRes.pvalue;
       OutTrack->PathLength = FitRes.path_length;
       OutTrack->TOF = FitRes.tof;
 
-      OutTrack->MomIni.SetXYZ(FitRes.momX_init,FitRes.momY_init,FitRes.momZ_init);
+      OutTrack->MomIni.SetXYZ(FitRes.momX_init, FitRes.momY_init, FitRes.momZ_init);
+      OutTrack->BetaIni = FitRes.beta2;
+      OutTrack->MassIni = FitRes.mass2;
+      OutTrack->TOFIni = FitRes.tof2;
+      OutTrack->PathLengthIni = TInfo->second[FitRes.lastHit].length; // FitRes.path_length2;
+      OutTrack->RChiIni = FitRes.fitter;
+      if(Decay == 1)
+        OutTrack->Sim2Vtx.SetXYZT(std::get<1>(IsDecay->second), std::get<2>(IsDecay->second), std::get<3>(IsDecay->second),
+                                  std::get<4>(IsDecay->second));
+
       OutTrack->State[0] = FitRes.posX;
       OutTrack->State[1] = FitRes.posY;
       OutTrack->State[2] = FitRes.posZ;
