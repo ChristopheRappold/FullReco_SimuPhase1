@@ -461,9 +461,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
         }
 
       InfoPar track_stateLast(it_trackInfo.second[id_lastHit]);
-      
-      assert(fitTrack->checkConsistency());
-      
+
+      // assert(fitTrack->checkConsistency());
+      fitTrack->checkConsistency();
 #ifdef DEBUG_KALMAN2
       std::cout << "track n'" << ntrack << std::endl;
 #endif
