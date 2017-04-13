@@ -179,38 +179,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
         }
     }
 #endif
-  
-  auto pid_fromName = [] (const std::string& name) {
-    if(name=="proton")
-      return 2212;
-    if(name=="He3")
-      return 10003;
-    if(name=="pi-")
-      return -211;
-    if(name=="pi+")
-      return 211;
-    if(name=="neutron")
-      return 2112;
-    if(name=="kaon0")
-      return 311;
-    if(name=="kaon+")
-      return 321;
-    if(name=="kaon-")
-      return -321;
-    if(name=="H3L")
-      return 20001;
-    if(name=="pi0")
-      return 111;
-    if(name=="triton")
-      return 10001;
-    if(name=="deuteron")
-      return 10000;
-    if(name=="alpha")
-      return 10002;
-
-    return 0;
-  };
-  
 
   std::string nameMother(event.MotherName);
   int id_mother = event.MotherTrackID;
