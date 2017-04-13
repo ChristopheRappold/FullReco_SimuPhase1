@@ -201,7 +201,8 @@ struct SimHit
   double mass = 0.;
 
   double Eloss = 0.;
-  double time =0.;
+  double time = 0.;
+  double length = 0.;
 };
 
 struct InfoPar
@@ -213,6 +214,7 @@ struct InfoPar
   double mass = -999.;
   double Eloss = 0.;
   double time = 0.;
+  double length = 0.;
 };
 
 struct ResSolDAF
@@ -224,7 +226,8 @@ struct ResSolDAF
   double pvalue = -1.;
   double chi2 = -1.;
   double ndf = 0.;
-
+  int fitter = -1;
+  
   double momX_init = -999.;
   double momY_init = -999.;
   double momZ_init = -999.;
@@ -238,9 +241,14 @@ struct ResSolDAF
   double posZ = -999.;
 
   double mass = -999.;
+  double mass2 = -999.;
   double beta = -999.;
+  double beta2 = -999.;
   double tof = -999.;
+  double tof2 = -999.;
+
   double path_length = -999.;
+  double path_length2 = -999.;
   double path_time = -999.;
 
   double dE = -999.;
@@ -274,6 +282,7 @@ class FullRecoEvent
   std::unordered_map<int, std::vector<int> > TrackDAF;
   std::unordered_map<int, std::vector<SimHit> > TrackDAFSim;
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
+  std::unordered_map<int, std::tuple<int,double,double,double,double> > TrackMother;
 
   FullRecoEvent();
   ~FullRecoEvent();

@@ -29,5 +29,5 @@ void FullRecoEvent::Clear(int toclean)
   TrackDAF.clear();
   TrackDAFSim.clear();
   TrackInfo.clear();
+  TrackMother.clear();
 }
-
