@@ -409,19 +409,20 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       TMatrixDSym seedCov(6);
       REP->get6DStateCov(stateRef, seedState, seedCov);
 
-
 #ifdef DEBUG_KALMAN
-      std::cout<<"init_p:"<<std::endl;
+      std::cout << "init_p:" << std::endl;
       init_p.Print();
       init_p.Unit().Print();
-      std::cout<<"init_point :"<<std::endl;
+      std::cout << "seed_p:" << std::endl;
+      seed_p.Print();
+      std::cout << "init_point :" << std::endl;
       init_point.Print();
-      std::cout<<" SEED :"<<std::endl;
+      std::cout << " SEED :" << std::endl;
       seedState.Print();
-      std::cout<<"--"<<std::endl;
+      std::cout << "--" << std::endl;
       seedCov.Print();
-      //std::cout<<"init_plane :"<<std::endl;
-      //init_plane.Print();
+// std::cout<<"init_plane :"<<std::endl;
+// init_plane.Print();
 #endif
 
       if(REP == NULL)
