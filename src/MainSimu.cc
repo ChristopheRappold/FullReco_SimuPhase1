@@ -75,7 +75,7 @@ int main(int argc,char** argv)
   bool HypHI = false;
   std::string nameGeo("./geo/GeoSolenoid.root");
   //int type_hyp = 0;
-  while ((option_char = getopt_long (argc,argv,"+hc:n:e:s:",optlong,NULL)) != EOF)
+  while ((option_char = getopt_long (argc,argv,"+hc:n:e:s:g:",optlong,NULL)) != EOF)
     switch (option_char)
       {  
       case 'h': std::cerr <<"usage: "<<argv[0]<<" [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-h]  OutputFile RootInputFile_withParObj [RootInputFiles....]"<<std::endl; std::exit(1); break;
@@ -140,7 +140,7 @@ int main(int argc,char** argv)
   TDatabasePDG::Instance()->AddParticle("He5L","He5L",4.8399,kFALSE,0.,1.*3.,"Ions",20003);
   
 
-  TFile* offile=new TFile(name_out.c_str(),"RECREATE");
+  TFile* offile = new TFile(name_out.c_str(),"RECREATE");
 
   TTree* Anatree = 0;
   MCAnaEventG4Sol *Anaevent = 0;
@@ -223,11 +223,11 @@ int main(int argc,char** argv)
   TString fra_string("Fraction");
   fra_string+=Nb_fraction;
   Option.push_back(fra_string.Data());
-
+  Option.push_back("NoMaterial");
   Option.push_back("Debug_DAF");
       
       
-  Ana_Hist ListHisto(true/*DAF_Debug*/,false/*Oldvertex*/,false/*DCproject*/,false/*Finding*/,true/*Hough*/,true);
+  Ana_Hist ListHisto(true/*DAF_Debug*/,false/*Oldvertex*/,false/*DCproject*/,true/*Finding*/,true/*Hough*/,true);
   FullRecoTask ReconstructionTask(ToDo,Option,1.,InputPar);
 
   ReconstructionTask.AttachHisto(&ListHisto);
