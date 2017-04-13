@@ -280,8 +280,41 @@ int main(int argc,char** argv)
   Anatree->Write(); 
   std::cout<<"Tree Filled"<<std::endl;
   //ListHisto.Write(offile_hist);
-  //ListHisto.Write(offile);
+  ListHisto.Write(offile);
+
   std::cout<<"Histo Written"<<std::endl;
+
+  TObjArray* additionalPDG = new TObjArray;
+  additionalPDG->SetName("additionalPDG");
+  int id_pdg = 10004+1;
+  bool finish = false;
+  while( finish==false )
+    {
+      TParticlePDG* PDG_particle = TDatabasePDG::Instance()->GetParticle(id_pdg);
+      if(PDG_particle!=nullptr)
+	{
+	  additionalPDG->Add(PDG_particle);
+	  ++id_pdg;
+	}
+      else
+	finish = true;
+    }
+  id_pdg = 20003+1;
+  while( finish==false )
+    {
+      TParticlePDG* PDG_particle = TDatabasePDG::Instance()->GetParticle(id_pdg);
+      if(PDG_particle!=nullptr)
+	{
+	  additionalPDG->Add(PDG_particle);
+	  ++id_pdg;
+	}
+      else
+	finish = true;
+    }
+  offile->WriteObjectAny(additionalPDG, additionalPDG->Class(), "additionalPDG");
+  //additionalPDG->Write();
+
+  std::cout<<"Additional PDG data written"<<std::endl;
 
   offile->Close();
   //offile_hist->Close();
