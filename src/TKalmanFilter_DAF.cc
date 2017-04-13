@@ -221,20 +221,68 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       const int id_track = it_trackInfo.first;
       auto it_ListHits = RecoEvent.TrackDAF.find(id_track);
 
-      int id_firstHit = -1;
-      for(size_t idTempHit = 0; idTempHit < it_ListHits->second.size(); ++idTempHit)
-	if(it_ListHits->second[idTempHit]!=-1)
-	  {
-	    id_firstHit=idTempHit;
-	    break;
-	  }
-      if(id_firstHit==-1)
-	continue;
-      
-      if(TMath::Abs(it_trackInfo.second[id_firstHit].pdg)<1e-2)
-	continue;
-      
-      
+      std::set<std::tuple<double, int, int> > id_dets;
+
+      for(size_t id_det = 0; id_det < it_ListHits->second.size(); ++id_det)
+        {
+          int id_hit = it_ListHits->second[id_det];
+          if(id_hit < 0)
+            continue;
+
+          genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
+          id_dets.insert(std::make_tuple(currentHit->getRawHitCoords()(2), id_det, id_hit));
+        }
+
+      // if(id_firstDet != std::get<1>(*firstHit) )
+      // 	{
+      // 	  std::cout<<"!> Kalman: firstHit not matched !"<<id_firstDet<<" "<<std::get<1>(*firstHit)<<"\n";
+      // 	  auto Decay = RecoEvent.TrackMother.find(id_track);
+      // 	  bool IsDecay = Decay != RecoEvent.TrackMother.end();
+      // 	  std::cout<<"track #"<<id_track<<" "<<PDG<<" "<<IsDecay<<"\n";
+      // 	  for(auto ii : id_dets)
+      // 	    std::cout<<"| :"<<std::get<0>(ii)<<" "<<std::get<1>(ii)<<" "<<std::get<2>(ii)<<"\n";
+      // 	  std::cout<<" +---\n";
+      // 	}
+
+      // for(size_t idTempDet = 0; idTempDet < it_ListHits->second.size(); ++idTempDet)
+      //   if(it_ListHits->second[idTempDet] != -1)
+      //     {
+      //       if(id_firstDet == -1 && idTempDet != G4Sol::PSFE)
+      //         id_firstDet = idTempDet;
+
+      //       ++nb_ValidHits;
+      //       // break;
+      //     }
+
+      // if(id_firstDet == -1)
+      //   continue;
+
+      if(id_dets.size() < 3) //(nb_ValidHits < 3)
+        continue;
+
+      auto f_LastHitIsValid = [](const auto& it_ListHits, std::set<G4Sol::SolDet> listToTest) {
+
+        for(auto it_det : listToTest)
+          if(it_ListHits->second[it_det] >= 0)
+            return it_det;
+
+        return G4Sol::SIZEOF_G4SOLDETTYPE;
+
+      };
+      G4Sol::SolDet lastValidHit = f_LastHitIsValid(it_ListHits, {G4Sol::PSCE, G4Sol::PSFE, G4Sol::RPC_l, G4Sol::RPC_h});
+
+      if(lastValidHit == G4Sol::SIZEOF_G4SOLDETTYPE)
+        continue;
+
+      const auto firstHit = id_dets.cbegin();
+      const auto lastHit = id_dets.crbegin();
+
+      int id_firstDet = std::get<1>(*firstHit);
+      int id_lastHit = std::get<1>(*lastHit); // std::get<0>(lastHit);
+
+      if(TMath::Abs(it_trackInfo.second[id_firstDet].pdg) < 1e-2)
+        continue;
+
 #ifdef DEBUG_KALMAN
       std::cout << " Id_track: " << id_track << std::endl;
 #endif
@@ -331,29 +379,31 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       std::cout << "init mom : ";
       init_p.Print();
 #endif
-      
-         
+
+      // const double mom_res = .200; // GeV
+      // double new_P = gRandom->Gaus(seed_Mom_Mag,mom_res);
+      TVector3 seed_p(init_p);
+      // seed_p.SetMag(new_P);
+
       genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG);
 
-      genfit::AbsMeasurement* FirstHit = RecoEvent.ListHits[id_firstHit][it_ListHits->second[id_firstHit]].get();
-      TVectorD& HitrawRef =  FirstHit->getRawHitCoords();
-      const TVector3 init_point(HitrawRef[0],HitrawRef[1],HitrawRef[2]);
+      genfit::AbsMeasurement* FirstHit = RecoEvent.ListHits[id_firstDet][it_ListHits->second[id_firstDet]].get();
+      TVectorD& HitrawRef = FirstHit->getRawHitCoords();
+      const TVector3 init_point(HitrawRef[0], HitrawRef[1], HitrawRef[2]);
 
-
-      //TVector3 init_point(track_state[9],track_state[10],track_state[11]);
-
+      // TVector3 init_point(track_state[9],track_state[10],track_state[11]);
 
       TMatrixDSym CovM(6);
-      //double resolution = 0.1;
-      for (int i = 0; i < 6; ++i)
-	CovM(i,i) = 1000.;
-	
+      // double resolution = 0.1;
+      for(int i = 0; i < 6; ++i)
+        CovM(i, i) = 1000.;
+
       genfit::MeasuredStateOnPlane stateRef(REP);
-      //TEP->setPDG(infoTrack.PDG);
-      REP->setPosMomCov(stateRef, init_point, init_p,CovM);
+      // TEP->setPDG(infoTrack.PDG);
+      REP->setPosMomCov(stateRef, init_point, seed_p, CovM);
       // remember original initial state
-      const genfit::StateOnPlane stateRefOrig(stateRef);
-	
+      const genfit::StateOnPlane stateRefOrig(stateRef.getState(), stateRef.getPlane(), REP, stateRef.getAuxInfo());
+
       // create track
       TVectorD seedState(6);
       TMatrixDSym seedCov(6);
@@ -388,18 +438,27 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       std::shared_ptr<genfit::Track> fitTrack = std::make_shared<genfit::Track>(REP, seedState, seedCov);
 #endif
 
-      int id_lastHit = -1;
-      for(size_t id_det = 0; id_det < it_ListHits->second.size(); ++id_det)
-	{
-	  int id_hit = it_ListHits->second[id_det];
-	  if(id_hit<0)
-	    continue;
-	  
-	  genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
-	  //Vtracks->insertPoint(new genfit::TrackPoint(RecoEvent.ListHitsDAF[id_track][ii],Vtracks));
-	  fitTrack->insertPoint(new genfit::TrackPoint(currentHit,fitTrack.get(),false));
-	  id_lastHit = id_det;
-	}
+      // std::tuple<int, double> lastHit = std::make_tuple(-1, -9999.);
+
+      for(auto ids : id_dets)
+        {
+          int id_det = std::get<1>(ids);
+          int id_hit = std::get<2>(ids);
+
+          genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
+#ifdef DEBUG_KALMAN
+          std::cout << "Loop insertPoint: #det:" << id_det << " #hit:" << id_hit << " " << currentHit << "\n";
+          currentHit->Print();
+#endif
+          // if(std::get<1>(lastHit) < currentHit->getRawHitCoords()(2))
+          //   {
+          //     lastHit = std::make_tuple(id_det, currentHit->getRawHitCoords()(2));
+          //   }
+
+          // Vtracks->insertPoint(new genfit::TrackPoint(RecoEvent.ListHitsDAF[id_track][ii],Vtracks));
+          fitTrack->insertPoint(new genfit::TrackPoint(currentHit, fitTrack.get(), false));
+          // id_lastHit = id_det;
+        }
 
       InfoPar track_stateLast(it_trackInfo.second[id_lastHit]);
       
