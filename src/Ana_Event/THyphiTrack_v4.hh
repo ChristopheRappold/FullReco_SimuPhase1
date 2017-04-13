@@ -1,17 +1,17 @@
-#ifndef HYPHITRACKV3_h
-#define HYPHITRACKV3_h
+#ifndef HYPHISIMTRACKV4_h
+#define HYPHISIMTRACKV4_h
 
-#include "TObject.h"
+#include "TClass.h"
 #include "TLorentzVector.h"
+#include "TMatrixT.h"
+#include "TObject.h"
 #include "TString.h"
 #include "TVector3.h"
-#include "TMatrixT.h"
-#include "TClass.h"
 
-class THyphiTrack : public TObject{
+class THyphiTrack : public TObject
+{
 
-public :
-  
+  public:
   TString type;
   Int_t MC_status;
   Double_t Chi2;
@@ -41,18 +41,21 @@ public :
   Double_t PathLength;
   Double_t TOF;
 
-
   TVector3 MomIni;
   Float_t RChiIni;
-  //  Double32_t PathLengthIni;
-  Float_t BetaIni;
-  
+  Double32_t PathLengthIni;
+  Double32_t TOFIni;
+  Double32_t BetaIni;
+  Double32_t MassIni;
 
+  TLorentzVector Sim2Vtx;
+  
+  
   ////////////////////////
   Double_t State[6];
   Double_t Cov[6][6];
   ////////////////////////
-  // TVector3 MomTof;  
+  // TVector3 MomTof;
   // ///////////////////////
   // Double32_t Residu_X_TR1;
   // Double32_t Residu_X_TR2;
@@ -64,25 +67,26 @@ public :
   // Double32_t Residu_Y_DC2;
   // Double32_t Residu_Y_TOF;
 
-//   TMatrixT<double> state;
-//   TMatrixT<double> cov;
-  
+  //   TMatrixT<double> state;
+  //   TMatrixT<double> cov;
+
   THyphiTrack();
   THyphiTrack(const THyphiTrack& H);
   ~THyphiTrack();
 
-  virtual void Clear(Option_t *option ="");
+  virtual void Clear(Option_t* option = "");
   // void SetPara(const TString& name,Int_t MC,Double_t chi2,Double_t chi2_x, Double_t chi2_y,Double_t mass, Int_t pdg,const TVector3& vec);
-  // void SetPara(const TString& name,Int_t MC,Double_t chi2,Double_t chi2_x, Double_t chi2_y,Double_t mass, Int_t pdg,const TVector3& vec,Int_t charge,Int_t barid,Double_t beta,const TVector3& hit_tr1,const TVector3& hit_tr2, const TVector3 hit_dc2, const TVector3 num_dc2,Double_t pval2,Int_t tofsbar );
+  // void SetPara(const TString& name,Int_t MC,Double_t chi2,Double_t chi2_x, Double_t chi2_y,Double_t mass, Int_t pdg,const TVector3&
+  // vec,Int_t charge,Int_t barid,Double_t beta,const TVector3& hit_tr1,const TVector3& hit_tr2, const TVector3 hit_dc2, const TVector3
+  // num_dc2,Double_t pval2,Int_t tofsbar );
 
-//   inline void setState(const TMatrixT<double>& aState) {
-//     state = aState;
-//   }
-//   inline void setCov(const TMatrixT<double>& aCov) {
-//     cov = aCov;
-//   }
-  ClassDef(THyphiTrack,5)
-    
+  //   inline void setState(const TMatrixT<double>& aState) {
+  //     state = aState;
+  //   }
+  //   inline void setCov(const TMatrixT<double>& aCov) {
+  //     cov = aCov;
+  //   }
+  ClassDef(THyphiTrack, 5)
 };
 
 #endif

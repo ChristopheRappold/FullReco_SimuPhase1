@@ -5,7 +5,7 @@ using namespace std;
 
 ClassImp(THyphiTrack)
   
-THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1.),Mass(-1.),pdgcode(0),MomMass(0.,0.,0.,0.),Mom(0.,0.,0.),Charge(0),BarId(0),Beta(0),RefPoint(-999.,-999.,-999.),Pval2(-1),TofsBar(-1),PathLength(-999),TOF(-999),MomIni(-999,-999,-999),RChiIni(-1),BetaIni(-999)//,state(5,1),cov(5,5)
+THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1.),Mass(-1.),pdgcode(0),MomMass(0.,0.,0.,0.),Mom(0.,0.,0.),Charge(0),BarId(0),Beta(0),RefPoint(-999.,-999.,-999.),Pval2(-1),TofsBar(-1),PathLength(-999),TOF(-999),MomIni(-999,-999,-999),RChiIni(-1),PathLengthIni(-999.),TOFIni(-999.),BetaIni(-999),MassIni(-999.),Sim2Vtx(-999.,-999.,-999.,-999.)//,state(5,1),cov(5,5)
 {
   
   //   std::cout<<"THyphiTrack Constructor"<<std::endl;
@@ -48,7 +48,10 @@ THyphiTrack::THyphiTrack(const THyphiTrack& H)
 
   MomIni = H.MomIni;
   RChiIni = H.RChiIni;
+  PathLengthIni = H.PathLengthIni;
+  TOFIni = H.TOFIni;
   BetaIni = H.BetaIni;
+  MassIni = H.MassIni;
 
   for(int i=0;i<6;i++)
     {
@@ -99,7 +102,10 @@ void THyphiTrack::Clear(Option_t *option)
 
   MomIni.SetXYZ(-999,-999,-999);
   RChiIni = -1;
-  BetaIni =-999;
+  PathLengthIni = -999.;
+  TOFIni = -999.;
+  BetaIni = -999.;
+  MassIni = -999.;
 
   for(int i=0;i<6;i++)
     {
