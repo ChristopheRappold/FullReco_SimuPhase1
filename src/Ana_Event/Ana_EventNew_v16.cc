@@ -3,7 +3,7 @@
 //#include "THyphiSimpleHit.hh"
 #include "THyphiHitDet.hh"
 //#include "TTrackSimple_v2.hh"
-#include "THyphiTrack_v3.hh"
+#include "THyphiTrack_v4.hh"
 
 using namespace std;
 
