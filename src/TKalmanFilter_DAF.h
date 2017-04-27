@@ -78,6 +78,8 @@ class TKalmanFilter_DAF : public TDataProcessInterface
   std::vector<genfit::DetPlane*> list_Plane;
 
   TVector3 Plane_time;
+
+  int Nb_event = 0;
 };
 
 #endif

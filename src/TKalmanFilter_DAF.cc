@@ -231,8 +231,26 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       const int id_track = it_trackInfo.first;
       auto it_ListHits = RecoEvent.TrackDAF.find(id_track);
 
+      auto getZpos = [](genfit::AbsMeasurement* m) {
+        TVectorD& HitrawRef = m->getRawHitCoords();
+        if(HitrawRef.GetNrows() == 2)
+          {
+            genfit::StateOnPlane dummy;
+            genfit::SharedPlanePtr plane = dynamic_cast<genfit::PlanarMeasurement*>(m)->constructPlane(dummy);
+            TVector3 tempO(plane->getO());
+            return tempO.Z();
+          }
+        else if(HitrawRef.GetNrows() == 3)
+          return HitrawRef[2];
+        else
+          {
+            std::cout << "E> rawref not proper !" << HitrawRef.GetNrows() << "\n";
+            HitrawRef.Print();
+            return -999.;
+          }
+      };
       std::set<std::tuple<double, int, int> > id_dets;
-
+      double total_dE = 0.;
       for(size_t id_det = 0; id_det < it_ListHits->second.size(); ++id_det)
         {
           int id_hit = it_ListHits->second[id_det];
@@ -240,7 +258,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             continue;
 
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
-          id_dets.insert(std::make_tuple(currentHit->getRawHitCoords()(2), id_det, id_hit));
+
+	  total_dE += it_trackInfo.second[id_det].Eloss;
+	  id_dets.insert(std::make_tuple(getZpos(currentHit), id_det, id_hit));
         }
 
       // if(id_firstDet != std::get<1>(*firstHit) )
@@ -279,127 +299,214 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
         return G4Sol::SIZEOF_G4SOLDETTYPE;
 
       };
+
       G4Sol::SolDet lastValidHit = f_LastHitIsValid(it_ListHits, {G4Sol::PSCE, G4Sol::PSFE, G4Sol::RPC_l, G4Sol::RPC_h});
 
       if(lastValidHit == G4Sol::SIZEOF_G4SOLDETTYPE)
-        continue;
+        {
+#ifdef DEBUG_KALMAN
+          std::cout << "!> LastValidHit not found !\n";
+          std::vector<std::stringstream> s1(it_trackInfo.second.size() / 20 + 1);
+          std::vector<std::stringstream> s2(it_trackInfo.second.size() / 20 + 1);
+          std::vector<std::stringstream> s3(it_trackInfo.second.size() / 20 + 1);
+          for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+            {
+              s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
+              s2[i / 20] << printW(i, 6) << ", ";
+              s3[i / 20] << printW(it_trackInfo.second[i].pdg, 6) << ", ";
+            }
+          for(size_t i = 0; i < s1.size(); ++i)
+            {
+              std::cout << "Det  :" << s1[i].str() << "\n";
+              std::cout << "idDet:" << s2[i].str() << "\n";
+              std::cout << "stat :" << s3[i].str() << "\n";
+            }
+#endif
+	  AnaHisto->h_stats->Fill("NoValidLastHit",1.);
+          continue;
+        }
 
-      const auto firstHit = id_dets.cbegin();
-      const auto lastHit = id_dets.crbegin();
-
+      
+      auto firstHit = id_dets.cbegin();
       int id_firstDet = std::get<1>(*firstHit);
-      int id_lastHit = std::get<1>(*lastHit); // std::get<0>(lastHit);
 
       if(TMath::Abs(it_trackInfo.second[id_firstDet].pdg) < 1e-2)
-        continue;
-
+        {
+#ifdef DEBUG_KALMAN
+          std::cout << "!> pdgcode = 0 " << it_trackInfo.second[id_firstDet].pdg << "\n";
+#endif
+          continue;
+        }
 #ifdef DEBUG_KALMAN
       std::cout << " Id_track: " << id_track << std::endl;
 #endif
 
       const InfoPar track_state(it_trackInfo.second[id_firstDet]);
 
+      genfit::AbsMeasurement* tempHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
+      TVectorD& tempHitrawRef = tempHit->getRawHitCoords();
+      const TVector3 firstPos(tempHitrawRef[0], tempHitrawRef[1], getZpos(tempHit));
+
       const int PDG = static_cast<int>(track_state.pdg);
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(PDG);
+
+      AnaHisto->h_total_dE->Fill(PDG_particle->GetName(),total_dE,1.);
+      
       if(PDG_particle == nullptr)
         {
           std::cout << "E> PDG not found !" << std::endl;
           continue;
         }
       const double charge = PDG_particle->Charge() / 3.;
-
       const int PID = charge * charge;
-
-#ifdef DEBUG_KALMAN
-      std::cout << " PID:" << PID << endl;
-#endif
-
-      const TVector3 init_p(track_state.momX, track_state.momY, track_state.momZ);
-
-      const double seed_Mom_Mag = init_p.Mag();
-      if(TMath::Abs(seed_Mom_Mag) < 1e-9)
+      //std::cout<<"id_dets:"<<id_dets.size()<<" ";
+      if(charge <= 1)
         {
-          std::cout << "E> Seed Momemtum with TVector3 is zero ! " << PDG_particle->GetName() << " Mom:" << seed_Mom_Mag << "\n";
-          auto printW = [](const auto a, const int width) -> std::string {
-            std::stringstream ss;
-            ss << std::fixed << std::right;
-            ss.fill(' ');    // fill space around displayed #
-            ss.width(width); // set  width around displayed #
-            ss << a;
-            return ss.str();
-          };
-          auto printFixed = [](const double a, const int decDigits, const int width) -> std::string {
-            std::stringstream ss;
-            ss << std::fixed << std::right;
-            ss.fill(' ');            // fill space around displayed #
-            ss.width(width);         // set  width around displayed #
-            ss.precision(decDigits); // set # places after decimal
-            ss << a;
-            return ss.str();
-          };
-
-          std::cout << "TrackID #" << it_ListHits->first << " hit_id :\n";
-          std::vector<std::stringstream> s1(it_ListHits->second.size() / 20 + 1);
-          std::vector<std::stringstream> s2(it_ListHits->second.size() / 20 + 1);
-          for(size_t i = 0; i < it_ListHits->second.size(); ++i)
+          std::set<std::tuple<double, int, int> > temp_id_dets;
+          for(auto id_det : id_dets)
             {
-              s1[i / 20] << printW(i, 3) << ", ";
-              s2[i / 20] << printW(it_ListHits->second[i], 3) << ", ";
-            }
-          for(size_t i = 0; i < s1.size(); ++i)
-            {
-              std::cout << "idDet:" << s1[i].str() << "\n";
-              std::cout << "stat :" << s2[i].str() << "\n";
+              if(std::get<1>(id_det) <= G4Sol::RPC_h)
+                temp_id_dets.insert(id_det);
             }
 
-          std::cout << "Track Info :\n";
-          std::vector<std::stringstream> s11(it_ListHits->second.size() / 10 + 1);
-          std::vector<std::stringstream> s22(it_ListHits->second.size() / 10 + 1);
-          std::vector<std::stringstream> s33(it_ListHits->second.size() / 10 + 1);
-          std::vector<std::stringstream> s44(it_ListHits->second.size() / 10 + 1);
-          std::vector<std::stringstream> s55(it_ListHits->second.size() / 10 + 1);
-          std::vector<std::stringstream> s66(it_ListHits->second.size() / 10 + 1);
-          for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
-            {
-              s11[i / 10] << printW(i, 9) << ", ";
-              s22[i / 10] << printFixed(it_trackInfo.second[i].pdg, 3, 9) << ", ";
-              s33[i / 10] << printFixed(it_trackInfo.second[i].momX, 3, 9) << ", ";
-              s44[i / 10] << printFixed(it_trackInfo.second[i].momY, 3, 9) << ", ";
-              s55[i / 10] << printFixed(it_trackInfo.second[i].momZ, 3, 9) << ", ";
-              s66[i / 10] << printFixed(it_trackInfo.second[i].time, 3, 9) << ", ";
-            }
-          for(size_t i = 0; i < s1.size(); ++i)
-            {
-              std::cout << "idDet:" << s11[i].str() << "\n";
-              std::cout << "pdg  :" << s22[i].str() << "\n";
-              std::cout << "momX :" << s33[i].str() << "\n";
-              std::cout << "momY :" << s44[i].str() << "\n";
-              std::cout << "momZ :" << s55[i].str() << "\n";
-              std::cout << "time :" << s66[i].str() << "\n";
-            }
-
-          // for(auto id_hit : track.second)
-          // 	std::cout<<" "<<id_hit<<", ";
-          // std::cout<<"] "<<std::endl;
-
-          continue;
+          std::swap(id_dets, temp_id_dets);
         }
 
+      //cout<<"after :"<<id_dets.size()<<"\n";
+
+      firstHit = id_dets.cbegin();
+      id_firstDet = std::get<1>(*firstHit);
+      const auto lastHit = id_dets.crbegin();
+      const int id_lastDet = std::get<1>(*lastHit); // std::get<0>(lastHit);
+
+#ifdef DEBUG_KALMAN
+      for(auto idet : id_dets)
+	std::cout << "det:" << std::get<1>(idet) << " [" << std::get<2>(idet) << "] at Z:" << std::get<0>(idet) << "\n";
+      
+      std::cout << " PID:" << PID << " " << charge << " " << PDG << "\n";
+#endif
+
+      const InfoPar track_stateLast(it_trackInfo.second[id_lastDet]);
+
+      //Forward
+      //TVector3 init_p(track_state.momX, track_state.momY, track_state.momZ);
+      TVector3 init_p(track_stateLast.momX, track_stateLast.momY, track_stateLast.momZ);
+
+      double seed_Mom_Mag = init_p.Mag();
+      if(TMath::Abs(seed_Mom_Mag) < 1e-9)
+        {
+#ifdef DEBUG_KALMAN
+	  std::cout << "!> Seed Momemtum with TVector3 is zero ! correcting \n";
+#endif
+	  auto tempLastHit = id_dets.crbegin();
+          ++tempLastHit;
+          auto lastHit2 = tempLastHit;
+          const InfoPar track_stateBeforeLast(it_trackInfo.second[std::get<1>(*lastHit2)]);
+          const TVector3 init_p2(track_stateBeforeLast.momX, track_stateBeforeLast.momY, track_stateBeforeLast.momZ);
+
+          if(TMath::Abs(init_p2.Mag()) < 1e-7)
+            {
+              std::cout << "E> Seed Momemtum with TVector3 is zero ! " << PDG_particle->GetName() << " Mom:" << seed_Mom_Mag << "\n";
+              std::cout << "TrackID #" << it_ListHits->first << " hit_id :\n";
+              std::vector<std::stringstream> s1(it_ListHits->second.size() / 20 + 1);
+              std::vector<std::stringstream> s2(it_ListHits->second.size() / 20 + 1);
+              for(size_t i = 0; i < it_ListHits->second.size(); ++i)
+                {
+                  s1[i / 20] << printW(i, 3) << ", ";
+                  s2[i / 20] << printW(it_ListHits->second[i], 3) << ", ";
+                }
+              for(size_t i = 0; i < s1.size(); ++i)
+                {
+                  std::cout << "idDet:" << s1[i].str() << "\n";
+                  std::cout << "stat :" << s2[i].str() << "\n";
+                }
+
+              std::cout << "Track Info :\n";
+              std::vector<std::stringstream> s11(it_ListHits->second.size() / 10 + 1);
+              std::vector<std::stringstream> s22(it_ListHits->second.size() / 10 + 1);
+              std::vector<std::stringstream> s33(it_ListHits->second.size() / 10 + 1);
+              std::vector<std::stringstream> s44(it_ListHits->second.size() / 10 + 1);
+              std::vector<std::stringstream> s55(it_ListHits->second.size() / 10 + 1);
+              std::vector<std::stringstream> s66(it_ListHits->second.size() / 10 + 1);
+              for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+                {
+                  s11[i / 10] << printW(i, 9) << ", ";
+                  s22[i / 10] << printFixed(it_trackInfo.second[i].pdg, 3, 9) << ", ";
+                  s33[i / 10] << printFixed(it_trackInfo.second[i].momX, 3, 9) << ", ";
+                  s44[i / 10] << printFixed(it_trackInfo.second[i].momY, 3, 9) << ", ";
+                  s55[i / 10] << printFixed(it_trackInfo.second[i].momZ, 3, 9) << ", ";
+                  s66[i / 10] << printFixed(it_trackInfo.second[i].time, 3, 9) << ", ";
+                }
+              for(size_t i = 0; i < s1.size(); ++i)
+                {
+                  std::cout << "idDet:" << s11[i].str() << "\n";
+                  std::cout << "pdg  :" << s22[i].str() << "\n";
+                  std::cout << "momX :" << s33[i].str() << "\n";
+                  std::cout << "momY :" << s44[i].str() << "\n";
+                  std::cout << "momZ :" << s55[i].str() << "\n";
+                  std::cout << "time :" << s66[i].str() << "\n";
+                }
+
+              // for(auto id_hit : track.second)
+              // 	std::cout<<" "<<id_hit<<", ";
+              // std::cout<<"] "<<std::endl;
+              continue;
+            }
+          else
+            {
+              init_p.SetXYZ(init_p2.X(), init_p2.Y(), init_p2.Z());
+	      seed_Mom_Mag = init_p.Mag();
+#ifdef DEBUG_KALMAN
+              std::cout << "!> Reset init_p N#" << Nb_event << "\n";
+
+              std::vector<std::stringstream> s1(it_trackInfo.second.size() / 20 + 1);
+              std::vector<std::stringstream> s2(it_trackInfo.second.size() / 20 + 1);
+              std::vector<std::stringstream> s3(it_trackInfo.second.size() / 20 + 1);
+              for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+                {
+                  s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
+                  s2[i / 20] << printW(i, 6) << ", ";
+                  s3[i / 20] << printW(it_trackInfo.second[i].pdg, 6) << ", ";
+                }
+              for(size_t i = 0; i < s1.size(); ++i)
+                {
+                  std::cout << "Det  :" << s1[i].str() << "\n";
+                  std::cout << "idDet:" << s2[i].str() << "\n";
+                  std::cout << "stat :" << s3[i].str() << "\n";
+                }
+              for(auto idet : id_dets)
+                {
+                  std::cout << "det:" << std::get<1>(idet) << " [" << std::get<2>(idet) << "] at Z:" << std::get<0>(idet) << "\n";
+                }
+#endif
+            }
+        }
 #ifdef DEBUG_KALMAN
       std::cout << "init mom : ";
       init_p.Print();
 #endif
 
-      // const double mom_res = .200; // GeV
-      // double new_P = gRandom->Gaus(seed_Mom_Mag,mom_res);
+      const double mom_res = .00500;
+      double new_P = gRandom->Gaus(seed_Mom_Mag,mom_res*seed_Mom_Mag);
       TVector3 seed_p(init_p);
-      // seed_p.SetMag(new_P);
+      seed_p.SetMag(new_P);
 
-      genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG);
+      //Forward
+      //genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG,1);
+      //REP->setDebugLvl(2);
+      genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG,-1);
 
-      genfit::AbsMeasurement* FirstHit = RecoEvent.ListHits[id_firstDet][it_ListHits->second[id_firstDet]].get();
+      //std::cout<<" -- :"<<id_firstDet<<" "<<std::get<2>(*firstHit)<<" \n";
+      //std::cout<<" -- :"<<id_lastDet<<" "<<std::get<2>(*lastHit)<<" \n";
+
+      // Forward
+      // genfit::AbsMeasurement* FirstHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
+      // TVectorD& HitrawRef = FirstHit->getRawHitCoords();
+
+      genfit::AbsMeasurement* FirstHit = RecoEvent.ListHits[id_lastDet][std::get<2>(*lastHit)].get();
       TVectorD& HitrawRef = FirstHit->getRawHitCoords();
-      const TVector3 init_point(HitrawRef[0], HitrawRef[1], HitrawRef[2]);
+
+      const TVector3 init_point(HitrawRef[0], HitrawRef[1], getZpos(FirstHit));
 
       // TVector3 init_point(track_state[9],track_state[10],track_state[11]);
 
@@ -408,6 +515,13 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       for(int i = 0; i < 6; ++i)
         CovM(i, i) = 1000.;
 
+      //Backward
+      genfit::MeasuredStateOnPlane stateToFinalRef(REP);
+      TVector3 momFinalRef(track_state.momX,track_state.momY,track_state.momZ);
+      if(momFinalRef.Mag()<1e-8)
+       	std::cout<<"E> momFinalRef null !"<<track_state.momX<<" "<<track_state.momY<<" "<<track_state.momZ<<std::endl;
+       REP->setPosMomCov(stateToFinalRef, firstPos, momFinalRef, CovM);
+      
       genfit::MeasuredStateOnPlane stateRef(REP);
       // TEP->setPDG(infoTrack.PDG);
       REP->setPosMomCov(stateRef, init_point, seed_p, CovM);
@@ -451,6 +565,13 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
       // std::tuple<int, double> lastHit = std::make_tuple(-1, -9999.);
 
+      // Backward
+      std::set<std::tuple<double,int,int> > temp_id_det2;
+      for(auto ids = id_dets.crbegin(), ids_end = id_dets.crend(); ids != ids_end ; ++ids)
+	temp_id_det2.insert(*ids);
+
+      std::swap(id_dets,temp_id_det2);
+
       for(auto ids : id_dets)
         {
           int id_det = std::get<1>(ids);
@@ -458,7 +579,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 #ifdef DEBUG_KALMAN
-          std::cout << "Loop insertPoint: #det:" << id_det << " #hit:" << id_hit << " " << currentHit << "\n";
+          std::cout << "Loop insertPoint: #det:" << G4Sol::nameLiteralDet.begin()[id_det] << " #hit:" << id_hit << " " << currentHit
+                    << "\n";
           currentHit->Print();
 #endif
           // if(std::get<1>(lastHit) < currentHit->getRawHitCoords()(2))
@@ -468,10 +590,10 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           // Vtracks->insertPoint(new genfit::TrackPoint(RecoEvent.ListHitsDAF[id_track][ii],Vtracks));
           fitTrack->insertPoint(new genfit::TrackPoint(currentHit, fitTrack.get(), false));
-          // id_lastHit = id_det;
+          // id_lastDet = id_det;
         }
 
-      InfoPar track_stateLast(it_trackInfo.second[id_lastHit]);
+      // InfoPar track_stateLast(it_trackInfo.second[id_lastDet]);
 
       // assert(fitTrack->checkConsistency());
       fitTrack->checkConsistency();
@@ -532,7 +654,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           try
             {
-              REP->extrapolateToPlane(kfsop, stateRefOrig.getPlane());
+	      //Forward
+              //REP->extrapolateToPlane(kfsop, stateRefOrig.getPlane());
+              REP->extrapolateToPlane(kfsop, stateToFinalRef.getPlane());
             }
           catch(genfit::Exception& e)
             {
@@ -546,17 +670,25 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           tempResults.charge = charge;
           tempResults.pdg_ini = PDG;
           tempResults.pdg_guess = PDG;
-
-          const TVectorD& referenceState = stateRefOrig.getState();
+	  //Forward
+          //const TVectorD& referenceState = stateRefOrig.getState();
+          const TVectorD& referenceState = stateToFinalRef.getState();
           const TVectorD& stateFit = kfsop.getState();
+
+          const TMatrixDSym& covPull = kfsop.getCov();
+
           TVector3 p3, posRef;
           TMatrixDSym covFit(6);
 
           kfsop.getPosMomCov(posRef, p3, covFit);
 
-          tempResults.momX_init = init_p.X();
-          tempResults.momY_init = init_p.Y();
-          tempResults.momZ_init = init_p.Z();
+	  //Forward
+          // tempResults.momX_init = init_p.X();
+	  // tempResults.momY_init = init_p.Y();
+	  // tempResults.momZ_init = init_p.Z();
+          tempResults.momX_init = track_state.momX;
+	  tempResults.momY_init = track_state.momY;
+	  tempResults.momZ_init = track_state.momZ;
 
           tempResults.momX = p3.X();
           tempResults.momY = p3.Y();
@@ -642,13 +774,15 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           try
             {
               Path_length = fitTrack->getTrackLen(REP); // getTotalLength();
+              //Path_length = -fitTrack->getTrackLen(REP); // getTotalLength();
               // double Path_length = Vtracks->getTotalLength();
               // double Path_lengthB = Vtracks->getTotalLengthBack();
             }
           catch(genfit::Exception& e)
             {
               std::cerr << e.what();
-              std::cout << "could not get TrackLen ! \n";
+              //std::cout << "could not get TrackLen ! \n";
+              AnaHisto->h_stats->Fill("Exc:TrackLen", 1.);
               continue;
             }
           try
@@ -670,9 +804,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           // double Path_lengthMean = Path_length + Path_lengthB;
           double Path_lengthMean = Path_length;
           // Path_lengthMean/=2.;
-          Path_lengthMean += init_point.Mag(); // DistToTR1;
-                                               // 	  if(ndf==1)
-                                               // 	    Path_lengthMean=Path_length;
+          Path_lengthMean += firstPos.Mag(); // DistToTR1;
+                                             // 	  if(ndf==1)
+                                             // 	    Path_lengthMean=Path_length;
 
           AnaHisto->h_Path->Fill(Path_length);
           // AnaHisto->h_Path_Back->Fill(Path_lengthB);
