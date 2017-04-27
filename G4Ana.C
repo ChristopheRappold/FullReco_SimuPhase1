@@ -1,32 +1,32 @@
- #include "./src/Ana_Event/MCAnaEventG4Sol.hh"
+#include "./src/Ana_Event/MCAnaEventG4Sol.hh"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <map>
-#include <numeric>
-#include <unordered_map>
 #include <cassert>
 #include <chrono>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
+#include "TChain.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "TChain.h"
 
-#include "TH1F.h"
-#include "TH2F.h"
 #include "TCanvas.h"
 #include "TGraphAsymmErrors.h"
+#include "TH1F.h"
+#include "TH2F.h"
 
 #include "TDatabasePDG.h"
 
 #define ROOT6
 #ifdef ROOT6
 #include "TTreeReader.h"
-#include "TTreeReaderValue.h"
 #include "TTreeReaderArray.h"
+#include "TTreeReaderValue.h"
 #endif
 
 #include "TVector3.h"
@@ -40,71 +40,67 @@ struct DataTreeMC
 };
 
 
-class Timer {
- public:
+
+
+class Timer
+{
+  public:
   Timer() : beg_(clock_::now()) {}
   void reset() { beg_ = clock_::now(); }
-  double elapsed() const {
-    return std::chrono::duration_cast<second_>(clock_::now() - beg_).count();
-  }
+  double elapsed() const { return std::chrono::duration_cast<second_>(clock_::now() - beg_).count(); }
 
- private:
+  private:
   typedef std::chrono::high_resolution_clock clock_;
   typedef std::chrono::duration<double, std::ratio<1> > second_;
   std::chrono::time_point<clock_> beg_;
 };
 
-
-
-
-void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), const std::string& nameList = "./rMinBias_r1.0.root", const std::string& outfile ="")
+void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), const std::string& nameList = "./rMinBias_r1.0.root",
+           const std::string& outfile = "")
 {
 
-  TDatabasePDG::Instance()->AddParticle("deuteron","deuteron",1.875613,kTRUE,0.,1.*3.,"Ions",10000);
-  TDatabasePDG::Instance()->AddParticle("triton","triton",2.80925,kTRUE,0.,1.*3.,"Ions",10001);
-  TDatabasePDG::Instance()->AddParticle("alpha","alpha",3.727417,kTRUE,0.,2.*3.,"Ions",10002);
-  TDatabasePDG::Instance()->AddParticle("He3","He3",2.80923,kTRUE,0.,2.*3.,"Ions",10003);
-  TDatabasePDG::Instance()->AddParticle("Li6","Li6",5.6015194,kTRUE,0.,3.*3.,"Ions",10004);
-  TDatabasePDG::Instance()->AddParticle("H3L","H3L",2.99114,kFALSE,0.,1.*3.,"Ions",20001);
-  TDatabasePDG::Instance()->AddParticle("H4L","H4L",3.9225,kFALSE,0.,1.*3.,"Ions",20002);
-  TDatabasePDG::Instance()->AddParticle("He5L","He5L",4.8399,kFALSE,0.,1.*3.,"Ions",20003);
+  TDatabasePDG::Instance()->AddParticle("deuteron", "deuteron", 1.875613, kTRUE, 0., 1. * 3., "Ions", 10000);
+  TDatabasePDG::Instance()->AddParticle("triton", "triton", 2.80925, kTRUE, 0., 1. * 3., "Ions", 10001);
+  TDatabasePDG::Instance()->AddParticle("alpha", "alpha", 3.727417, kTRUE, 0., 2. * 3., "Ions", 10002);
+  TDatabasePDG::Instance()->AddParticle("He3", "He3", 2.80923, kTRUE, 0., 2. * 3., "Ions", 10003);
+  TDatabasePDG::Instance()->AddParticle("Li6", "Li6", 5.6015194, kTRUE, 0., 3. * 3., "Ions", 10004);
+  TDatabasePDG::Instance()->AddParticle("H3L", "H3L", 2.99114, kFALSE, 0., 1. * 3., "Ions", 20001);
+  TDatabasePDG::Instance()->AddParticle("H4L", "H4L", 3.9225, kFALSE, 0., 1. * 3., "Ions", 20002);
+  TDatabasePDG::Instance()->AddParticle("He5L", "He5L", 4.8399, kFALSE, 0., 1. * 3., "Ions", 20003);
   
-    
-  auto ploting = [](TH1F& h, const std::string& nameC, std::vector<double> range = {10,-10}, std::string option="") {
-    TCanvas* c = new TCanvas(nameC.c_str(),nameC.c_str(),500,500);
+  auto ploting = [](TH1F& h, const std::string& nameC, std::vector<double> range = {10, -10}, std::string option = "") {
+    TCanvas* c = new TCanvas(nameC.c_str(), nameC.c_str(), 500, 500);
     c->cd();
-    if(range[0]<range[1])
-      h.GetXaxis()->SetRangeUser(range[0],range[1]);
-    if(option.empty()==false)
+    if(range[0] < range[1])
+      h.GetXaxis()->SetRangeUser(range[0], range[1]);
+    if(option.empty() == false)
       h.Draw(option.c_str());
     else
       h.Draw();
     c->Draw();
   };
-  
-  auto plotingArray = []( std::unordered_map<int,TH2F*>& h2, const std::string& nameC, const std::string& nameOpt="colz")
-  {
-    //int index = 0;
+
+  auto plotingArray = [](std::unordered_map<int, TH2F*>& h2, const std::string& nameC, const std::string& nameOpt = "colz") {
+    // int index = 0;
     for(auto& hist2d : h2)
       {
-	if(hist2d.second->GetEntries()<=0)
-	  continue;
-	
-	std::string nameCtemp(nameC);
-	auto PDG_particle = TDatabasePDG::Instance()->GetParticle(hist2d.first);
-	nameCtemp+= PDG_particle->GetName();//std::tostring(index);
-	
-	TCanvas* c = new TCanvas(nameCtemp.c_str(),nameCtemp.c_str(),500,500);
-	c->cd();
-	hist2d.second->Draw(nameOpt.c_str());
-	c->Draw();
-	//++index;
+        if(hist2d.second->GetEntries() <= 0)
+          continue;
+
+        std::string nameCtemp(nameC);
+        auto PDG_particle = TDatabasePDG::Instance()->GetParticle(hist2d.first);
+        nameCtemp += PDG_particle->GetName(); // std::tostring(index);
+
+        TCanvas* c = new TCanvas(nameCtemp.c_str(), nameCtemp.c_str(), 500, 500);
+        c->cd();
+        hist2d.second->Draw(nameOpt.c_str());
+        c->Draw();
+        //++index;
       }
   };
 
-  auto plotingAcceptance = [&ParticleList]( std::unordered_map<int,std::vector<TH1F*> >& h1, const std::string& nameC, bool AllIn = false)
-  {
-    //int index = 0;
+  auto plotingAcceptance = [&ParticleList](std::unordered_map<int, std::vector<TH1F*> >& h1, const std::string& nameC, bool AllIn = false) {
+    // int index = 0;
     for(auto& hist1d : h1)
       {
 	auto PDG_particle = TDatabasePDG::Instance()->GetParticle(hist1d.first);
@@ -227,7 +223,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   
   //TFile* f = new TFile(nameList.c_str());
   TChain* Chain = new TChain("T");
-  std::cout<<"Files :"<<nameList<<std::endl;
+  std::cout << "Files :" << nameList << std::endl;
   if(nameList.find(".root") != std::string::npos)
     {
       std::cout<<"Load from single file "<<nameList<<std::endl;
@@ -236,7 +232,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
     }
   else
     {
-      std::cout<<"Adding Chain from List files"<<std::endl;
+      std::cout << "Adding Chain from List files" << std::endl;
       std::ifstream List(nameList.c_str());
       std::string infiles;
       int nb_file = 0;
@@ -244,15 +240,15 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	{
 	  std::cout<<infiles<<std::endl;
 	  int temp_nb = Chain->AddFile(infiles.c_str());
-	  nb_file+=temp_nb;
-	}
-      std::cout<<" Loaded "<<nb_file<<" files "<<std::endl;
+          nb_file += temp_nb;
+        }
+      std::cout << " Loaded " << nb_file << " files " << std::endl;
     }
 
-  MCAnaEventG4Sol* event= new MCAnaEventG4Sol();
+  MCAnaEventG4Sol* event = new MCAnaEventG4Sol();
 
   Chain->SetBranchAddress("MCAnaEventG4Sol", &event);
-    
+
   // TH1F* tofP = new TH1F("tofplus","tofplus",32,0,32);
   // TH2F* tofP_bar = new TH2F("tofplus_bar","tofplus_bar",32,0,32,10,0,10);
   // std::unordered_map<std::string,TH2F*> tofP_barMomDiff;
@@ -262,8 +258,10 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   // std::unordered_map<std::string,TH2F*> tofP_barTR2xMom;
   // std::unordered_map<std::string,TH2F*> tofP_barTR2xTR1x;
 
-  // std::vector< std::vector<std::string> > nameParticleInit = { {"proton","proton"},{"deuteron","deuteron"},{"triton","triton"},{"kaon+","kaonP"},{"pi+","piP"},
-  // 							       {"alpha","alpha"},{"He3","He3"},{"e+","electron"},{"pi-","piN"},{"He6[0.0]","He6"},{"Li6[0.0]","Li6"} };
+  // std::vector< std::vector<std::string> > nameParticleInit = {
+  // {"proton","proton"},{"deuteron","deuteron"},{"triton","triton"},{"kaon+","kaonP"},{"pi+","piP"},
+  // 							       {"alpha","alpha"},{"He3","He3"},{"e+","electron"},{"pi-","piN"},{"He6[0.0]","He6"},{"Li6[0.0]","Li6"}
+  // };
 
   // std::vector< std::vector<std::string> > nameParticle;
   // if(nameSelected.empty())
@@ -276,7 +274,6 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   //   }
   // assert(nameParticle.size()!=0);
 
-  
   // for(auto& Particle : nameParticle)
   //   {
   //     std::string nameH("h_BarMom_");
@@ -288,8 +285,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   // 	{range[0] = 5.; range[1] = 15.;}
   //     else if(Particle[1] == "He6" || Particle[1] == "Li6")
   // 	{range[0] = 14.; range[1] = 24.;}
-      
-  //     tofP_barMomParticle.insert({Particle[0],new TH2F(nameH.c_str(),nameH.c_str(),32,0,32,200,range[0],range[1])});  
+
+  //     tofP_barMomParticle.insert({Particle[0],new TH2F(nameH.c_str(),nameH.c_str(),32,0,32,200,range[0],range[1])});
 
   //     //tofP_barMomDiff.insert({key,new TH2F(nameHD.c_str(),nameHD.c_str(),32,0,32,100,-5,5)});
   //     for(int i=0;i<32;++i)
@@ -301,14 +298,14 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   // 	  nameHD+=std::to_string(i);
   // 	  tofP_barMomDiff.insert({key,new TH2F(nameHD.c_str(),nameHD.c_str(),100,range[0],range[1],1000,-1,0)});
   // 	}
-      
+
   //     std::string nameH2("h_BarTR1x_");
   //     nameH2+=Particle[1];
-  //     tofP_barTR1x.insert({Particle[0],new TH2F(nameH2.c_str(),nameH2.c_str(),32,0,32,250,0,250)});  
+  //     tofP_barTR1x.insert({Particle[0],new TH2F(nameH2.c_str(),nameH2.c_str(),32,0,32,250,0,250)});
 
   //     std::string nameH3("h_BarTR2x_");
   //     nameH3+=Particle[1];
-  //     tofP_barTR2x.insert({Particle[0],new TH2F(nameH3.c_str(),nameH3.c_str(),32,0,32,420,0,420)});  
+  //     tofP_barTR2x.insert({Particle[0],new TH2F(nameH3.c_str(),nameH3.c_str(),32,0,32,420,0,420)});
 
   //     for(int i=0;i<32;++i)
   // 	{
@@ -317,7 +314,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   // 	  key+=std::to_string(i);
   // 	  nameH4+=Particle[1];
   // 	  nameH4+=std::to_string(i);
-  // 	  tofP_barTR2xMom.insert({key,new TH2F(nameH4.c_str(),nameH4.c_str(),420,0,420,200,-0.2,0.2)});//range[0],range[1])});  
+  // 	  tofP_barTR2xMom.insert({key,new TH2F(nameH4.c_str(),nameH4.c_str(),420,0,420,200,-0.2,0.2)});//range[0],range[1])});
   // 	}
 
   //     for(int i=0;i<32;++i)
@@ -327,10 +324,11 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   // 	  key+=std::to_string(i);
   // 	  nameH5+=Particle[1];
   // 	  nameH5+=std::to_string(i);
-  // 	  tofP_barTR2xTR1x.insert({key,new TH2F(nameH5.c_str(),nameH5.c_str(),420,0,420,250,0,250)});//range[0],range[1])});  
+  // 	  tofP_barTR2xTR1x.insert({key,new TH2F(nameH5.c_str(),nameH5.c_str(),420,0,420,250,0,250)});//range[0],range[1])});
   // 	}
 
-  //     TableFinding.insert({Particle[0],std::vector< std::vector< std::set<int> > >(32,std::vector< std::set<int> >(420,std::set<int>()))});
+  //     TableFinding.insert({Particle[0],std::vector< std::vector< std::set<int> > >(32,std::vector< std::set<int>
+  //     >(420,std::set<int>()))});
   //   }
 
   TH2F* h_Acceptance = new TH2F("Acceptance","Acceptance",20,0,20,10,0,10);
@@ -403,17 +401,17 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   
   
   const auto Entries = Chain->GetEntries();
-  std::cout<<" Entries :"<<Entries<<std::endl;
+  std::cout << " Entries :" << Entries << std::endl;
   int timing = 0;
-  //reader.SetEntriesRange(0,10);
+  // reader.SetEntriesRange(0,10);
   for(Long64_t iEntry = 0; iEntry < Entries; ++iEntry)
     {
-      //cout<<" #"<<iEntry<<" "<<Entries<<" "<<iEntry/Entries<<endl;
-      if(static_cast<int>(static_cast<double>(iEntry)/static_cast<double>(Entries)*10)==timing)
-	{
-	  std::cout<<"Processing :"<<timing*10<<"% \n";
-	  ++timing;
-	}
+      // cout<<" #"<<iEntry<<" "<<Entries<<" "<<iEntry/Entries<<endl;
+      if(static_cast<int>(static_cast<double>(iEntry) / static_cast<double>(Entries) * 10) == timing)
+        {
+          std::cout << "Processing :" << timing * 10 << "% \n";
+          ++timing;
+        }
       Chain->GetEntry(iEntry);
 
       std::vector<DataTreeMC> TempData(event->Nmc);
@@ -443,74 +441,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	      hAngleAll2->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
 	    }
 	}
-      
-      for(Int_t id = 0; id< event->CDH->GetEntries();++id)
-	{
-	  const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->CDH->At(id)));
-	  int TrackID = MChit.MC_id;
-	  for(auto MCpar : TempData)
-	    if(TrackID == MCpar.MC_id)
-	      {
-		auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
-		h_Acceptance->Fill(PDG_particle->GetName(),"CDH",1);
-		h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
-		auto it_momAcc = h_MomAcc.find(MChit.Pdg);
-		it_momAcc->second[1]->Fill(MCpar.MomMass.P());
-		it_momAcc->second[7]->Fill(MCpar.MomMass.P());
-		auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
-		it_angleAcc->second[1]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
-		it_YAcc->second[1]->Fill(MCpar.MomMass.Rapidity());
-		it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
-		if(MCpar.Mother_id>=0)
-		  {
-		    h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
-		    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
-		    it_momAcc2->second[1]->Fill(MCpar.MomMass.P());
-		    it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
-		    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
-		    it_angleAcc2->second[1]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		    it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		  }
-
-	      }
-	  
-	}
 
 
-
-      for(Int_t id = 0; id< event->RPC->GetEntries();++id)
-	{
-	  const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->RPC->At(id)));
-	  int TrackID = MChit.MC_id;
-	  for(auto MCpar : TempData)
-	    if(TrackID == MCpar.MC_id)
-	      {
-		auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
-		h_Acceptance->Fill(PDG_particle->GetName(),"RPC",1);
-		h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
-		auto it_momAcc = h_MomAcc.find(MChit.Pdg);
-		it_momAcc->second[2]->Fill(MCpar.MomMass.P());
-		it_momAcc->second[7]->Fill(MCpar.MomMass.P());
-		auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
-		it_angleAcc->second[2]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
-		it_YAcc->second[2]->Fill(MCpar.MomMass.Rapidity());
-		it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
-		if(MCpar.Mother_id>=0)
-		  {
-		    h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
-		    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
-		    it_momAcc2->second[2]->Fill(MCpar.MomMass.P());
-		    it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
-		    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
-		    it_angleAcc2->second[2]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		    it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		  }
-	      }
-	}
 
       std::unordered_map<int,int> idDet;
       for(Int_t id = 0; id< event->FMF2->GetEntries();++id)
@@ -546,12 +478,53 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 			it_angleAcc2->second[3]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
 			//it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
 		      }
-
 		  }
 	      }
 	}
 	
       
+      for(Int_t id = 0; id < event->RPC->GetEntries(); ++id)
+        {
+          const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->RPC->At(id)));
+          int TrackID = MChit.MC_id;
+          for(auto& MCpar : TempData)
+            if(TrackID == MCpar.MC_id)
+              {
+                MCpar.FinalHit.insert(std::make_pair("RPC", MChit.MCHit));
+                auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+                h_Acceptance->Fill(PDG_particle->GetName(), "RPC", 1);
+                h_Acceptance->Fill(PDG_particle->GetName(), "Det", 1);
+                auto it_momAcc = h_MomAcc.find(MChit.Pdg);
+                it_momAcc->second[2]->Fill(MCpar.MomMass.P());
+                it_momAcc->second[7]->Fill(MCpar.MomMass.P());
+                auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
+                it_angleAcc->second[2]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
+                it_YAcc->second[2]->Fill(MCpar.MomMass.Rapidity());
+                it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
+                if(MCpar.Mother_id >= 0)
+                  {
+                    h_Acceptance->Fill(PDG_particle->GetName(), "Decay_Det", 1);
+                    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
+                    it_momAcc2->second[2]->Fill(MCpar.MomMass.P());
+                    it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
+                    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
+                    it_angleAcc2->second[2]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                    it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+		    if(DaughterFragInFRS)
+		      {
+			h_Acceptance->Fill(PDG_particle->GetName(), "Decay_DetCoinFRS", 1);
+			auto it_momAcc3 = h_MomAccDecayCoinFRS.find(MChit.Pdg);
+			it_momAcc3->second[2]->Fill(MCpar.MomMass.P());
+			it_momAcc3->second[7]->Fill(MCpar.MomMass.P());
+			auto it_angleAcc3 = h_AngleAccDecayCoinFRS.find(MChit.Pdg);
+			it_angleAcc3->second[2]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+			it_angleAcc3->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+		      }
+		    
+                  }
+              }
 
       for(Int_t id = 0; id< event->PSCE->GetEntries();++id)
 	{
@@ -616,6 +589,48 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 		    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
 		    it_angleAcc2->second[5]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
 		    //it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+      for(Int_t id = 0; id < event->CDH->GetEntries(); ++id)
+        {
+          const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->CDH->At(id)));
+          int TrackID = MChit.MC_id;
+          for(auto& MCpar : TempData)
+            if(TrackID == MCpar.MC_id)
+              {
+                MCpar.FinalHit.insert(std::make_pair("CDH", MChit.MCHit));
+
+                auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+                h_Acceptance->Fill(PDG_particle->GetName(), "CDH", 1);
+                h_Acceptance->Fill(PDG_particle->GetName(), "Det", 1);
+                h_Acceptance->Fill(PDG_particle->GetName(), "Det2", 1);
+                auto it_momAcc = h_MomAcc.find(MChit.Pdg);
+                it_momAcc->second[1]->Fill(MCpar.MomMass.P());
+                it_momAcc->second[7]->Fill(MCpar.MomMass.P());
+                auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
+                it_angleAcc->second[1]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
+                it_YAcc->second[1]->Fill(MCpar.MomMass.Rapidity());
+                it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
+                if(MCpar.Mother_id >= 0)
+                  {
+                    h_Acceptance->Fill(PDG_particle->GetName(), "Decay_Det", 1);
+                    h_Acceptance->Fill(PDG_particle->GetName(), "Decay_Det2", 1);
+                    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
+                    it_momAcc2->second[1]->Fill(MCpar.MomMass.P());
+                    it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
+                    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
+                    it_angleAcc2->second[1]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                    it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+		    if(DaughterFragInFRS)
+		      {
+			h_Acceptance->Fill(PDG_particle->GetName(), "Decay_DetCoinFRS", 1);
+			auto it_momAcc3 = h_MomAccDecayCoinFRS.find(MChit.Pdg);
+			it_momAcc3->second[1]->Fill(MCpar.MomMass.P());
+			it_momAcc3->second[7]->Fill(MCpar.MomMass.P());
+			auto it_angleAcc3 = h_AngleAccDecayCoinFRS.find(MChit.Pdg);
+			it_angleAcc3->second[1]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+			it_angleAcc3->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+		      }
 		  }
 	      }
 	  
@@ -795,13 +810,13 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       // 	  TDirectory* dirTemp = fout->mkdir(nameDir.c_str(),nameDir.c_str());
       // 	  dirTemp->cd();
       // 	  std::vector<TDirectory*> subDirTemp (nameParticle.size(),nullptr);
-	  
+
       // 	  for(auto it_nameP = nameParticle.begin(), it_namePend = nameParticle.end();it_nameP!=it_namePend;++it_nameP)
       // 	    {
       // 	      size_t index = std::distance(nameParticle.begin(),it_nameP);
       // 	      subDirTemp[index] = dirTemp->mkdir((*it_nameP)[0].c_str());
       // 	    }
-	  
+
       // 	  for(auto& hist2d : h2)
       // 	    {
       // 	      if(hist2d.second->GetEntries()<=0)
@@ -828,8 +843,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       // writeToFile(tofP_barMomParticle,"TOFP_Mom");
       // writeToFile(tofP_barMomDiff,"TOFP_MomDiff");
       // writeToFile(tofP_barTR2xTR1x,"TOFP_Tr2Tr1");
-      
-      //fout->Close();
+
+      // fout->Close();
     }
 
 }
