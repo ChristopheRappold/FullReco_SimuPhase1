@@ -37,6 +37,13 @@ struct DataTreeMC
   int Mother_id;
   int pdg;
   TLorentzVector MomMass;
+  std::unordered_map<std::string, TVector3> FinalHit;
+};
+
+struct ParticleD
+{
+  TLorentzVector MomMass;
+  TLorentzVector Vtx;
 };
 
 
@@ -541,32 +548,49 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
           ++timing;
         }
       Chain->GetEntry(iEntry);
-
-      std::vector<DataTreeMC> TempData(event->Nmc);
       
-      for(Int_t id = 0; id< event->fMC_Particle->GetEntries();++id)
-	{
-	  const TMcParticle& MCpar = *(dynamic_cast<TMcParticle*>(event->fMC_Particle->At(id)));
-	  TempData[id].MC_id = MCpar.Mc_id;
-	  TempData[id].Mother_id = MCpar.Mother_id;
-	  TempData[id].pdg = MCpar.Pdg;
-	  TempData[id].MomMass = MCpar.MomMass;
-	  auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MCpar.Pdg);
-	  h_Acceptance->Fill(PDG_particle->GetName(),"All",1);
+      std::vector<DataTreeMC> TempData(event->Nmc);
+      std::vector<std::tuple<ParticleD,double> > daugthers;
+      int pdg_frag = -1;
+      for(Int_t id = 0; id < event->fMC_Particle->GetEntries(); ++id)
+        {
+          const TMcParticle& MCpar = *(dynamic_cast<TMcParticle*>(event->fMC_Particle->At(id)));
+          TempData[id].MC_id = MCpar.Mc_id;
+          TempData[id].Mother_id = MCpar.Mother_id;
+          TempData[id].pdg = MCpar.Pdg;
+          TempData[id].MomMass = MCpar.MomMass;
+          auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MCpar.Pdg);
 
-	  TH1F* hMomAll = f_createAccHist(h_MomAcc,ParticleBinMM,MCpar.Pdg,"Mom");
-	  hMomAll->Fill(MCpar.MomMass.P());
-	  TH1F* hAngleAll = f_createAccHist(h_AngleAcc,ParticleBinAA,MCpar.Pdg,"Theta");
-	  hAngleAll->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-	  TH1F* hYAll = f_createAccHist(h_RapidityAcc,ParticleBinYY,MCpar.Pdg,"Y");
-	  hYAll->Fill(MCpar.MomMass.Rapidity());
-	  if(MCpar.Mother_id>=0)
-	    {
-	      h_Acceptance->Fill(PDG_particle->GetName(),"Decay",1);
-	      TH1F* hMomAll2 = f_createAccHist(h_MomAccDecay,ParticleBinMM,MCpar.Pdg,"Decay_Mom");
-	      hMomAll2->Fill(MCpar.MomMass.P());
-	      TH1F* hAngleAll2 = f_createAccHist(h_AngleAccDecay,ParticleBinAA,MCpar.Pdg,"Decay_Theta");
-	      hAngleAll2->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+	  h_Acceptance->Fill(PDG_particle->GetName(), "All", 1);
+
+          TH1F* hMomAll = f_createAccHist(h_MomAcc, ParticleBinMM, MCpar.Pdg, "Mom");
+          hMomAll->Fill(MCpar.MomMass.P());
+          TH1F* hAngleAll = f_createAccHist(h_AngleAcc, ParticleBinAA, MCpar.Pdg, "Theta");
+          hAngleAll->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+          TH1F* hYAll = f_createAccHist(h_RapidityAcc, ParticleBinYY, MCpar.Pdg, "Y");
+          hYAll->Fill(MCpar.MomMass.Rapidity());
+          if(MCpar.Mother_id >= 0)
+            {
+              h_Acceptance->Fill(PDG_particle->GetName(), "Decay", 1);
+              TH1F* hMomAll2 = f_createAccHist(h_MomAccDecay, ParticleBinMM, MCpar.Pdg, "Decay_Mom");
+              hMomAll2->Fill(MCpar.MomMass.P());
+              TH1F* hAngleAll2 = f_createAccHist(h_AngleAccDecay, ParticleBinAA, MCpar.Pdg, "Decay_Theta");
+              hAngleAll2->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+
+              h_Acceptance->Fill(PDG_particle->GetName(), "DecayCoinFRS", 1);
+	      TH1F* hMomAll3 = f_createAccHist(h_MomAccDecayCoinFRS, ParticleBinMM, MCpar.Pdg, "DecayCoinFRS_Mom");
+              hMomAll3->Fill(MCpar.MomMass.P());
+              TH1F* hAngleAll3 = f_createAccHist(h_AngleAccDecayCoinFRS, ParticleBinAA, MCpar.Pdg, "DecayCoinFRS_Theta");
+              hAngleAll3->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+
+	      if(MCpar.Pdg >= 2000)
+		{
+		  pdg_frag =  MCpar.Pdg;
+		  ParticleD d_frag;
+		  d_frag.MomMass = MCpar.MomMass;
+		  d_frag.Vtx = MCpar.Vtx;
+		  daugthers.emplace_back(std::make_tuple(d_frag,MCpar.Charge));
+		}
 	    }
 	}
 
