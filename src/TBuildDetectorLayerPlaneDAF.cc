@@ -122,7 +122,31 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 {
   int NumFilled = 0;
 //  std::cout<<"TBuidlDetectorLayerPlaneDAF : Proton = "<<event.n_Proton<<endl;
+
 #ifdef DEBUG_BUILD
+  auto printW = [](const auto a, const int width, bool lr = true) -> std::string {
+		  std::stringstream ss;
+		  ss << std::fixed ;
+		  if(lr)
+		    ss << std::right;
+		  else
+		    ss << std::left;
+		  ss.fill(' ');    // fill space around displayed #
+		  ss.width(width); // set  width around displayed #
+		  ss << a;
+		  return ss.str();
+		};
+  auto printFixed = [](const double a, const int decDigits, const int width) -> std::string {
+		      std::stringstream ss;
+		      ss << std::fixed << std::right;
+		      ss.fill(' ');            // fill space around displayed #
+		      ss.width(width);         // set  width around displayed #
+		      ss.precision(decDigits); // set # places after decimal
+		      ss << a;
+		      return ss.str();
+		    };
+
+
   for(size_t id = 0; id < event.BeamNames.size(); ++id)
     {
       int trackID = event.BeamTrackID[id];
@@ -134,7 +158,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           for(auto hit : *det)
             {
               if(hit.TrackID == trackID)
-                std::cout << "Branch: " << det->GetBranchName() << " " << hit.HitPosX << " " << hit.HitPosY << " " << hit.HitPosZ << " "
+                std::cout << "Branch: " << printW(det->GetBranchName(), 18,false) << " " << printFixed(hit.HitPosX, 4, 6) << " " << printFixed(hit.HitPosY, 4, 6) << " " << printFixed(hit.HitPosZ, 4, 6) << " "
                           << " " << hit.LayerID << " " << hit.Pname << "\n";
             }
 #else
@@ -142,9 +166,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             {
               TG4Sol_Hit* hit = dynamic_cast<TG4Sol_Hit*>(det->At(j));
               if(hit->TrackID == trackID)
-                std::cout << "Branch: " << det->GetName() << " hit:" << hit->HitPosX << " " << hit->HitPosY << " " << hit->HitPosZ
-                          << " mom:" << hit->MomX << " " << hit->MomY << " " << hit->MomZ << " | "
-                          << " " << hit->LayerID << " " << hit->Pname << "\n";
+                std::cout << "Branch: " << printW(det->GetName(), 18,false) << " hit:" << printFixed(hit->HitPosX,4,9) << " " << printFixed(hit->HitPosY,4,9) << " " << printFixed(hit->HitPosZ,4,9)
+                          << " mom:" << printFixed(hit->MomX,4,8) << " " << printFixed(hit->MomY,4,8) << " " << printFixed(hit->MomZ,4,8) << " | "
+                          << " " << printW(hit->LayerID,2) << " " << printW(hit->Pname,6) << "\n";
             }
 #endif
         }
@@ -170,9 +194,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               // hit.Print();
               TG4Sol_Hit* hit = dynamic_cast<TG4Sol_Hit*>(det->At(j));
               if(hit->TrackID == trackID)
-                std::cout << "Branch: " << det->GetName() << " hit:" << hit->HitPosX << " " << hit->HitPosY << " " << hit->HitPosZ
-                          << " mom:" << hit->MomX << " " << hit->MomY << " " << hit->MomZ << " | "
-                          << " " << hit->LayerID << " " << hit->Pname << "\n";
+                std::cout << "Branch: " << printW(det->GetName(), 18,false) << " hit:" << printFixed(hit->HitPosX,4,9) << " " << printFixed(hit->HitPosY,4,9) << " " << printFixed(hit->HitPosZ,4,9)
+                          << " mom:" << printFixed(hit->MomX,4,8) << " " << printFixed(hit->MomY,4,8) << " " << printFixed(hit->MomZ,4,8) << " | "
+                          << " " << printW(hit->LayerID,2) << " " << printW(hit->Pname,6) << "\n";
             }
 
 #endif
@@ -474,28 +498,56 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 #ifdef DEBUG_BUILD
   std::cout << "done !" << std::endl;
 #endif
-
+  
 #ifdef DEBUG_BUILD
   cout << " DAF Hit :" << endl;
   for(auto track : RecoEvent.TrackDAF)
     {
-      std::cout << "TrackID #" << track.first << " hit_id [";
-      for(auto id_hit : track.second)
-        std::cout << " " << id_hit << ", ";
+      std::cout << "TrackID #" << track.first << " hit_id [\n";
+      std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
+      std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
+      std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
+      for(size_t i = 0; i < track.second.size(); ++i)
+	{
+	  s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
+	  s2[i / 20] << printW(i, 6) << ", ";
+	  s3[i / 20] << printW(track.second[i], 6) << ", ";
+	}
+      for(size_t i = 0; i < s1.size(); ++i)
+	{
+	  std::cout << "idDet:" << s1[i].str() << "\n";
+	  std::cout << "stat :" << s2[i].str() << "\n";
+	}
+
       std::cout << "] " << std::endl;
     }
+
+  
   for(auto track : RecoEvent.TrackInfo)
     {
-      std::cout << "TrackID #" << track.first << " PID [";
-      for(auto id_hit : track.second)
-        std::cout << " :" << id_hit.pdg << ", ";
+      std::cout << "TrackID #" << track.first << " PID [\n";
+      std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
+      std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
+      std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
+      for(size_t i = 0; i < track.second.size(); ++i)
+	{
+	  s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
+	  s2[i / 20] << printW(i, 6) << ", ";
+	  s3[i / 20] << printW(track.second[i].pdg, 6) << ", ";
+	}
+      for(size_t i = 0; i < s1.size(); ++i)
+	{
+	  std::cout << "idDet:" << s1[i].str() << "\n";
+	  std::cout << "stat :" << s2[i].str() << "\n";
+	}
+
       std::cout << "] " << std::endl;
     }
-// for(const auto& det : RecoEvent.ListHits)
-//   {
-//     for(const auto& hit : det)
-// 	hit->Print();
-//   }
+for(const auto& det : RecoEvent.ListHits)
+  {
+     for(const auto& hit : det)
+       hit->Print();
+   }
 #endif
   return 0;
 }
