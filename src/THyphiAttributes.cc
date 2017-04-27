@@ -39,6 +39,7 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
   G4_TimeResolution = false;
   G4_GeoResolution = false;
   Debug_DAF = false;
+  DoNoMaterial = false;
 
   for(const auto& opt : option)
     {
