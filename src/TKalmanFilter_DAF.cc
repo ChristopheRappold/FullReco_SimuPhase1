@@ -907,7 +907,21 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           for(size_t it_pdg = 0; it_pdg < hist_to_pdg.size(); ++it_pdg)
             {
               if(hist_to_pdg[it_pdg] == PDG)
-                AnaHisto->h_mom_res[it_pdg]->Fill(init_p.Mag(), std::fabs(init_p.Mag() - p3.Mag()) / init_p.Mag());
+                {
+                  AnaHisto->h_mom_res[it_pdg]->Fill(init_p.Mag(), (init_p.Mag() - p3.Mag()) / init_p.Mag());
+
+                  AnaHisto->h_ResPull[it_pdg][0]->Fill((charge / stateFit[0] - init_p.Mag()));
+                  AnaHisto->h_ResPull_normal[it_pdg][0]->Fill(init_p.Mag(),(charge / stateFit[0] - init_p.Mag())/init_p.Mag());
+                  for(int i_Res = 1; i_Res < 5; ++i_Res)
+                    {
+		      AnaHisto->h_ResPull[it_pdg][i_Res]->Fill((stateFit[i_Res] - referenceState[i_Res]));
+		      AnaHisto->h_ResPull_normal[it_pdg][i_Res]->Fill(referenceState[i_Res],(stateFit[i_Res] - referenceState[i_Res])/referenceState[i_Res]);
+
+		    }
+                  for(int i_Pull = 0; i_Pull < 5; ++i_Pull)
+                    AnaHisto->h_ResPull[it_pdg][i_Pull + 5]->Fill((stateFit[i_Pull] - referenceState[i_Pull]) /
+                                                                  sqrt(covPull[i_Pull][i_Pull]));
+                }
             }
 
           if(p_value2 < .75)
