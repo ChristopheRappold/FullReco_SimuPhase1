@@ -102,12 +102,33 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
     dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("INNER_1");
 
   dynamic_cast<FrsSolenoidHypField*>(Field)->SetField(0.,0.,Field_Strength);
+  dynamic_cast<FrsSolenoidHypField*>(Field)->Print();
+  // std::cout<< " IsInside : (0,0,70)"<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,70.)<< " (0,0,125.50) "<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,125.5)<<"\n";
+  // std::cout<< " IsInside : (0,0,40)"<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,40.)<< " (0,0,155.50) "<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,155.5)<<"\n";
+
   //bool inTelsa = false;
   // GFFieldManager::getInstance()->init(new GFHypFieldMap_new(true,-0.750533/0.8016*facFRS,inTelsa,false,1.,Field));
   //double facFRS = Field_Strength;
   //genfit::FieldManager::getInstance()->init(new genfit::GFHypFieldMap_new(true, 0.750533 * facFRS, inTelsa, false, 1., false, Field));
   genfit::FieldManager::getInstance()->init(new genfit::GFWasaMap(Field));
 
+  TGeoMedium* vac = gGeoManager->GetMedium(" VAC");
+  assert(vac!=nullptr);
+  gGeoManager->GetVolume("PSCE")->SetMedium(vac);
+  gGeoManager->GetVolume("PSFE")->SetMedium(vac);
+  gGeoManager->GetVolume("HypHI_RPC_l_log")->SetMedium(vac);
+  gGeoManager->GetVolume("HypHI_RPC_h_log")->SetMedium(vac);
+  gGeoManager->GetVolume("FMF2_log")->SetMedium(vac);
+  //  for(auto name : name_GeoVolumes)
+  //    {
+  //      TGeoVolume* vol = gGeoManager->GetVolume(name.c_str());
+  //      if(vol != nullptr)
+  // 	{
+  // 	  vol->SetMedium(vac);
+  // 	}
+  //   }
+  
+  
   genfit::FieldManager::getInstance()->useCache(true, 8);
   genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
   if(DoNoMaterial)
@@ -116,6 +137,20 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
       std::cout << " ** > Use No material !" << std::endl;
     }
 
+  // genfit::MaterialEffects::getInstance()->drawdEdx(-211);
+  // genfit::MaterialEffects::getInstance()->drawdEdx(2212);
+  // genfit::MaterialEffects::getInstance()->drawdEdx(10003);
+  // double bx=0.,by=0.,bz=0.;
+  // genfit::FieldManager::getInstance()->getFieldVal(0.,0.,70.,bx,by,bz);
+  // std::cout<<"From genfit: (0,0,70) bz:"<<bz<<" ";
+  // genfit::FieldManager::getInstance()->getFieldVal(0.,0.,125.5,bx,by,bz);
+  // std::cout<<"(0,0,125.5) bz:"<<bz<<"\n";
+  // genfit::FieldManager::getInstance()->getFieldVal(0.,0.,40.,bx,by,bz);
+  // std::cout<<"From genfit: (0,0,40) bz:"<<bz<<" ";
+  // genfit::FieldManager::getInstance()->getFieldVal(0.,0.,155.5,bx,by,bz);
+  // std::cout<<"(0,0,155.5) bz:"<<bz<<"\n";
+
+  
   std::cout << " done " << std::endl;
 }
 
