@@ -997,44 +997,102 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
               }
         }
 
+      auto f_Svtx = [](const ParticleD& d1, const ParticleD& d2)
+		    {
+		      double v1[3],v2[3],p1[3],p2[3];
+		      double vec1[3],vec2[3];
+		      
+		      v1[0] = d1.MomMass.Px();
+		      v1[1] = d1.MomMass.Py();
+		      v1[2] = d1.MomMass.Pz();
+		      p1[0] = d1.Vtx.X();
+		      p1[1] = d1.Vtx.Y();
+		      p1[2] = d1.Vtx.Z();
+					      
+		      v2[0] = d2.MomMass.Px();
+		      v2[1] = d2.MomMass.Py();
+		      v2[2] = d2.MomMass.Pz();
+		      p2[0] = d2.Vtx.X();
+		      p2[1] = d2.Vtx.Y();
+		      p2[2] = d2.Vtx.Z();
+					      
+		      vec1[0]=v1[0]*v1[0]+v1[1]*v1[1]+v1[2]*v1[2];
+		      vec1[1]=-(v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2]);
+		      vec1[2]=v1[0]*(p1[0]-p2[0])+v1[1]*(p1[1]-p2[1])+v1[2]*(p1[2]-p2[2]);
+					      
+		      vec2[0]=v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2];
+		      vec2[1]=-(v2[0]*v2[0]+v2[1]*v2[1]+v2[2]*v2[2]);
+		      vec2[2]=v2[0]*(p1[0]-p2[0])+v2[1]*(p1[1]-p2[1])+v2[2]*(p1[2]-p2[2]);
+					      
+		      auto f_solve = [](double v1[3], double v2[3]) {
+
+				       double det = v1[0]*v2[1]-v1[1]*v2[0];
+				       if (std::abs(det)<1e-5)
+					 {
+					   return std::make_tuple(-1,0.,0.);
+					 }
+				       else
+					 {
+					   double x=(v1[1]*v2[2]-v1[2]*v2[1])/det;
+					   double y=(v1[2]*v2[0]-v1[0]*v2[2])/det;
+					   return std::make_tuple(1,x,y);
+					 }
+				     };
+
+		      int res=0;
+		      double x=0,y=0, dist=0;
+		      TVector3 point, poca1, poca2;
+		      std::tie(res,x,y) = f_solve(vec1,vec2);
+		      if(res==1)
+			{
+			  for (int i=0; i< 3; i++)
+			    {
+			      poca1[i]=x*v1[i]+p1[i];
+			      poca2[i]=y*v2[i]+p2[i];
+			      point[i]=(poca1[i]+poca2[i])/2.;
+			      dist += (poca1[i]-poca2[i])*(poca1[i]-poca2[i]);
+			    }
+			  dist = std::sqrt(dist);
+			}
+		      return std::make_tuple(res,dist,point,poca1,poca2); 
+		    };
+      
 
       
-      for(Int_t id = 0; id< event->fTrack->GetEntries();++id)
+      if(daugthers.size()>1)
 	{
-	  const THyphiTrack& RecoTrack = *(dynamic_cast<THyphiTrack*>(event->fTrack->At(id)));
-	  int TrackID = RecoTrack.MC_status;
-	  for(auto MCpar :TempData)
-	    if(TrackID == MCpar.MC_id)
-	      {
-		if(RecoTrack.Pval2<0.001)
-		  continue;
-		auto it_2DHist = h_MomAccReco.find(MCpar.pdg);
-		if(it_2DHist == h_MomAccReco.end())
+	  TLorentzVector v4_mother;
+	  for(auto v4_d : daugthers)
+	    v4_mother += std::get<0>(v4_d).MomMass;
+	  //v4_mother+=d_frag;
+	  
+	  if(daugthers.size()==2)
+	    {
+	      TVector3 Svtx,Poca1,Poca2;
+	      int res;
+	      double dist;
+	      std::tie(res,dist,Svtx,Poca1,Poca2) = f_Svtx(std::get<0>(daugthers[0]),std::get<0>(daugthers[1]));
+
+	      h_Vtx->Fill(dist);
+	      h_RZVtx->Fill(Svtx.Perp(),Svtx.Z());
+	      h_InvMassVtx->Fill(v4_mother.M(),dist);
+	      for(auto v4_d : daugthers)
+		if(std::get<0>(v4_d).MomMass.M() > .5)
 		  {
-		    auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MCpar.pdg);
-		    std::string namePar(PDG_particle->GetName());
-		    std::string nameParHist(namePar);
-		    std::replace(nameParHist.begin(),nameParHist.end(),'+','P');
-		    std::replace(nameParHist.begin(),nameParHist.end(),'-','N');
-		    nameParHist+="_RecoMom";
-		    double binMin = 0.;
-		    double binMax = 10.;
-		    auto it_binMinMax = ParticleBinMM.find(namePar);
-		    if(it_binMinMax != ParticleBinMM.end())
-		      {
-			binMin = it_binMinMax->second[0];
-			binMax = it_binMinMax->second[1];
-		      }
-		    TH2F* h_Reco = new TH2F(nameParHist.c_str(),nameParHist.c_str(),25,binMin,binMax,1000,0,0.1);
-		    h_MomAccReco.insert(std::make_pair(MCpar.pdg,h_Reco));
-		    h_Reco->Fill(MCpar.MomMass.P(),std::fabs(RecoTrack.MomMass.P()-MCpar.MomMass.P())/MCpar.MomMass.P());
+		    h_Vtx_X->Fill(Svtx.X()-std::get<0>(v4_d).Vtx.X());
+		    h_Vtx_Y->Fill(Svtx.Y()-std::get<0>(v4_d).Vtx.Y());
+		    h_Vtx_Z->Fill(Svtx.Z()-std::get<0>(v4_d).Vtx.Z());
 		  }
-		else
-		  it_2DHist->second->Fill(MCpar.MomMass.P(),std::fabs(RecoTrack.MomMass.P()-MCpar.MomMass.P())/MCpar.MomMass.P());
-	      }
+	    }
+	  h_InvMass->Fill(v4_mother.M());
+
+	  for(auto v4_d : daugthers)
+	    if(std::get<0>(v4_d).MomMass.M() > .5)
+	      h_InvMassBrho->Fill(v4_mother.M(),3.10715497 * std::get<0>(v4_d).MomMass.P() / std::get<1>(v4_d));
+	  //h_InvMassBrho->Fill(v4_mother.M(),3.10715497 * d_frag.P() / 2.);
 	}
       
-      //cout<<"\n";
+      // cout<<"\n";
     }
 
   if(outfile.empty())
