@@ -299,7 +299,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       std::cout << "iDet #" << iDet << " " << nameTempBr << " " << TypeDet << std::endl;
 #endif
 
-      double resolution = 0.1;
+      double resolution_wire = 0.01;
+      double resolution_wire_z = 0.1;
+      double resolution_planar = 0.05; // cm
       double time_res = 0.150; // ns
       if(nameTempBr == "FMF2_log" || nameTempBr == "HypHI_TrackFwd_log")
         {
