@@ -2,23 +2,11 @@
 
 #include "TRandom3.h"
 
-//#include "MathematicalTools.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
 #include "StateOnPlane.h"
 
-//#include "Genfit/HypLSLTrackRep.h"
-//#include "Genfit/HypLSLTrackFieldMapRep.h"
-
-//#include "Genfit/HypVirtSpacePointRecoHit.h"
-//#include "EventG4/THypHI_TR.h"
-//#include "EventG4/THypHi_pTOF.h"
-// #include "GFTrack.h"
-// #include "RKTrackRep.h"
-// #include "GFKalman.h"
 #include "Exception.h"
-
-//#include "GFHypRecoHit.h"
 
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
@@ -32,11 +20,6 @@
 #include <algorithm>
 #include <memory>
 #include <numeric>
-
-//#include "boost/smart_ptr.hpp"
-//#include "boost/scoped_ptr.hpp"
-//#include "boost/shared_ptr.hpp"
-//#include "MCAnaEventG4Sol/TTrackSimple.hh"
 
 //#define DEBUG_KALMAN2
 //#define DEBUG_KALMAN
@@ -203,6 +186,23 @@ int TKalmanFilter_DAF::SoftExit(int result_full) { return result_full; }
 
 int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 {
+  auto printW = [](const auto a, const int width) -> std::string {
+    std::stringstream ss;
+    ss << std::fixed << std::right;
+    ss.fill(' ');    // fill space around displayed #
+    ss.width(width); // set  width around displayed #
+    ss << a;
+    return ss.str();
+  };
+  auto printFixed = [](const double a, const int decDigits, const int width) -> std::string {
+    std::stringstream ss;
+    ss << std::fixed << std::right;
+    ss.fill(' ');            // fill space around displayed #
+    ss.width(width);         // set  width around displayed #
+    ss.precision(decDigits); // set # places after decimal
+    ss << a;
+    return ss.str();
+  };
 
   unsigned int Nb_trackSeed = RecoEvent.TrackDAF.size();
 
@@ -478,6 +478,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           std::cout << "*** FITTER EXCEPTION *** Rescue fitter take place !" << std::endl;
           std::cout << e1.what() << std::endl;
+          AnaHisto->h_stats->Fill("Exc:RescueFit", 1.);
 
           try
             {
@@ -488,6 +489,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             {
               std::cout << "*** FITTER Rescue EXCEPTION *** cancel fit !" << std::endl;
               std::cout << e2.what() << std::endl;
+              AnaHisto->h_stats->Fill("Exc:FitFail", 1.);
 
               continue;
             }
@@ -512,6 +514,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           if(tp == NULL)
             {
               std::cout << "Track has no TrackPoint with fitterInfo! \n";
+              AnaHisto->h_stats->Fill("Exc:NoTrackPointInfo", 1.);
               continue;
             }
 
@@ -524,6 +527,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           catch(genfit::Exception& e)
             {
               std::cerr << "Exception, next track" << std::endl;
+              AnaHisto->h_stats->Fill("Exc:FitBacktoOrig", 1.);
               std::cerr << e.what();
               continue;
             }
@@ -648,6 +652,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             {
               std::cerr << e.what();
               std::cout << "could not get TOF! \n";
+              AnaHisto->h_stats->Fill("Exc:TOF", 1.);
               continue;
             }
 
