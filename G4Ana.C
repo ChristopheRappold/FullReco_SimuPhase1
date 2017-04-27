@@ -111,125 +111,173 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
     // int index = 0;
     for(auto& hist1d : h1)
       {
-	auto PDG_particle = TDatabasePDG::Instance()->GetParticle(hist1d.first);
-	if(std::fabs(PDG_particle->Charge())<1e-1)
-	  continue;
-	std::string namePar(PDG_particle->GetName());
-	
-	if(ParticleList.size()>0)
-	  {
-	    auto it_findPar = ParticleList.find(namePar);
-	    if(it_findPar == ParticleList.end())
-	      continue;
-	  }
-	if(hist1d.second[0]->GetEntries()<=0)
-	  continue;
-	
-	std::string nameCtemp(nameC);
+        auto PDG_particle = TDatabasePDG::Instance()->GetParticle(hist1d.first);
+        if(std::fabs(PDG_particle->Charge()) < 1e-1)
+          continue;
+        std::string namePar(PDG_particle->GetName());
 
-	nameCtemp+= namePar;//std::tostring(index);
-	for(auto hist : hist1d.second)
-	  hist->Sumw2();
+        if(ParticleList.size() > 0)
+          {
+            auto it_findPar = ParticleList.find(namePar);
+            if(it_findPar == ParticleList.end())
+              continue;
+          }
+        if(hist1d.second[0]->GetEntries() <= 0)
+          continue;
 
-	//std::string nameDet [] = {"_CDH","_RPC","_FMF2","_AllDet"};
-	
-	TCanvas* c = new TCanvas(nameCtemp.c_str(),nameCtemp.c_str(),500,500);
-	if(AllIn==false)
-	  {
-	    c->Divide(2,2);
-	    // c->cd(1);
-	    // hist1d.second[0]->Draw("e1");
-	    // c->cd(2);
-	    // hist1d.second[1]->Draw("e1");
-	    // c->cd(3);
-	    for(size_t i=1; i<hist1d.second.size();++i)
-	      {
-		c->cd(i);
-		std::string nameAcc(hist1d.second[i]->GetName());
-		nameAcc+="GeoAcceptance";
-		//TH1F* htemp1 = new TH1F(nameAcc.c_str(),nameAcc.c_str(),hist1d.second[0]->GetNbinsX(),hist1d.second[0]->GetXaxis()->GetXmin(),hist1d.second[0]->GetXaxis()->GetXmax());
-		for(int n = 1; n<=hist1d.second[0]->GetNbinsX();++n)
-		  {
-		    Int_t Nall = hist1d.second[0]->GetBinContent(n);
-		    Int_t Nacc = hist1d.second[i]->GetBinContent(n);
-		    if(Nall<=0)
-		      {
-			Nacc=0;
-			hist1d.second[i]->SetBinContent(n,Nacc);
-		      }
-		    if(Nall<Nacc)
-		      {
-			Nacc = Nall;
-			hist1d.second[i]->SetBinContent(n,Nacc);
-		      }
-		  }
-		if(hist1d.second[i]->GetEntries()>1)
-		  {
-		    TH1F* h_acc = (TH1F*) hist1d.second[i]->Clone();
-		    h_acc->GetXaxis()->SetRangeUser(hist1d.second[0]->GetXaxis()->GetXmin(),hist1d.second[0]->GetXaxis()->GetXmax());
-		    //TGraphAsymmErrors* g_acc = new TGraphAsymmErrors(hist1d.second[0],hist1d.second[1]);
-		    h_acc->SetNameTitle(nameAcc.c_str(),nameAcc.c_str());
-		    h_acc->Divide(hist1d.second[0]);
-		    h_acc->Draw("e1");
-		  }
-	      }
-	  }
-	else
-	  {
-	    c->cd();
-	    for(size_t i=hist1d.second.size()-1; i>=1;--i)
-	      {
-		std::string nameAcc(hist1d.second[i]->GetName());
-		nameAcc+="GeoAcceptance";
-		//TH1F* htemp1 = new TH1F(nameAcc.c_str(),nameAcc.c_str(),hist1d.second[0]->GetNbinsX(),hist1d.second[0]->GetXaxis()->GetXmin(),hist1d.second[0]->GetXaxis()->GetXmax());
-		for(int n = 1; n<=hist1d.second[0]->GetNbinsX();++n)
-		  {
-		    Int_t Nall = hist1d.second[0]->GetBinContent(n);
-		    Int_t Nacc = hist1d.second[i]->GetBinContent(n);
-		    if(Nall<=0)
-		      {
-			Nacc=0;
-			hist1d.second[i]->SetBinContent(n,Nacc);
-		      }
-		    if(Nall<Nacc)
-		      {
-			Nacc = Nall;
-			hist1d.second[i]->SetBinContent(n,Nacc);
-		      }
-		  }
-		if(hist1d.second[i]->GetEntries()>1)
-		  {
-		    TH1F* h_acc = (TH1F*) hist1d.second[i]->Clone();
-		    h_acc->GetXaxis()->SetRangeUser(hist1d.second[0]->GetXaxis()->GetXmin(),hist1d.second[0]->GetXaxis()->GetXmax());
-		    //TGraphAsymmErrors* g_acc = new TGraphAsymmErrors(hist1d.second[0],hist1d.second[1]);
-		    h_acc->SetNameTitle(nameAcc.c_str(),nameAcc.c_str());
-		    h_acc->Divide(hist1d.second[0]);
-		    if(i==hist1d.second.size()-1)
-		      h_acc->Draw("e1");
-		    else
-		      {
-			h_acc->SetLineColor(i);
-			h_acc->Draw("same e1");
-		      }
-		  }
-	      }
+        std::string nameCtemp(nameC);
 
-	  }
-	c->Draw();
-	//++index;
+        nameCtemp += namePar; // std::tostring(index);
+        for(auto hist : hist1d.second)
+          hist->Sumw2();
+
+        // std::string nameDet [] = {"_CDH","_RPC","_FMF2","_AllDet"};
+
+        TCanvas* c = new TCanvas(nameCtemp.c_str(), nameCtemp.c_str(), 500, 500);
+        if(AllIn == false)
+          {
+            c->Divide(2, 2);
+            // c->cd(1);
+            // hist1d.second[0]->Draw("e1");
+            // c->cd(2);
+            // hist1d.second[1]->Draw("e1");
+            // c->cd(3);
+            for(size_t i = 1; i < hist1d.second.size(); ++i)
+              {
+                c->cd(i);
+                std::string nameAcc(hist1d.second[i]->GetName());
+                nameAcc += "GeoAcceptance";
+                // TH1F* htemp1 = new
+                // TH1F(nameAcc.c_str(),nameAcc.c_str(),hist1d.second[0]->GetNbinsX(),hist1d.second[0]->GetXaxis()->GetXmin(),hist1d.second[0]->GetXaxis()->GetXmax());
+                for(int n = 1; n <= hist1d.second[0]->GetNbinsX(); ++n)
+                  {
+                    Int_t Nall = hist1d.second[0]->GetBinContent(n);
+                    Int_t Nacc = hist1d.second[i]->GetBinContent(n);
+                    if(Nall <= 0)
+                      {
+                        Nacc = 0;
+                        hist1d.second[i]->SetBinContent(n, Nacc);
+                      }
+                    if(Nall < Nacc)
+                      {
+                        Nacc = Nall;
+                        hist1d.second[i]->SetBinContent(n, Nacc);
+                      }
+                  }
+                if(hist1d.second[i]->GetEntries() > 1)
+                  {
+                    TH1F* h_acc = (TH1F*)hist1d.second[i]->Clone();
+                    h_acc->GetXaxis()->SetRangeUser(hist1d.second[0]->GetXaxis()->GetXmin(), hist1d.second[0]->GetXaxis()->GetXmax());
+                    // TGraphAsymmErrors* g_acc = new TGraphAsymmErrors(hist1d.second[0],hist1d.second[1]);
+                    h_acc->SetNameTitle(nameAcc.c_str(), nameAcc.c_str());
+                    h_acc->Divide(hist1d.second[0]);
+                    h_acc->Draw("e1");
+                  }
+              }
+          }
+        else
+          {
+            c->cd();
+            for(size_t i = hist1d.second.size() - 1; i >= 1; --i)
+              {
+                std::string nameAcc(hist1d.second[i]->GetName());
+                nameAcc += "GeoAcceptance";
+                // TH1F* htemp1 = new
+                // TH1F(nameAcc.c_str(),nameAcc.c_str(),hist1d.second[0]->GetNbinsX(),hist1d.second[0]->GetXaxis()->GetXmin(),hist1d.second[0]->GetXaxis()->GetXmax());
+                for(int n = 1; n <= hist1d.second[0]->GetNbinsX(); ++n)
+                  {
+                    Int_t Nall = hist1d.second[0]->GetBinContent(n);
+                    Int_t Nacc = hist1d.second[i]->GetBinContent(n);
+                    if(Nall <= 0)
+                      {
+                        Nacc = 0;
+                        hist1d.second[i]->SetBinContent(n, Nacc);
+                      }
+                    if(Nall < Nacc)
+                      {
+                        Nacc = Nall;
+                        hist1d.second[i]->SetBinContent(n, Nacc);
+                      }
+                  }
+                if(hist1d.second[i]->GetEntries() > 1)
+                  {
+                    TH1F* h_acc = (TH1F*)hist1d.second[i]->Clone();
+                    h_acc->GetXaxis()->SetRangeUser(hist1d.second[0]->GetXaxis()->GetXmin(), hist1d.second[0]->GetXaxis()->GetXmax());
+                    // TGraphAsymmErrors* g_acc = new TGraphAsymmErrors(hist1d.second[0],hist1d.second[1]);
+                    h_acc->SetNameTitle(nameAcc.c_str(), nameAcc.c_str());
+                    h_acc->Divide(hist1d.second[0]);
+                    if(i == hist1d.second.size() - 1)
+                      h_acc->Draw("e1");
+                    else
+                      {
+                        h_acc->SetLineColor(i);
+                        h_acc->Draw("same e1");
+                      }
+                  }
+              }
+          }
+        c->Draw();
+        //++index;
       }
   };
 
-  
-  auto ploting2D = [](TH2F& h, const std::string& nameC)
-    {
-      TCanvas* c = new TCanvas(nameC.c_str(),nameC.c_str(),500,500);
-      c->cd();
-      h.Draw("colz");
-      c->Draw();
-    };
-  
-  //TFile* f = new TFile(nameList.c_str());
+  auto ploting2D = [](TH2F& h, const std::string& nameC) {
+    TCanvas* c = new TCanvas(nameC.c_str(), nameC.c_str(), 500, 500);
+    c->cd();
+    h.Draw("colz");
+    c->Draw();
+  };
+
+  auto plotingCDCFinal = [&ParticleList](std::unordered_map<std::string, std::vector<TH2F*> >& h_CDCFinalHit, const std::string& name) {
+    for(auto it_hist : h_CDCFinalHit)
+      {
+        std::string nameC(name);
+	std::cout<<"name FinalHit key:"<<it_hist.first<<"\n";
+        // int pdg_code = std::stoi(it_hist.first, nullptr);
+        auto it_posPDG = it_hist.first.find_first_of("-1234567890");
+        std::string nameDet = it_hist.first.substr(0, it_posPDG);
+
+        std::string namePDG = it_hist.first.substr(it_posPDG, std::string::npos);
+        int pdg_code = std::stoi(namePDG);
+
+	auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
+
+	std::string namePar(PDG_particle->GetName());
+        if(ParticleList.size() > 0)
+          {
+            auto it_findPar = ParticleList.find(namePar);
+            if(it_findPar == ParticleList.end())
+              continue;
+          }
+	
+	
+	std::replace(namePar.begin(), namePar.end(), '+', 'P');
+        std::replace(namePar.begin(), namePar.end(), '-', 'N');
+
+	nameC += nameDet;
+        nameC += namePar;
+	auto it_multi = it_hist.first.find("Multiplicity");
+	if(it_multi!=std::string::npos)
+	  nameC += "Multiplicity";
+	auto it_decay = it_hist.first.find("Decay");
+	if(it_decay!=std::string::npos)
+	  nameC += "Decay";
+	auto it_frs = it_hist.first.find("CoinFRS");
+	if(it_frs != std::string::npos)
+	  nameC += "CoinFRS";
+	
+	TCanvas* c = new TCanvas(nameC.c_str(), nameC.c_str(), 600, 600);
+        c->Divide(2, 2);
+        for(size_t id = 0; id < it_hist.second.size(); ++id)
+          {
+            c->cd(1 + id);
+            it_hist.second[id]->DrawNormalized("colz");
+          }
+        c->Draw();
+      }
+  };
+
+  // TFile* f = new TFile(nameList.c_str());
   TChain* Chain = new TChain("T");
   std::cout << "Files :" << nameList << std::endl;
   if(nameList.find(".root") != std::string::npos)
@@ -352,75 +400,134 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   //     >(420,std::set<int>()))});
   //   }
 
-  TH2F* h_Acceptance = new TH2F("Acceptance","Acceptance",20,0,20,10,0,10);
-
-  std::unordered_map<int, std::vector<TH1F*> > h_MomAcc; 
-  std::unordered_map<int, std::vector<TH1F*> > h_MomAccDecay; 
-  std::unordered_map<int, std::vector<TH1F*> > h_AngleAcc; 
-  std::unordered_map<int, std::vector<TH1F*> > h_AngleAccDecay; 
-  std::unordered_map<int, std::vector<TH1F*> > h_RapidityAcc; 
-
-  std::unordered_map<int, TH2F*> h_MomAccReco; 
-
-  std::unordered_map<std::string, std::vector<double> > ParticleBinMM = {{"pi-",{0.,2.}},{"pi+",{0.,2.}},{"K+",{0.,3.}},{"K-",{0.,3.}},{"proton",{0.,5.}},
-									{"neutron",{0.,5.}},{"He3",{5.,10.}},{"deuteron",{4.,8}},{"triton",{7.,12.}},
-									{"alpha",{9.,12.}}};
-
-  std::unordered_map<std::string, std::vector<double> > ParticleBinAA = {{"pi-",{0.,90.}},{"pi+",{0.,90.}},{"K+",{0.,90.}},{"K-",{0.,90.}},{"proton",{0.,90.}},
-									{"neutron",{0.,90.}},{"He3",{0.,10.}},{"deuteron",{0.,10.}},{"triton",{0.,10.}},
-									{"alpha",{0.,10.}}};
-
-  std::unordered_map<std::string, std::vector<double> > ParticleBinYY = {{"pi-",{0.,5.}},{"pi+",{0.,5.}},{"K+",{0.,5.}},{"K-",{0.,5.}},{"proton",{0.,5.}},
-									{"neutron",{0.,5.}},{"He3",{0.,5.}},{"deuteron",{0.,5.}},{"triton",{0.,5.}},
-									{"alpha",{0.,5.}}};
+  std::unordered_map< std::string,std::vector<double> > binInvMass = { {"H3L",{2.5,3.5}}, {"H4L", {3.5,4.5}}, {"nnL",{1.6,2.6}}, {"Lambda",{0.5,1.5}}};
 
   
+  TH2F* h_Acceptance = new TH2F("Acceptance", "Acceptance", 20, 0, 20, 10, 0, 10);
+  TH1F* h_Vtx = new TH1F("Vtx","Vtx",1000,0,10);
+  TH2F* h_RZVtx = new TH2F("RZVtx","RZVtx",200,0,10,200,0,200);
+
+  TH1F* h_Vtx_X = new TH1F("Res_Xvtx","Res_Xvtx",1000,-2,2);
+  TH1F* h_Vtx_Y = new TH1F("Res_Yvtx","Res_Yvtx",1000,-1,1);
+  TH1F* h_Vtx_Z = new TH1F("Res_Zvtx","Res_Zvtx",1000,-1,1);
+
+  TH1F* h_InvMass = nullptr;
+  TH2F* h_InvMassVtx = nullptr;
+  TH2F* h_InvMassBrho = nullptr;
   
-  auto f_createAccHist = [] (std::unordered_map<int, std::vector<TH1F*> >& h_Acc,const std::unordered_map<std::string, std::vector<double> >& ParBin, int  pdg, std::string nameH) -> TH1F*
+  std::vector<TH2F*> h_InvMassBrho_multi; 
+
+  for(auto it_binInv : binInvMass)
     {
-      auto it_Acc = h_Acc.find(pdg);
-      if(it_Acc==h_Acc.end())
+      if( nameList.find(it_binInv.first) != std::string::npos)
 	{
-	  auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg);
-	  std::string namePar(PDG_particle->GetName());
-		  
-	  std::string nameParHist(PDG_particle->GetName());
-	  std::replace(nameParHist.begin(),nameParHist.end(),'+','P');
-	  std::replace(nameParHist.begin(),nameParHist.end(),'-','N');
-	  std::string nameAll(nameParHist);
-	  nameAll+=nameH;
-	  nameAll+="_All";
-	  std::string nameSel(nameParHist);
-	  nameSel+=nameH;
-	  nameSel+="_Acc";
-	  std::string nameSel2 [7] = {nameSel+"CDH",nameSel+"RPC",nameSel+"FMF2",nameSel+"PSCE",nameSel+"PSBE",nameSel+"PSFE",nameSel+"Det"};
-	  std::vector<TH1F*> tempHist(8,nullptr);
-	  double binMin = 0.;
-	  double binMax = 10.;
-	  auto it_binMinMax = ParBin.find(namePar);
-	  if(it_binMinMax != ParBin.end())
+	  h_InvMass = new TH1F("InvMass","InvMass",1000,it_binInv.second[0],it_binInv.second[1]);
+	  h_InvMassVtx = new TH2F("InvMassVtx","InvMassVtx",1000,it_binInv.second[0],it_binInv.second[1],200,0,1);
+	  h_InvMassBrho = new TH2F("InvMassBrho","InvMassBrho",1000,it_binInv.second[0],it_binInv.second[1],200,10,20);
+      
+	  for(size_t i=0; i<20; ++i)
 	    {
-	      binMin = it_binMinMax->second[0];
-	      binMax = it_binMinMax->second[1];
+	      TString nameTemp("InvMassBrho_MoreMulti_");
+	      nameTemp+=i;
+	      h_InvMassBrho_multi.emplace_back( new TH2F(nameTemp,nameTemp,1000,it_binInv.second[0],it_binInv.second[1],200,10,20) );      
 	    }
-	  tempHist[0] = new TH1F(nameAll.c_str(),nameAll.c_str(),20,binMin,binMax);
-	  tempHist[1] = new TH1F(nameSel2[0].c_str(),nameSel2[0].c_str(),20,binMin,binMax);
-	  tempHist[2] = new TH1F(nameSel2[1].c_str(),nameSel2[1].c_str(),20,binMin,binMax);
-	  tempHist[3] = new TH1F(nameSel2[2].c_str(),nameSel2[2].c_str(),20,binMin,binMax);
-	  tempHist[4] = new TH1F(nameSel2[3].c_str(),nameSel2[3].c_str(),20,binMin,binMax);
-	  tempHist[5] = new TH1F(nameSel2[4].c_str(),nameSel2[4].c_str(),20,binMin,binMax);
-	  tempHist[6] = new TH1F(nameSel2[5].c_str(),nameSel2[5].c_str(),20,binMin,binMax);
-	  tempHist[7] = new TH1F(nameSel2[6].c_str(),nameSel2[6].c_str(),20,binMin,binMax);
-	  h_Acc.insert(std::make_pair(pdg,tempHist));
-	  return tempHist[0];
 	}
-      else
-	return it_Acc->second[0];
-    };
-    
-  
-  
-  
+    }
+  std::unordered_map<int, std::vector<TH1F*> > h_MomAcc;
+  std::unordered_map<int, std::vector<TH1F*> > h_MomAccDecay;
+  std::unordered_map<int, std::vector<TH1F*> > h_MomAccDecayCoinFRS;
+  std::unordered_map<int, std::vector<TH1F*> > h_AngleAcc;
+  std::unordered_map<int, std::vector<TH1F*> > h_AngleAccDecay;
+  std::unordered_map<int, std::vector<TH1F*> > h_AngleAccDecayCoinFRS;
+  std::unordered_map<int, std::vector<TH1F*> > h_RapidityAcc;
+
+  std::unordered_map<std::string, std::vector<TH2F*> > h_FinalHit_CDC;
+
+  std::unordered_map<int, TH2F*> h_MomAccReco;
+  std::unordered_map<int, std::vector<TH2F*> > h_MomAccReco_multi;
+
+  std::unordered_map<std::string, std::vector<double> > ParticleBinMM = {
+      {"pi-", {0., 2.}},     {"pi+", {0., 2.}},  {"K+", {0., 3.}},      {"K-", {0., 3.}},      {"proton", {0., 5.}},
+      {"neutron", {0., 5.}}, {"He3", {5., 10.}}, {"deuteron", {4., 8}}, {"triton", {7., 12.}}, {"alpha", {9., 12.}}};
+
+  std::unordered_map<std::string, std::vector<double> > ParticleBinAA = {
+      {"pi-", {0., 90.}},     {"pi+", {0., 90.}}, {"K+", {0., 90.}},       {"K-", {0., 90.}},     {"proton", {0., 90.}},
+      {"neutron", {0., 90.}}, {"He3", {0., 10.}}, {"deuteron", {0., 10.}}, {"triton", {0., 10.}}, {"alpha", {0., 10.}}};
+
+  std::unordered_map<std::string, std::vector<double> > ParticleBinYY = {
+      {"pi-", {0., 5.}},     {"pi+", {0., 5.}}, {"K+", {0., 5.}},       {"K-", {0., 5.}},     {"proton", {0., 5.}},
+      {"neutron", {0., 5.}}, {"He3", {0., 5.}}, {"deuteron", {0., 5.}}, {"triton", {0., 5.}}, {"alpha", {0., 5.}}};
+
+  // std::vector<std::string> ParticleBinFF = {"pi-","pi+","K+","K-","proton","neutron","He3","deuteron","triton","alpha"};
+
+  auto f_createAccHist = [](std::unordered_map<int, std::vector<TH1F*> >& h_Acc,
+                            const std::unordered_map<std::string, std::vector<double> >& ParBin, int pdg, std::string nameH) -> TH1F* {
+    auto it_Acc = h_Acc.find(pdg);
+    if(it_Acc == h_Acc.end())
+      {
+        auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg);
+        std::string namePar(PDG_particle->GetName());
+
+        std::string nameParHist(PDG_particle->GetName());
+        std::replace(nameParHist.begin(), nameParHist.end(), '+', 'P');
+        std::replace(nameParHist.begin(), nameParHist.end(), '-', 'N');
+        std::string nameAll(nameParHist);
+        nameAll += nameH;
+        nameAll += "_All";
+        std::string nameSel(nameParHist);
+        nameSel += nameH;
+        nameSel += "_Acc";
+        std::string nameSel2[] = {nameSel + "CDH",  nameSel + "RPC",  nameSel + "FMF2", nameSel + "PSCE",
+                                   nameSel + "PSBE", nameSel + "PSFE", nameSel + "Det", nameSel + "Det2"};
+        std::vector<TH1F*> tempHist(9, nullptr);
+        double binMin = 0.;
+        double binMax = 10.;
+        auto it_binMinMax = ParBin.find(namePar);
+        if(it_binMinMax != ParBin.end())
+          {
+            binMin = it_binMinMax->second[0];
+            binMax = it_binMinMax->second[1];
+          }
+        tempHist[0] = new TH1F(nameAll.c_str(), nameAll.c_str(), 20, binMin, binMax);
+        tempHist[1] = new TH1F(nameSel2[0].c_str(), nameSel2[0].c_str(), 20, binMin, binMax);
+        tempHist[2] = new TH1F(nameSel2[1].c_str(), nameSel2[1].c_str(), 20, binMin, binMax);
+        tempHist[3] = new TH1F(nameSel2[2].c_str(), nameSel2[2].c_str(), 20, binMin, binMax);
+        tempHist[4] = new TH1F(nameSel2[3].c_str(), nameSel2[3].c_str(), 20, binMin, binMax);
+        tempHist[5] = new TH1F(nameSel2[4].c_str(), nameSel2[4].c_str(), 20, binMin, binMax);
+        tempHist[6] = new TH1F(nameSel2[5].c_str(), nameSel2[5].c_str(), 20, binMin, binMax);
+        tempHist[7] = new TH1F(nameSel2[6].c_str(), nameSel2[6].c_str(), 20, binMin, binMax);
+        tempHist[8] = new TH1F(nameSel2[7].c_str(), nameSel2[7].c_str(), 20, binMin, binMax);
+        h_Acc.insert(std::make_pair(pdg, tempHist));
+        return tempHist[0];
+      }
+    else
+      return it_Acc->second[0];
+  };
+
+  auto f_createCDCFinal = [](std::unordered_map<std::string, std::vector<TH2F*> >& h_CDCFinal,
+                             const std::string& nameH) -> std::vector<TH2F*>& {
+    auto it_CDCFinal = h_CDCFinal.find(nameH);
+    if(it_CDCFinal == h_CDCFinal.end())
+      {
+        std::string nameHist = nameH;
+        std::string tempNameHist = nameH + "_X";
+        std::vector<TH2F*> h_vecH(3, nullptr);
+        h_vecH[0] = new TH2F(tempNameHist.c_str(), tempNameHist.c_str(), 20, 0, 20, 100, -50, 50);
+        tempNameHist = nameH + "_Y";
+        h_vecH[1] = new TH2F(tempNameHist.c_str(), tempNameHist.c_str(), 20, 0, 20, 100, -50, 50);
+        tempNameHist = nameH + "_Z";
+        h_vecH[2] = new TH2F(tempNameHist.c_str(), tempNameHist.c_str(), 20, 0, 20, 100, 60, 160);
+
+        auto it_ret = h_CDCFinal.insert(std::make_pair(nameHist, h_vecH));
+
+        return it_ret.first->second;
+      }
+    else
+      {
+        return it_CDCFinal->second;
+      }
+  };
+
   const auto Entries = Chain->GetEntries();
   std::cout << " Entries :" << Entries << std::endl;
   int timing = 0;
@@ -736,19 +843,28 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 
   if(outfile.empty())
     {
-      ploting2D(*h_Acceptance,"c1");
+      ploting2D(*h_Acceptance, "c1");
 
-      plotingAcceptance(h_MomAcc,"c1_MomAcc",true);
+      //plotingAcceptance(h_MomAcc, "c1_MomAcc", true);
 
-      plotingAcceptance(h_AngleAcc,"c1_AngleAcc",true);
+      //plotingAcceptance(h_AngleAcc, "c1_AngleAcc", true);
 
-      plotingAcceptance(h_RapidityAcc,"c1_RapidityAcc",true);
+      //plotingAcceptance(h_RapidityAcc, "c1_RapidityAcc", true);
 
-      plotingAcceptance(h_MomAccDecay,"c1_MomAccDecay",true);
-      
-      plotingAcceptance(h_AngleAccDecay,"c1_AngleAccDecay",true);
-      
-      plotingArray(h_MomAccReco,"c1_Reco","candle");
+      //plotingAcceptance(h_MomAccDecay, "c1_MomAccDecay", true);
+
+      //plotingAcceptance(h_AngleAccDecay, "c1_AngleAccDecay", true);
+
+      plotingArray(h_MomAccReco, "c1_Reco", "candle");
+
+      //plotingCDCFinal(h_FinalHit_CDC, "c2_");
+
+      TCanvas* c_Inv = new TCanvas("c_Inv","c_Inv",1000,500); 
+      c_Inv->Divide(2,1);
+      c_Inv->cd(1);
+      h_InvMass->Draw();
+      c_Inv->cd(2);
+      h_InvMassBrho->Draw();
     }
   else
     {
