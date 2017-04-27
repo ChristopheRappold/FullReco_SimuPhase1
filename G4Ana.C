@@ -67,6 +67,14 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   TDatabasePDG::Instance()->AddParticle("H3L", "H3L", 2.99114, kFALSE, 0., 1. * 3., "Ions", 20001);
   TDatabasePDG::Instance()->AddParticle("H4L", "H4L", 3.9225, kFALSE, 0., 1. * 3., "Ions", 20002);
   TDatabasePDG::Instance()->AddParticle("He5L", "He5L", 4.8399, kFALSE, 0., 1. * 3., "Ions", 20003);
+  auto AddToDatabasePDG = [](TObjArray* array) {
+			  for(auto temp: *array)
+			    {
+			      TParticlePDG* temp1 = dynamic_cast<TParticlePDG*>(temp);
+			      TDatabasePDG::Instance()->AddParticle(temp1->GetName(),temp1->GetTitle(), temp1->Mass(), temp1->Stable(), temp1->Width(), temp1->Charge(), temp1->ParticleClass(), temp1->PdgCode());
+			    }
+			};
+
   
   auto ploting = [](TH1F& h, const std::string& nameC, std::vector<double> range = {10, -10}, std::string option = "") {
     TCanvas* c = new TCanvas(nameC.c_str(), nameC.c_str(), 500, 500);
@@ -226,9 +234,16 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   std::cout << "Files :" << nameList << std::endl;
   if(nameList.find(".root") != std::string::npos)
     {
-      std::cout<<"Load from single file "<<nameList<<std::endl;
+      TFile* f_in = new TFile(nameList.c_str());
+      TObjArray* addPDG = (TObjArray*) f_in->Get("additionalPDG");
+      if(addPDG!=nullptr)
+	AddToDatabasePDG(addPDG);
+      f_in->Close();
+      
+      std::cout << "Load from single file " << nameList << std::endl;
       int temp_nb = Chain->AddFile(nameList.c_str());
-      std::cout<<" Loaded "<<temp_nb<<" files "<<std::endl;
+      std::cout << " Loaded " << temp_nb << " files " << std::endl;
+
     }
   else
     {
@@ -236,9 +251,15 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       std::ifstream List(nameList.c_str());
       std::string infiles;
       int nb_file = 0;
-      while(std::getline(List,infiles))
-	{
-	  std::cout<<infiles<<std::endl;
+      while(std::getline(List, infiles))
+        {	  
+	  std::cout << infiles << std::endl;
+	  TFile* f_in = new TFile(infiles.c_str());
+	  TObjArray* addPDG = (TObjArray*) f_in->Get("additionalPDG");
+	  if(addPDG!=nullptr)
+	    AddToDatabasePDG(addPDG);
+	  f_in->Close();
+
 	  int temp_nb = Chain->AddFile(infiles.c_str());
           nb_file += temp_nb;
         }
