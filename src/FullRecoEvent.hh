@@ -85,7 +85,16 @@ enum SolDet : int
   SIZEOF_G4SOLDETTYPE
 };
 
-template <typename T, T... args>
+  constexpr auto nameLiteralDet = {  "InSi0", "InSi1", "InSi2", "InSi3", "TR1", "TR2", "PSFE", "MG01", "MG02", "MG03", "MG04",
+				     "MG05", "MG06", "MG07", "MG08", "MG09", "MG10", "MG11", "MG12", "MG13", "MG14", "MG15",
+				     "MG16", "MG17", "PSCE", "PSBE", "CDC0", "CDC1", "CDC2", "CDC3", "CDC4",
+				     "CDC5", "CDC6", "CDC7", "CDC8", "CDC9", "CDC10", "CDC11", "CDC12",
+				     "CDC13", "CDC14", "CDHBar", "TrFwd0", "TrFwd1", "TrFwd2", "RPCl", "RPCh",
+				     "FMF2S0", "FMF2S1", "FMF2S2"};
+  
+
+  
+  template <typename T, T... args>
 struct EnumIter : public std::iterator<std::input_iterator_tag, T, std::ptrdiff_t, const T*, const T&>
 {
   static constexpr T values[] = {args...};
