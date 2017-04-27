@@ -144,6 +144,31 @@ public:
 
 };
 
+constexpr bool IsPlanar(G4Sol::SolDet idDet) {
+  switch (idDet) {
+  case G4Sol::InSi0 : ;
+  case G4Sol::InSi1 : ;
+  case G4Sol::InSi2 : ;
+  case G4Sol::InSi3 : ;
+  case G4Sol::TR1 : ;
+  case G4Sol::TR2 : ;
+  case G4Sol::PSFE : ;
+  case G4Sol::PSBE : ;
+  case G4Sol::TrFwd0 : ;
+  case G4Sol::TrFwd1 : ;
+  case G4Sol::TrFwd2 : ;
+  case G4Sol::RPC_l : ;
+  case G4Sol::RPC_h : ;
+  case G4Sol::FMF2Stop0 : ;
+  case G4Sol::FMF2Stop1 : ;
+  case G4Sol::FMF2Stop2 :
+    return true;
+  default:
+    return false;
+  };  
+}; 
+
+
 
 class TBuildDetectorLayerPlaneDAF : public TDataBuilder
 {

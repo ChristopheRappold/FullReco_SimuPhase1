@@ -20,6 +20,7 @@
 #include "AbsMeasurement.h"
 #include "PlanarMeasurement.h"
 #include "SpacepointMeasurement.h"
+#include "ProlateSpacepointMeasurement.h"
 
 #include <assert.h>
 

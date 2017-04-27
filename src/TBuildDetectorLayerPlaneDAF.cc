@@ -327,16 +327,26 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               if(tempTrack == RecoEvent.TrackDAF.end())
                 continue;
 
-              TVectorD hitCoords(3);
-              hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution);
-              hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution);
-              hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
-              TMatrixDSym hitCov(3);
-              hitCov(0, 0) = resolution * resolution;
-              hitCov(1, 1) = resolution * resolution;
-              hitCov(2, 2) = resolution * resolution;
-              measurement = std::make_unique<genfit::SpacepointMeasurement>(hitCoords, hitCov, int(TypeDet) + LayerID, 0, nullptr);
+              TVectorD hitCoords(2);
+              hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_planar);
+              hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_planar);
+              //hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
 
+              TVectorD hitCoordsTree(3);
+	      hitCoordsTree(0) = hitCoords(0);
+	      hitCoordsTree(1) = hitCoords(1);
+	      hitCoordsTree(2) = hit.HitPosZ;
+              
+              TMatrixDSym hitCov(2);
+              hitCov(0, 0) = resolution_planar * resolution_planar;
+              hitCov(1, 1) = resolution_planar * resolution_planar;
+              //hitCov(2, 2) = resolution * resolution;
+              measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet) + LayerID, 0, nullptr);
+
+	      TVector3 o(0.,0.,hit.HitPosZ), u(1.,0.,0.), v(0.,1.,0.);
+	      genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+	      dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+	      
               RecoEvent.ListHits[TypeDet + LayerID].emplace_back(measurement.release());
               int indexHit = RecoEvent.ListHits[TypeDet + LayerID].size() - 1;
 
@@ -377,9 +387,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               const double charge = PDG_particle->Charge() / 3.;
 
               if(TypeDet + LayerID >= G4Sol::TrFwd0 && TypeDet + LayerID <= G4Sol::TrFwd2)
-                fillOutHit(OutTree->FwdTracker, hit, pdg_code, charge, hitCoords, TypeDet + LayerID, 0.);
+                fillOutHit(OutTree->FwdTracker, hit, pdg_code, charge, hitCoordsTree, TypeDet + LayerID, 0.);
               if(TypeDet + LayerID >= G4Sol::FMF2Stop0 && TypeDet + LayerID <= G4Sol::FMF2Stop2)
-                fillOutHit(OutTree->FMF2, hit, pdg_code, charge, hitCoords, TypeDet + LayerID, 0.);
+                fillOutHit(OutTree->FMF2, hit, pdg_code, charge, hitCoordsTree, TypeDet + LayerID, 0.);
             }
         }
       else
@@ -405,19 +415,53 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               auto tempTrack = RecoEvent.TrackDAF.find(TrackID);
               if(tempTrack == RecoEvent.TrackDAF.end())
                 continue;
-              TVectorD hitCoords(3);
-              hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution);
-              hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution);
-              hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
-              TMatrixDSym hitCov(3);
-              hitCov(0, 0) = resolution * resolution;
-              hitCov(1, 1) = resolution * resolution;
-              hitCov(2, 2) = resolution * resolution;
-              measurement = std::make_unique<genfit::SpacepointMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
 
-              RecoEvent.ListHits[TypeDet].emplace_back(measurement.release());
-              int indexHit = RecoEvent.ListHits[TypeDet].size() - 1;
+	      TVectorD hitCoordsTree(3);
+	      if(IsPlanar(TypeDet))
+		{
+		  TVectorD hitCoords(2);
+		  hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_planar);
+		  hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_planar);
+		  //hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
+		  TMatrixDSym hitCov(2);
+		  hitCov(0, 0) = resolution_planar * resolution_planar;
+		  hitCov(1, 1) = resolution_planar * resolution_planar;
+		  //hitCov(2, 2) = resolution * resolution;
+		  measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+		  
+		  TVector3 o(0.,0.,hit.HitPosZ), u(1.,0.,0.), v(0.,1.,0.);
+		  genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+		  dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
+		  hitCoordsTree(0) = hitCoords(0);
+		  hitCoordsTree(1) = hitCoords(1);
+		  hitCoordsTree(2) = hit.HitPosZ;				  
+		}
+	      else
+		{
+		  TVectorD hitCoords(3);
+
+		  hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_wire);
+		  hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_wire);
+		  hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution_wire_z);
+
+		  TMatrixDSym hitCov(3);
+		  hitCov(0, 0) = resolution_wire * resolution_wire;
+		  hitCov(1, 1) = resolution_wire * resolution_wire;
+		  hitCov(2, 2) = resolution_wire_z * resolution_wire_z;
+
+		  measurement = std::make_unique<genfit::ProlateSpacepointMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+		  const TVector3 WireDir(0.,0.,1.);
+		  dynamic_cast<genfit::ProlateSpacepointMeasurement*>(measurement.get())->setLargestErrorDirection(WireDir);
+
+		  hitCoordsTree(0) = hitCoords(0);
+		  hitCoordsTree(1) = hitCoords(1);
+		  hitCoordsTree(2) = hitCoords(2);
+		}
+	      
+	      RecoEvent.ListHits[TypeDet].emplace_back(measurement.release());
+	      int indexHit = RecoEvent.ListHits[TypeDet].size() - 1;
+		  
               tempTrack->second[TypeDet] = indexHit;
 
               int pdg_code = pid_fromName(hit.Pname);
@@ -455,31 +499,31 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               const double charge = PDG_particle->Charge() / 3.;
 
               if(TypeDet >= G4Sol::InSi0 && TypeDet <= G4Sol::InSi3)
-                fillOutHit(OutTree->InSi, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+                fillOutHit(OutTree->InSi, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet >= G4Sol::TR1 && TypeDet <= G4Sol::TR2)
-                fillOutHit(OutTree->TR, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+                fillOutHit(OutTree->TR, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet >= G4Sol::CDC_layer0 && TypeDet <= G4Sol::CDC_layer14)
-                fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+                fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet >= G4Sol::MG01 && TypeDet <= G4Sol::MG17)
-                fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+                fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet == G4Sol::CDHBar)
-                fillOutHit(OutTree->CDH, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+                fillOutHit(OutTree->CDH, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet == G4Sol::RPC_l || TypeDet == G4Sol::RPC_h)
-                fillOutHit(OutTree->RPC, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+                fillOutHit(OutTree->RPC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet == G4Sol::PSFE)
-                fillOutHit(OutTree->PSFE, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+                fillOutHit(OutTree->PSFE, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet == G4Sol::PSCE)
-                fillOutHit(OutTree->PSCE, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+                fillOutHit(OutTree->PSCE, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet == G4Sol::PSBE)
-                fillOutHit(OutTree->PSBE, hit, pdg_code, charge, hitCoords, TypeDet, LayerID);
+                fillOutHit(OutTree->PSBE, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
             }
         }
     }
