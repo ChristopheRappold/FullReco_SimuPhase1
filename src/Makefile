@@ -26,7 +26,7 @@ DictObjSuf    = $(DictpSuf).$(ObjSuf)
 OutPutOpt     = -o
 
 #CXX           = g++
-CXXFLAGS      = -O2 -fPIC -g -std=c++1y #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+CXXFLAGS      = -O3 -fPIC -g -std=c++1y #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 LIBS          = -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
 LDFLAGS       = -O
 SOFLAGS       = -shared
@@ -60,7 +60,7 @@ Sources = MainSimu.cc FullRecoEvent.cc Ana_Hist.cc
 Headers = $(patsubst %.cc,%.hh,$(Sources))
 Objects = $(patsubst %.cc,%.o,$(Sources))
 
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBayesFinder.cc
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBayesFinder.cc CheckField.cc
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
