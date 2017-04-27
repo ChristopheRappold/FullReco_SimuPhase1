@@ -25,7 +25,7 @@ class THyphiAttributes
   public:
   int Nb_CPU;
   int Nb_Fraction;
-
+  int NEvent;
   bool G4_simu;
   bool G4_TimeResolution;
   bool G4_GeoResolution;

@@ -72,6 +72,12 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
               std::string substring(opt.substr(found + 8));
               Nb_Fraction = std::atoi(substring.c_str());
             }
+	  found = opt.find("Event");
+	  if(found != std::string::npos)
+	    {
+	      std::string substring(opt.substr(found + 5));
+              NEvent = std::atoi(substring.c_str());
+	    }
         }
     }
 

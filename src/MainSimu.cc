@@ -223,7 +223,10 @@ int main(int argc,char** argv)
   TString fra_string("Fraction");
   fra_string+=Nb_fraction;
   Option.push_back(fra_string.Data());
-  Option.push_back("NoMaterial");
+  TString nevent_string("Event");
+  nevent_string+=Stop_event[0]-Start_event[0];
+  Option.push_back(nevent_string.Data());
+  //Option.push_back("NoMaterial");
   Option.push_back("Debug_DAF");
       
       
