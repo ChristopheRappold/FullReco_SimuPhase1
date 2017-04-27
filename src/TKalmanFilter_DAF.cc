@@ -53,14 +53,14 @@ TKalmanFilter_DAF::TKalmanFilter_DAF(const THyphiAttributes& attribut) : TDataPr
   Fitter_rescue->setMinIterations(2);
   Fitter_rescue->setMaxIterations(nIter);
 
-  // Fitter = new genfit::KalmanFitter(6,dPVal,1e-3,true);//
-  // Fitter = new genfit::DAF(true);
+  //Fitter = new genfit::KalmanFitter(10, dPVal, 1e3, false); //
+  //Fitter = new genfit::DAF(true);
   Fitter = new genfit::KalmanFitterRefTrack(nIter, dPVal); //,1e4);
-  Fitter->setMinIterations(2);
+  Fitter->setMinIterations(3);
   Fitter->setMultipleMeasurementHandling(mmHandling);
   Fitter->setMaxIterations(nIter);
-
-  // Fitter->setDebugLvl(10);
+  
+  //Fitter->setDebugLvl(10);
 
   rep = new genfit::RKTrackRep();
 
@@ -104,6 +104,16 @@ int TKalmanFilter_DAF::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* Out
 {
 
   int result_mom = Exec(RecoEvent, OutTree);
+
+  ++Nb_event;
+#ifdef DISPLAY
+  if(Nb_event == att.NEvent)
+    {
+      display->setOptions("ABDEFGHMPT"); // G show geometry
+      // if (matFX) display->setOptions("ABDEFGHMPT"); // G show geometry
+      display->open();
+    }
+#endif
 
   return SoftExit(result_mom);
 }
@@ -809,12 +819,6 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 #endif
         }
     }
-
-#ifdef DISPLAY
-  display->setOptions("ABDEFGHMPT"); // G show geometry
-  // if (matFX) display->setOptions("ABDEFGHMPT"); // G show geometry
-  display->open();
-#endif
 
   return 0;
 }
