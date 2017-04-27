@@ -251,12 +251,14 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       };
       std::set<std::tuple<double, int, int> > id_dets;
       double total_dE = 0.;
+      int n_Central = 0;
       for(size_t id_det = 0; id_det < it_ListHits->second.size(); ++id_det)
         {
           int id_hit = it_ListHits->second[id_det];
           if(id_hit < 0)
             continue;
-
+	  if(id_det>=G4Sol::MG01 && id_det<=G4Sol::MG17)
+	    ++n_Central;
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
 	  total_dE += it_trackInfo.second[id_det].Eloss;
@@ -288,8 +290,18 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       //   continue;
 
       if(id_dets.size() < 3) //(nb_ValidHits < 3)
-        continue;
-
+        {
+#ifdef DEBUG_KALMAN
+          std::cout << "!> less than 3 measurements: " << id_dets.size() << "\n";
+#endif
+	  AnaHisto->h_stats->Fill("Less3Mes",1);
+          continue;
+        }
+      if(n_Central<12)
+	{
+	  AnaHisto->h_stats->Fill("Less3MesCentral",1);
+	  continue;
+	}
       auto f_LastHitIsValid = [](const auto& it_ListHits, std::set<G4Sol::SolDet> listToTest) {
 
         for(auto it_det : listToTest)
