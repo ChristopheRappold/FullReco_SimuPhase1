@@ -1,6 +1,7 @@
 #ifndef DEBUGHEADER
 #define DEBUGHEADER
 
+//#define DEBUG_BUILD
 #define QUIET
 //#define ROOT6
 //#define DEBUG_KALMAN_RESIDU
