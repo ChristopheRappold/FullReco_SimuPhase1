@@ -868,78 +868,239 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
     }
   else
     {
-      TFile* fout = new TFile(outfile.c_str(),"RECREATE");
+      TFile* fout = new TFile(outfile.c_str(), "RECREATE");
       fout->cd();
       h_Acceptance->Write();
+      h_InvMass->Write();
+      h_Vtx->Write();
+      h_RZVtx->Write();
+      h_InvMassVtx->Write();
+      h_InvMassBrho->Write();
+      h_Vtx_X->Write();
+      h_Vtx_Y->Write();
+      h_Vtx_Z->Write();
+      auto f_DoEff = [](std::vector<TH1F*>& hist1d) -> std::vector<TH1F*> {
 
-      auto f_DoEff = [] (std::vector<TH1F*>& hist1d) -> std::vector<TH1F*> {
-	
-	std::vector<TH1F*> h_out(hist1d.size()-1,nullptr);
-	for(size_t i=hist1d.size()-1; i>=1;--i)
-	  {
-	    std::string nameAcc(hist1d[i]->GetName());
-	    nameAcc+="GeoAcceptance";
-	    //TH1F* htemp1 = new TH1F(nameAcc.c_str(),nameAcc.c_str(),hist1d.second[0]->GetNbinsX(),hist1d.second[0]->GetXaxis()->GetXmin(),hist1d.second[0]->GetXaxis()->GetXmax());
-	    for(int n = 1; n<=hist1d[0]->GetNbinsX();++n)
-	      {
-		Int_t Nall = hist1d[0]->GetBinContent(n);
-		Int_t Nacc = hist1d[i]->GetBinContent(n);
-		if(Nall<=0)
-		  {
-		    Nacc=0;
-		    hist1d[i]->SetBinContent(n,Nacc);
-		  }
-		if(Nall<Nacc)
-		  {
-			Nacc = Nall;
-			hist1d[i]->SetBinContent(n,Nacc);
-		  }
-	      }
-	    if(hist1d[i]->GetEntries()>1)
-	      {
-		h_out[i-1] = (TH1F*) hist1d[i]->Clone();
-		h_out[i-1]->GetXaxis()->SetRangeUser(hist1d[0]->GetXaxis()->GetXmin(),hist1d[0]->GetXaxis()->GetXmax());
-		//TGraphAsymmErrors* g_acc = new TGraphAsymmErrors(hist1d.second[0],hist1d.second[1]);
-		h_out[i-1]->SetNameTitle(nameAcc.c_str(),nameAcc.c_str());
-		h_out[i-1]->Divide(hist1d[0]);
-		if(i!=hist1d.size()-1)
-		  h_out[i-1]->SetLineColor(i);
-	      }
-	  }
-	return h_out;
-     };
-      
+        std::vector<TH1F*> h_out(hist1d.size() - 1, nullptr);
+	hist1d[0]->Sumw2();
+        for(size_t i = hist1d.size() - 1; i >= 1; --i)
+          {
+            std::string nameAcc(hist1d[i]->GetName());
+            nameAcc += "GeoAcceptance";
+            // TH1F* htemp1 = new
+            // TH1F(nameAcc.c_str(),nameAcc.c_str(),hist1d.second[0]->GetNbinsX(),hist1d.second[0]->GetXaxis()->GetXmin(),hist1d.second[0]->GetXaxis()->GetXmax());
+            for(int n = 1; n <= hist1d[0]->GetNbinsX(); ++n)
+              {
+                Int_t Nall = hist1d[0]->GetBinContent(n);
+                Int_t Nacc = hist1d[i]->GetBinContent(n);
+                if(Nall <= 0)
+                  {
+                    Nacc = 0;
+                    hist1d[i]->SetBinContent(n, Nacc);
+                  }
+                if(Nall < Nacc)
+                  {
+                    Nacc = Nall;
+                    hist1d[i]->SetBinContent(n, Nacc);
+                  }
+              }
+            if(hist1d[i]->GetEntries() > 1)
+              {
+                h_out[i - 1] = (TH1F*)hist1d[i]->Clone();
+		h_out[i - 1]->Sumw2();
+		h_out[i - 1]->GetXaxis()->SetRangeUser(hist1d[0]->GetXaxis()->GetXmin(), hist1d[0]->GetXaxis()->GetXmax());
+                // TGraphAsymmErrors* g_acc = new TGraphAsymmErrors(hist1d.second[0],hist1d.second[1]);
+                h_out[i - 1]->SetNameTitle(nameAcc.c_str(), nameAcc.c_str());
+                h_out[i - 1]->Divide(hist1d[0]);
+                if(i != hist1d.size() - 1)
+                  h_out[i - 1]->SetLineColor(i);
+              }
+          }
+        return h_out;
+      };
 
       for(auto it_momAcc : h_MomAcc)
-	{
-	  int pdg = it_momAcc.first;
-	  auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg);
-	  std::string nameDir(PDG_particle->GetName());
+        {
+          int pdg = it_momAcc.first;
+          auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg);
+          std::string nameDir(PDG_particle->GetName());
 
-	  auto it_angleAcc = h_AngleAcc.find(pdg);
-	  auto it_rapAcc = h_RapidityAcc.find(pdg);
-	  auto it_momRes = h_MomAccReco.find(pdg);
+          auto it_angleAcc = h_AngleAcc.find(pdg);
+          auto it_rapAcc = h_RapidityAcc.find(pdg);
+          auto it_momRes = h_MomAccReco.find(pdg);
 
-	  std::vector<TH1F*> momEff = f_DoEff(it_momAcc.second);
-	  std::vector<TH1F*> angleEff = f_DoEff(it_angleAcc->second);
-	  std::vector<TH1F*> rapEff = f_DoEff(it_rapAcc->second);
-       	  TDirectory* dirTemp = fout->mkdir(nameDir.c_str(),nameDir.c_str());
-       	  dirTemp->cd();
+          std::vector<TH1F*> momEff = f_DoEff(it_momAcc.second);
+          std::vector<TH1F*> angleEff = f_DoEff(it_angleAcc->second);
+          std::vector<TH1F*> rapEff = f_DoEff(it_rapAcc->second);
+
+	  int nb_hist = 0;
+
 	  for(auto htemp : momEff)
-	    if(htemp!=nullptr)
-	      htemp->Write();
+            if(htemp != nullptr)
+	      if(htemp->GetEntries()>0)
+	      ++nb_hist;
 
 	  for(auto htemp : angleEff)
-	    if(htemp!=nullptr)
-	      htemp->Write();
+            if(htemp != nullptr)
+	      if( htemp->GetEntries()>0)
+	      ++nb_hist;
 
-	  for(auto htemp : rapEff)
-	    if(htemp!=nullptr)
-	      htemp->Write();
+          for(auto htemp : rapEff)
+            if(htemp != nullptr)
+	      if(htemp->GetEntries()>0)
+	      ++nb_hist;
+          if(it_momRes != h_MomAccReco.end())
+	    if(it_momRes->second->GetEntries()>0)
+	      ++nb_hist;
 
-	  if(it_momRes!=h_MomAccReco.end())
-	    it_momRes->second->Write();
-	}
+	  if( nb_hist == 0)
+	    continue;
+	  
+	  TDirectory* dirTemp = fout->mkdir(nameDir.c_str(), nameDir.c_str());
+          dirTemp->cd();
+          for(auto htemp : momEff)
+            if(htemp != nullptr)
+	      if( htemp->GetEntries()>0)
+              htemp->Write();
+
+          for(auto htemp : angleEff)
+            if(htemp != nullptr)
+	      if(htemp->GetEntries()>0)
+              htemp->Write();
+
+          for(auto htemp : rapEff)
+            if(htemp != nullptr)
+	      if(htemp->GetEntries()>0)
+              htemp->Write();
+
+          if(it_momRes != h_MomAccReco.end())
+	    if(it_momRes->second->GetEntries()>0)
+	      it_momRes->second->Write();
+        }
+
+      for(auto it_momAcc : h_MomAccDecay)
+        {
+          int pdg = it_momAcc.first;
+          auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg);
+          std::string nameDir(PDG_particle->GetName());
+	  nameDir+="Decay";
+          auto it_angleAcc = h_AngleAccDecay.find(pdg);
+
+          std::vector<TH1F*> momEff = f_DoEff(it_momAcc.second);
+          std::vector<TH1F*> angleEff = f_DoEff(it_angleAcc->second);
+
+	  int nb_hist = 0;
+
+	  for(auto htemp : momEff)
+            if(htemp != nullptr)
+	      if(htemp->GetEntries()>0)
+	      ++nb_hist;
+
+	  for(auto htemp : angleEff)
+            if(htemp != nullptr)
+	      if( htemp->GetEntries()>0)
+	      ++nb_hist;
+
+	  if( nb_hist == 0)
+	    continue;
+
+          TDirectory* dirTemp = fout->mkdir(nameDir.c_str(), nameDir.c_str());
+          dirTemp->cd();
+
+	  for(auto htemp : momEff)
+            if(htemp != nullptr)
+              if( htemp->GetEntries()>0)
+		htemp->Write();
+
+          for(auto htemp : angleEff)
+            if(htemp != nullptr)
+              if( htemp->GetEntries()>0)
+		htemp->Write();
+
+        }
+
+      for(auto it_momAcc : h_MomAccDecayCoinFRS)
+        {
+          int pdg = it_momAcc.first;
+          auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg);
+          std::string nameDir(PDG_particle->GetName());
+	  nameDir+="DecayCoinFRS";
+          auto it_angleAcc = h_AngleAccDecay.find(pdg);
+
+          std::vector<TH1F*> momEff = f_DoEff(it_momAcc.second);
+          std::vector<TH1F*> angleEff = f_DoEff(it_angleAcc->second);
+
+	  int nb_hist = 0;
+
+	  for(auto htemp : momEff)
+            if(htemp != nullptr)
+	      if(htemp->GetEntries()>0)
+	      ++nb_hist;
+
+	  for(auto htemp : angleEff)
+            if(htemp != nullptr)
+	      if( htemp->GetEntries()>0)
+	      ++nb_hist;
+
+	  if( nb_hist == 0)
+	    continue;
+	  
+          TDirectory* dirTemp = fout->mkdir(nameDir.c_str(), nameDir.c_str());
+          dirTemp->cd();
+
+	  for(auto htemp : momEff)
+            if(htemp != nullptr)
+	      if( htemp->GetEntries()>0)
+		htemp->Write();
+
+          for(auto htemp : angleEff)
+            if(htemp != nullptr)
+	      if( htemp->GetEntries()>0)
+		htemp->Write();
+
+        }
+
+      for(auto it_hist : h_FinalHit_CDC)
+	{
+
+	  auto it_posPDG = it_hist.first.find_first_of("-1234567890");
+	  std::string nameDet = it_hist.first.substr(0, it_posPDG);
+	      
+	  std::string namePDG = it_hist.first.substr(it_posPDG, std::string::npos);
+	  int pdg_code = std::stoi(namePDG);
+	  auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
+	      
+	  std::string namePar(PDG_particle->GetName());
+
+	  // std::replace(namePar.begin(), namePar.end(), '+', 'P');
+	  // std::replace(namePar.begin(), namePar.end(), '-', 'N');
+
+	  auto getDir = [](TFile* out_file, const std::string& name_dir) {
+			  if(!out_file->GetDirectory(name_dir.c_str()))
+			    return out_file->mkdir(name_dir.c_str());
+			  else
+			    return out_file->GetDirectory(name_dir.c_str());
+			};
+	  std::string nameDir (namePar);
+	      
+	  auto it_decay = it_hist.first.find("Decay");
+	  if(it_decay!=std::string::npos)
+	    nameDir += "Decay";
+	  auto it_frs = it_hist.first.find("CoinFRS");
+	  if(it_frs != std::string::npos)
+	    nameDir += "CoinFRS";
+
+	  TDirectory* dirTemp = getDir(fout,nameDir);
+	  dirTemp->cd();
+	  for(size_t id = 0; id < it_hist.second.size(); ++id)
+	    {
+	      it_hist.second[id]->Write();
+	    }
+	      
+	  
+	
+
+	}      
       
       fout->Close();
       // auto writeToFile = [&fout,&nameParticle](std::unordered_map<int,TH2F*>& h2, const std::string& nameDir)
@@ -984,5 +1145,54 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       // fout->Close();
     }
 
-}
+  auto f_delete_map = [](auto& maps) {
+  			for(auto it : maps)
+			  for(auto it1 : it.second)
+			    {
+			      it1->Reset();
+			      it1->Delete();
+			    }
+		      };
+  
+  f_delete_map(h_MomAcc);
+  f_delete_map(h_MomAccDecay);
+  f_delete_map(h_MomAccDecayCoinFRS);
+  f_delete_map(h_AngleAcc);
+  f_delete_map(h_AngleAccDecay);
+  f_delete_map(h_AngleAccDecayCoinFRS);
+  f_delete_map(h_RapidityAcc);
 
+  f_delete_map(h_FinalHit_CDC);
+  for(auto it : h_MomAccReco)
+    {
+      it.second->Reset();
+      it.second->Delete();
+    }
+  f_delete_map(h_MomAccReco_multi);
+  for(auto it : h_InvMassBrho_multi)
+    {
+      it->Reset();
+      it->Delete();
+    }
+
+  h_Acceptance->Reset();
+  h_Vtx->Reset();
+  h_RZVtx->Reset();
+  h_InvMass->Reset();
+  h_InvMassVtx->Reset();
+  h_InvMassBrho->Reset();
+  h_Vtx_X->Reset();
+  h_Vtx_Y->Reset();
+  h_Vtx_Z->Reset();
+
+  h_Acceptance->Delete();
+  h_Vtx->Delete();
+  h_RZVtx->Delete();
+  h_InvMass->Delete();
+  h_InvMassVtx->Delete();
+  h_InvMassBrho->Delete();
+  h_Vtx_X->Delete();
+  h_Vtx_Y->Delete();
+  h_Vtx_Z->Delete();
+  
+}
