@@ -90,7 +90,7 @@ class Ana_Hist
   TH2F* h_mom_res[5];
 
   
-  std::unordered_map<std::string, std::vector<TH1*> > HistRegisteredByDir;
+  std::unordered_map<std::string, std::tuple<std::vector<TH1*>, int> > HistRegisteredByDir;
 
   Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Hough = true, bool Simu = false);
   ~Ana_Hist();

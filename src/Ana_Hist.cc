@@ -185,13 +185,76 @@ int Ana_Hist::Write(TFile* out_file)
   HaveBeenWritten = true;
   out_file->cd();
 
+  auto f_DiffResolution = [](TH2F* h)
+			  {
+			    TGraphErrors* g_resMean = nullptr;
+			    TGraphErrors* g_resStd = nullptr;
+
+			    if(h==nullptr)
+			      return std::make_tuple(g_resMean, g_resStd);
+			    
+			    TString nameHist1(h->GetName());
+			    nameHist1 += "Mean";
+			    TString nameHist2(h->GetName());
+			    nameHist2 += "Std";
+
+			    g_resMean = new TGraphErrors;
+			    g_resStd = new TGraphErrors;
+
+			    g_resMean->SetNameTitle(nameHist1,nameHist1);
+			    g_resStd->SetNameTitle(nameHist2,nameHist2);
+
+			    for(int i_x = 1; i_x <= h->GetNbinsX(); ++i_x)
+			      {
+				TString nameH("Proj_");
+				nameH+=i_x;
+			        TH1D* h_temp = h->ProjectionY(nameH,i_x,i_x);
+
+				double mean = h_temp->GetMean();
+				double mean_err = h_temp->GetMeanError();
+				double rms = h_temp->GetRMS();
+				double rms_err = h_temp->GetRMSError();
+
+				double x_c = h->GetXaxis()->GetBinCenter(i_x);
+				double x_w = h->GetXaxis()->GetBinWidth(i_x);
+				
+				h_temp->GetXaxis()->SetRangeUser(mean-rms*2.,mean+rms*2.);
+				
+				mean = h_temp->GetMean();
+				mean_err = h_temp->GetMeanError();
+				rms = h_temp->GetRMS();
+				rms_err = h_temp->GetRMSError();
+				
+				g_resMean->SetPoint(i_x-1, x_c, mean);
+				g_resMean->SetPointError(i_x-1,x_w*0.5,mean_err);
+				g_resStd->SetPoint(i_x-1, x_c, rms);
+				g_resStd->SetPointError(i_x-1,x_w*0.5,rms_err);
+			      }
+			    return std::make_tuple(g_resMean, g_resStd);			    
+			  };
+
+  
   std::cout << "making directory " << std::endl;
   for(auto it : HistRegisteredByDir)
     {
       TDirectory* temp_dir = GetDir(out_file, it.first);
       temp_dir->cd();
-      for(auto it_hist : it.second)
-        it_hist->Write();
+      
+      for(auto it_hist : std::get<0>(it.second))
+        {
+	  it_hist->Write();
+	  if(std::get<1>(it.second)==1)
+	    {
+	      TGraphErrors* g1;
+	      TGraphErrors* g2;
+	      
+	      std::tie(g1,g2) = f_DiffResolution(dynamic_cast<TH2F*>(it_hist));
+	      if(g1!=nullptr)
+		g1->Write();
+	      if(g2!=nullptr)
+		g2->Write();
+	    }
+	}
       out_file->cd();
     }
 
