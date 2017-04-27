@@ -138,7 +138,7 @@ int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
       OutTrack->MC_status = TrackID + 10000 * Decay;
       OutTrack->Chi2 = FitRes.chi2;
       OutTrack->Chi2_X = FitRes.ndf;
-      OutTrack->Chi2_Y = FitRes.firstHit;
+      OutTrack->Chi2_Y = FitRes.Ncentral;//FitRes.firstHit;
       OutTrack->Mass = FitRes.mass;
       OutTrack->pdgcode = FitRes.pdg_guess;
       OutTrack->MomMass.SetXYZM(FitRes.momX, FitRes.momY, FitRes.momZ, FitRes.mass);
@@ -782,8 +782,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               AnaHisto->h_path_tof_cut->Fill(Path_lengthMean / 30., time_of_flight);
             }
           tempResults.firstHit = id_firstDet;
-          tempResults.lastHit = id_lastHit;
-          tempResults.dE = dE;
+          tempResults.lastHit = id_lastDet;
+	  tempResults.Ncentral = n_Central;
+	  tempResults.dE = dE;
           tempResults.path_time = Path_time;
           tempResults.path_length = Path_lengthMean;
           tempResults.path_length2 = Path_length;
