@@ -13,6 +13,7 @@
 #include "TH1I.h"
 #include "TH2F.h"
 #include "TH2I.h"
+#include "TGraphErrors.h"
 
 //#include "TCanvas.h"
 #include "TDirectory.h"
@@ -39,6 +40,13 @@ class Ana_Hist
 
   TH1I* h_stats;
   TH1I* h_task_exit;
+  //Field
+  TH2F* FieldXY[3];
+  TH2F* FieldXZ[3];
+  TH2F* FieldYZ[3];
+  TH2F* FieldXY_n[3];
+  TH2F* FieldXZ_n[3];
+  TH2F* FieldYZ_n[3];
   // Finder
   TH2F* h_xy;
   TH2F* h_PxPy;
@@ -88,7 +96,10 @@ class Ana_Hist
   TH1F* h_pv_particle[4];
 
   TH2F* h_mom_res[5];
+  TH1D* h_ResPull[5][10];
+  TH2F* h_ResPull_normal[5][10];
 
+  TH2F* h_total_dE;
   
   std::unordered_map<std::string, std::tuple<std::vector<TH1*>, int> > HistRegisteredByDir;
 
@@ -104,6 +115,7 @@ class Ana_Hist
     else
       return out_file->GetDirectory(name_dir.c_str());
   }
+  
 };
 
 #endif

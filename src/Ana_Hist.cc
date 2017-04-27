@@ -36,11 +36,49 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
 
   HaveBeenWritten = false;
 
-  h_stats = new TH1I("stats", "stats", 10, 0, 10);
+  h_stats = new TH1I("stats", "stats", 20, 0, 20);
   h_task_exit = new TH1I("h_task_exit", "h_task_exit", 20, 0, 20);
 
-  HistRegisteredByDir.insert(std::make_pair("stat", std::vector<TH1*>({h_stats, h_task_exit})));
+  HistRegisteredByDir.insert(std::make_pair("stat", std::make_tuple(std::vector<TH1*>({h_stats, h_task_exit}),0)));
 
+  std::vector<std::string> name_field = {"Bx","By","Bz"};
+  std::vector<TH1*> h_fields;
+  for(size_t i=0;i<name_field.size();++i)
+    {
+      std::string name_h_field = "FieldXY_";
+      name_h_field+=name_field[i];
+      FieldXY[i] = new TH2F(name_h_field.c_str(),name_h_field.c_str(),600,-150,150,600,-150,150);
+      h_fields.emplace_back(FieldXY[i]);
+
+      std::string name_h_field1 = "FieldXZ_";
+      name_h_field1+=name_field[i];
+      FieldXZ[i] = new TH2F(name_h_field1.c_str(),name_h_field1.c_str(),600,-150,150,1200,-300,300);
+      h_fields.emplace_back(FieldXZ[i]);
+
+      std::string name_h_field2 = "FieldYZ_";
+      name_h_field2+=name_field[i];
+      FieldYZ[i] = new TH2F(name_h_field2.c_str(),name_h_field2.c_str(),600,-150,150,1200,-300,300);
+      h_fields.emplace_back(FieldYZ[i]);
+
+      std::string name_h_field_n = "FieldXYn_";
+      name_h_field_n+=name_field[i];
+      FieldXY_n[i] = new TH2F(name_h_field_n.c_str(),name_h_field_n.c_str(),600,-150,150,600,-150,150);
+      h_fields.emplace_back(FieldXY_n[i]);
+
+      std::string name_h_field_n1 = "FieldXZn_";
+      name_h_field_n1+=name_field[i];
+      FieldXZ_n[i] = new TH2F(name_h_field_n1.c_str(),name_h_field_n1.c_str(),600,-150,150,1200,-300,300);
+      h_fields.emplace_back(FieldXZ_n[i]);
+
+      std::string name_h_field_n2 = "FieldYZn_";
+      name_h_field_n2+=name_field[i];
+      FieldYZ_n[i] = new TH2F(name_h_field_n2.c_str(),name_h_field_n2.c_str(),600,-150,150,1200,-300,300);
+      h_fields.emplace_back(FieldYZ_n[i]);
+
+    }
+  
+  HistRegisteredByDir.insert(std::make_pair("Field", std::make_tuple(h_fields,0)));
+  
   if(EnableState[DAF])
     {
       std::vector<TH1*> HistReg;
@@ -58,11 +96,11 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       hd_chi[1] = new TH1F("AAD_Chi2_BigTof", "AAD_Chi2_BigTof", 500, 0, 100);
       HistReg.emplace_back(hd_chi[0]);
 
-      h_Path = new TH1F("path_length", "path_length", 200, 400., 800.);
+      h_Path = new TH1F("path_length", "path_length", 200, 0., 400.);
       HistReg.emplace_back(h_Path);
-      h_Path_Back = new TH1F("path_length_back", "path_length_back", 200, 400., 800.);
+      h_Path_Back = new TH1F("path_length_back", "path_length_back", 200, 0., 400.);
       HistReg.emplace_back(h_Path_Back);
-      h_MeanPath = new TH1F("Mean_path_length", "Mean_path_length", 200, 400., 800.);
+      h_MeanPath = new TH1F("Mean_path_length", "Mean_path_length", 200, 0., 400.);
       HistReg.emplace_back(h_MeanPath);
       h_dpath = new TH1F("Dpath", "Dpath", 200, -10., 10.);
       HistReg.emplace_back(h_dpath);
@@ -111,8 +149,11 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(h_path_tof_cut);
       h_path_mom_cut = new TH2F("path_mom_pvcut", "path_mom_pvcut", 500, 15., 20., 200, 0, 20.);
       HistReg.emplace_back(h_path_mom_cut);
-
-      HistRegisteredByDir.insert(std::make_pair("Kalman", HistReg));
+      
+      h_total_dE = new TH2F("total_dE","total_dE",30,0,30,500,0,100);
+      HistReg.emplace_back(h_total_dE);
+      
+      HistRegisteredByDir.insert(std::make_pair("Kalman", std::make_tuple(HistReg,0)));
 
       std::string name[4] = {"_proton", "_alpha", "_pi-", "_he3"};
       for(int i = 0; i < 4; i++)
@@ -136,21 +177,45 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
 
           temp = "Kalman";
           temp += name[i];
-          HistRegisteredByDir.insert(std::make_pair(temp, HistRegPID));
+          HistRegisteredByDir.insert(std::make_pair(temp, std::make_tuple(HistRegPID,0)));
         }
 
       std::vector<std::string> name_res = {"_p","_piN","_piP","_KN","_KP"};
-      int id = 0;
-      std::vector<TH1*> HistRegRes;
-      for(auto temp_name : name_res)
+      
+      std::vector<std::tuple<int,double,double> > list_bins= {std::make_tuple(500,-1.,1.), std::make_tuple(500,-0.1,0.1), std::make_tuple(500,-0.1,0.1),
+						     std::make_tuple(500,-1.,1.), std::make_tuple(500,-1.,1.),
+						     std::make_tuple(200,-6.,6.), std::make_tuple(200,-6.,6.), std::make_tuple(200,-6.,6.),
+						     std::make_tuple(200,-6.,6.), std::make_tuple(200,-6.,6.),
+      };
+      std::vector<std::string> name_histres = {"h_momRes","h_upRes","h_vpRes","h_uRes","h_vRes","h_qopPull","h_upPull","h_vpPull","h_uPull","h_vPull"};
+
+      std::vector<TH1*> HistRegRes1;
+      std::vector<TH1*> HistRegRes2;
+      for(size_t id = 0; id<name_res.size();++id)
 	{
-	  std::string temp = "mom_res";
-	  temp += temp_name;
-	  h_mom_res[id] = new TH2F(temp.c_str(), temp.c_str(), 25, 0., 10., 1000, 0., 0.1);
-	  HistRegRes.emplace_back(h_mom_res[id]);
-	  ++id;
+	  std::string tempResHist = "mom_res";
+	  auto temp_nameRes = name_res[id];
+	  tempResHist += temp_nameRes;
+	  h_mom_res[id] = new TH2F(tempResHist.c_str(), tempResHist.c_str(), 25, 0., 5., 50, -1, 1);
+	  HistRegRes1.emplace_back(h_mom_res[id]);
+
+	  for(size_t id_h = 0; id_h < name_histres.size();++id_h)
+	    {
+	      std::string temp1_ResHist = name_histres[id_h];
+	      temp1_ResHist+= temp_nameRes;
+	      int nBin;
+	      double minB, maxB;
+	      std::tie(nBin,minB,maxB) = list_bins[id_h];
+	      h_ResPull[id][id_h] = new TH1D(temp1_ResHist.c_str(),temp1_ResHist.c_str(),nBin, minB, maxB);
+	      HistRegRes2.emplace_back(h_ResPull[id][id_h]);
+	      temp1_ResHist+="2D";
+	      h_ResPull_normal[id][id_h] = new TH2F(temp1_ResHist.c_str(),temp1_ResHist.c_str(),100,0,10,nBin, minB, maxB);
+	      HistRegRes2.emplace_back(h_ResPull_normal[id][id_h]);
+	    }
 	}
-      HistRegisteredByDir.insert(std::make_pair("MomRes", HistRegRes));
+      
+      HistRegisteredByDir.insert(std::make_pair("MomRes", std::make_tuple(HistRegRes1,1)));
+      HistRegisteredByDir.insert(std::make_pair("ResPull", std::make_tuple(HistRegRes2,0)));
       
     }
 
@@ -173,7 +238,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_TrackFindingStat = new TH2F("h_TrackFindingStat", "h_TrackFindingStat", 20, 0, 20, 22, -2, 20);
       HistReg.emplace_back(h_TrackFindingStat);
 
-      HistRegisteredByDir.insert(std::make_pair("Finder", HistReg));
+      HistRegisteredByDir.insert(std::make_pair("Finder", std::make_tuple(HistReg,0)));
     }
 
   std::cout << " : done !" << std::endl;
@@ -269,15 +334,15 @@ int Ana_Hist::WriteTemp(char* tempfile)
   cout << "File = " << tempfile << endl;
 
   ff->cd();
-
-  for(auto it : HistRegisteredByDir)
-    {
-      TDirectory* temp_dir = GetDir(ff, it.first);
-      temp_dir->cd();
-      for(auto it_hist : it.second)
-        it_hist->Write();
-      ff->cd();
-    }
+  Write(ff);
+  // for(auto it : HistRegisteredByDir)
+  //   {
+  //     TDirectory* temp_dir = GetDir(ff, it.first);
+  //     temp_dir->cd();
+  //     for(auto it_hist : it.second)
+  //       it_hist->Write();
+  //     ff->cd();
+  //   }
 
   // TDirectory *bmtp = ff->mkdir("BetaMom_Tof+");
   // TDirectory *bmbg = ff->mkdir("BetaMom_BigTof+");
