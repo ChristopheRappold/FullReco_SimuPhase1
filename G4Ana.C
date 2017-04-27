@@ -594,41 +594,59 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	    }
 	}
 
+      std::unordered_map<int, int> idDet;
+      bool DaughterFragInFRS = false; 
+      for(Int_t id = 0; id < event->FMF2->GetEntries(); ++id)
+        {
+          const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->FMF2->At(id)));
+          int TrackID = MChit.MC_id;
+          for(auto MCpar : TempData)
+            if(TrackID == MCpar.MC_id)
+              {
 
+                auto it_det = idDet.find(TrackID);
+                if(it_det == idDet.end())
+                  {
+                    MCpar.FinalHit.insert(std::make_pair("FMF2", MChit.MCHit));
 
-      std::unordered_map<int,int> idDet;
-      for(Int_t id = 0; id< event->FMF2->GetEntries();++id)
-	{
-	  const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->FMF2->At(id)));
-	  int TrackID = MChit.MC_id;
-	  for(auto MCpar : TempData)
-	    if(TrackID == MCpar.MC_id)
-	      {
-		auto it_det = idDet.find(TrackID);
-		if(it_det == idDet.end())
-		  {
-		    auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
-		    h_Acceptance->Fill(PDG_particle->GetName(),"FMF2",1);
-		    //h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
-		    idDet.insert(std::make_pair(TrackID, MChit.LayerID));
-		    auto it_momAcc = h_MomAcc.find(MChit.Pdg);
-		    it_momAcc->second[3]->Fill(MCpar.MomMass.P());
-		    //it_momAcc->second[7]->Fill(MCpar.MomMass.P());
-		    auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
-		    it_angleAcc->second[3]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		    //it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		    auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
-		    it_YAcc->second[3]->Fill(MCpar.MomMass.Rapidity());
-		    //it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
-		    if(MCpar.Mother_id>=0)
-		      {
-			//h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
-			auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
-			it_momAcc2->second[3]->Fill(MCpar.MomMass.P());
-			//it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
-			auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
-			it_angleAcc2->second[3]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-			//it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+                    auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+                    h_Acceptance->Fill(PDG_particle->GetName(), "FMF2", 1);
+                    // h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
+                    idDet.insert(std::make_pair(TrackID, MChit.LayerID));
+
+                    auto it_momAcc = h_MomAcc.find(MChit.Pdg);
+                    it_momAcc->second[3]->Fill(MCpar.MomMass.P());
+                    // it_momAcc->second[7]->Fill(MCpar.MomMass.P());
+                    auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
+                    it_angleAcc->second[3]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                    // it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+                    auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
+                    it_YAcc->second[3]->Fill(MCpar.MomMass.Rapidity());
+                    // it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
+                    if(MCpar.Mother_id >= 0)
+                      {
+                        // h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
+                        auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
+                        it_momAcc2->second[3]->Fill(MCpar.MomMass.P());
+                        // it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
+                        auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
+                        it_angleAcc2->second[3]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+
+			if(MCpar.pdg >= 10000)
+			  {
+			    if(TMath::Abs(MChit.MCHit.X())<7 && TMath::Abs(MChit.MCHit.Y())<7)
+			      {
+				DaughterFragInFRS = true;
+				h_Acceptance->Fill(PDG_particle->GetName(), "FMF2DecayCoinFRS", 1);
+
+				auto it_momAcc3 = h_MomAccDecayCoinFRS.find(MChit.Pdg);
+				it_momAcc3->second[3]->Fill(MCpar.MomMass.P());
+				// it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
+				auto it_angleAcc3 = h_AngleAccDecayCoinFRS.find(MChit.Pdg);
+				it_angleAcc3->second[3]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+			      }
+			  }		
+			// it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
 		      }
 		  }
 	      }
@@ -677,70 +695,126 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 		    
                   }
               }
+        }
 
-      for(Int_t id = 0; id< event->PSCE->GetEntries();++id)
-	{
-	  const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->PSCE->At(id)));
-	  int TrackID = MChit.MC_id;
-	  for(auto MCpar : TempData)
-	    if(TrackID == MCpar.MC_id)
-	      {
-		auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
-		h_Acceptance->Fill(PDG_particle->GetName(),"PSCE",1);
-		h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
-		auto it_momAcc = h_MomAcc.find(MChit.Pdg);
-		it_momAcc->second[4]->Fill(MCpar.MomMass.P());
-		it_momAcc->second[7]->Fill(MCpar.MomMass.P());
-		auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
-		it_angleAcc->second[4]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
-		it_YAcc->second[4]->Fill(MCpar.MomMass.Rapidity());
-		it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
-		if(MCpar.Mother_id>=0)
-		  {
-		    h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
-		    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
-		    it_momAcc2->second[4]->Fill(MCpar.MomMass.P());
-		    it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
-		    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
-		    it_angleAcc2->second[4]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		    it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+      for(Int_t id = 0; id < event->PSCE->GetEntries(); ++id)
+        {
+          const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->PSCE->At(id)));
+          int TrackID = MChit.MC_id;
+          for(auto& MCpar : TempData)
+            if(TrackID == MCpar.MC_id)
+              {
+                MCpar.FinalHit.insert(std::make_pair("PSCE", MChit.MCHit));
+
+                auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+                h_Acceptance->Fill(PDG_particle->GetName(), "PSCE", 1);
+                h_Acceptance->Fill(PDG_particle->GetName(), "Det", 1);
+                h_Acceptance->Fill(PDG_particle->GetName(), "Det2", 1);
+                auto it_momAcc = h_MomAcc.find(MChit.Pdg);
+                it_momAcc->second[4]->Fill(MCpar.MomMass.P());
+                it_momAcc->second[7]->Fill(MCpar.MomMass.P());
+                it_momAcc->second[8]->Fill(MCpar.MomMass.P());
+                auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
+                it_angleAcc->second[4]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                it_angleAcc->second[8]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
+                it_YAcc->second[4]->Fill(MCpar.MomMass.Rapidity());
+                it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
+                it_YAcc->second[8]->Fill(MCpar.MomMass.Rapidity());
+                if(MCpar.Mother_id >= 0)
+                  {
+                    h_Acceptance->Fill(PDG_particle->GetName(), "Decay_Det", 1);
+                    h_Acceptance->Fill(PDG_particle->GetName(), "Decay_Det2", 1);
+                    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
+                    it_momAcc2->second[4]->Fill(MCpar.MomMass.P());
+                    it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
+                    it_momAcc2->second[8]->Fill(MCpar.MomMass.P());
+                    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
+                    it_angleAcc2->second[4]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                    it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                    it_angleAcc2->second[8]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+
+		    if(DaughterFragInFRS)
+		      {
+			h_Acceptance->Fill(PDG_particle->GetName(), "Decay_DetCoinFRS", 1);
+			auto it_momAcc3 = h_MomAccDecayCoinFRS.find(MChit.Pdg);
+			it_momAcc3->second[4]->Fill(MCpar.MomMass.P());
+			it_momAcc3->second[7]->Fill(MCpar.MomMass.P());
+			it_momAcc3->second[8]->Fill(MCpar.MomMass.P());
+			auto it_angleAcc3 = h_AngleAccDecayCoinFRS.find(MChit.Pdg);
+			it_angleAcc3->second[4]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+			it_angleAcc3->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+			it_angleAcc3->second[8]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+		      }
 		  }
+              }
+        }
 
+      for(Int_t id = 0; id < event->PSBE->GetEntries(); ++id)
+        {
+          const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->PSBE->At(id)));
+          int TrackID = MChit.MC_id;
+          for(auto MCpar : TempData)
+            if(TrackID == MCpar.MC_id)
+              {
+                auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+                h_Acceptance->Fill(PDG_particle->GetName(), "PSBE", 1);
+                // h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
+                auto it_momAcc = h_MomAcc.find(MChit.Pdg);
+                it_momAcc->second[5]->Fill(MCpar.MomMass.P());
+                // it_momAcc->second[7]->Fill(MCpar.MomMass.P());
+                auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
+                it_angleAcc->second[5]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                // it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+                auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
+                it_YAcc->second[5]->Fill(MCpar.MomMass.Rapidity());
+                // it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
+                if(MCpar.Mother_id >= 0)
+                  {
+                    // h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
+                    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
+                    it_momAcc2->second[5]->Fill(MCpar.MomMass.P());
+                    // it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
+                    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
+                    it_angleAcc2->second[5]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                    // it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+                  }
+              }
+        }
 
-	      }
-	  
-	}
-      
-      for(Int_t id = 0; id< event->PSBE->GetEntries();++id)
-	{
-	  const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->PSBE->At(id)));
-	  int TrackID = MChit.MC_id;
-	  for(auto MCpar : TempData)
-	    if(TrackID == MCpar.MC_id)
-	      {
-		auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
-		h_Acceptance->Fill(PDG_particle->GetName(),"PSBE",1);
-		//h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
-		auto it_momAcc = h_MomAcc.find(MChit.Pdg);
-		it_momAcc->second[5]->Fill(MCpar.MomMass.P());
-		//it_momAcc->second[7]->Fill(MCpar.MomMass.P());
-		auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
-		it_angleAcc->second[5]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		//it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
-		it_YAcc->second[5]->Fill(MCpar.MomMass.Rapidity());
-		//it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
-		if(MCpar.Mother_id>=0)
-		  {
-		    //h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
-		    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
-		    it_momAcc2->second[5]->Fill(MCpar.MomMass.P());
-		    //it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
-		    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
-		    it_angleAcc2->second[5]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		    //it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+      for(Int_t id = 0; id < event->PSFE->GetEntries(); ++id)
+        {
+          const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->PSFE->At(id)));
+          int TrackID = MChit.MC_id;
+          for(auto MCpar : TempData)
+            if(TrackID == MCpar.MC_id)
+              {
+                auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+                h_Acceptance->Fill(PDG_particle->GetName(), "PSFE", 1);
+                h_Acceptance->Fill(PDG_particle->GetName(),"Det2",1);
+                auto it_momAcc = h_MomAcc.find(MChit.Pdg);
+                it_momAcc->second[6]->Fill(MCpar.MomMass.P());
+                it_momAcc->second[8]->Fill(MCpar.MomMass.P());
+                auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
+                it_angleAcc->second[6]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                it_angleAcc->second[8]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+                auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
+                it_YAcc->second[6]->Fill(MCpar.MomMass.Rapidity());
+                it_YAcc->second[8]->Fill(MCpar.MomMass.Rapidity());
+                if(MCpar.Mother_id >= 0)
+                  {
+                    h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det2",1);
+                    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
+                    it_momAcc2->second[6]->Fill(MCpar.MomMass.P());
+                    it_momAcc2->second[8]->Fill(MCpar.MomMass.P());
+                    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
+                    it_angleAcc2->second[6]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
+                    it_angleAcc2->second[8]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+                  }
+              }
+        }
+
       for(Int_t id = 0; id < event->CDH->GetEntries(); ++id)
         {
           const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->CDH->At(id)));
@@ -784,46 +858,144 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 			it_angleAcc3->second[7]->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
 		      }
 		  }
-	      }
-	  
-	}
+              }
+        }
 
+      std::unordered_map<int, int> TrackMulti;
+      for(Int_t id = 0; id < event->CDC->GetEntries(); ++id)
+        {
+          const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->CDC->At(id)));
+          int TrackID = MChit.MC_id;
+          auto it_trackM = TrackMulti.find(TrackID);
+          if(it_trackM != TrackMulti.end())
+            it_trackM->second += 1;
+          else
+            TrackMulti.insert(std::make_pair(TrackID, 1));
+        }
+
+      for(Int_t id = 0; id < event->CDC->GetEntries(); ++id)
+        {
+          const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->CDC->At(id)));
+          int TrackID = MChit.MC_id;
+          for(auto MCpar : TempData)
+            if(TrackID == MCpar.MC_id)
+              {
+                auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+                auto it_trackMulti = TrackMulti.find(TrackID);
+                if(it_trackMulti == TrackMulti.end())
+                  std::cout << "!> trackMulti : unfound trackID :" << TrackID << "\n";
+
+                for(auto finalHit_Det : MCpar.FinalHit)
+                  {
+                    std::string nameHist = finalHit_Det.first;
+                    nameHist += std::to_string(MChit.Pdg);
+
+                    auto it_FinalHit_CDC = f_createCDCFinal(h_FinalHit_CDC, nameHist);
+                    it_FinalHit_CDC[0]->Fill(MChit.LayerID-6, finalHit_Det.second.X());
+                    it_FinalHit_CDC[1]->Fill(MChit.LayerID-6, finalHit_Det.second.Y());
+                    it_FinalHit_CDC[2]->Fill(MChit.LayerID-6, finalHit_Det.second.Z());
+
+                    std::string nameHistM(nameHist);
+                    nameHistM += "MultiplicityCDC";
+                    auto it_FinalHit_CDCMulti = f_createCDCFinal(h_FinalHit_CDC, nameHistM);
+                    it_FinalHit_CDCMulti[0]->Fill(it_trackMulti->second, finalHit_Det.second.X());
+                    it_FinalHit_CDCMulti[1]->Fill(it_trackMulti->second, finalHit_Det.second.Y());
+                    it_FinalHit_CDCMulti[2]->Fill(it_trackMulti->second, finalHit_Det.second.Z());
+
+                    if(MCpar.Mother_id >= 0)
+                      {
+                        nameHist += "_Decay";
+                        auto it_FinalHit_CDC_Decay = f_createCDCFinal(h_FinalHit_CDC, nameHist);
+                        it_FinalHit_CDC_Decay[0]->Fill(MChit.LayerID-6, finalHit_Det.second.X());
+			it_FinalHit_CDC_Decay[1]->Fill(MChit.LayerID-6, finalHit_Det.second.Y());
+			it_FinalHit_CDC_Decay[2]->Fill(MChit.LayerID-6, finalHit_Det.second.Z());
+
+                        nameHistM += "_Decay";
+                        auto it_FinalHit_CDCMulti_Decay = f_createCDCFinal(h_FinalHit_CDC, nameHistM);
+                        it_FinalHit_CDCMulti_Decay[0]->Fill(it_trackMulti->second, finalHit_Det.second.X());
+                        it_FinalHit_CDCMulti_Decay[1]->Fill(it_trackMulti->second, finalHit_Det.second.Y());
+                        it_FinalHit_CDCMulti_Decay[2]->Fill(it_trackMulti->second, finalHit_Det.second.Z());
+			if(DaughterFragInFRS)
+			  {
+			    nameHist += "_DecayCoinFRS";
+			    auto it_FinalHit_CDC_DecayFRS = f_createCDCFinal(h_FinalHit_CDC, nameHist);
+			    it_FinalHit_CDC_DecayFRS[0]->Fill(MChit.LayerID-6, finalHit_Det.second.X());
+			    it_FinalHit_CDC_DecayFRS[1]->Fill(MChit.LayerID-6, finalHit_Det.second.Y());
+			    it_FinalHit_CDC_DecayFRS[2]->Fill(MChit.LayerID-6, finalHit_Det.second.Z());
+			    
+			    nameHistM += "_DecayCoinFRS";
+			    auto it_FinalHit_CDCMulti_DecayFRS = f_createCDCFinal(h_FinalHit_CDC, nameHistM);
+			    it_FinalHit_CDCMulti_DecayFRS[0]->Fill(it_trackMulti->second, finalHit_Det.second.X());
+			    it_FinalHit_CDCMulti_DecayFRS[1]->Fill(it_trackMulti->second, finalHit_Det.second.Y());
+			    it_FinalHit_CDCMulti_DecayFRS[2]->Fill(it_trackMulti->second, finalHit_Det.second.Z());
+
+			  }
+			
+                      }
+                  }
+              }
+        }
       
-      for(Int_t id = 0; id< event->PSFE->GetEntries();++id)
-	{
-	  const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->PSFE->At(id)));
-	  int TrackID = MChit.MC_id;
-	  for(auto MCpar : TempData)
-	    if(TrackID == MCpar.MC_id)
-	      {
-		auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
-		h_Acceptance->Fill(PDG_particle->GetName(),"PSFE",1);
-		//h_Acceptance->Fill(PDG_particle->GetName(),"Det",1);
-		auto it_momAcc = h_MomAcc.find(MChit.Pdg);
-		it_momAcc->second[6]->Fill(MCpar.MomMass.P());
-		//it_momAcc->second[7]->Fill(MCpar.MomMass.P());
-		auto it_angleAcc = h_AngleAcc.find(MChit.Pdg);
-		it_angleAcc->second[6]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		//it_angleAcc->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		auto it_YAcc = h_RapidityAcc.find(MChit.Pdg);
-		it_YAcc->second[6]->Fill(MCpar.MomMass.Rapidity());
-		//it_YAcc->second[7]->Fill(MCpar.MomMass.Rapidity());
-		if(MCpar.Mother_id>=0)
+      for(Int_t id = 0; id < event->fTrack->GetEntries(); ++id)
+        {
+          const THyphiTrack& RecoTrack = *(dynamic_cast<THyphiTrack*>(event->fTrack->At(id)));
+          int TrackID = RecoTrack.MC_status;
+	  if(RecoTrack.Sim2Vtx.Z()>0 && TrackID>2000)
+	    TrackID -= 10000;
+
+          for(auto MCpar : TempData)
+            if(TrackID == MCpar.MC_id)
+              {
+		auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MCpar.pdg);
+		if(MCpar.pdg<1000)
 		  {
-		    //h_Acceptance->Fill(PDG_particle->GetName(),"Decay_Det",1);
-		    auto it_momAcc2 = h_MomAccDecay.find(MChit.Pdg);
-		    it_momAcc2->second[6]->Fill(MCpar.MomMass.P());
-		    //it_momAcc2->second[7]->Fill(MCpar.MomMass.P());
-		    auto it_angleAcc2 = h_AngleAccDecay.find(MChit.Pdg);
-		    it_angleAcc2->second[6]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
-		    //it_angleAcc2->second[7]->Fill(MCpar.MomMass.Theta()*TMath::RadToDeg());
+		    ParticleD d_pi;
+		    //TLorentzVector p4;
+		    d_pi.MomMass.SetXYZM(RecoTrack.MomMass.Px(),RecoTrack.MomMass.Py(),RecoTrack.MomMass.Pz(),PDG_particle->Mass());
+		    d_pi.Vtx.SetXYZT(RecoTrack.RefPoint.X(),RecoTrack.RefPoint.Y(),RecoTrack.RefPoint.Z(),0.);
+		    daugthers.emplace_back(std::make_tuple(d_pi,PDG_particle->Charge()/3.));
 		  }
-	      }
-	  
-	}
+                // if(RecoTrack.Pval2 < 0.000000001)
+                //   continue;
+
+		// auto f_extrap = [](const TVector3& dir,const TVector3& point, const double z, TVector3& point_in_z)
+		// 		{
+		// 		  TVector3 dir_temp(dir);
+		// 		  if(TMath::Abs(dir.Z()-1.)>1e-9)
+		// 		    dir_temp*=1./dir_temp.Z();
+				  
+		// 		  //cout<<" debug Line 3D :"<<"("<<dir_temp.X()<<" "<<dir_temp.Y()<<" "<<dir_temp.Z()<<")"<<endl;
+				  
+		// 		  point_in_z.SetX(dir_temp.X()*(z-point.Z())+point.X());
+		// 		  point_in_z.SetY(dir_temp.Y()*(z-point.Z())+point.Y());
+		// 		  point_in_z.SetZ(z);
+		// 		};
 
 
-
+		auto it_2DHist = h_MomAccReco.find(MCpar.pdg);
+                if(it_2DHist == h_MomAccReco.end())
+                  {
+                    std::string namePar(PDG_particle->GetName());
+                    std::string nameParHist(namePar);
+                    std::replace(nameParHist.begin(), nameParHist.end(), '+', 'P');
+                    std::replace(nameParHist.begin(), nameParHist.end(), '-', 'N');
+                    nameParHist += "_RecoMom";
+                    double binMin = 0.;
+                    double binMax = 10.;
+                    auto it_binMinMax = ParticleBinMM.find(namePar);
+                    if(it_binMinMax != ParticleBinMM.end())
+                      {
+                        binMin = it_binMinMax->second[0];
+                        binMax = it_binMinMax->second[1];
+                      }
+		    TH2F* h_Reco = new TH2F(nameParHist.c_str(), nameParHist.c_str(), 25, binMin, binMax, 1000, 0, 0.1);
+                    h_MomAccReco.insert(std::make_pair(MCpar.pdg, h_Reco));
+                    h_Reco->Fill(MCpar.MomMass.P(), std::fabs(RecoTrack.MomMass.P() - MCpar.MomMass.P()) / MCpar.MomMass.P());
+                  }
+                else
+                  it_2DHist->second->Fill(MCpar.MomMass.P(), std::fabs(RecoTrack.MomMass.P() - MCpar.MomMass.P()) / MCpar.MomMass.P());
+              }
+        }
 
 
       
