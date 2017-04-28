@@ -1059,7 +1059,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       
 
       
-      if(daugthers.size()>1)
+      if(daugthers.size()>1 && h_InvMass != nullptr)
 	{
 	  TLorentzVector v4_mother;
 	  for(auto v4_d : daugthers)
@@ -1072,18 +1072,22 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	      int res;
 	      double dist;
 	      std::tie(res,dist,Svtx,Poca1,Poca2) = f_Svtx(std::get<0>(daugthers[0]),std::get<0>(daugthers[1]));
-
-	      h_Vtx->Fill(dist);
-	      h_RZVtx->Fill(Svtx.Perp(),Svtx.Z());
-	      h_InvMassVtx->Fill(v4_mother.M(),dist);
-	      for(auto v4_d : daugthers)
-		if(std::get<0>(v4_d).MomMass.M() > .5)
-		  {
-		    h_Vtx_X->Fill(Svtx.X()-std::get<0>(v4_d).Vtx.X());
-		    h_Vtx_Y->Fill(Svtx.Y()-std::get<0>(v4_d).Vtx.Y());
-		    h_Vtx_Z->Fill(Svtx.Z()-std::get<0>(v4_d).Vtx.Z());
-		  }
+	      if(res==1)
+		{
+		  h_Vtx->Fill(dist);
+		  h_RZVtx->Fill(Svtx.Perp(),Svtx.Z());
+		  
+		  h_InvMassVtx->Fill(v4_mother.M(),dist);
+		  for(auto v4_d : daugthers)
+		    if(std::get<0>(v4_d).MomMass.M() > .5)
+		      {
+			h_Vtx_X->Fill(Svtx.X()-std::get<0>(v4_d).Vtx.X());
+			h_Vtx_Y->Fill(Svtx.Y()-std::get<0>(v4_d).Vtx.Y());
+			h_Vtx_Z->Fill(Svtx.Z()-std::get<0>(v4_d).Vtx.Z());
+		      }
+		}
 	    }
+	  
 	  h_InvMass->Fill(v4_mother.M());
 
 	  for(auto v4_d : daugthers)
@@ -1125,14 +1129,17 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       TFile* fout = new TFile(outfile.c_str(), "RECREATE");
       fout->cd();
       h_Acceptance->Write();
-      h_InvMass->Write();
-      h_Vtx->Write();
-      h_RZVtx->Write();
-      h_InvMassVtx->Write();
-      h_InvMassBrho->Write();
-      h_Vtx_X->Write();
-      h_Vtx_Y->Write();
-      h_Vtx_Z->Write();
+      if(h_InvMass != nullptr)
+	{
+	  h_InvMass->Write();
+	  h_Vtx->Write();
+	  h_RZVtx->Write();
+	  h_InvMassVtx->Write();
+	  h_InvMassBrho->Write();
+	  h_Vtx_X->Write();
+	  h_Vtx_Y->Write();
+	  h_Vtx_Z->Write();
+	}
       auto f_DoEff = [](std::vector<TH1F*>& hist1d) -> std::vector<TH1F*> {
 
         std::vector<TH1F*> h_out(hist1d.size() - 1, nullptr);
@@ -1430,23 +1437,27 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
     }
 
   h_Acceptance->Reset();
-  h_Vtx->Reset();
-  h_RZVtx->Reset();
-  h_InvMass->Reset();
-  h_InvMassVtx->Reset();
-  h_InvMassBrho->Reset();
-  h_Vtx_X->Reset();
-  h_Vtx_Y->Reset();
-  h_Vtx_Z->Reset();
-
+  if(h_InvMass != nullptr)
+    {
+      h_Vtx->Reset();
+      h_RZVtx->Reset();
+      h_InvMass->Reset();
+      h_InvMassVtx->Reset();
+      h_InvMassBrho->Reset();
+      h_Vtx_X->Reset();
+      h_Vtx_Y->Reset();
+      h_Vtx_Z->Reset();
+    }
   h_Acceptance->Delete();
-  h_Vtx->Delete();
-  h_RZVtx->Delete();
-  h_InvMass->Delete();
-  h_InvMassVtx->Delete();
-  h_InvMassBrho->Delete();
-  h_Vtx_X->Delete();
-  h_Vtx_Y->Delete();
-  h_Vtx_Z->Delete();
-  
+  if(h_InvMass != nullptr)
+    {
+      h_Vtx->Delete();
+      h_RZVtx->Delete();
+      h_InvMass->Delete();
+      h_InvMassVtx->Delete();
+      h_InvMassBrho->Delete();
+      h_Vtx_X->Delete();
+      h_Vtx_Y->Delete();
+      h_Vtx_Z->Delete();
+    }
 }
