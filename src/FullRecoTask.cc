@@ -3,6 +3,7 @@
 #include "TBuildDetectorLayerPlaneDAF.h"
 
 
+#include "TBayesFinder.h"
 #include "TKalmanFilter_DAF.h"
 #include "CheckField.h"
 //#include "TKalmanFilter_FRS.h"
@@ -33,7 +34,9 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
   list_processMC.emplace_back(new CheckField(Attributes));
+  list_processMC.emplace_back(new TBayesFinder(Attributes));
   list_processMC.emplace_back(new TKalmanFilter_DAF(Attributes) );
+
 }
 
 
