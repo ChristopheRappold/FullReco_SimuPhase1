@@ -2,7 +2,7 @@
 
 #include "TBuildDetectorLayerPlaneDAF.h"
 
-#include "TBayesFinder.h"
+
 #include "TKalmanFilter_DAF.h"
 #include "CheckField.h"
 //#include "TKalmanFilter_FRS.h"
@@ -33,7 +33,6 @@ FullRecoTask::FullRecoTask(const std::list<std::string>& type,const std::list<st
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
   list_processMC.push_back(new CheckField(Attributes));
-  list_processMC.push_back(new TBayesFinder(Attributes) );
   list_processMC.push_back(new TKalmanFilter_DAF(Attributes) );
 }
 
