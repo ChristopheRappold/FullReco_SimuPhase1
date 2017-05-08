@@ -58,7 +58,7 @@ int main(int argc,char** argv)
       std::cout << "!> Wrong number of parameters!\n";
       std::cout << "!> Example of use:\n";
       std::cout << "!> " << argv[0];
-      std::cout << "[-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [--scaling FieldScalingFactor] [-k FieldScalingFactor] [-t EventList] [--select EventList] [-h] OutputFile RootInputFile_withParObj [RootInputFiles....] \n";
+      std::cout << "[-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-h] OutputFile RootInputFile_withParObj \n";
       std::exit(1);
     }
 
@@ -84,7 +84,7 @@ int main(int argc,char** argv)
       case 'e': std::cout<<"Nb Event "<<optarg<<std::endl; Nb_event=std::atoi(optarg); break;
       case 's': std::cout<<"Start Event "<<optarg<<std::endl; Start=std::atoi(optarg); break;
       case 'g': std::cout<<"Geometry field :"<<optarg<<std::endl; nameGeo= std::string(optarg); break;
-      case '?': std::cerr <<"usage: "<<argv[0]<<" [-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [--scaling FieldScalingFactor] [-k FieldScalingFactor] [-h]  OutputFile RootInputFile_withParObj [RootInputFiles....]"<<std::endl; std::exit(1);
+      case '?': std::cerr <<"usage: "<<argv[0]<<" [-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-h]  OutputFile RootInputFile "<<std::endl; std::exit(1);
       }
 	
   std::string name_in,name_out;
@@ -92,7 +92,7 @@ int main(int argc,char** argv)
   if(optind == argc )
     {
 		
-      std::cerr <<"usage: "<<argv[0]<<" [-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [--scaling FieldScalingFactor] [-k FieldScalingFactor] [-h]  OutputFile RootInputFile_withParObj [RootInputFiles....]"<<std::endl;
+      std::cerr <<"usage: "<<argv[0]<<" [-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-h]  OutputFile RootInputFile "<<std::endl;
       std::cerr <<" input and output Rootfile are missing !"<<optind<<" "<<argc<<std::endl;
       std::exit(1);
     }
