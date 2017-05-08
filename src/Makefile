@@ -60,7 +60,7 @@ Sources = MainSimu.cc FullRecoEvent.cc Ana_Hist.cc
 Headers = $(patsubst %.cc,%.hh,$(Sources))
 Objects = $(patsubst %.cc,%.o,$(Sources))
 
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBayesFinder.cc CheckField.cc
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc CheckField.cc #TBayesFinder.cc 
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
