@@ -44,6 +44,7 @@ struct ParticleD
 {
   TLorentzVector MomMass;
   TLorentzVector Vtx;
+  int pdg;
 };
 
 
@@ -61,7 +62,6 @@ class Timer
   typedef std::chrono::duration<double, std::ratio<1> > second_;
   std::chrono::time_point<clock_> beg_;
 };
-
 void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), const std::string& nameList = "./rMinBias_r1.0.root",
            const std::string& outfile = "")
 {
@@ -419,6 +419,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   TH1F* h_Vtx_Z = new TH1F("Res_Zvtx","Res_Zvtx",1000,-1,1);
 
   TH1F* h_InvMass = nullptr;
+  std::unordered_map<int,TH1F*> h_InvMassMix;
   TH2F* h_InvMassVtx = nullptr;
   TH2F* h_InvMassBrho = nullptr;
   
@@ -431,7 +432,6 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	  h_InvMass = new TH1F("InvMass","InvMass",1000,it_binInv.second[0],it_binInv.second[1]);
 	  h_InvMassVtx = new TH2F("InvMassVtx","InvMassVtx",1000,it_binInv.second[0],it_binInv.second[1],200,0,1);
 	  h_InvMassBrho = new TH2F("InvMassBrho","InvMassBrho",1000,it_binInv.second[0],it_binInv.second[1],200,10,20);
-      
 	  for(size_t i=0; i<20; ++i)
 	    {
 	      TString nameTemp("InvMassBrho_MoreMulti_");
@@ -440,6 +440,12 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	    }
 	}
     }
+  h_InvMassMix.insert(std::make_pair(10003,new TH1F("h_InvMassMix_H3L","h_InvMassMix_H3L",1000, binInvMass["H3L"][0], binInvMass["H3L"][1])));
+  h_InvMassMix.insert(std::make_pair(10002,new TH1F("h_InvMassMix_H4L","h_InvMassMix_H4L",1000, binInvMass["H4L"][0], binInvMass["H4L"][1])));
+  h_InvMassMix.insert(std::make_pair(10000,new TH1F("h_InvMassMix_nnL","h_InvMassMix_nnL",1000, binInvMass["nnL"][0], binInvMass["nnL"][1])));
+  h_InvMassMix.insert(std::make_pair(2112,new TH1F("h_InvMassMix_Lambda","h_InvMassMix_Lambda",1000, binInvMass["Lambda"][0], binInvMass["Lambda"][1])));
+
+  
   std::unordered_map<int, std::vector<TH1F*> > h_MomAcc;
   std::unordered_map<int, std::vector<TH1F*> > h_MomAccDecay;
   std::unordered_map<int, std::vector<TH1F*> > h_MomAccDecayCoinFRS;
@@ -551,6 +557,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       
       std::vector<DataTreeMC> TempData(event->Nmc);
       std::vector<std::tuple<ParticleD,double> > daugthers;
+      std::vector<std::tuple<ParticleD,double> > fake_daugthers;
       int pdg_frag = -1;
       for(Int_t id = 0; id < event->fMC_Particle->GetEntries(); ++id)
         {
@@ -589,7 +596,19 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 		  ParticleD d_frag;
 		  d_frag.MomMass = MCpar.MomMass;
 		  d_frag.Vtx = MCpar.Vtx;
+		  d_frag.pdg = pdg_frag;
 		  daugthers.emplace_back(std::make_tuple(d_frag,MCpar.Charge));
+		}
+	    }
+	  else
+	    {
+	      if(MCpar.Pdg >= 2000)
+		{
+		  ParticleD d_frag;
+		  d_frag.MomMass = MCpar.MomMass;
+		  d_frag.Vtx = MCpar.Vtx;
+		  d_frag.pdg = MCpar.Pdg;
+		  fake_daugthers.emplace_back(std::make_tuple(d_frag,MCpar.Charge));
 		}
 	    }
 	}
@@ -953,6 +972,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 		    //TLorentzVector p4;
 		    d_pi.MomMass.SetXYZM(RecoTrack.MomMass.Px(),RecoTrack.MomMass.Py(),RecoTrack.MomMass.Pz(),PDG_particle->Mass());
 		    d_pi.Vtx.SetXYZT(RecoTrack.RefPoint.X(),RecoTrack.RefPoint.Y(),RecoTrack.RefPoint.Z(),0.);
+		    d_pi.pdg = MCpar.pdg;
 		    daugthers.emplace_back(std::make_tuple(d_pi,PDG_particle->Charge()/3.));
 		  }
                 // if(RecoTrack.Pval2 < 0.000000001)
@@ -1061,9 +1081,17 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       
       if(daugthers.size()>1 && h_InvMass != nullptr)
 	{
-	  TLorentzVector v4_mother;
+	  TLorentzVector v4_mother, v4_piN;
+	  bool have_pi = false;
 	  for(auto v4_d : daugthers)
-	    v4_mother += std::get<0>(v4_d).MomMass;
+	    {
+	      v4_mother += std::get<0>(v4_d).MomMass;
+	      if(std::get<1>(v4_d)<0.)
+		{
+		  have_pi = true;
+		  v4_piN = std::get<0>(v4_d).MomMass;
+		}
+	    }
 	  //v4_mother+=d_frag;
 	  
 	  if(daugthers.size()==2)
@@ -1094,6 +1122,20 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	    if(std::get<0>(v4_d).MomMass.M() > .5)
 	      h_InvMassBrho->Fill(v4_mother.M(),3.10715497 * std::get<0>(v4_d).MomMass.P() / std::get<1>(v4_d));
 	  //h_InvMassBrho->Fill(v4_mother.M(),3.10715497 * d_frag.P() / 2.);
+
+	  if(fake_daugthers.size()>0 && have_pi==true)
+	    {
+	      for(auto v4_fake : fake_daugthers)
+		{
+		  TLorentzVector v4_m = v4_piN;
+		  v4_m += std::get<0>(v4_fake).MomMass;
+		  auto it_hist = h_InvMassMix.find(std::get<0>(v4_fake).pdg);
+		  if(it_hist != h_InvMassMix.end())
+		    it_hist->second->Fill(v4_m.M());
+		  else
+		    std::cout<<"!> fake inv mass pdg not found !"<<std::get<0>(v4_fake).pdg<<std::endl;
+		}
+	    }	     
 	}
       
       // cout<<"\n";
@@ -1139,6 +1181,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	  h_Vtx_X->Write();
 	  h_Vtx_Y->Write();
 	  h_Vtx_Z->Write();
+	  for(auto it_hist : h_InvMassMix)
+	    it_hist.second->Write();
 	}
       auto f_DoEff = [](std::vector<TH1F*>& hist1d) -> std::vector<TH1F*> {
 
@@ -1447,6 +1491,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       h_Vtx_X->Reset();
       h_Vtx_Y->Reset();
       h_Vtx_Z->Reset();
+      for(auto& it : h_InvMassMix)
+	it.second->Reset();
     }
   h_Acceptance->Delete();
   if(h_InvMass != nullptr)
