@@ -1195,6 +1195,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	  h_Vtx_Z->Write();
 	  for(auto it_hist : h_InvMassMix)
 	    it_hist.second->Write();
+	  for(auto it_hist : h_InvMassBrhoMix)
+	    it_hist.second->Write();
 	}
       auto f_DoEff = [](std::vector<TH1F*>& hist1d) -> std::vector<TH1F*> {
 
