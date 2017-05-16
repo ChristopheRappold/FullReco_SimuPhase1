@@ -422,6 +422,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 
   TH1F* h_InvMass = nullptr;
   std::unordered_map<int,TH1F*> h_InvMassMix;
+  std::unordered_map<int,TH2F*> h_InvMassBrhoMix;
   TH2F* h_InvMassVtx = nullptr;
   TH2F* h_InvMassBrho = nullptr;
   
@@ -445,7 +446,12 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   h_InvMassMix.insert(std::make_pair(10003,new TH1F("h_InvMassMix_H3L","h_InvMassMix_H3L",1000, binInvMass["H3L"][0], binInvMass["H3L"][1])));
   h_InvMassMix.insert(std::make_pair(10002,new TH1F("h_InvMassMix_H4L","h_InvMassMix_H4L",1000, binInvMass["H4L"][0], binInvMass["H4L"][1])));
   h_InvMassMix.insert(std::make_pair(10000,new TH1F("h_InvMassMix_nnL","h_InvMassMix_nnL",1000, binInvMass["nnL"][0], binInvMass["nnL"][1])));
-  h_InvMassMix.insert(std::make_pair(2112,new TH1F("h_InvMassMix_Lambda","h_InvMassMix_Lambda",1000, binInvMass["Lambda"][0], binInvMass["Lambda"][1])));
+  h_InvMassMix.insert(std::make_pair(2212,new TH1F("h_InvMassMix_Lambda","h_InvMassMix_Lambda",1000, binInvMass["Lambda"][0], binInvMass["Lambda"][1])));
+
+  h_InvMassBrhoMix.insert(std::make_pair(10003,new TH2F("h_InvMassBrhoMix_H3L","h_InvMassBrhoMix_H3L",1000, binInvMass["H3L"][0], binInvMass["H3L"][1],200,10,20)));
+  h_InvMassBrhoMix.insert(std::make_pair(10002,new TH2F("h_InvMassBrhoMix_H4L","h_InvMassBrhoMix_H4L",1000, binInvMass["H4L"][0], binInvMass["H4L"][1],200,10,20)));
+  h_InvMassBrhoMix.insert(std::make_pair(10000,new TH2F("h_InvMassBrhoMix_nnL","h_InvMassBrhoMix_nnL",1000, binInvMass["nnL"][0], binInvMass["nnL"][1],200,10,20)));
+  h_InvMassBrhoMix.insert(std::make_pair(2212,new TH2F("h_InvMassBrhoMix_Lambda","h_InvMassBrhoMix_Lambda",1000, binInvMass["Lambda"][0], binInvMass["Lambda"][1],200,10,20)));
 
   
   std::unordered_map<int, std::vector<TH1F*> > h_MomAcc;
@@ -1134,8 +1140,12 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 		  auto it_hist = h_InvMassMix.find(std::get<0>(v4_fake).pdg);
 		  if(it_hist != h_InvMassMix.end())
 		    it_hist->second->Fill(v4_m.M());
-		  else
-		    std::cout<<"!> fake inv mass pdg not found !"<<std::get<0>(v4_fake).pdg<<std::endl;
+
+		  auto it_hist_brho = h_InvMassBrhoMix.find(std::get<0>(v4_fake).pdg);
+		  if(it_hist_brho != h_InvMassBrhoMix.end())
+		    it_hist_brho->second->Fill(v4_m.M(),3.10715497 * std::get<0>(v4_fake).MomMass.P() / std::get<1>(v4_fake));
+		  //else
+		  //  std::cout<<"!> fake inv mass pdg not found !"<<std::get<0>(v4_fake).pdg<<std::endl;
 		}
 	    }	     
 	}
@@ -1494,6 +1504,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       h_Vtx_Y->Reset();
       h_Vtx_Z->Reset();
       for(auto& it : h_InvMassMix)
+	it.second->Reset();
+      for(auto& it : h_InvMassBrhoMix)
 	it.second->Reset();
     }
   h_Acceptance->Delete();
