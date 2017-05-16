@@ -78,7 +78,9 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 			  for(auto temp: *array)
 			    {
 			      TParticlePDG* temp1 = dynamic_cast<TParticlePDG*>(temp);
-			      TDatabasePDG::Instance()->AddParticle(temp1->GetName(),temp1->GetTitle(), temp1->Mass(), temp1->Stable(), temp1->Width(), temp1->Charge(), temp1->ParticleClass(), temp1->PdgCode());
+			      TParticlePDG* old = TDatabasePDG::Instance()->GetParticle(temp1->PdgCode());
+			      if(old == nullptr)
+				TDatabasePDG::Instance()->AddParticle(temp1->GetName(),temp1->GetTitle(), temp1->Mass(), temp1->Stable(), temp1->Width(), temp1->Charge(), temp1->ParticleClass(), temp1->PdgCode());
 			    }
 			};
 
