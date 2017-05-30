@@ -2,7 +2,7 @@
 
 The full reconstruction code for Geant4 simulations of the solenoid-type experiment at FRS.
 
-The code consists in the framework developped by the HypHI collaboration for the two first
+The code consists in the framework developed by the HypHI collaboration for the two first
 HypHI experiments (phase0 & phase0.5). It is responsible for the track and event
 reconstruction of simulated and experimental data. It uses the external library, Genfit,
 for the Kalman Filter. It is written in C++14.
@@ -44,7 +44,7 @@ lib/
 input/
 field/
 
-The following directories are mendatory : geo/, src/, src/.deps and lib/. 
+The following directories are mandatory : geo/, src/, src/.deps and lib/. 
 If lib or .deps is missing just:
 ```sh
 mkdir lib
