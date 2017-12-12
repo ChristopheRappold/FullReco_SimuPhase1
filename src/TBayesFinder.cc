@@ -21,7 +21,7 @@ using namespace std;
 using namespace G4Sol;
 
 
-TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterface("bayes_finder"),att(attribut)
+TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterface("bayes_finder"),att(attribut),ME( 17, std::vector<TGeoNodeMatrix*>()),LayerGeo(17, std::vector<DataLayer>())
 {
   
   for(auto it : *gGeoManager->GetListOfVolumes() )
@@ -37,6 +37,105 @@ TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterfa
 	}
     }
 
+
+
+
+  auto N00 = gGeoManager->GetListOfNodes();
+  TGeoNodeMatrix* WASA_1 = (TGeoNodeMatrix*)N00->At(0);
+  TString nameWASA = WASA_1->GetName();
+  if(nameWASA.Contains("WASA"))
+    {
+      std::cout<<"WASA:\n";
+      WASA_1->GetMatrix()->Print();
+      auto N01 = WASA_1->GetNodes();
+
+      TGeoNodeMatrix* MFLD_1 = (TGeoNodeMatrix*)N01->At(0);
+      std::cout<<"MFLD:\n";
+      MFLD_1->GetMatrix()->Print();
+  
+      auto N02 = MFLD_1->GetNodes();
+
+      //N02->Print();
+      TGeoNodeMatrix* INNER_1 = (TGeoNodeMatrix*)N02->At(0);
+      std::cout<<"INNER:\n";
+      INNER_1->GetMatrix()->Print();
+
+      TGeoHMatrix ToMaster = (*INNER_1->GetMatrix())*(*MFLD_1->GetMatrix());
+      std::cout<<"ToINNER:\n:";
+      ToMaster.Print();
+  
+      auto N03 = INNER_1->GetNodes();
+      //N03->Print();
+
+      TGeoNodeMatrix* MD[17]; 
+      unsigned int Nsize[17];
+      std::vector<TGeoHMatrix> MatMD;
+      for(int i=0;i<17;++i)
+	{
+	  MD[i] = nullptr;
+	  MD[i] = (TGeoNodeMatrix*)N03->At(1+i);
+	  Nsize[i] = MD[i]->GetNodes()->GetEntries()-2;
+
+	  std::cout<<i<<"MD \n";
+	  MD[i]->GetMatrix()->Print();
+      
+	  MatMD.emplace_back((*MD[i]->GetMatrix())*(ToMaster));
+
+	  MatMD.back().Print();
+	}
+
+      std::vector< std::vector<TGeoNodeMatrix*> > ME( 17, std::vector<TGeoNodeMatrix*>());
+      std::vector< std::vector< DataLayer > LayerGeo(17, std::vector<DataLayer>());
+  
+      for( auto i = 0 ; i < ME.size(); ++i)
+	{
+	  ME[i] = std::vector<TGeoNodeMatrix*>(Nsize[i],nullptr);
+	  auto N04 = MD[i]->GetNodes();
+	  for( auto j = 0; j<Nsize[i]; ++j)
+	    {
+	      ME[i][j] = (TGeoNodeMatrix*)N04->At(j);
+
+	      auto TempTube = dynamic_cast<TGeoTube*>(ME[i][j]->GetVolume()->GetShape());
+
+	      Double_t TempCenter[3] = {0.,0.,0.}; 
+	      Double_t TempMinC[3] = {0.,0.,-TempTube->GetDz()};
+	      Double_t TempMaxC[3] = {0.,0.,TempTube->GetDz()};
+
+	      Double_t CenterInMaster[3] = {0.,0.,0.};
+	      Double_t MinInMaster[3] = {0.,0.,0.};
+	      Double_t MaxInMaster[3] = {0.,0.,0.};
+	      ME[i][j]->LocalToMaster(TempCenter, CenterInMaster);
+	      ME[i][j]->LocalToMaster(TempMinC, MinInMaster);
+	      ME[i][j]->LocalToMaster(TempMaxC, MaxInMaster);
+
+	      Double_t CenterInLab[3] = {0.,0.,0.};
+	      Double_t MinInLab[3] = {0.,0.,0.};
+	      Double_t MaxInLab[3] = {0.,0.,0.};
+
+	      MatMD[i].LocalToMaster(CenterInMaster, CenterInLab);
+	      MatMD[i].LocalToMaster(MinInMaster, MinInLab);
+	      MatMD[i].LocalToMaster(MaxInMaster, MaxInLab);
+	  
+	      DataLayer tempDimData;
+
+	      tempDimData.cenX[0] = CenterInLab[0];
+	      tempDimData.cenY[0] = CenterInLab[1];
+	      tempDimData.cenZ[0] = CenterInLab[2];
+
+	      tempDimData.minX[0] = MinInLab[0];
+	      tempDimData.minY[0] = MinInLab[1];
+	      tempDimData.minZ[0] = MinInLab[2];
+
+	      tempDimData.maxX[0] = MaxInLab[0];
+	      tempDimData.maxY[0] = MaxInLab[1];
+	      tempDimData.maxZ[0] = MaxInLab[2];
+
+	      LayerGeo[i][j].emplace_back(tempDimData);
+	    }
+	}
+    }
+    
+  
 }
 
 TBayesFinder::~TBayesFinder()
