@@ -601,7 +601,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
               TH1F* hAngleAll3 = f_createAccHist(h_AngleAccDecayCoinFRS, ParticleBinAA, MCpar.Pdg, "DecayCoinFRS_Theta");
               hAngleAll3->Fill(MCpar.MomMass.Theta() * TMath::RadToDeg());
 
-	      if(MCpar.Pdg >= 2000)
+	      if(MCpar.Pdg >= 2000 && MCpar.Charge!=0)
 		{
 		  pdg_frag =  MCpar.Pdg;
 		  ParticleD d_frag;
@@ -613,7 +613,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	    }
 	  else
 	    {
-	      if(MCpar.Pdg >= 2000)
+	      if(MCpar.Pdg >= 2000 && MCpar.Charge !=0)
 		{
 		  ParticleD d_frag;
 		  d_frag.MomMass = MCpar.MomMass;
@@ -622,8 +622,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 		  fake_daugthers.emplace_back(std::make_tuple(d_frag,MCpar.Charge));
 		}
 	    }
-	}
-
+	}      
+   
       std::unordered_map<int, int> idDet;
       bool DaughterFragInFRS = false; 
       for(Int_t id = 0; id < event->FMF2->GetEntries(); ++id)
@@ -986,6 +986,7 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 		    d_pi.pdg = MCpar.pdg;
 		    daugthers.emplace_back(std::make_tuple(d_pi,PDG_particle->Charge()/3.));
 		  }
+
                 // if(RecoTrack.Pval2 < 0.000000001)
                 //   continue;
 
@@ -1089,7 +1090,6 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 		    };
       
 
-      
       if(daugthers.size()>1 && h_InvMass != nullptr)
 	{
 	  TLorentzVector v4_mother;
@@ -1163,8 +1163,6 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 		}
 	    }	     
 	}
-      
-      // cout<<"\n";
     }
 
   if(outfile.empty())
