@@ -297,7 +297,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 	  AnaHisto->h_stats->Fill("Less3Mes",1);
           continue;
         }
-      if(n_Central<12)
+      if(n_Central<9)
 	{
 	  AnaHisto->h_stats->Fill("Less3MesCentral",1);
 	  continue;
