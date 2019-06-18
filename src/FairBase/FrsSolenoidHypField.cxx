@@ -259,7 +259,8 @@ void FrsSolenoidHypField::SetPositionFromGeoManager(const TString& name_node)
     MagneticField->LocalToMaster(lloc,lmaster);
   else
     {
-      TGeoHMatrix h = (*tempMatrix)*(*MagneticField);
+      TGeoHMatrix M1(*MagneticField), T1(*tempMatrix);
+      TGeoHMatrix h = T1*M1;
       h.LocalToMaster(lloc,lmaster);
     }
 
