@@ -31,9 +31,9 @@ LIBS          = -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
 LDFLAGS       = -O
 SOFLAGS       = -shared
 
-CXX = clang++-4.0 #g++
-CC =  clang-4.0 #gcc
-LD = clang++-4.0 #g++
+CXX = g++
+CC =  gcc
+LD = g++
 
 
 ROOTCFLAGS   := $(shell root-config --cflags)
