@@ -169,6 +169,8 @@ int THyphiAttributes::Init_Para()
   Target_Size = sizeTarget->second;
   auto fieldV = InputPar.simParameters->find("Field_CDS_Bz");
   Field_Strength = fieldV->second;
+  auto WasaS = InputPar.simParameters->find("Wasa_Side");
+  Wasa_Side = WasaS->second;
 
   TObjArray* L_vol = gGeoManager->GetListOfVolumes();
   int n_volume = L_vol->GetEntries();

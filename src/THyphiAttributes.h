@@ -39,6 +39,8 @@ class THyphiAttributes
   double Target_Size;
   double Field_Strength;
 
+  int Wasa_Side;
+
   std::vector<std::string> name_GeoVolumes;
 
   bool beam_only;
