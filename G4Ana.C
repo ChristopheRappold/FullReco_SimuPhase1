@@ -286,6 +286,56 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       }
   };
 
+  // auto plotingTRFinal = [&ParticleList](std::unordered_map<std::string, std::vector<TH2F*> >& h_TRFinalHit, const std::string& name) {
+  //   for(auto it_hist : h_TRFinalHit)
+  //     {
+  //       std::string nameC(name);
+  // 	std::cout<<"name TR FinalHit key:"<<it_hist.first<<"\n";
+  //       // int pdg_code = std::stoi(it_hist.first, nullptr);
+  //       auto it_posPDG = it_hist.first.find_first_of("-1234567890");
+  //       std::string nameDet = it_hist.first.substr(0, it_posPDG);
+
+  //       std::string namePDG = it_hist.first.substr(it_posPDG, std::string::npos);
+  //       int pdg_code = std::stoi(namePDG);
+
+  // 	auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
+
+  // 	std::string namePar(PDG_particle->GetName());
+  //       if(ParticleList.size() > 0)
+  //         {
+  //           auto it_findPar = ParticleList.find(namePar);
+  //           if(it_findPar == ParticleList.end())
+  //             continue;
+  //         }
+		
+  // 	std::replace(namePar.begin(), namePar.end(), '+', 'P');
+  //       std::replace(namePar.begin(), namePar.end(), '-', 'N');
+
+  // 	nameC += nameDet;
+  //       nameC += namePar;
+  // 	auto it_multi = it_hist.first.find("Multiplicity");
+  // 	if(it_multi!=std::string::npos)
+  // 	  nameC += "Multiplicity";
+  // 	auto it_decay = it_hist.first.find("Decay");
+  // 	if(it_decay!=std::string::npos)
+  // 	  nameC += "Decay";
+  // 	auto it_frs = it_hist.first.find("CoinFRS");
+  // 	if(it_frs != std::string::npos)
+  // 	  nameC += "CoinFRS";
+	
+  // 	TCanvas* c = new TCanvas(nameC.c_str(), nameC.c_str(), 600, 600);
+  //       c->Divide(2, 2);
+  //       for(size_t id = 0; id < it_hist.second.size(); ++id)
+  //         {
+  //           c->cd(1 + id);
+  //           it_hist.second[id]->DrawNormalized("colz");
+  //         }
+  //       c->Draw();
+  //     }
+  // };
+
+
+  
   // TFile* f = new TFile(nameList.c_str());
   TChain* Chain = new TChain("T");
   std::cout << "Files :" << nameList << std::endl;
@@ -467,6 +517,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 
   std::unordered_map<std::string, std::vector<TH2F*> > h_FinalHit_CDC;
 
+  std::unordered_map<std::string, std::vector<TH2F*> > h_FinalHit_TR;
+
   std::unordered_map<int, TH2F*> h_MomAccReco;
   std::unordered_map<int, std::vector<TH2F*> > h_MomAccReco_multi;
 
@@ -552,6 +604,31 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       }
   };
 
+  auto f_createTRFinal = [](std::unordered_map<std::string, std::vector<TH2F*> >& h_TRFinal,
+                             const std::string& nameH) -> std::vector<TH2F*>& {
+    auto it_TRFinal = h_TRFinal.find(nameH);
+    if(it_TRFinal == h_TRFinal.end())
+      {
+        std::string nameHist = nameH;
+        std::string tempNameHist = nameH + "_TR1_XY";
+        std::vector<TH2F*> h_vecH(2, nullptr);
+
+        h_vecH[0] = new TH2F(tempNameHist.c_str(), tempNameHist.c_str(), 200, -20, 20, 200, -20, 20);
+        tempNameHist = nameH + "_TR2_XY";
+        h_vecH[1] = new TH2F(tempNameHist.c_str(), tempNameHist.c_str(), 200, -20, 20, 200, -20, 20);
+
+        auto it_ret = h_TRFinal.insert(std::make_pair(nameHist, h_vecH));
+
+        return it_ret.first->second;
+      }
+    else
+      {
+        return it_TRFinal->second;
+      }
+  };
+
+
+  
   const auto Entries = Chain->GetEntries();
   std::cout << " Entries :" << Entries << std::endl;
   int timing = 0;
@@ -965,6 +1042,54 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
                   }
               }
         }
+
+
+      for(Int_t id = 0; id < event->TR->GetEntries(); ++id)
+        {
+          const TMcHit& MChit = *(dynamic_cast<TMcHit*>(event->TR->At(id)));
+          int TrackID = MChit.MC_id;
+          for(auto MCpar : TempData)
+            if(TrackID == MCpar.MC_id)
+              {
+                auto PDG_particle = TDatabasePDG::Instance()->GetParticle(MChit.Pdg);
+                auto it_trackMulti = TrackMulti.find(TrackID);
+                if(it_trackMulti == TrackMulti.end())
+                  std::cout << "!> trackMulti : unfound trackID :" << TrackID << "\n";
+
+                for(auto finalHit_Det : MCpar.FinalHit)
+                  {
+                    std::string nameHist = finalHit_Det.first;
+                    nameHist += std::to_string(MChit.Pdg);
+
+		    auto it_FinalHit_TR = f_createTRFinal(h_FinalHit_TR, nameHist);
+		    if(MChit.LayerID==4)
+		      it_FinalHit_TR[0]->Fill(MChit.MCHit.X(), MChit.MCHit.Y());
+		    if(MChit.LayerID==5)
+		      it_FinalHit_TR[1]->Fill(MChit.MCHit.X(), MChit.MCHit.Y());
+		    
+		    if(MCpar.Mother_id >= 0)
+                      {
+                        nameHist += "_Decay";
+			auto it_FinalHit_TR = f_createTRFinal(h_FinalHit_TR, nameHist);
+			if(MChit.LayerID==4)
+			  it_FinalHit_TR[0]->Fill(MChit.MCHit.X(), MChit.MCHit.Y());
+			if(MChit.LayerID==5)
+			  it_FinalHit_TR[1]->Fill(MChit.MCHit.X(), MChit.MCHit.Y());
+			
+			if(DaughterFragInFRS)
+			  {
+			    nameHist += "_DecayCoinFRS";
+			    auto it_FinalHit_TR = f_createTRFinal(h_FinalHit_TR, nameHist);
+			    if(MChit.LayerID==4)
+			      it_FinalHit_TR[0]->Fill(MChit.MCHit.X(), MChit.MCHit.Y());
+			    if(MChit.LayerID==5)
+			      it_FinalHit_TR[1]->Fill(MChit.MCHit.X(), MChit.MCHit.Y());
+			  }
+			
+                      }
+		  }
+	      }
+	}
       
       for(Int_t id = 0; id < event->fTrack->GetEntries(); ++id)
         {
@@ -1182,6 +1307,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
       plotingArray(h_MomAccReco, "c1_Reco", "candle");
 
       //plotingCDCFinal(h_FinalHit_CDC, "c2_");
+
+      plotingCDCFinal(h_FinalHit_TR, "c3_");
 
       TCanvas* c_Inv = new TCanvas("c_Inv","c_Inv",1000,500); 
       c_Inv->Divide(2,1);
@@ -1431,11 +1558,47 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
 	    {
 	      it_hist.second[id]->Write();
 	    }
-	      
-	  
-	
-
 	}      
+
+      for(auto it_hist : h_FinalHit_TR)
+	{
+
+	  auto it_posPDG = it_hist.first.find_first_of("-1234567890");
+	  std::string nameDet = it_hist.first.substr(0, it_posPDG);
+	      
+	  std::string namePDG = it_hist.first.substr(it_posPDG, std::string::npos);
+	  int pdg_code = std::stoi(namePDG);
+	  auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
+	      
+	  std::string namePar(PDG_particle->GetName());
+
+	  // std::replace(namePar.begin(), namePar.end(), '+', 'P');
+	  // std::replace(namePar.begin(), namePar.end(), '-', 'N');
+
+	  auto getDir = [](TFile* out_file, const std::string& name_dir) {
+			  if(!out_file->GetDirectory(name_dir.c_str()))
+			    return out_file->mkdir(name_dir.c_str());
+			  else
+			    return out_file->GetDirectory(name_dir.c_str());
+			};
+	  std::string nameDir (namePar);
+	      
+	  auto it_decay = it_hist.first.find("Decay");
+	  if(it_decay!=std::string::npos)
+	    nameDir += "Decay";
+	  auto it_frs = it_hist.first.find("CoinFRS");
+	  if(it_frs != std::string::npos)
+	    nameDir += "CoinFRS";
+
+	  TDirectory* dirTemp = getDir(fout,nameDir);
+	  dirTemp->cd();
+	  for(size_t id = 0; id < it_hist.second.size(); ++id)
+	    {
+	      it_hist.second[id]->Write();
+	    }
+	}      
+
+
       
       fout->Close();
       // auto writeToFile = [&fout,&nameParticle](std::unordered_map<int,TH2F*>& h2, const std::string& nameDir)
@@ -1498,6 +1661,8 @@ void G4Ana(const std::set<std::string>& ParticleList = std::set<std::string>(), 
   f_delete_map(h_RapidityAcc);
 
   f_delete_map(h_FinalHit_CDC);
+  f_delete_map(h_FinalHit_TR);
+
   for(auto it : h_MomAccReco)
     {
       it.second->Reset();
