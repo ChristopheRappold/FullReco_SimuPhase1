@@ -331,7 +331,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
       };
 
-      G4Sol::SolDet lastValidHit = f_LastHitIsValid(it_ListHits, {G4Sol::PSCE, G4Sol::PSFE, G4Sol::RPC_l, G4Sol::RPC_h});
+      G4Sol::SolDet LastFrontWall = att.Wasa_Side == 0 ? G4Sol::PSFE : G4Sol::PSBE ;
+      G4Sol::SolDet lastValidHit = f_LastHitIsValid(it_ListHits, {G4Sol::PSCE, LastFrontWall, G4Sol::RPC_l, G4Sol::RPC_h});
 
       if(lastValidHit == G4Sol::SIZEOF_G4SOLDETTYPE)
         {
