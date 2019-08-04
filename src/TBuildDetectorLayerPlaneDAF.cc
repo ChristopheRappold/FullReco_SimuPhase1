@@ -562,7 +562,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       for(size_t i = 0; i < s1.size(); ++i)
 	{
 	  std::cout << "idDet:" << s1[i].str() << "\n";
-	  std::cout << "stat :" << s2[i].str() << "\n";
+	  std::cout << "stat :" << s3[i].str() << "\n";
 	}
 
       std::cout << "] " << std::endl;
@@ -584,7 +584,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       for(size_t i = 0; i < s1.size(); ++i)
 	{
 	  std::cout << "idDet:" << s1[i].str() << "\n";
-	  std::cout << "stat :" << s2[i].str() << "\n";
+	  std::cout << "stat :" << s3[i].str() << "\n";
 	}
 
       std::cout << "] " << std::endl;
