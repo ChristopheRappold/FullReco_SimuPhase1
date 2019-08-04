@@ -39,6 +39,8 @@ class Ana_Hist
   std::vector<bool> EnableState;
 
   TH1I* h_stats;
+  TH2I* h_statsLess3Mes;
+  TH2I* h_statsInvalid;
   TH1I* h_task_exit;
   //Field
   TH2F* FieldXY[3];

@@ -37,9 +37,11 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
   HaveBeenWritten = false;
 
   h_stats = new TH1I("stats", "stats", 20, 0, 20);
+  h_statsLess3Mes = new TH2I("statsLess3", "statsLess3", 40, 0, 40,40,0,40);
+  h_statsInvalid = new TH2I("statsInvalid", "statsInvalid", 40, 0, 40,40,0,40);
   h_task_exit = new TH1I("h_task_exit", "h_task_exit", 20, 0, 20);
 
-  HistRegisteredByDir.insert(std::make_pair("stat", std::make_tuple(std::vector<TH1*>({h_stats, h_task_exit}),0)));
+  HistRegisteredByDir.insert(std::make_pair("stat", std::make_tuple(std::vector<TH1*>({h_stats, h_task_exit, h_statsLess3Mes, h_statsInvalid}),0)));
 
   std::vector<std::string> name_field = {"Bx","By","Bz"};
   std::vector<TH1*> h_fields;

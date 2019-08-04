@@ -295,11 +295,30 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           std::cout << "!> less than 3 measurements: " << id_dets.size() << "\n";
 #endif
 	  AnaHisto->h_stats->Fill("Less3Mes",1);
+	  int idPDG = 0;
+          for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+	    if(it_trackInfo.second[i].pdg!=idPDG)
+	      {
+		idPDG = it_trackInfo.second[i].pdg;
+		break;
+	      }
+	  std::string namePDG = std::to_string(idPDG);
+	  AnaHisto->h_statsLess3Mes->Fill(namePDG.c_str(),"Less3Mes",1.);
+	  
           continue;
         }
       if(n_Central<9)
 	{
 	  AnaHisto->h_stats->Fill("Less3MesCentral",1);
+	  int idPDG = 0;
+          for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+	    if(it_trackInfo.second[i].pdg!=idPDG)
+	      {
+		idPDG = it_trackInfo.second[i].pdg;
+		break;
+	      }
+	  std::string namePDG = std::to_string(idPDG);
+	  AnaHisto->h_statsLess3Mes->Fill(namePDG.c_str(),"Less3MesCentral",1.);
 	  continue;
 	}
       auto f_LastHitIsValid = [](const auto& it_ListHits, std::set<G4Sol::SolDet> listToTest) {
@@ -316,6 +335,14 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
       if(lastValidHit == G4Sol::SIZEOF_G4SOLDETTYPE)
         {
+	  int idPDG = 0;
+          for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+	    if(it_trackInfo.second[i].pdg!=idPDG)
+	      {
+		idPDG = it_trackInfo.second[i].pdg;
+		break;
+	      }
+	  
 #ifdef DEBUG_KALMAN
           std::cout << "!> LastValidHit not found !\n";
           std::vector<std::stringstream> s1(it_trackInfo.second.size() / 20 + 1);
@@ -335,7 +362,16 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             }
 #endif
 	  AnaHisto->h_stats->Fill("NoValidLastHit",1.);
-          continue;
+
+	  std::string namePDG = std::to_string(idPDG);
+	  for(auto it_det = it_ListHits->second.crbegin(), it_det_end = it_ListHits->second.crend(); it_det != it_det_end ; ++it_det)
+	    if(*it_det>=0)
+	      {
+		int id_det_inv = it_ListHits->second.size()-1-std::distance(it_ListHits->second.crbegin(), it_det);
+		AnaHisto->h_statsInvalid->Fill(namePDG.c_str(),G4Sol::nameLiteralDet.begin()[id_det_inv],1.);
+		break;
+	      }
+	  continue;
         }
 
       
