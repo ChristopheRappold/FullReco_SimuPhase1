@@ -17,7 +17,7 @@ MainFullReco
 MainInvMass
 *gz
 *debug
-*log*
+./log*
 src/Genfit2_v1/build
 src/Genfit2_v1/build1
 src/Genfit2_v1/doc/html
