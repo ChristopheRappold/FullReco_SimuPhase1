@@ -1,3 +1,6 @@
 [submodule "src/Genfit2_v2"]
 	path = src/Genfit2_v2
 	url = https://github.com/ChristopheRappold/GenFit
+[submodule "src/spdlog"]
+	path = src/spdlog
+	url = https://github.com/gabime/spdlog.git
