@@ -22,6 +22,9 @@
 #include "TGeoManager.h"
 #include "TGeoElement.h"
 
+#include <sstream>
+
+#include "spdlog/spdlog.h"
 
 //#include "TClustering.h"
 #ifdef ROOT6
@@ -44,10 +47,11 @@ public:
   {  }
   ~PDG_fromName()
   {
-    std::cout<<"PDG_fromName cache \n";
+    std::stringstream ss;
+    ss<<"PDG_fromName cache \n";
     for(auto it : cache_NucleiPID)
-      std::cout<<"["<<it.first<<", "<<it.second<<"] ";
-    std::cout<<"\n";
+      ss<<"["<<it.first<<", "<<it.second<<"] ";
+    spdlog::get("Console")->info(ss.str());
   }
   
   int operator() (const std::string& name)
@@ -122,7 +126,7 @@ public:
     double Dmass = 0.;
     if(TempElement==nullptr)
       {
-	std::cout<<"E> no element ! "<<AtomMass<<" "<<id_Elem<<" "<<TempElement<<"\n";
+	spdlog::get("some_logger")->info("E> no element ! {} {} {}", AtomMass, id_Elem, fmt::ptr(TempElement));
 	if(AtomMass==23 && id_Elem==14)
 	  Dmass = 23.073*1e-3; // MeV -> GeV
 	else

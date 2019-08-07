@@ -1,5 +1,4 @@
 #include "TBuildDetectorLayerPlaneDAF.h"
-#include <iostream>
 #include <list>
 #include <map>
 #include <set>
@@ -21,7 +20,7 @@ const std::string PDG_fromName::ElName2[] = {"n",  "H",  "He", "Li", "Be", "B", 
 
 TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes& attribut) : TDataBuilder("build_det"), att(attribut)
 {
-  cout << "TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF" << endl;
+  att._logger->info("TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF");
 
   std::vector<std::string> tempName = {"HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
 				       "TR1_log","TR2_log",
@@ -70,41 +69,31 @@ int TBuildDetectorLayerPlaneDAF::SoftExit(int return_build)
 {
   if(return_build == -1)
     {
-#ifndef QUIET
-      std::cout << "!> Multiplicity > 2 on Start : event rejected" << std::endl;
-#endif
+      att._logger->warn("!> Multiplicity > 2 on Start : event rejected");
       AnaHisto->h_stats->Fill("start M>2", 1);
       return -1;
     }
   else if(return_build == -2)
     {
-#ifndef QUIET
-      std::cout << "!> TDC Timing Start cut : event rejected" << std::endl;
-#endif
+      att._logger->warn("!> TDC Timing Start cut : event rejected");
       AnaHisto->h_stats->Fill("start Timing cut", 1);
       return -1;
     }
   else if(return_build == -3)
     {
-#ifndef QUIET
-      std::cout << "!> Chamber Hit > 1000 : event rejected" << std::endl;
-#endif
+      att._logger->warn("!> Chamber Hit > 1000 : event rejected");
       AnaHisto->h_stats->Fill("chamber hit>1000", 1);
       return -1;
     }
   else if(return_build == -9)
     {
-#ifndef QUIET
-      std::cout << "!> No Beam : event rejected" << std::endl;
-#endif
+      att._logger->warn("!> No Beam : event rejected");
       AnaHisto->h_stats->Fill("No Beam", 1);
       return -1;
     }
   else if(return_build != 0)
     {
-#ifndef QUIET
-      std::cout << "Error in Build Detector !" << std::endl;
-#endif
+      att._logger->warn("Error in Build Detector !");
       AnaHisto->h_stats->Fill("Error", 1);
       return -1;
     }
@@ -150,7 +139,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   for(size_t id = 0; id < event.BeamNames.size(); ++id)
     {
       int trackID = event.BeamTrackID[id];
-      std::cout << "beam : " << event.BeamNames[id] << " #" << trackID << "\n";
+      att._logger->debug("beam : {} # {}", event.BeamNames[id],  trackID);
 
       for(auto& det : hits)
         {
@@ -158,17 +147,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           for(auto hit : *det)
             {
               if(hit.TrackID == trackID)
-                std::cout << "Branch: " << printW(det->GetBranchName(), 18,false) << " " << printFixed(hit.HitPosX, 4, 6) << " " << printFixed(hit.HitPosY, 4, 6) << " " << printFixed(hit.HitPosZ, 4, 6) << " "
-                          << " " << hit.LayerID << " " << hit.Pname << "\n";
+                att._logger->debug("Branch: {} {} {} {} {} {}", printW(det->GetBranchName(), 18,false), printFixed(hit.HitPosX, 4, 6), printFixed(hit.HitPosY, 4, 6), printFixed(hit.HitPosZ, 4, 6), hit.LayerID, hit.Pname);
             }
 #else
           for(int j = 0; j < det->GetEntries(); ++j)
             {
               TG4Sol_Hit* hit = dynamic_cast<TG4Sol_Hit*>(det->At(j));
               if(hit->TrackID == trackID)
-                std::cout << "Branch: " << printW(det->GetName(), 18,false) << " hit:" << printFixed(hit->HitPosX,4,9) << " " << printFixed(hit->HitPosY,4,9) << " " << printFixed(hit->HitPosZ,4,9)
-                          << " mom:" << printFixed(hit->MomX,4,8) << " " << printFixed(hit->MomY,4,8) << " " << printFixed(hit->MomZ,4,8) << " | "
-                          << " " << printW(hit->LayerID,2) << " " << printW(hit->Pname,6) << "\n";
+                att._logger->debug("Branch: {} hit:{} {} {} mom:{} {} {} | {} {}", printW(det->GetName(), 18,false), printFixed(hit->HitPosX,4,9), printFixed(hit->HitPosY,4,9), printFixed(hit->HitPosZ,4,9), printFixed(hit->MomX,4,8), printFixed(hit->MomY,4,8), printFixed(hit->MomZ,4,8), printW(hit->LayerID,2), printW(hit->Pname,6));
             }
 #endif
         }
@@ -176,7 +162,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   for(size_t id = 0; id < event.DaughterNames.size(); ++id)
     {
       int trackID = event.DaughterTrackID[id];
-      std::cout << "decayed : " << event.DaughterNames[id] << " #" << trackID << "\n";
+      att._logger->debug("decayed : {} # {}", event.DaughterNames[id], trackID);
 
       for(auto& det : hits)
         {
@@ -185,8 +171,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             {
               // hit.Print();
               if(hit.TrackID == trackID)
-                std::cout << "Branch: " << det->GetBranchName() << " " << hit.HitPosX << " " << hit.HitPosY << " " << hit.HitPosZ << " "
-                          << hit.LayerID << " " << hit.Pname << "\n";
+                att._logger->debug("Branch: {} {} {} {} {} {}", det->GetBranchName(), hit.HitPosX, hit.HitPosY, hit.HitPosZ, hit.LayerID, hit.Pname);
             }
 #else
           for(int j = 0; j < det->GetEntries(); ++j)
@@ -194,11 +179,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               // hit.Print();
               TG4Sol_Hit* hit = dynamic_cast<TG4Sol_Hit*>(det->At(j));
               if(hit->TrackID == trackID)
-                std::cout << "Branch: " << printW(det->GetName(), 18,false) << " hit:" << printFixed(hit->HitPosX,4,9) << " " << printFixed(hit->HitPosY,4,9) << " " << printFixed(hit->HitPosZ,4,9)
-                          << " mom:" << printFixed(hit->MomX,4,8) << " " << printFixed(hit->MomY,4,8) << " " << printFixed(hit->MomZ,4,8) << " | "
-                          << " " << printW(hit->LayerID,2) << " " << printW(hit->Pname,6) << "\n";
+                att._logger->debug("Branch: {} hit:{} {} {} mom:{} {} {} | {} {}", printW(det->GetName(), 18,false), printFixed(hit->HitPosX,4,9), printFixed(hit->HitPosY,4,9), printFixed(hit->HitPosZ,4,9), printFixed(hit->MomX,4,8), printFixed(hit->MomY,4,8), printFixed(hit->MomZ,4,8), printW(hit->LayerID,2), printW(hit->Pname,6));
             }
-
+	  
 #endif
         }
     }
@@ -296,7 +279,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       std::unique_ptr<genfit::AbsMeasurement> measurement = nullptr;
 
 #ifdef DEBUG_BUILD
-      std::cout << "iDet #" << iDet << " " << nameTempBr << " " << TypeDet << std::endl;
+      att._logger->debug("iDet # {} {} {}", iDet, nameTempBr, TypeDet);
 #endif
 
       double resolution_wire = 0.01;
@@ -321,7 +304,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               int TrackID = hit.TrackID;
               int LayerID = hit.LayerID;
 #ifdef DEBUG_BUILD
-              std::cout << " hit#" << indexInBranch << " " << hit.Pname << " " << hit.TrackID << " " << hit.LayerID << std::endl;
+              att._logger->debug(" hit#{} {} {} {}", indexInBranch, hit.Pname, hit.TrackID, hit.LayerID);
 #endif
               auto tempTrack = RecoEvent.TrackDAF.find(TrackID);
               if(tempTrack == RecoEvent.TrackDAF.end())
@@ -381,7 +364,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
               if(PDG_particle == nullptr)
                 {
-                  std::cout << "E> PDG not found !" << std::endl;
+                  att._logger->error("E> PDG not found !");
                   continue;
                 }
               const double charge = PDG_particle->Charge() / 3.;
@@ -410,7 +393,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               int TrackID = hit.TrackID;
               int LayerID = hit.LayerID;
 #ifdef DEBUG_BUILD
-              std::cout << " hit#" << indexInBranch << " " << hit.Pname << " " << hit.TrackID << " " << hit.LayerID << std::endl;
+              att._logger->debug(" hit#{} {} {} {}", indexInBranch, hit.Pname, hit.TrackID, hit.LayerID);
 #endif
               auto tempTrack = RecoEvent.TrackDAF.find(TrackID);
               if(tempTrack == RecoEvent.TrackDAF.end())
@@ -493,7 +476,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
               if(PDG_particle == nullptr)
                 {
-                  std::cout << "E> PDG not found !" << std::endl;
+                  att._logger->error("E> PDG not found !");
                   continue;
                 }
               const double charge = PDG_particle->Charge() / 3.;
@@ -542,14 +525,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   OutTree->NPsce = OutTree->PSCE->GetEntries();
 
 #ifdef DEBUG_BUILD
-  std::cout << "done !" << std::endl;
+  att._logger->debug( "done !");
 #endif
   
 #ifdef DEBUG_BUILD
-  cout << " DAF Hit :" << endl;
+  att._logger->debug( " DAF Hit :");
   for(auto track : RecoEvent.TrackDAF)
     {
-      std::cout << "TrackID #" << track.first << " hit_id [\n";
+      att._logger->debug( "TrackID # {} hit_id [", track.first);
       std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
       std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
       std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
@@ -561,17 +544,17 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 	}
       for(size_t i = 0; i < s1.size(); ++i)
 	{
-	  std::cout << "idDet:" << s1[i].str() << "\n";
-	  std::cout << "stat :" << s3[i].str() << "\n";
+	  att._logger->debug( "idDet:{}", s1[i].str() );
+	  att._logger->debug( "stat :{}", s3[i].str() );
 	}
 
-      std::cout << "] " << std::endl;
+      att._logger->debug( "] ");
     }
 
   
   for(auto track : RecoEvent.TrackInfo)
     {
-      std::cout << "TrackID #" << track.first << " PID [\n";
+      att._logger->debug( "TrackID #{} PID [", track.first);
       std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
       std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
       std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
@@ -583,11 +566,11 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 	}
       for(size_t i = 0; i < s1.size(); ++i)
 	{
-	  std::cout << "idDet:" << s1[i].str() << "\n";
-	  std::cout << "stat :" << s3[i].str() << "\n";
+	  att._logger->debug( "idDet:{}", s1[i].str() );
+	  att._logger->debug( "stat :{}", s3[i].str() );
 	}
 
-      std::cout << "] " << std::endl;
+      att._logger->debug( "] ");
     }
 for(const auto& det : RecoEvent.ListHits)
   {

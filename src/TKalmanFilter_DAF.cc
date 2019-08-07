@@ -5,6 +5,7 @@
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
 #include "StateOnPlane.h"
+//#include "IO.h"
 
 #include "Exception.h"
 
@@ -36,6 +37,9 @@ TKalmanFilter_DAF::TKalmanFilter_DAF(const THyphiAttributes& attribut) : TDataPr
   const int nIter = 7;        // max number of iterations
   const double dPVal = 1.e-3; // convergence criterion
 
+  //genfit::errorOut.rdbuf(errorOut.rdbuf());
+  //genfit::printOut.rdbuf(printOut.rdbuf());
+  
   // const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedAverage;
   // For Ref
   // const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToReference;
@@ -69,7 +73,7 @@ TKalmanFilter_DAF::TKalmanFilter_DAF(const THyphiAttributes& attribut) : TDataPr
 #ifdef DISPLAY
   display = genfit::EventDisplay::getInstance();
   display->reset();
-  std::cout << " Display On :" << display << std::endl;
+  att._logger->info( " Display On :{}", fmt::ptr(display));
 #endif
 }
 
@@ -222,7 +226,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       ntrack++;
 
 #ifdef DEBUG_KALMAN
-      std::cout << "start #" << ntrack; //<<std::endl;
+      att._logger->debug("start #{}", ntrack); //<<std::endl;
 // std::cout<<" | Pointsize "<<Vtracks->getNumPoints()<<" Measurements "<<Vtracks->getNumPointsWithMeasurement()<<" Rep
 // "<<Vtracks->getNumReps()<<std::endl;
 // std::vector<std::string> name_det;
@@ -244,7 +248,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           return HitrawRef[2];
         else
           {
-            std::cout << "E> rawref not proper !" << HitrawRef.GetNrows() << "\n";
+	    fmt::print( "E> rawref not proper ! {}", HitrawRef.GetNrows() );
             HitrawRef.Print();
             return -999.;
           }
@@ -292,7 +296,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       if(id_dets.size() < 3) //(nb_ValidHits < 3)
         {
 #ifdef DEBUG_KALMAN
-          std::cout << "!> less than 3 measurements: " << id_dets.size() << "\n";
+          att._logger->debug( "!> less than 3 measurements: {}", id_dets.size() );
 #endif
 	  AnaHisto->h_stats->Fill("Less3Mes",1);
 	  int idPDG = 0;
@@ -345,7 +349,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 	      }
 	  
 #ifdef DEBUG_KALMAN
-          std::cout << "!> LastValidHit not found !\n";
+          att._logger->debug( "!> LastValidHit not found !");
           std::vector<std::stringstream> s1(it_trackInfo.second.size() / 20 + 1);
           std::vector<std::stringstream> s2(it_trackInfo.second.size() / 20 + 1);
           std::vector<std::stringstream> s3(it_trackInfo.second.size() / 20 + 1);
@@ -357,9 +361,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             }
           for(size_t i = 0; i < s1.size(); ++i)
             {
-              std::cout << "Det  :" << s1[i].str() << "\n";
-              std::cout << "idDet:" << s2[i].str() << "\n";
-              std::cout << "stat :" << s3[i].str() << "\n";
+              att._logger->debug( "Det	:{}", s1[i].str() );
+	      att._logger->debug( "idDet:{}", s2[i].str() );
+	      att._logger->debug( "stat :{}", s3[i].str() );
             }
 #endif
 	  AnaHisto->h_stats->Fill("NoValidLastHit",1.);
@@ -382,12 +386,12 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       if(TMath::Abs(it_trackInfo.second[id_firstDet].pdg) < 1e-2)
         {
 #ifdef DEBUG_KALMAN
-          std::cout << "!> pdgcode = 0 " << it_trackInfo.second[id_firstDet].pdg << "\n";
+          att._logger->debug( "!> pdgcode = 0 {}", it_trackInfo.second[id_firstDet].pdg );
 #endif
           continue;
         }
 #ifdef DEBUG_KALMAN
-      std::cout << " Id_track: " << id_track << std::endl;
+      att._logger->debug( " Id_track: {}", id_track);
 #endif
 
       const InfoPar track_state(it_trackInfo.second[id_firstDet]);
@@ -403,7 +407,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       
       if(PDG_particle == nullptr)
         {
-          std::cout << "E> PDG not found !" << std::endl;
+          att._logger->error( "E> PDG not found !");
           continue;
         }
       const double charge = PDG_particle->Charge() / 3.;
@@ -430,9 +434,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
 #ifdef DEBUG_KALMAN
       for(auto idet : id_dets)
-	std::cout << "det:" << std::get<1>(idet) << " [" << std::get<2>(idet) << "] at Z:" << std::get<0>(idet) << "\n";
+	att._logger->debug( "det:{} [{}] at Z:{}", std::get<1>(idet), std::get<2>(idet), std::get<0>(idet) );
       
-      std::cout << " PID:" << PID << " " << charge << " " << PDG << "\n";
+      att._logger->debug( " PID:{} {} {}", PID, charge, PDG);
 #endif
 
       const InfoPar track_stateLast(it_trackInfo.second[id_lastDet]);
@@ -445,7 +449,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       if(TMath::Abs(seed_Mom_Mag) < 1e-9)
         {
 #ifdef DEBUG_KALMAN
-	  std::cout << "!> Seed Momemtum with TVector3 is zero ! correcting \n";
+	  att._logger->debug( "!> Seed Momemtum with TVector3 is zero ! correcting ");
 #endif
 	  auto tempLastHit = id_dets.crbegin();
           ++tempLastHit;
@@ -455,8 +459,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           if(TMath::Abs(init_p2.Mag()) < 1e-7)
             {
-              std::cout << "E> Seed Momemtum with TVector3 is zero ! " << PDG_particle->GetName() << " Mom:" << seed_Mom_Mag << "\n";
-              std::cout << "TrackID #" << it_ListHits->first << " hit_id :\n";
+              att._logger->error( "E> Seed Momemtum with TVector3 is zero ! {} Mom:{}", PDG_particle->GetName(), seed_Mom_Mag);
+	      att._logger->error( "TrackID #{} hit_id :", it_ListHits->first);
               std::vector<std::stringstream> s1(it_ListHits->second.size() / 20 + 1);
               std::vector<std::stringstream> s2(it_ListHits->second.size() / 20 + 1);
               for(size_t i = 0; i < it_ListHits->second.size(); ++i)
@@ -466,11 +470,11 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                 }
               for(size_t i = 0; i < s1.size(); ++i)
                 {
-                  std::cout << "idDet:" << s1[i].str() << "\n";
-                  std::cout << "stat :" << s2[i].str() << "\n";
+                  att._logger->error( "idDet:{}", s1[i].str() );
+		  att._logger->error( "stat :{}", s2[i].str() );
                 }
 
-              std::cout << "Track Info :\n";
+              att._logger->error( "Track Info :");
               std::vector<std::stringstream> s11(it_ListHits->second.size() / 10 + 1);
               std::vector<std::stringstream> s22(it_ListHits->second.size() / 10 + 1);
               std::vector<std::stringstream> s33(it_ListHits->second.size() / 10 + 1);
@@ -488,12 +492,12 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                 }
               for(size_t i = 0; i < s1.size(); ++i)
                 {
-                  std::cout << "idDet:" << s11[i].str() << "\n";
-                  std::cout << "pdg  :" << s22[i].str() << "\n";
-                  std::cout << "momX :" << s33[i].str() << "\n";
-                  std::cout << "momY :" << s44[i].str() << "\n";
-                  std::cout << "momZ :" << s55[i].str() << "\n";
-                  std::cout << "time :" << s66[i].str() << "\n";
+		  att._logger->error( "idDet:{}", s11[i].str() );
+		  att._logger->error( "pdg  :{}", s22[i].str() );
+		  att._logger->error( "momX :{}", s33[i].str() );
+		  att._logger->error( "momY :{}", s44[i].str() );
+		  att._logger->error( "momZ :{}", s55[i].str() );
+		  att._logger->error( "time :{}", s66[i].str() );
                 }
 
               // for(auto id_hit : track.second)
@@ -506,7 +510,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               init_p.SetXYZ(init_p2.X(), init_p2.Y(), init_p2.Z());
 	      seed_Mom_Mag = init_p.Mag();
 #ifdef DEBUG_KALMAN
-              std::cout << "!> Reset init_p N#" << Nb_event << "\n";
+              att._logger->debug( "!> Reset init_p N#{}", Nb_event);
 
               std::vector<std::stringstream> s1(it_trackInfo.second.size() / 20 + 1);
               std::vector<std::stringstream> s2(it_trackInfo.second.size() / 20 + 1);
@@ -519,19 +523,19 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                 }
               for(size_t i = 0; i < s1.size(); ++i)
                 {
-                  std::cout << "Det  :" << s1[i].str() << "\n";
-                  std::cout << "idDet:" << s2[i].str() << "\n";
-                  std::cout << "stat :" << s3[i].str() << "\n";
+                  att._logger->debug("Det  :{}", s1[i].str() );
+		  att._logger->debug("idDet:{}", s2[i].str() );
+		  att._logger->debug("stat :{}", s3[i].str() );
                 }
               for(auto idet : id_dets)
                 {
-                  std::cout << "det:" << std::get<1>(idet) << " [" << std::get<2>(idet) << "] at Z:" << std::get<0>(idet) << "\n";
+                  att._logger->debug( "det:{} [{}] at Z:{}", std::get<1>(idet), std::get<2>(idet), std::get<0>(idet) );
                 }
 #endif
             }
         }
 #ifdef DEBUG_KALMAN
-      std::cout << "init mom : ";
+      att._logger->debug("init mom : ");
       init_p.Print();
 #endif
 
@@ -568,7 +572,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       genfit::MeasuredStateOnPlane stateToFinalRef(REP);
       TVector3 momFinalRef(track_state.momX,track_state.momY,track_state.momZ);
       if(momFinalRef.Mag()<1e-8)
-       	std::cout<<"E> momFinalRef null !"<<track_state.momX<<" "<<track_state.momY<<" "<<track_state.momZ<<std::endl;
+       	att._logger->error("E> momFinalRef null !{} {} {}", track_state.momX, track_state.momY, track_state.momZ);
        REP->setPosMomCov(stateToFinalRef, firstPos, momFinalRef, CovM);
       
       genfit::MeasuredStateOnPlane stateRef(REP);
@@ -583,26 +587,26 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       REP->get6DStateCov(stateRef, seedState, seedCov);
 
 #ifdef DEBUG_KALMAN
-      std::cout << "init_p:" << std::endl;
+      att._logger->debug( "init_p:" );
       init_p.Print();
       init_p.Unit().Print();
-      std::cout << "seed_p:" << std::endl;
+      att._logger->debug( "seed_p:" );
       seed_p.Print();
-      std::cout << "init_point :" << std::endl;
+      att._logger->debug( "init_point :" );
       init_point.Print();
-      std::cout << " SEED :" << std::endl;
+      att._logger->debug( " SEED :" );
       seedState.Print();
-      std::cout << "--" << std::endl;
+      att._logger->debug( "--" );
       seedCov.Print();
 // std::cout<<"init_plane :"<<std::endl;
 // init_plane.Print();
 #endif
 
       if(REP == NULL)
-        std::cout << "E> no Rep build" << std::endl;
+        att._logger->error("E> no Rep build");
 #ifdef DEBUG_KALMAN
       else
-        std::cout << "rep done" << std::endl;
+        att._logger->debug( "rep done" );
 #endif
 
 // std::auto_ptr<genfit::Track> fitTrack(new genfit::Track(REP, seedState, seedCov));
@@ -628,8 +632,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 #ifdef DEBUG_KALMAN
-          std::cout << "Loop insertPoint: #det:" << G4Sol::nameLiteralDet.begin()[id_det] << " #hit:" << id_hit << " " << currentHit
-                    << "\n";
+          att._logger->debug( "Loop insertPoint: #det:{} #hit {} {}", G4Sol::nameLiteralDet.begin()[id_det], id_hit, fmt::ptr(currentHit));
           currentHit->Print();
 #endif
           // if(std::get<1>(lastHit) < currentHit->getRawHitCoords()(2))
@@ -647,7 +650,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       // assert(fitTrack->checkConsistency());
       fitTrack->checkConsistency();
 #ifdef DEBUG_KALMAN2
-      std::cout << "track n'" << ntrack << std::endl;
+      att._logger->debug( "track n'{}", ntrack);
 #endif
       int whoDoFit = 1;
       try
@@ -656,9 +659,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
         }
       catch(genfit::Exception& e1)
         {
-
-          std::cout << "*** FITTER EXCEPTION *** Rescue fitter take place !" << std::endl;
-          std::cout << e1.what() << std::endl;
+	  
+          att._logger->info( "*** FITTER EXCEPTION *** Rescue fitter take place !");
+          att._logger->info( e1.what() );
           AnaHisto->h_stats->Fill("Exc:RescueFit", 1.);
 
           try
@@ -668,8 +671,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             }
           catch(genfit::Exception& e2)
             {
-              std::cout << "*** FITTER Rescue EXCEPTION *** cancel fit !" << std::endl;
-              std::cout << e2.what() << std::endl;
+              att._logger->info( "*** FITTER Rescue EXCEPTION *** cancel fit !" );
+              att._logger->info(e2.what() );
               AnaHisto->h_stats->Fill("Exc:FitFail", 1.);
 
               continue;
@@ -681,8 +684,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 #endif
 
 #ifdef DEBUG_KALMAN2
-      std::cout << "SUCESSFULL FIT!" << std::endl;
-      std::cout << "track n'" << ntrack << " / " << fitTrack->getFitStatus(REP)->isFitConverged() << std::endl;
+      att._logger->debug( "SUCESSFULL FIT!" );
+      att._logger->debug( "track n'{} / {}", ntrack, fitTrack->getFitStatus(REP)->isFitConverged());
       fitTrack->Print();
 #endif
 
@@ -694,27 +697,30 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           genfit::TrackPoint* tp = fitTrack->getPointWithMeasurementAndFitterInfo(0, REP);
           if(tp == NULL)
             {
-              std::cout << "Track has no TrackPoint with fitterInfo! \n";
+              att._logger->info( "Track has no TrackPoint with fitterInfo!");
               AnaHisto->h_stats->Fill("Exc:NoTrackPointInfo", 1.);
               continue;
             }
 
-          genfit::KalmanFittedStateOnPlane kfsop(*(dynamic_cast<genfit::KalmanFitterInfo*>(tp->getFitterInfo(REP))->getBackwardUpdate()));
-
+	  genfit::KalmanFittedStateOnPlane* kfsop = nullptr; 
           try
             {
+	      kfsop = (dynamic_cast<genfit::KalmanFitterInfo*>(tp->getFitterInfo(REP))->getBackwardUpdate());
+			
 	      //Forward
               //REP->extrapolateToPlane(kfsop, stateRefOrig.getPlane());
-              REP->extrapolateToPlane(kfsop, stateToFinalRef.getPlane());
+              REP->extrapolateToPlane(*kfsop, stateToFinalRef.getPlane());
             }
           catch(genfit::Exception& e)
             {
-              std::cerr << "Exception, next track" << std::endl;
+              //std::cerr << "Exception, next track" << std::endl;
               AnaHisto->h_stats->Fill("Exc:FitBacktoOrig", 1.);
-              std::cerr << e.what();
+              //std::cerr << e.what();
               continue;
             }
 
+	  assert(kfsop != nullptr);
+	  
           ResSolDAF tempResults;
           tempResults.charge = charge;
           tempResults.pdg_ini = PDG;
@@ -722,14 +728,14 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 	  //Forward
           //const TVectorD& referenceState = stateRefOrig.getState();
           const TVectorD& referenceState = stateToFinalRef.getState();
-          const TVectorD& stateFit = kfsop.getState();
+          const TVectorD& stateFit = kfsop->getState();
 
-          const TMatrixDSym& covPull = kfsop.getCov();
+          const TMatrixDSym& covPull = kfsop->getCov();
 
           TVector3 p3, posRef;
           TMatrixDSym covFit(6);
 
-          kfsop.getPosMomCov(posRef, p3, covFit);
+          kfsop->getPosMomCov(posRef, p3, covFit);
 
 	  //Forward
           // tempResults.momX_init = init_p.X();
@@ -761,7 +767,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           tempResults.ndf = ndf;
           tempResults.fitter = whoDoFit;
 #ifdef DEBUG_KALMAN2
-          std::cout << " / chi2 =" << chi2 << " / ndf =" << ndf << std::endl;
+          att._logger->debug( " / chi2 ={} / ndf ={}", chi2, ndf);
 #endif
 
           // double p_value = TMath::Prob(chi2,ndf);
@@ -779,7 +785,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 // h_chi2_smooth->Fill(Vtracks[itr]->getChiSquSmooth());
 
 #ifdef DEBUG_KALMAN2
-          std::cout << " / 1-p_value =" << 1 - p_value << std::endl;
+          att._logger->debug( " / 1-p_value ={}",1 - p_value );
 #endif
 
           // n_status[static_cast<int>(charge)+1]++;
@@ -829,8 +835,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             }
           catch(genfit::Exception& e)
             {
-              std::cerr << e.what();
-              //std::cout << "could not get TrackLen ! \n";
+              att._logger->info( "could not get TrackLen ! ");
+              att._logger->info( e.what() );
               AnaHisto->h_stats->Fill("Exc:TrackLen", 1.);
               continue;
             }
@@ -843,8 +849,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             }
           catch(genfit::Exception& e)
             {
-              std::cerr << e.what();
-              std::cout << "could not get TOF! \n";
+              att._logger->info( "could not get TOF! ");
+	      att._logger->info(e.what());
               AnaHisto->h_stats->Fill("Exc:TOF", 1.);
               continue;
             }
@@ -872,36 +878,31 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
 #ifdef VERBOSE_EVE
 
-          std::cout << "$$$$$$$$$$$$-----------------------$$$$$$$$$$$$$$$" << std::endl;
-          std::cout << "DAF Length :ListTrackPoints :" << std::endl;
-          std::cout << "TEveLine* EveTrack_DAF1 = new TEveLine(TrackRepList_DAF," << rep_length->EveListTrackPoint.size() << ");"
-                    << std::endl;
-          for(unsigned int i = 0; i < rep_length->EveListTrackPoint.size(); ++i)
+          att._logger->debug( "$$$$$$$$$$$$-----------------------$$$$$$$$$$$$$$$" );
+	  att._logger->debug( "DAF Length :ListTrackPoints :" );
+	  att._logger->debug( "TEveLine* EveTrack_DAF1 = new TEveLine(TrackRepList_DAF,{});", rep_length->EveListTrackPoint.size() );
+
+	  for(unsigned int i = 0; i < rep_length->EveListTrackPoint.size(); ++i)
             {
-              std::cout << std::setprecision(10) << "EveTrack_DAF1->SetPoint(" << i << "," << rep_length->EveListTrackPoint[i].X() << ","
-                        << rep_length->EveListTrackPoint[i].Y() << "," << rep_length->EveListTrackPoint[i].Z() << ");" << std::endl;
+              att._logger->debug( "EveTrack_DAF1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});",i, rep_length->EveListTrackPoint[i].X(), 
+				  rep_length->EveListTrackPoint[i].Y(), rep_length->EveListTrackPoint[i].Z() );
             }
 
-          std::cout << "Fitted Hit :" << std::endl;
-          std::cout << "TEvePointSet* EveHitFitter1 = new TEvePointSet(HitFitter1," << 5 << ");" << std::endl;
-          std::cout << std::setprecision(10) << "EveHitFitter1->SetPoint(" << 0 << "," << HitTR1.X() << "," << HitTR1.Y() << ","
-                    << HitTR1.Z() << ");" << std::endl;
-          std::cout << std::setprecision(10) << "EveHitFitter1->SetPoint(" << 1 << "," << HitDC1.X() << "," << HitDC1.Y() << ","
-                    << HitDC1.Z() << ");" << std::endl;
-          std::cout << std::setprecision(10) << "EveHitFitter1->SetPoint(" << 2 << "," << HitTR2.X() << "," << HitTR2.Y() << ","
-                    << HitTR2.Z() << ");" << std::endl;
-          std::cout << std::setprecision(10) << "EveHitFitter1->SetPoint(" << 3 << "," << HitDC2.X() << "," << HitDC2.Y() << ","
-                    << HitDC2.Z() << ");" << std::endl;
-          std::cout << std::setprecision(10) << "EveHitFitter1->SetPoint(" << 4 << "," << HitTOF.X() << "," << HitTOF.Y() << ","
-                    << HitTOF.Z() << ");" << std::endl;
-
-          std::cout << "DAF Track :" << std::endl;
-          std::cout << "TEveRecTrack *DAF_track_rc = new TEveRecTrack();" << std::endl;
-          std::cout << "DAF_track_rc->fV.Set(" << HitTR1.X() << "," << HitTR1.Y() << "," << HitTR1.Z() << ");" << std::endl;
-          std::cout << "DAF_track_rc->fP.Set(" << p3.X() << "," << p3.Y() << "," << p3.Z() << ");" << std::endl;
+          att._logger->debug( "Fitted Hit :" );
+	  att._logger->debug( "TEvePointSet* EveHitFitter1 = new TEvePointSet(HitFitter1,5)");
+	  att._logger->debug( "EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 0, HitTR1.X(), HitTR1.Y(), HitTR1.Z() );
+	  att._logger->debug( "EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 1, HitDC1.X(), HitDC1.Y(), HitDC1.Z() );
+	  att._logger->debug( "EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 2, HitTR2.X(), HitTR2.Y(), HitTR2.Z() );
+	  att._logger->debug( "EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 3, HitDC2.X(), HitDC2.Y(), HitDC2.Z() );
+	  att._logger->debug( "EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 4, HitTOF.X(), HitTOF.Y(), HitTOF.Z() );
+			      
+	  att._logger->debug( "DAF Track :" );
+	  att._logger->debug( "TEveRecTrack *DAF_track_rc = new TEveRecTrack();");
+	  att._logger->debug( "DAF_track_rc->fV.Set({},{},{});", HitTR1.X(), HitTR1.Y(), HitTR1.Z() );
+	  att._logger->debug( "DAF_track_rc->fP.Set({},{},{});", p3.X(), p3.Y(), p3.Z() );
           // std::cout<<"int sign = -"<<list_MC[current_idMC]->Charge<<std::endl;
-          std::cout << "DAF_track_rc->fSign = -" << charge << std::endl;
-          std::cout << "$$$$$$$$$$$$-----------------------$$$$$$$$$$$$$$$" << std::endl;
+          att._logger->debug( "DAF_track_rc->fSign = -{};", charge);
+	  att._logger->debug( "$$$$$$$$$$$$-----------------------$$$$$$$$$$$$$$$" );
 
 #endif
 
@@ -919,15 +920,14 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           if(beta < 0.)
             {
-              cout << "E> Beta Negative ! " << Path_lengthMean << " " << time_of_flight << " | " << Path_length << " "
-                   << endl; //<<Path_lengthB<<" "<<endl;
-              cout << charge << " " << p << " " << chi2 << " " << ndf << " " << p_value2 << endl;
+              att._logger->error( "E> Beta Negative ! {} {} | {}", Path_lengthMean, time_of_flight, Path_length);
+	      //<<Path_lengthB<<" "<<endl;
+              att._logger->info("{} {} {} {} {}", charge, p, chi2, ndf, p_value2);
             }
 
 #ifdef DEBUG_KALMAN2
-          std::cout << "charge: " << charge
-                    << " / time = " << time_of_flight /*Detectors_UTr["TOF"][id_track][3]*/ << " / Path = " << Path_length
-                    << " PathMean = " << Path_lengthMean << " / Beta = " << beta << " / Mass = " << mass << std::endl;
+          att._logger->debug( "charge: {} / time = {} / Path = {} PathMean = {} / Beta = {} / Mass = {}", charge,time_of_flight /*Detectors_UTr["TOF"][id_track][3]*/,
+			      Path_length, Path_lengthMean, beta, mass );
 #endif
 
           AnaHisto->h_beta->Fill(beta);
@@ -1006,14 +1006,14 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               }
 
 #ifdef DEBUG_KALMAN
-          std::cout << "Temp :" << ntrack << " " << p_value2 << " " << mass << std::endl;
-          std::cout << "MomRef :" << id_track << " " << p_value << " " << mass << std::endl;
+          att._logger->debug( "Temp :{} {} {}", ntrack, p_value2, mass);
+          att._logger->debug( "MomRef :{} {} {}", id_track, p_value, mass);
 #endif
 
           RecoEvent.DAF_results.insert(std::make_pair(id_track, tempResults));
 // RecoEvent.Sigma[ntrack]=CovSigma;
 #ifdef DEBUG_KALMAN
-          std::cout << "Kalman pval " << p_value2 << " charge " << charge << std::endl;
+          att._logger->debug( "Kalman pval {} charge {}", p_value2, charge);
 #endif
         }
     }

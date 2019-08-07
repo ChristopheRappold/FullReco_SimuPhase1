@@ -1,7 +1,7 @@
 #include "THyphiAttributes.h"
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
+//#include <iostream>
 
 #include "TMath.h"
 //#define FIELD_DEBUG
@@ -13,11 +13,14 @@
 
 #include "TGeoManager.h"
 
+#include "spdlog/spdlog.h"
+
 //#define OLDGENFIT For Kalman_RK
 //#define OLD_FIELDMAP
 THyphiAttributes::THyphiAttributes() : Field(nullptr), InputPar{nullptr, nullptr}
 {
-
+  _logger = spdlog::get("Console");
+  
   G4_simu = false;
   G4_TimeResolution = false;
   G4_GeoResolution = false;
@@ -33,8 +36,10 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
                                    const DataSim& In)
     : Field(nullptr), InputPar(In)
 {
-  std::cout << "THyphiAttributes()" << std::endl;
+  _logger = spdlog::get("Console");
+  _logger->info( "THyphiAttributes()" );
 
+  
   G4_simu = false;
   G4_TimeResolution = false;
   G4_GeoResolution = false;
@@ -83,7 +88,7 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
 
   Init_Para();
 
-  std::cout << " *** > Loading Fieldmap ";
+  _logger->info( " *** > Loading Fieldmap ");
 
   Field = new FrsSolenoidHypField();
 
@@ -92,7 +97,7 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
     if(nameGeo == "WASA")
       {
         isWasa = true;
-        std::cout << "!> Wasa geometry found !\n";
+        _logger->warn( "!> Wasa geometry found !");
         break;
       }
 
@@ -134,7 +139,7 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
   if(DoNoMaterial)
     {
       genfit::MaterialEffects::getInstance()->setNoEffects();
-      std::cout << " ** > Use No material !" << std::endl;
+      _logger->warn( " ** > Use No material !" );
     }
 
   // genfit::MaterialEffects::getInstance()->drawdEdx(-211);
@@ -151,7 +156,7 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
   // std::cout<<"(0,0,155.5) bz:"<<bz<<"\n";
 
   
-  std::cout << " done " << std::endl;
+  _logger->info( " done ");
 }
 
 int THyphiAttributes::Init_Para()

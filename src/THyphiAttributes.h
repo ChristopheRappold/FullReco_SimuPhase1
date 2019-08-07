@@ -1,6 +1,6 @@
 #ifndef THYPHIATTRIBUTE
 #define THYPHIATTRIBUTE
-#include <iostream>
+//#include <iostream>
 #include <list>
 #include <map>
 #include <string>
@@ -12,6 +12,8 @@
 #include "FairBase/HypFieldMapFull.h"
 
 #include "FairBase/FrsSolenoidHypField.h"
+
+#include "spdlog/logger.h"
 
 struct DataSim
 {
@@ -51,6 +53,8 @@ class THyphiAttributes
 
   const DataSim& InputPar;
 
+  std::shared_ptr<spdlog::logger> _logger;
+  
   THyphiAttributes();
   THyphiAttributes(const std::list<std::string>& type, const std::list<std::string>& option, double FS, const DataSim& InputParameters);
   ~THyphiAttributes();

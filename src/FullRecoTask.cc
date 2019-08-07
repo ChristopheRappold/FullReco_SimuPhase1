@@ -13,7 +13,7 @@
 
 FullRecoTask::FullRecoTask():Attributes(),REvent()
 {
-  std::cout<<" *** > default FullRecoTask instance created !"<<std::endl;
+  Attributes._logger->info(" *** > default FullRecoTask instance created !");
   det_build = 0;
   AnaHisto = 0;
   list_processMC.resize(0);
@@ -23,7 +23,7 @@ FullRecoTask::FullRecoTask():Attributes(),REvent()
 
 FullRecoTask::FullRecoTask(const std::list<std::string>& type,const std::list<std::string>& option,double FS, const DataSim& In):Attributes(type,option,FS,In),REvent()
 {
-  std::cout<<" *** > FullRecoTask instance created | Reconstruction requested are :";
+  Attributes._logger->info(" *** > FullRecoTask instance created | Reconstruction requested are :");
   det_build = 0;
   AnaHisto = 0;
 
@@ -91,7 +91,7 @@ int FullRecoTask::EventProcess(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree
       if( (*(*process))(RecoEvent,OutTree) != 0)
 	{
 	  AnaHisto->h_task_exit->Fill((*process)->signature.c_str(),1);
-	  std::cout<<"courrent process:"<<(*process)->signature<<" failed"<<std::endl;
+	  Attributes._logger->warn("courrent process:{} failed", (*process)->signature);
 	  return -1;
 	}
     }

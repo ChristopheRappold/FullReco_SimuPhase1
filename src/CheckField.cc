@@ -49,7 +49,7 @@ int CheckField::SoftExit(int result_full)
 
 int CheckField::Check()
 {
-  std::cout<<"Start Field check :";
+  att._logger->info("Start Field check :");
 
   TGeoVolume* v = gGeoManager->GetVolume(0);
   TGeoShape* s = v->GetShape();
@@ -57,7 +57,7 @@ int CheckField::Check()
   TGeoBBox* sb = dynamic_cast<TGeoBBox*>(s);
   if(sb==nullptr)
     {
-      std::cout<<"E> CheckField: dynamic_cast failed !\n";
+      att._logger->error("E> CheckField: dynamic_cast failed !");
       v->Print();
       return 0;
     }
@@ -66,7 +66,7 @@ int CheckField::Check()
   double Dx = sb->GetDX();
   double Dy = sb->GetDY();
   double Dz = sb->GetDZ();
-  std::cout<<" between :"<<Dx<<" "<<Dy<<" "<<Dz<<"\n";
+  att._logger->info(" between : {} {} {}",Dx, Dy, Dz);
   auto GenfitMag = genfit::FieldManager::getInstance();
   // const auto max_i = 10000000;
   // auto i = max_i;
@@ -87,7 +87,7 @@ int CheckField::Check()
       for(double z = -Dz; z<Dz ; z += 1.) 
 	{
 	  if(i%10000000==0)
-	    std::cout<<"Processing Check#"<<i<<"\n";
+	    att._logger->info("Processing Check# {}",i);
 	  ++i;
 	  double b[3]={0.,0.,0.};
 	  

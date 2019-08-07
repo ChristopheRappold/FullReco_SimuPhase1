@@ -1,8 +1,11 @@
 #include "Ana_Hist.hh"
-#include "Riostream.h"
+//#include "Riostream.h"
 #include "TFile.h"
-
 #include "TGeoManager.h"
+
+#include <sstream>
+#include "spdlog/spdlog.h"
+
 using namespace std;
 
 Ana_Hist::~Ana_Hist()
@@ -29,11 +32,15 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
   EnableState[HOUGH] = Hough;
   EnableState[SIMU] = Simu;
 
-  cout << "Creating Histograms ";
+  _logger = spdlog::get("Console");
+
+  stringstream ss;
+  ss<< "Creating Histograms ";
   for(int i = 0; i < SIZEOF_STATEHIST; ++i)
     if(EnableState[i] == true)
-      cout << "Hist [" << i << "] ";
-
+      ss << "Hist [" << i << "] ";
+  _logger->info(ss.str());
+  
   HaveBeenWritten = false;
 
   h_stats = new TH1I("stats", "stats", 20, 0, 20);
@@ -243,7 +250,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistRegisteredByDir.insert(std::make_pair("Finder", std::make_tuple(HistReg,0)));
     }
 
-  std::cout << " : done !" << std::endl;
+  _logger->info( " : done !");
 }
 
 int Ana_Hist::Write(TFile* out_file)
@@ -301,7 +308,7 @@ int Ana_Hist::Write(TFile* out_file)
 			  };
 
   
-  std::cout << "making directory " << std::endl;
+  _logger->info( "making directory ");
   for(auto it : HistRegisteredByDir)
     {
       TDirectory* temp_dir = GetDir(out_file, it.first);
@@ -333,7 +340,7 @@ int Ana_Hist::WriteTemp(char* tempfile)
   HaveBeenWritten = true;
 
   TFile* ff = new TFile(tempfile, "RECREATE");
-  cout << "File = " << tempfile << endl;
+  _logger->info( "File = {}", tempfile);
 
   ff->cd();
   Write(ff);

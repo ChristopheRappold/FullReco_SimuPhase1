@@ -3,7 +3,7 @@
 
 //#include "ShadowAna_Hist.hh"
 
-#include <iostream>
+//#include <iostream>
 
 #include <string>
 #include <unordered_map>
@@ -20,6 +20,8 @@
 #include "TFile.h"
 #include "TMath.h"
 
+#include "spdlog/logger.h"
+
 enum StateHist : int
 {
   DAF = 0,
@@ -33,7 +35,8 @@ enum StateHist : int
 
 class Ana_Hist
 {
-
+  std::shared_ptr<spdlog::logger> _logger;
+  
   public:
   bool HaveBeenWritten;
   std::vector<bool> EnableState;
