@@ -26,8 +26,8 @@ DictObjSuf    = $(DictpSuf).$(ObjSuf)
 OutPutOpt     = -o
 
 #CXX           = g++
-CXXFLAGS      = -O3 -fPIC -g -std=c++1y #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
-LIBS          = -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
+CXXFLAGS      = -O3 -fPIC -g -std=c++1y -DSPDLOG_COMPILED_LIB #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+LIBS          = -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
 LDFLAGS       = -O
 SOFLAGS       = -shared
 
@@ -41,12 +41,13 @@ ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
 
 GENFITV2FLAGS = -I./Genfit2_v2/include
+SPDLOGFLAGS = -I./spdlog/include
 
-
-CXXFLAGS     += $(ROOTCFLAGS) $(GENFITV2FLAGS) -I/opt/local/include #-I./boost
+CXXFLAGS     += $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) -I/opt/local/include #-I./boost
 LIBS         += $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol
 
 GENFIT_LIB = -lgenfit2
+SPDLOG_LIB = -lspdlog
 LIB_MERGER =  $(ROOTLIBS) -lAna_Event -lAna_Event_Out
 LIB_PROFILING = #-L/home/christophe/Workspace/gperftools-2.4/lib -ltcmalloc #-lprofiler
 
@@ -77,10 +78,10 @@ CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 # MathObj = MathematicalTools.o
 # MathSo = libHyphiMathTools.$(DllSuf)
 
-all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libMCEvent.so $(Bindir)/MainSimu
+all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so $(Bindir)/MainSimu
 
-$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so
-	$(CXX) $(CXXFLAGS)  -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING)
+$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a
+	$(CXX) $(CXXFLAGS)  -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB)
 
 # $(Bindir)/BatchMerger: BatchMerger.o libAnaEventOut.so libAna_Event.so
 # 	$(CXX) $(CXXFLAGS) BatchMerger.o $(LIBS) $(LIB_MERGER) -o $(Bindir)/BatchMerger
@@ -117,7 +118,9 @@ ifeq ($(ROOTVERSION),6)
 endif
 	@echo "---> $@ done"
 
-
+libspdlog.a :
+	make -C spdlog/build
+	make -C spdlog/build install
 
 libFairBase.so :
 	make -C FairBase
