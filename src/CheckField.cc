@@ -16,14 +16,7 @@
 #include "FieldManager.h"
 
 CheckField::CheckField(const THyphiAttributes& attribut):TDataProcessInterface("check_field"),att(attribut),done(0)
-{
-  
-}
-
-CheckField::~CheckField()
-{
-
-}
+{ }
 
 int CheckField::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
 {

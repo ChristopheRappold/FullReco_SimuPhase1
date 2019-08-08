@@ -18,13 +18,13 @@ class CheckField :  public TDataProcessInterface
 
 
   CheckField(const THyphiAttributes& attr);
-  ~CheckField();
+  ~CheckField() final = default;
 
   //int Init(Ana_Hist* h);
-  int operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
+  int operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
  private:
-  int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
-  int SoftExit(int) override;
+  int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
+  int SoftExit(int) final;
   int Check();
 
   bool done;

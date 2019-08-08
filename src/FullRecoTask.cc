@@ -11,13 +11,13 @@
 /****************************************************************************************************/
 /****************************************************************************************************/
 
-FullRecoTask::FullRecoTask():Attributes(),REvent()
-{
-  Attributes._logger->info(" *** > default FullRecoTask instance created !");
-  det_build = 0;
-  AnaHisto = 0;
-  list_processMC.resize(0);
-}
+// FullRecoTask::FullRecoTask():Attributes(),REvent()
+// {
+//   Attributes._logger->info(" *** > default FullRecoTask instance created !");
+//   det_build = 0;
+//   AnaHisto = 0;
+//   list_processMC.resize(0);
+// }
 
 
 

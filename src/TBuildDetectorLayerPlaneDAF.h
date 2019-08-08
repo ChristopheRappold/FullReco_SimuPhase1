@@ -181,8 +181,8 @@ class TBuildDetectorLayerPlaneDAF : public TDataBuilder
   
   const THyphiAttributes& att;
 
-  TBuildDetectorLayerPlaneDAF(const THyphiAttributes& att);
-  ~TBuildDetectorLayerPlaneDAF();
+  explicit TBuildDetectorLayerPlaneDAF(const THyphiAttributes& att);
+  ~TBuildDetectorLayerPlaneDAF() final;
 
 #ifdef ROOT6
   int operator() (const TG4Sol_Event& event, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits, FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree);
@@ -198,7 +198,7 @@ class TBuildDetectorLayerPlaneDAF : public TDataBuilder
   int Exec(const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree);
 #endif
   
-  int SoftExit(int);
+  int SoftExit(int) final;
 
 private:
   

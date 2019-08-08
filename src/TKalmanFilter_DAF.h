@@ -57,15 +57,15 @@ class TKalmanFilter_DAF : public TDataProcessInterface
   public:
   const THyphiAttributes& att;
 
-  TKalmanFilter_DAF(const THyphiAttributes& attr);
-  ~TKalmanFilter_DAF();
+  explicit TKalmanFilter_DAF(const THyphiAttributes& attr);
+  ~TKalmanFilter_DAF() final;
 
   // int Init(Ana_Hist* h);
-  int operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) override;
+  int operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) final;
 
   private:
-  int Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) override;
-  int SoftExit(int) override;
+  int Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) final;
+  int SoftExit(int) final;
   int Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent);
 
   // genfit::DAF* Fitter;

@@ -146,7 +146,7 @@ class MomRef
 
   MomRef() : id_track(-1), p_value(-1.), mass(-1.), x_TOF(-1.), y_TOF(-1.){};
   MomRef(int id_, double pv_, double mass_, double x_, double y_) : id_track(id_), p_value(pv_), mass(mass_), x_TOF(x_), y_TOF(y_){};
-  ~MomRef(){};
+  ~MomRef() = default;
 };
 
 class CompMomRef
@@ -193,7 +193,7 @@ class TVertex
   }
   TVertex(std::string t_) : type(t_), vertex(TVector3(0., 0., 0.)), Chi2(0.), Ndf(0), Cov(TMatrixT<double>(3, 3)) {}
 
-  ~TVertex() {}
+  ~TVertex() = default;
 };
 
 struct SimHit

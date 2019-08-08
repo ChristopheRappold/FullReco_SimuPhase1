@@ -17,20 +17,20 @@
 
 //#define OLDGENFIT For Kalman_RK
 //#define OLD_FIELDMAP
-THyphiAttributes::THyphiAttributes() : Field(nullptr), InputPar{nullptr, nullptr}
-{
-  _logger = spdlog::get("Console");
+// THyphiAttributes::THyphiAttributes() : Field(nullptr), InputPar{nullptr, nullptr}
+// {
+//   _logger = spdlog::get("Console");
   
-  G4_simu = false;
-  G4_TimeResolution = false;
-  G4_GeoResolution = false;
-  back_tracking = false;
-  beam_only = false;
-  Debug_DAF = false;
-  DoNoMaterial = false;
+//   G4_simu = false;
+//   G4_TimeResolution = false;
+//   G4_GeoResolution = false;
+//   back_tracking = false;
+//   beam_only = false;
+//   Debug_DAF = false;
+//   DoNoMaterial = false;
 
-  Init_Para();
-}
+//   Init_Para();
+// }
 
 THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std::list<std::string>& option, double FieldScalingFactor,
                                    const DataSim& In)
@@ -188,5 +188,3 @@ int THyphiAttributes::Init_Para()
 
   return 0;
 }
-
-THyphiAttributes::~THyphiAttributes() {}

@@ -55,9 +55,9 @@ class THyphiAttributes
 
   std::shared_ptr<spdlog::logger> _logger;
   
-  THyphiAttributes();
+  THyphiAttributes() = delete;
   THyphiAttributes(const std::list<std::string>& type, const std::list<std::string>& option, double FS, const DataSim& InputParameters);
-  ~THyphiAttributes();
+  ~THyphiAttributes() = default;
 
   int Init_Para();
 };

@@ -32,7 +32,7 @@ class FullRecoTask
 {
 
 public :
-  FullRecoTask();
+  FullRecoTask() = delete;
   FullRecoTask(const std::list<std::string>& type,const std::list<std::string>& opt,double FS, const DataSim& In);
   ~FullRecoTask();
   
