@@ -29,7 +29,7 @@
 
 //#include "Math/ProbFunc.h"
 
-typedef TDataProcess<FullRecoEvent, MCAnaEventG4Sol> TDataProcessInterface;
+using TDataProcessInterface = TDataProcess<FullRecoEvent, MCAnaEventG4Sol>;
 // namespace MathKalman
 // {
 //   struct Prob {

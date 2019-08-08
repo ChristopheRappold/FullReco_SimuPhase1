@@ -27,65 +27,65 @@
 class MomRef;
 class CompMomRef;
 
-typedef std::map<MomRef, std::vector<double>, CompMomRef> map_mom3;
+using map_mom3 = std::map<MomRef, std::vector<double>, CompMomRef> ;
 
 namespace G4Sol
 {
-enum SolDet : int
-{
-  InSi0 = 0,
-  InSi1,
-  InSi2,
-  InSi3 /*3*/,
-  TR1  /*4*/,
-  TR2  /*5*/,
-  PSFE /*6*/,
-  MG01 /*7*/,
-  MG02,
-  MG03,
-  MG04,
-  MG05,
-  MG06,
-  MG07,
-  MG08,
-  MG09,
-  MG10,
-  MG11,
-  MG12,
-  MG13,
-  MG14,
-  MG15,
-  MG16,
-  MG17 /*23*/,
-  PSCE /*24*/,
-  PSBE /*25*/,
-  CDC_layer0 /*4 - 26*/,
-  CDC_layer1,
-  CDC_layer2,
-  CDC_layer3,
-  CDC_layer4,
-  CDC_layer5,
-  CDC_layer6,
-  CDC_layer7,
-  CDC_layer8,
-  CDC_layer9,
-  CDC_layer10,
-  CDC_layer11,
-  CDC_layer12,
-  CDC_layer13,
-  CDC_layer14 /*18 - 40*/,
-  CDHBar /*19 - 41*/,
-  TrFwd0 /*20 - 42*/,
-  TrFwd1,
-  TrFwd2 /*22 - 44*/,
-  RPC_l /*23 - 44*/,
-  RPC_h /*24 - 45*/,
-  FMF2Stop0 /*25 - 46*/,
-  FMF2Stop1,
-  FMF2Stop2 /*27 - 48*/,
-  SIZEOF_G4SOLDETTYPE
-};
-
+  enum SolDet : int
+    {
+      InSi0 = 0,
+      InSi1,
+      InSi2,
+      InSi3 /*3*/,
+      TR1  /*4*/,
+      TR2  /*5*/,
+      PSFE /*6*/,
+      MG01 /*7*/,
+      MG02,
+      MG03,
+      MG04,
+      MG05,
+      MG06,
+      MG07,
+      MG08,
+      MG09,
+      MG10,
+      MG11,
+      MG12,
+      MG13,
+      MG14,
+      MG15,
+      MG16,
+      MG17 /*23*/,
+      PSCE /*24*/,
+      PSBE /*25*/,
+      CDC_layer0 /*4 - 26*/,
+      CDC_layer1,
+      CDC_layer2,
+      CDC_layer3,
+      CDC_layer4,
+      CDC_layer5,
+      CDC_layer6,
+      CDC_layer7,
+      CDC_layer8,
+      CDC_layer9,
+      CDC_layer10,
+      CDC_layer11,
+      CDC_layer12,
+      CDC_layer13,
+      CDC_layer14 /*18 - 40*/,
+      CDHBar /*19 - 41*/,
+      TrFwd0 /*20 - 42*/,
+      TrFwd1,
+      TrFwd2 /*22 - 44*/,
+      RPC_l /*23 - 44*/,
+      RPC_h /*24 - 45*/,
+      FMF2Stop0 /*25 - 46*/,
+      FMF2Stop1,
+      FMF2Stop2 /*27 - 48*/,
+      SIZEOF_G4SOLDETTYPE
+    };
+  
   constexpr auto nameLiteralDet = {  "InSi0", "InSi1", "InSi2", "InSi3", "TR1", "TR2", "PSFE", "MG01", "MG02", "MG03", "MG04",
 				     "MG05", "MG06", "MG07", "MG08", "MG09", "MG10", "MG11", "MG12", "MG13", "MG14", "MG15",
 				     "MG16", "MG17", "PSCE", "PSBE", "CDC0", "CDC1", "CDC2", "CDC3", "CDC4",
@@ -96,42 +96,40 @@ enum SolDet : int
 
   
   template <typename T, T... args>
-struct EnumIter : public std::iterator<std::input_iterator_tag, T, std::ptrdiff_t, const T*, const T&>
-{
-  static constexpr T values[] = {args...};
-  static constexpr std::size_t size = sizeof...(args);
+  struct EnumIter : public std::iterator<std::input_iterator_tag, T, std::ptrdiff_t, const T*, const T&>
+  {
+    static constexpr T values[] = {args...};
+    static constexpr std::size_t size = sizeof...(args);
 
-  int pos;
-  EnumIter() // No value is end
+    int pos;
+    EnumIter() // No value is end
       : pos(size)
-  {
-  }
-  EnumIter(T val) : pos(std::distance(&values[0], std::find(&values[0], &values[size], val))) {}
+    {    }
+    EnumIter(T val) : pos(std::distance(&values[0], std::find(&values[0], &values[size], val))) {}
 
-  const T& operator*() const { return values[pos]; }
-  EnumIter& operator++()
-  {
-    ++pos;
-    return *this;
-  }
-  EnumIter operator++(int)
-  {
-    EnumIter r(*this);
-    this->operator++();
-    return r;
-  }
-  bool operator==(EnumIter const& rhs) { return pos == rhs.pos; }
-  bool operator!=(EnumIter const& rhs) { return pos != rhs.pos; }
-};
-template <typename T, T... args>
-constexpr T EnumIter<T, args...>::values[];
-
-  typedef struct EnumIter<SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/, PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07, MG08, MG09,
-                        MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/, CDC_layer0 /*4 - 26*/, CDC_layer1,
-                        CDC_layer2, CDC_layer3, CDC_layer4, CDC_layer5, CDC_layer6, CDC_layer7, CDC_layer8, CDC_layer9, CDC_layer10,
-                        CDC_layer11, CDC_layer12, CDC_layer13, CDC_layer14 /*18 - 40*/, CDHBar /*19 - 41*/, TrFwd0 /*20 - 42*/, TrFwd1,
-                        TrFwd2 /*22 - 43*/, RPC_l /*23 - 44*/, RPC_h /*24 - 45*/, FMF2Stop0 /*25 - 46*/, FMF2Stop1, FMF2Stop2>
-    SolDetIter;
+    const T& operator*() const { return values[pos]; }
+    EnumIter& operator++()
+    {
+      ++pos;
+      return *this;
+    }
+    EnumIter operator++(int)
+    {
+      EnumIter r(*this);
+      this->operator++();
+      return r;
+    }
+    bool operator==(EnumIter const& rhs) { return pos == rhs.pos; }
+    bool operator!=(EnumIter const& rhs) { return pos != rhs.pos; }
+  };
+  template <typename T, T... args>
+  constexpr T EnumIter<T, args...>::values[];
+  using SolDetIter = struct EnumIter<SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/, PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07, MG08,
+				     MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/, CDC_layer0 /*4 - 26*/, CDC_layer1,
+				     CDC_layer2, CDC_layer3, CDC_layer4, CDC_layer5, CDC_layer6, CDC_layer7, CDC_layer8, CDC_layer9, CDC_layer10,
+				     CDC_layer11, CDC_layer12, CDC_layer13, CDC_layer14 /*18 - 40*/, CDHBar /*19 - 41*/, TrFwd0 /*20 - 42*/, TrFwd1,
+				     TrFwd2 /*22 - 43*/, RPC_l /*23 - 44*/, RPC_h /*24 - 45*/, FMF2Stop0 /*25 - 46*/, FMF2Stop1, FMF2Stop2> ;
+  
 }
 
 class MomRef

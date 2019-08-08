@@ -19,7 +19,7 @@
 
 #include "Math/ProbFunc.h"
 
-typedef TDataProcess<FullRecoEvent,MCAnaEvent> TDataProcessInterfaceMC;
+using TDataProcessInterfaceMC = TDataProcess<FullRecoEvent,MCAnaEvent> ;
 namespace MathKalmanFRS
 {
   struct Prob {

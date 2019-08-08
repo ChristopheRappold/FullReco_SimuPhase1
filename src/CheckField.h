@@ -9,7 +9,7 @@
 
 #include "THyphiAttributes.h"
 
-typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
+using TDataProcessInterface = TDataProcess<FullRecoEvent,MCAnaEventG4Sol>;
 
 class CheckField :  public TDataProcessInterface
 {
