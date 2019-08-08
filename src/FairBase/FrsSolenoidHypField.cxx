@@ -229,7 +229,8 @@ void FrsSolenoidHypField::SetPositionFromGeoManager(const TString& name_node)
   if(gGeoManager==nullptr)
     {
       cout<<" E - No gGeoManager initialized ! "<<endl;
-      Fatal("SetPosition","No gGeoManager");
+      Fatal("SetPositionFromGeoManager","No gGeoManager");
+      return;
     }
   
   TGeoNode* mother = gGeoManager->GetTopNode();
@@ -245,6 +246,13 @@ void FrsSolenoidHypField::SetPositionFromGeoManager(const TString& name_node)
       Solenoid_node = dynamic_cast<TGeoNodeMatrix*>(ListNodes->FindObject(name_node));
     }
   
+  if(Solenoid_node == nullptr)
+    {
+      cout<<" E - No Solenoid node found ! "<<endl;
+      Fatal("SetPositionFromGeoManager","No Solenoid_node found");
+      return;
+    }
+    
   TGeoTube* tempMag = (TGeoTube*) Solenoid_node->GetVolume()->GetShape();
   TGeoMatrix* MagneticField = (TGeoMatrix*) Solenoid_node->GetMatrix();
   
