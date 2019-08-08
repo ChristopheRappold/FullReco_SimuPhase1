@@ -91,7 +91,9 @@ int main(int argc,char** argv)
       case 's': std::cout<<"Start Event "<<optarg<<std::endl; Start=std::atoi(optarg); break;
       case 'g': std::cout<<"Geometry field :"<<optarg<<std::endl; nameGeo= std::string(optarg); break;
       case 'l': std::cout<<"Log level:"<<optarg<<std::endl; Log_lvl = std::atoi(optarg); break;
-      case '?': std::cerr <<"usage: "<<argv[0]<<" [-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-l lvllog] [--log lvllog] [-h]  OutputFile RootInputFile "<<std::endl; std::exit(1);
+      case '?': 
+      default:
+	std::cerr <<"usage: "<<argv[0]<<" [-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-l lvllog] [--log lvllog] [-h]  OutputFile RootInputFile "<<std::endl; std::exit(1);
       }
 	
   std::string name_in,name_out;
@@ -152,8 +154,8 @@ int main(int argc,char** argv)
       // HypHiMC_output_TREE ***********************
       Long64_t total_nentries=0;
       //Long64_t total_nentries_over_files=0;
-      int Start_event[3]={0,0,0};
-      int Stop_event[3]={0,0,0};
+      Long64_t Start_event[3]={0,0,0};
+      Long64_t Stop_event[3]={0,0,0};
 
 
 

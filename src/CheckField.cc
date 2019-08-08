@@ -55,7 +55,7 @@ int CheckField::Check()
       return 0;
     }
 
-  const Double_t* origin = sb->GetOrigin();
+  //const Double_t* origin = sb->GetOrigin();
   double Dx = sb->GetDX();
   double Dy = sb->GetDY();
   double Dz = sb->GetDZ();

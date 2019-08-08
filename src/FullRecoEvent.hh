@@ -22,7 +22,7 @@
 #include "SpacepointMeasurement.h"
 #include "ProlateSpacepointMeasurement.h"
 
-#include <assert.h>
+#include <cassert>
 
 class MomRef;
 class CompMomRef;

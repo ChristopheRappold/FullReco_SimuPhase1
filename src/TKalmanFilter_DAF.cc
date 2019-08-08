@@ -411,7 +411,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           continue;
         }
       const double charge = PDG_particle->Charge() / 3.;
-      const int PID = charge * charge;
+
       //std::cout<<"id_dets:"<<id_dets.size()<<" ";
       if(charge <= 1)
         {
@@ -435,7 +435,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 #ifdef DEBUG_KALMAN
       for(auto idet : id_dets)
 	att._logger->debug( "det:{} [{}] at Z:{}", std::get<1>(idet), std::get<2>(idet), std::get<0>(idet) );
-      
+
+      const int PID = charge * charge;
       att._logger->debug( " PID:{} {} {}", PID, charge, PDG);
 #endif
 
