@@ -49,7 +49,7 @@ public:
   {
     std::stringstream ss;
     ss<<"PDG_fromName cache \n";
-    for(auto it : cache_NucleiPID)
+    for(const auto& it : cache_NucleiPID)
       ss<<"["<<it.first<<", "<<it.second<<"] ";
     spdlog::get("Console")->info(ss.str());
   }

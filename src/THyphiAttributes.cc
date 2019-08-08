@@ -93,7 +93,7 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
   Field = new FrsSolenoidHypField();
 
   bool isWasa = false;
-  for(auto nameGeo : name_GeoVolumes)
+  for(const auto& nameGeo : name_GeoVolumes)
     if(nameGeo == "WASA")
       {
         isWasa = true;

@@ -12,7 +12,7 @@ class TDataProcess
   Ana_Hist* AnaHisto;
 
   TDataProcess():signature("proc_default"),AnaHisto(nullptr) {;}
-  explicit TDataProcess(const std::string name):signature(name),AnaHisto(nullptr) {;}
+  explicit TDataProcess(const std::string& name):signature(name),AnaHisto(nullptr) {;}
   virtual ~TDataProcess() { AnaHisto = nullptr;}
 
   virtual int Init(Ana_Hist* h) { AnaHisto = h; return 0;} 

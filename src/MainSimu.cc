@@ -220,7 +220,7 @@ int main(int argc,char** argv)
 	AllHits.emplace_back(new TTreeReaderArray<TG4Sol_Hit>(reader,name.c_str()));
 #else
       std::vector<TClonesArray*> AllHits;
-      for(auto name : *InputPar.nameDet)
+      for(const auto& name : *InputPar.nameDet)
 	{
 	  AllHits.emplace_back( new TClonesArray("TG4Sol_Hit",20));
 	  InTree->SetBranchAddress(name.c_str(),&AllHits.back());

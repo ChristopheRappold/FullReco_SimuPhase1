@@ -14,7 +14,7 @@
 // }
 
 
-EveSksField::EveSksField(TString namefield,bool Telsa,double fac,bool secondMagnet,double SBz,bool Solenoid):TEveMagField()
+EveSksField::EveSksField(const TString& namefield,bool Telsa,double fac,bool secondMagnet,double SBz,bool Solenoid):TEveMagField()
 {
 
   if(Telsa)

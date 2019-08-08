@@ -16,7 +16,7 @@ class EveSksField : public TEveMagField
   bool normalized;
 
 public:
-  EveSksField(TString n,bool Telsa=false,double fac =1.,bool SecondM = false,double Sbz = 10.,bool Solenoid=false);
+  EveSksField(const TString& n,bool Telsa=false,double fac =1.,bool SecondM = false,double Sbz = 10.,bool Solenoid=false);
   ~EveSksField();
 
   using   TEveMagField::GetField;

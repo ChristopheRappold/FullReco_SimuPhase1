@@ -188,10 +188,10 @@ class TVertex
   TMatrixT<double> Cov;
 
   TVertex(std::string t_, const TVector3& v_, double chi2_, int ndf_, const TMatrixT<double>& c_)
-      : type(t_), vertex(v_), Chi2(chi2_), Ndf(ndf_), Cov(c_)
+    : type(std::move(t_)), vertex(v_), Chi2(chi2_), Ndf(ndf_), Cov(c_)
   {
   }
-  TVertex(std::string t_) : type(t_), vertex(TVector3(0., 0., 0.)), Chi2(0.), Ndf(0), Cov(TMatrixT<double>(3, 3)) {}
+  explicit TVertex(std::string t_) : type(std::move(t_)), vertex(TVector3(0., 0., 0.)), Chi2(0.), Ndf(0), Cov(TMatrixT<double>(3, 3)) {}
 
   ~TVertex() = default;
 };

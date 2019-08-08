@@ -37,7 +37,7 @@ EveAladinField::EveAladinField(bool normalized_,double fac,bool Telsa,bool DoFie
 
 }
 
-EveAladinField::EveAladinField(TString namefield,bool normalized_,double fac,bool Telsa,bool DoFieldScaling,double p1_scaling):TEveMagField(),normalized(normalized_),scale(DoFieldScaling),factor(fac)
+EveAladinField::EveAladinField(const TString& namefield,bool normalized_,double fac,bool Telsa,bool DoFieldScaling,double p1_scaling):TEveMagField(),normalized(normalized_),scale(DoFieldScaling),factor(fac)
 {
 
   if(Telsa)

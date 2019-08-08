@@ -325,7 +325,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 	  AnaHisto->h_statsLess3Mes->Fill(namePDG.c_str(),"Less3MesCentral",1.);
 	  continue;
 	}
-      auto f_LastHitIsValid = [](const auto& it_ListHits, std::set<G4Sol::SolDet> listToTest) {
+      auto f_LastHitIsValid = [](const auto& it_ListHits, const std::set<G4Sol::SolDet>& listToTest) {
 
         for(auto it_det : listToTest)
           if(it_ListHits->second[it_det] >= 0)

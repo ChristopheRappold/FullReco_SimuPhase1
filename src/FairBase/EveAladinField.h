@@ -24,7 +24,7 @@ class EveAladinField : public TEveMagField
   
 public:
   EveAladinField(bool normalized_=true,double fac=0.7447,bool Telsa=false,bool DoFieldScaling=false,double p1_scaling=-3.7e-2);
-  EveAladinField(TString name_field,bool normalized_=true,double fac=0.7447,bool Telsa=false,bool DoFieldScaling=false,double p1_scaling=-3.7e-2);
+  EveAladinField(const TString& name_field,bool normalized_=true,double fac=0.7447,bool Telsa=false,bool DoFieldScaling=false,double p1_scaling=-3.7e-2);
   ~EveAladinField();
 
   using   TEveMagField::GetField;
