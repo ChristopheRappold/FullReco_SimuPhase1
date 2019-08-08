@@ -24,8 +24,8 @@ FullRecoTask::FullRecoTask():Attributes(),REvent()
 FullRecoTask::FullRecoTask(const std::list<std::string>& type,const std::list<std::string>& option,double FS, const DataSim& In):Attributes(type,option,FS,In),REvent()
 {
   Attributes._logger->info(" *** > FullRecoTask instance created | Reconstruction requested are :");
-  det_build = 0;
-  AnaHisto = 0;
+  det_build = nullptr;
+  AnaHisto = nullptr;
 
   //det_build = new TBuildDetectorLayerPlane(Attributes,Attributes.beam_only);
   det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
@@ -41,13 +41,13 @@ FullRecoTask::~FullRecoTask()
 {
   //delete REvent;
   //FieldMap.clear();
-  AnaHisto=0;
+  AnaHisto=nullptr;
   delete det_build;
-  det_build = 0;
+  det_build = nullptr;
   for(auto process = list_processMC.begin(), process_last = list_processMC.end(); process!=process_last;++process)
     {
       delete (*process);
-      *process = 0;
+      *process = nullptr;
     }
 }
 

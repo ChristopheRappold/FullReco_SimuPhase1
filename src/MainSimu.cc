@@ -190,9 +190,9 @@ int main(int argc,char** argv)
 
       TFile* input_file = new TFile(name_in.c_str());
 
-      TTree* InTree = 0;
+      TTree* InTree = nullptr;
       InTree = dynamic_cast<TTree*> (input_file->Get("G4Tree"));
-      assert(InTree!=0);
+      assert(InTree!=nullptr);
 
       DataSim InputPar{nullptr,nullptr}; 
       InputPar.nameDet = (std::vector<std::string>*)(input_file->Get("nameDet"));
@@ -208,7 +208,7 @@ int main(int argc,char** argv)
 	  ConsoleLogger->error("E> Load simParameters not possible ! {}", fmt::ptr(input_file->Get("simParameters")));
 	  return -1;
 	}
-      TG4Sol_Event* fEvent = 0;
+      TG4Sol_Event* fEvent = nullptr;
       InTree->SetBranchAddress("TG4Sol_Event", &fEvent);
 
 #ifdef ROOT6

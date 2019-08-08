@@ -79,28 +79,28 @@ TKalmanFilter_DAF::TKalmanFilter_DAF(const THyphiAttributes& attribut) : TDataPr
 
 TKalmanFilter_DAF::~TKalmanFilter_DAF()
 {
-  if(Vtracks != NULL)
+  if(Vtracks != nullptr)
     {
       delete Vtracks;
-      Vtracks = 0;
+      Vtracks = nullptr;
     }
 
-  if(Fitter != NULL)
+  if(Fitter != nullptr)
     {
       delete Fitter;
-      Fitter = 0;
+      Fitter = nullptr;
     }
-  if(Fitter_rescue != NULL)
+  if(Fitter_rescue != nullptr)
     {
       delete Fitter_rescue;
-      Fitter_rescue = 0;
+      Fitter_rescue = nullptr;
     }
 
   for(auto& elem : list_Plane)
-    if(elem != 0)
+    if(elem != nullptr)
       {
         delete elem;
-        elem = 0;
+        elem = nullptr;
       }
 }
 

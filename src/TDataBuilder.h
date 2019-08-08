@@ -12,9 +12,9 @@ class TDataBuilder
   const std::string signature;
   Ana_Hist* AnaHisto;
 
-  TDataBuilder():signature("build_default"),AnaHisto(NULL) {;}
-  TDataBuilder(const std::string name):signature(name),AnaHisto(NULL) {;}
-  virtual ~TDataBuilder() { AnaHisto = 0;}
+  TDataBuilder():signature("build_default"),AnaHisto(nullptr) {;}
+  explicit TDataBuilder(const std::string name):signature(name),AnaHisto(nullptr) {;}
+  virtual ~TDataBuilder() { AnaHisto = nullptr;}
 
   virtual int Init(Ana_Hist* h) { AnaHisto = h; return 0;}
 

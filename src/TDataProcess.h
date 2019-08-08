@@ -11,9 +11,9 @@ class TDataProcess
   const std::string signature;
   Ana_Hist* AnaHisto;
 
-  TDataProcess():signature("proc_default"),AnaHisto(NULL) {;}
-  TDataProcess(const std::string name):signature(name),AnaHisto(NULL) {;}
-  virtual ~TDataProcess() { AnaHisto = 0;}
+  TDataProcess():signature("proc_default"),AnaHisto(nullptr) {;}
+  explicit TDataProcess(const std::string name):signature(name),AnaHisto(nullptr) {;}
+  virtual ~TDataProcess() { AnaHisto = nullptr;}
 
   virtual int Init(Ana_Hist* h) { AnaHisto = h; return 0;} 
   virtual int operator() (T0& t1,T1* t2) = 0;
