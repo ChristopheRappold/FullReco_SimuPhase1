@@ -37,11 +37,11 @@ Now all repositories are set.
 
 4.  The local directory should look like this:
 
-geo/
-src/
-src/.deps
-lib/
-input/
+geo/ \
+src/ \
+src/.deps \
+lib/ \
+input/ \
 field/
 
 The following directories are mandatory : geo/, src/, src/.deps and lib/. 
@@ -125,17 +125,19 @@ You will have the libraries in lib/ and the executable ./MainSimu
 ./MainSimu -e 1000 -g ./geo/GeoWasaRealSolenoidFront.root Output.root run_H3LWithA_WasaFront3_Field1.8T.root
 
 command line options:
---help / -h : prompt the help
---cpu / -c : number of cpus 
---num / -n : cpu id for event splitting
---event / -e : total number of event to analyze
---start / -s : start from this event id
---geo / -g : path to geometry rootfile to use 
---log / -l : setting the level of logging: -1 = quiet mode, no stdout output / 0 = warning and higher / 1 = info and higher / 2 = debug and higher (default being 1)  
+
+--help / -h : prompt the help \
+--cpu / -c : number of cpus \
+--num / -n : cpu id for event splitting \
+--event / -e : total number of event to analyze \
+--start / -s : start from this event id \
+--geo / -g : path to geometry rootfile to use \
+--log / -l : setting the level of logging: -1 = quiet mode, no stdout output / 0 = warning and higher / 1 = info and higher / 2 = debug and higher (default being 1) 
+
 
 Usage / help message:
 
-!> Example of use:
+!> Example of use: \
 !> ./MainSimu [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-l lvllog] [--log lvllog] [-h] [--help] OutputFile RootInputFile
 
 It takes first the command line options, then the output rootfile name, then one input rootfile name.
