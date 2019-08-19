@@ -92,6 +92,24 @@ make
 make install
 ```
 
+In src/spdlog: you need also to have a build directory:
+```sh
+cd src/spdlog
+mkdir build
+```
+
+Now spdlog can configure with:
+```sh
+cd build
+cmake .. -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=..
+```
+
+And spdlog can be built:
+```sh
+make
+make install
+```
+
 Then to build everything (-j# is for parallel compilation with # being number of cpu):
 ```sh
 cd src
@@ -113,11 +131,12 @@ command line options:
 --event / -e : total number of event to analyze
 --start / -s : start from this event id
 --geo / -g : path to geometry rootfile to use 
+--log / -l : setting the level of logging: -1 = quiet mode, no stdout output / 0 = warning and higher / 1 = info and higher / 2 = debug and higher (default being 1)  
 
 Usage / help message:
 
 !> Example of use:
-!> ./MainSimu[-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-h] [--help] OutputFile RootInputFile
+!> ./MainSimu [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-l lvllog] [--log lvllog] [-h] [--help] OutputFile RootInputFile
 
 It takes first the command line options, then the output rootfile name, then one input rootfile name.
 
