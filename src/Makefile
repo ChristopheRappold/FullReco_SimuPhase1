@@ -57,7 +57,7 @@ LIB_PROFILING = #-L/home/christophe/Workspace/gperftools-2.4/lib -ltcmalloc #-lp
 DEPEND        = makedepend $(CXXFLAGS)
 
 #--------------------------------------------------------------------
-Sources = MainSimu.cc FullRecoEvent.cc Ana_Hist.cc  
+Sources = MainSimu.cc FullRecoEvent.cc FullRecoConfig.cc Ana_Hist.cc  
 Headers = $(patsubst %.cc,%.hh,$(Sources))
 Objects = $(patsubst %.cc,%.o,$(Sources))
 
