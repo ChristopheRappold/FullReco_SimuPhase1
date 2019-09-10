@@ -42,7 +42,8 @@ src/ \
 src/.deps \
 lib/ \
 input/ \
-field/
+field/ \
+config/
 
 The following directories are mandatory : geo/, src/, src/.deps and lib/. 
 If lib or .deps is missing just:
@@ -51,13 +52,14 @@ mkdir lib
 mkdir src/.deps
 
 ```
-| Dir:   | Usage:                                            |
-|--------|---------------------------------------------------|
-| geo/   | Gathers geometry rootfiles                        | 
-| src/   | Source directory                                  |
-| lib/   | Installation directory for the compiled libraries |
-| input/ | Gathers parameter files for calibrations          |
-| field/ | Gathers field map files                           |
+| Dir:    | Usage:                                            |
+|---------|---------------------------------------------------|
+| geo/    | Gathers geometry rootfiles                        | 
+| src/    | Source directory                                  |
+| lib/    | Installation directory for the compiled libraries |
+| input/  | Gathers parameter files for calibrations          |
+| field/  | Gathers field map files                           |
+| config/ | Gathers the configuration files                   |
 
 ## Requirements
 
@@ -132,13 +134,14 @@ command line options:
 --event / -e : total number of event to analyze \
 --start / -s : start from this event id \
 --geo / -g : path to geometry rootfile to use \
+--config / -f : path to the configuration file to use \
 --log / -l : setting the level of logging: -1 = quiet mode, no stdout output / 0 = warning and higher / 1 = info and higher / 2 = debug and higher (default being 1) 
 
 
 Usage / help message:
 
 !> Example of use: \
-!> ./MainSimu [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-l lvllog] [--log lvllog] [-h] [--help] OutputFile RootInputFile
+!> ./MainSimu [-f Config.cfg] [--config Config.cfg] [-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] [--start start_ev] [-e nb_event] [--event nb_event] [-l lvllog] [--log lvllog] [-h]  OutputFile RootInputFile 
 
 It takes first the command line options, then the output rootfile name, then one input rootfile name.
 
