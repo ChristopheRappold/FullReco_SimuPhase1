@@ -32,9 +32,8 @@
 //   Init_Para();
 // }
 
-THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std::list<std::string>& option, double FieldScalingFactor,
-                                   const DataSim& In)
-    : Field(nullptr), InputPar(In)
+THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& In)
+  : Field(nullptr), Config(config), InputPar(In)
 {
   _logger = spdlog::get("Console");
   _logger->info( "THyphiAttributes()" );
@@ -46,45 +45,24 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
   Debug_DAF = false;
   DoNoMaterial = false;
 
-  for(const auto& opt : option)
-    {
-      if(opt == "G4_simu")
-        G4_simu = true;
-      else if(opt == "G4_TimeReso")
-        G4_TimeResolution = true;
-      else if(opt == "G4_GeoReso")
-        G4_GeoResolution = true;
-      else if(opt == "back_tracking")
-        back_tracking = true;
-      else if(opt == "beam_only")
-        beam_only = true;
-      else if(opt == "Debug_DAF")
-        Debug_DAF = true;
-      else if(opt == "NoMaterial")
-        DoNoMaterial = true;
-      else
-        {
-          size_t found;
-          found = opt.find("CPU");
-          if(found != std::string::npos)
-            {
-              std::string substring(opt.substr(found + 3));
-              Nb_CPU = std::atoi(substring.c_str());
-            }
-          found = opt.find("Fraction");
-          if(found != std::string::npos)
-            {
-              std::string substring(opt.substr(found + 8));
-              Nb_Fraction = std::atoi(substring.c_str());
-            }
-	  found = opt.find("Event");
-	  if(found != std::string::npos)
-	    {
-	      std::string substring(opt.substr(found + 5));
-              NEvent = std::atoi(substring.c_str());
-	    }
-        }
-    }
+  if(Config.IsAvailable("G4_simu"))
+    G4_simu = true;
+  if(Config.IsAvailable("G4_TimeReso"))
+    G4_TimeResolution = true;
+  if(Config.IsAvailable( "G4_GeoReso"))
+    G4_GeoResolution = true;
+  if(Config.IsAvailable( "back_tracking"))
+    back_tracking = true;
+  if(Config.IsAvailable( "beam_only"))
+    beam_only = true;
+  if(Config.IsAvailable( "Debug_DAF"))
+    Debug_DAF = true;
+  if(Config.IsAvailable( "NoMaterial"))
+    DoNoMaterial = true;
+  
+  Nb_CPU = Config.Get<int>("Nb_CPU");
+  Nb_Fraction = Config.Get<int>("Nb_Fraction");
+  NEvent = Config.Get<int>("Nb_Event");
 
   Init_Para();
 
@@ -161,8 +139,8 @@ THyphiAttributes::THyphiAttributes(const std::list<std::string>& type, const std
 
 int THyphiAttributes::Init_Para()
 {
-  Nb_CPU = 1;
-  Nb_Fraction = 1;
+  //Nb_CPU = 1;
+  //Nb_Fraction = 1;
 
   auto posTargetX = InputPar.simParameters->find("Target_PosX");
   Target_PositionX = posTargetX->second;

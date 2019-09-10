@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 //#include "TRandom3.h"
+#include "FullRecoConfig.hh"
+
 #include "FairBase/FrsSksHypFieldMapFull.h"
 #include "FairBase/HypConstField.h"
 #include "FairBase/HypFieldMap.h"
@@ -51,12 +53,13 @@ class THyphiAttributes
 
   FairField* Field;
 
+  const FullRecoConfig& Config;
   const DataSim& InputPar;
 
   std::shared_ptr<spdlog::logger> _logger;
   
   THyphiAttributes() = delete;
-  THyphiAttributes(const std::list<std::string>& type, const std::list<std::string>& option, double FS, const DataSim& InputParameters);
+  THyphiAttributes(const FullRecoConfig& conf, const DataSim& InputParameters);
   ~THyphiAttributes() = default;
 
   int Init_Para();

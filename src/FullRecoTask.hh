@@ -17,6 +17,7 @@
 #include "TDataProcess.h"
 #include "TDataBuilder.h"
 
+#include "FullRecoConfig.hh"
 #include "THyphiAttributes.h"
 #include "Ana_Hist.hh"
 #include "Debug.hh"
@@ -27,13 +28,14 @@
 
 class FullRecoEvent;
 class Ana_Hist;
+class FullRecoConfig;
 
 class FullRecoTask
 {
 
 public :
   FullRecoTask() = delete;
-  FullRecoTask(const std::list<std::string>& type,const std::list<std::string>& opt,double FS, const DataSim& In);
+  FullRecoTask(const FullRecoConfig& config, const DataSim& In);
   ~FullRecoTask();
   
   //int EventLoop(THypHi_Event *event,std::vector<TUTracker_Event*> *UTrackerEvents,Ana_Event* OutTree);

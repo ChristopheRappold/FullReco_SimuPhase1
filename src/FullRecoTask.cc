@@ -21,7 +21,7 @@
 
 
 
-FullRecoTask::FullRecoTask(const std::list<std::string>& type,const std::list<std::string>& option,double FS, const DataSim& In):Attributes(type,option,FS,In),REvent()
+FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attributes(config,In),REvent()
 {
   Attributes._logger->info(" *** > FullRecoTask instance created | Reconstruction requested are :");
   det_build = nullptr;
