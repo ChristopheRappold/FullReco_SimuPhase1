@@ -63,6 +63,47 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   Nb_CPU = Config.Get<int>("Nb_CPU");
   Nb_Fraction = Config.Get<int>("Nb_Fraction");
   NEvent = Config.Get<int>("Nb_Event");
+  if(Config.IsAvailable("MultiThreading"))
+    {
+      RunType = MultiTh;
+      IsMain = true;
+      NQueue   = Config.IsAvailable("Queue_Size")     ? Config.Get<int>("Queue_Size")     : 10;
+      NBuilder = Config.IsAvailable("Nb_DataBuilder") ? Config.Get<int>("Nb_DataBuilder") : 1;
+      NKalman  = Config.IsAvailable("Nb_TrackFitter") ? Config.Get<int>("Nb_TrackFitter") : 1;
+      NMerger  = Config.IsAvailable("Nb_DataMerger")  ? Config.Get<int>("Nb_DataMerger")  : 1;
+    }
+  else if(Config.IsAvailable("ZeroMQ"))
+    {
+      RunType = ZeroMQ;
+      NQueue   = -1;
+      IsMain = Config.IsAvailable("ZMQ_Main") ? Config.Get<bool>("ZMQ_Main") : true;
+      NBuilder = Config.IsAvailable("Nb_DataBuilder") ? Config.Get<int>("Nb_DataBuilder") : 1;
+      NKalman  = Config.IsAvailable("Nb_TrackFitter") ? Config.Get<int>("Nb_TrackFitter") : 1;
+      NMerger  = Config.IsAvailable("Nb_DataMerger")  ? Config.Get<int>("Nb_DataMerger")  : 1;
+
+      addr_initEvent = Config.IsAvailable("Addr_InitEvent") ? Config.Get<std::string>("Addr_InitEvent") : "inproc://Nevent";
+      
+      addr_frontBuilder = Config.IsAvailable("Addr_InputBuilder") ? Config.Get<std::string>("Addr_InputBuilder") : "inproc://Q0";
+      addr_backFitter = Config.IsAvailable("Addr_OutputBuilder") ? Config.Get<std::string>("Addr_OutputBuilder") : "inproc://Q0out";
+      
+      addr_frontFitter = Config.IsAvailable("Addr_InputFitter") ? Config.Get<std::string>("Addr_InputFitter") : "inproc://Q1";
+      addr_backMerger = Config.IsAvailable("Addr_OutputFitter") ? Config.Get<std::string>("Addr_OutputFitter") : "inproc://Q1out";
+      
+      addr_frontMerger = Config.IsAvailable("Addr_InputMerger") ? Config.Get<std::string>("Addr_InputMerger") : "inproc://Q2";
+      addr_backEnd = Config.IsAvailable("Addr_OutputMerger") ? Config.Get<std::string>("Addr_OutputMerger") : "inproc://Q2out";
+      
+      addr_control = Config.IsAvailable("Addr_EndControl") ? Config.Get<std::string>("Addr_EndControl") : "inproc://controlQ";
+
+      addr_monitor = Config.IsAvailable("Addr_Monitor") ? Config.Get<std::string>("Addr_Monitor") : "tcp://127.0.0.1:9876";
+    }
+  else
+    {
+      RunType = SingleTh;
+      NQueue   = -1;
+      NBuilder = 1;
+      NKalman  = 1;
+      NMerger  = 1;
+    }
 
   Init_Para();
 
@@ -133,6 +174,10 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   // genfit::FieldManager::getInstance()->getFieldVal(0.,0.,155.5,bx,by,bz);
   // std::cout<<"(0,0,155.5) bz:"<<bz<<"\n";
 
+
+  gGeoManager->CloseGeometry();
+  if(Config.IsAvailable("MultiThreading"))
+    gGeoManager->SetMaxThreads(NKalman);
   
   _logger->info( " done ");
 }
@@ -163,6 +208,6 @@ int THyphiAttributes::Init_Para()
       name_GeoVolumes.push_back(name_vol_temp);
     }
   name_GeoVolumes.push_back("Total");
-
+  
   return 0;
 }

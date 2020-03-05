@@ -30,6 +30,35 @@ class THyphiAttributes
   int Nb_CPU;
   int Nb_Fraction;
   int NEvent;
+
+  enum MTtype : int
+    {
+      SingleTh = 0,
+      MultiTh,
+      ZeroMQ,
+    };
+  MTtype RunType;
+
+  bool IsMain;
+  int NQueue;
+  int NBuilder;
+  int NKalman;
+  int NMerger;
+
+  std::string addr_initEvent; 
+                   
+  std::string addr_frontBuilder;
+  std::string addr_backFitter;
+                   
+  std::string addr_frontFitter; 
+  std::string addr_backMerger;
+                   
+  std::string addr_frontMerger; 
+  std::string addr_backEnd;
+                   
+  std::string addr_control;
+  std::string addr_monitor;
+  
   bool G4_simu;
   bool G4_TimeResolution;
   bool G4_GeoResolution;
