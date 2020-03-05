@@ -18,7 +18,9 @@
 CheckField::CheckField(const THyphiAttributes& attribut):TDataProcessInterface("check_field"),att(attribut),done(0)
 { }
 
-int CheckField::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
+void CheckField::InitMT() {att._logger->error("E> Not supposed to be multithreaded !"); }
+
+ReturnRes::InfoM CheckField::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
 {
 
   if(done==0)
@@ -34,11 +36,23 @@ int CheckField::Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
   return Check();
 }
 
-int CheckField::SoftExit(int result_full)
+ReturnRes::InfoM CheckField::SoftExit(int result_full)
 {
-  return result_full;    
+  return ReturnRes::Fine;    
 }
 
+void CheckField::SelectHists()
+{
+  for(size_t i=0;i<3;++i)
+    {
+      LocalHisto.FieldXY[i]   = AnaHisto->CloneAndRegister(AnaHisto->FieldXY[i]); 
+      LocalHisto.FieldXZ[i]   = AnaHisto->CloneAndRegister(AnaHisto->FieldXZ[i]); 
+      LocalHisto.FieldYZ[i]   = AnaHisto->CloneAndRegister(AnaHisto->FieldYZ[i]); 
+      LocalHisto.FieldXY_n[i] = AnaHisto->CloneAndRegister(AnaHisto->FieldXY_n[i]); 
+      LocalHisto.FieldXZ_n[i] = AnaHisto->CloneAndRegister(AnaHisto->FieldXZ_n[i]); 
+      LocalHisto.FieldYZ_n[i] = AnaHisto->CloneAndRegister(AnaHisto->FieldYZ_n[i]); 
+    }
+}
 
 int CheckField::Check()
 {
@@ -88,13 +102,13 @@ int CheckField::Check()
 	  for(int k=0;k<3;++k)
 	    if(TMath::Abs(b[k])>1e-10)
 	      {
-		AnaHisto->FieldXY[k]->Fill(x,y,b[k]);
-		AnaHisto->FieldXZ[k]->Fill(x,z,b[k]);
-		AnaHisto->FieldYZ[k]->Fill(y,z,b[k]);
+		LocalHisto.FieldXY[k]->Fill(x,y,b[k]);
+		LocalHisto.FieldXZ[k]->Fill(x,z,b[k]);
+		LocalHisto.FieldYZ[k]->Fill(y,z,b[k]);
 
-		AnaHisto->FieldXY_n[k]->Fill(x,y);
-		AnaHisto->FieldXZ_n[k]->Fill(x,z);
-		AnaHisto->FieldYZ_n[k]->Fill(y,z);
+		LocalHisto.FieldXY_n[k]->Fill(x,y);
+		LocalHisto.FieldXZ_n[k]->Fill(x,z);
+		LocalHisto.FieldYZ_n[k]->Fill(y,z);
 	      }
 	}
   

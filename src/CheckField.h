@@ -20,15 +20,27 @@ class CheckField :  public TDataProcessInterface
   CheckField(const THyphiAttributes& attr);
   ~CheckField() final = default;
 
-  //int Init(Ana_Hist* h);
-  int operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
+  void InitMT() final;
+  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
  private:
   int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
-  int SoftExit(int) final;
+  ReturnRes::InfoM SoftExit(int) final;
+  void SelectHists() final;
   int Check();
 
   bool done;
-  
+
+  struct LocalHists
+  {
+    TH2F* FieldXY[3]; 
+    TH2F* FieldXZ[3]; 
+    TH2F* FieldYZ[3]; 
+    TH2F* FieldXY_n[3];
+    TH2F* FieldXZ_n[3];
+    TH2F* FieldYZ_n[3];
+  };
+  LocalHists LocalHisto;
+
 };
 
 

@@ -104,7 +104,9 @@ TKalmanFilter_DAF::~TKalmanFilter_DAF()
       }
 }
 
-int TKalmanFilter_DAF::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+void TKalmanFilter_DAF::InitMT() {att._logger->error("E> Not supposed to be multithreaded !"); }
+
+ReturnRes::InfoM TKalmanFilter_DAF::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 {
 
   int result_mom = Exec(RecoEvent, OutTree);
@@ -121,6 +123,60 @@ int TKalmanFilter_DAF::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* Out
 
   return SoftExit(result_mom);
 }
+
+void TKalmanFilter_DAF::SelectHists()
+{
+
+
+  LocalHisto.h_stats         = AnaHisto->CloneAndRegister(AnaHisto->h_stats);
+  LocalHisto.h_statsLess3Mes = AnaHisto->CloneAndRegister(AnaHisto->h_statsLess3Mes);
+  LocalHisto.h_statsInvalid  = AnaHisto->CloneAndRegister(AnaHisto->h_statsInvalid);
+  LocalHisto.h_pv            = AnaHisto->CloneAndRegister(AnaHisto->h_pv);
+  LocalHisto.h_chi2          = AnaHisto->CloneAndRegister(AnaHisto->h_chi2);
+  for(size_t i = 0; i < 2; ++i)
+    {
+      LocalHisto.hd_chi[i] = AnaHisto->CloneAndRegister(AnaHisto->hd_chi[i]);
+      LocalHisto.hd_pv[i]  = AnaHisto->CloneAndRegister(AnaHisto->hd_pv[i]);
+    }
+  LocalHisto.h_Path             = AnaHisto->CloneAndRegister(AnaHisto->h_Path);
+  LocalHisto.h_MeanPath         = AnaHisto->CloneAndRegister(AnaHisto->h_MeanPath);
+  LocalHisto.h_beta             = AnaHisto->CloneAndRegister(AnaHisto->h_beta);
+  LocalHisto.h_beta2            = AnaHisto->CloneAndRegister(AnaHisto->h_beta2);
+  LocalHisto.h_beta3            = AnaHisto->CloneAndRegister(AnaHisto->h_beta3);
+  LocalHisto.h_Mass_All         = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_All);
+  LocalHisto.h_Mass_All2        = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_All2);
+  LocalHisto.h_Mass_All3        = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_All3);
+  LocalHisto.h_Mass_charge_All  = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_charge_All);
+  LocalHisto.h_Mass_charge_All2 = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_charge_All2);
+  LocalHisto.h_Mass_charge_All3 = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_charge_All3);
+  LocalHisto.h_beta_mom         = AnaHisto->CloneAndRegister(AnaHisto->h_beta_mom);
+  LocalHisto.h_beta_mom2        = AnaHisto->CloneAndRegister(AnaHisto->h_beta_mom2);
+  LocalHisto.h_beta_mom3        = AnaHisto->CloneAndRegister(AnaHisto->h_beta_mom3);
+  LocalHisto.h_pv_mom           = AnaHisto->CloneAndRegister(AnaHisto->h_pv_mom);
+  LocalHisto.h_pv_beta          = AnaHisto->CloneAndRegister(AnaHisto->h_pv_beta);
+  LocalHisto.h_pv_mass          = AnaHisto->CloneAndRegister(AnaHisto->h_pv_mass);
+  LocalHisto.h_path_tof         = AnaHisto->CloneAndRegister(AnaHisto->h_path_tof);
+  LocalHisto.h_mom_tof_cut      = AnaHisto->CloneAndRegister(AnaHisto->h_mom_tof_cut);
+  LocalHisto.h_path_mom_cut     = AnaHisto->CloneAndRegister(AnaHisto->h_path_mom_cut);
+  LocalHisto.h_path_tof_cut     = AnaHisto->CloneAndRegister(AnaHisto->h_path_tof_cut);
+  for(size_t i = 0; i < 4; ++i)
+    {
+      LocalHisto.h_Mass[i]          = AnaHisto->CloneAndRegister(AnaHisto->h_Mass[i]);
+      LocalHisto.h_chi2_particle[i] = AnaHisto->CloneAndRegister(AnaHisto->h_chi2_particle[i]);
+      LocalHisto.h_pv_particle[i]   = AnaHisto->CloneAndRegister(AnaHisto->h_pv_particle[i]);
+    }
+  for(size_t i = 0; i < 5; ++i)
+    {
+      LocalHisto.h_mom_res[i] = AnaHisto->CloneAndRegister(AnaHisto->h_mom_res[i]);
+      for(size_t j = 0; j < 10; ++j)
+        {
+          LocalHisto.h_ResPull[i][j]       = AnaHisto->CloneAndRegister(AnaHisto->h_ResPull[i][j]);
+          LocalHisto.h_ResPull_normal[i][j] = AnaHisto->CloneAndRegister(AnaHisto->h_ResPull_normal[i][j]);
+        }
+    }
+  LocalHisto.h_total_dE = AnaHisto->CloneAndRegister(AnaHisto->h_total_dE);
+}
+
 
 int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 {
@@ -196,7 +252,7 @@ int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
   return result_kalman;
 }
 
-int TKalmanFilter_DAF::SoftExit(int result_full) { return result_full; }
+ReturnRes::InfoM TKalmanFilter_DAF::SoftExit(int result_full) { return ReturnRes::Fine; }
 
 int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 {
@@ -298,7 +354,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 #ifdef DEBUG_KALMAN
           att._logger->debug( "!> less than 3 measurements: {}", id_dets.size() );
 #endif
-	  AnaHisto->h_stats->Fill("Less3Mes",1);
+	  LocalHisto.h_stats->Fill("Less3Mes",1);
 	  int idPDG = 0;
           for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
 	    if(it_trackInfo.second[i].pdg!=idPDG)
@@ -307,13 +363,13 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 		break;
 	      }
 	  std::string namePDG = std::to_string(idPDG);
-	  AnaHisto->h_statsLess3Mes->Fill(namePDG.c_str(),"Less3Mes",1.);
+	  LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(),"Less3Mes",1.);
 	  
           continue;
         }
       if(n_Central<9)
 	{
-	  AnaHisto->h_stats->Fill("Less3MesCentral",1);
+	  LocalHisto.h_stats->Fill("Less3MesCentral",1);
 	  int idPDG = 0;
           for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
 	    if(it_trackInfo.second[i].pdg!=idPDG)
@@ -322,7 +378,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 		break;
 	      }
 	  std::string namePDG = std::to_string(idPDG);
-	  AnaHisto->h_statsLess3Mes->Fill(namePDG.c_str(),"Less3MesCentral",1.);
+	  LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(),"Less3MesCentral",1.);
 	  continue;
 	}
       auto f_LastHitIsValid = [](const auto& it_ListHits, const std::set<G4Sol::SolDet>& listToTest) {
@@ -366,14 +422,14 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 	      att._logger->debug( "stat :{}", s3[i].str() );
             }
 #endif
-	  AnaHisto->h_stats->Fill("NoValidLastHit",1.);
+	  LocalHisto.h_stats->Fill("NoValidLastHit",1.);
 
 	  std::string namePDG = std::to_string(idPDG);
 	  for(auto it_det = it_ListHits->second.crbegin(), it_det_end = it_ListHits->second.crend(); it_det != it_det_end ; ++it_det)
 	    if(*it_det>=0)
 	      {
 		int id_det_inv = it_ListHits->second.size()-1-std::distance(it_ListHits->second.crbegin(), it_det);
-		AnaHisto->h_statsInvalid->Fill(namePDG.c_str(),G4Sol::nameLiteralDet.begin()[id_det_inv],1.);
+		LocalHisto.h_statsInvalid->Fill(namePDG.c_str(),G4Sol::nameLiteralDet.begin()[id_det_inv],1.);
 		break;
 	      }
 	  continue;
@@ -403,7 +459,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       const int PDG = static_cast<int>(track_state.pdg);
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(PDG);
 
-      AnaHisto->h_total_dE->Fill(PDG_particle->GetName(),total_dE,1.);
+      LocalHisto.h_total_dE->Fill(PDG_particle->GetName(),total_dE,1.);
       
       if(PDG_particle == nullptr)
         {
@@ -663,7 +719,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 	  
           att._logger->info( "*** FITTER EXCEPTION *** Rescue fitter take place !");
           att._logger->info( e1.what() );
-          AnaHisto->h_stats->Fill("Exc:RescueFit", 1.);
+          LocalHisto.h_stats->Fill("Exc:RescueFit", 1.);
 
           try
             {
@@ -674,7 +730,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             {
               att._logger->info( "*** FITTER Rescue EXCEPTION *** cancel fit !" );
               att._logger->info(e2.what() );
-              AnaHisto->h_stats->Fill("Exc:FitFail", 1.);
+              LocalHisto.h_stats->Fill("Exc:FitFail", 1.);
 
               continue;
             }
@@ -699,7 +755,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           if(tp == NULL)
             {
               att._logger->info( "Track has no TrackPoint with fitterInfo!");
-              AnaHisto->h_stats->Fill("Exc:NoTrackPointInfo", 1.);
+              LocalHisto.h_stats->Fill("Exc:NoTrackPointInfo", 1.);
               continue;
             }
 
@@ -715,7 +771,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           catch(genfit::Exception& e)
             {
               //std::cerr << "Exception, next track" << std::endl;
-              AnaHisto->h_stats->Fill("Exc:FitBacktoOrig", 1.);
+              LocalHisto.h_stats->Fill("Exc:FitBacktoOrig", 1.);
               //std::cerr << e.what();
               continue;
             }
@@ -780,8 +836,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           tempResults.pvalue = p_value;
 
-          AnaHisto->h_pv->Fill(p_value2);
-          AnaHisto->h_chi2->Fill(chi2);
+          LocalHisto.h_pv->Fill(p_value2);
+          LocalHisto.h_chi2->Fill(chi2);
 
 // h_chi2_smooth->Fill(Vtracks[itr]->getChiSquSmooth());
 
@@ -793,13 +849,13 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           if(charge > 0)
             {
-              AnaHisto->hd_chi[0]->Fill(chi2 / ndf);
-              AnaHisto->hd_pv[0]->Fill(p_value2);
+              LocalHisto.hd_chi[0]->Fill(chi2 / ndf);
+              LocalHisto.hd_pv[0]->Fill(p_value2);
             }
           else
             {
-              AnaHisto->hd_chi[1]->Fill(chi2 / ndf);
-              AnaHisto->hd_pv[1]->Fill(p_value2);
+              LocalHisto.hd_chi[1]->Fill(chi2 / ndf);
+              LocalHisto.hd_pv[1]->Fill(p_value2);
             }
 
           // GFDetPlane InitPlane(RecoEvent.ListHitsDAF[id_track][TR1X][0]->getDetPlane(rep));
@@ -838,7 +894,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             {
               att._logger->info( "could not get TrackLen ! ");
               att._logger->info( e.what() );
-              AnaHisto->h_stats->Fill("Exc:TrackLen", 1.);
+              LocalHisto.h_stats->Fill("Exc:TrackLen", 1.);
               continue;
             }
           try
@@ -852,7 +908,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             {
               att._logger->info( "could not get TOF! ");
 	      att._logger->info(e.what());
-              AnaHisto->h_stats->Fill("Exc:TOF", 1.);
+              LocalHisto.h_stats->Fill("Exc:TOF", 1.);
               continue;
             }
 
@@ -864,17 +920,17 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                                              // 	  if(ndf==1)
                                              // 	    Path_lengthMean=Path_length;
 
-          AnaHisto->h_Path->Fill(Path_length);
-          // AnaHisto->h_Path_Back->Fill(Path_lengthB);
-          AnaHisto->h_MeanPath->Fill(Path_lengthMean);
-// AnaHisto->h_dpath->Fill(Path_lengthB-Path_length);
+          LocalHisto.h_Path->Fill(Path_length);
+          // LocalHisto.h_Path_Back->Fill(Path_lengthB);
+          LocalHisto.h_MeanPath->Fill(Path_lengthMean);
+// LocalHisto.h_dpath->Fill(Path_lengthB-Path_length);
 
 // double rapidity = 0.5 * TMath::Log(( TMath::Sqrt(rep_length->getMass()*rep_length->getMass() + p3.Mag2()) +p3.Z())/(
 // TMath::Sqrt(rep_length->getMass()*rep_length->getMass() + p3.Mag2()) - p3.Z()));
 // for(unsigned int vol = 0 ; vol < att.name_GeoVolumes.size() ; ++vol)
 //   {
-//     AnaHisto->Material_XX0_y[vol]->Fill(rapidity,rep_length->getXX0(att.name_GeoVolumes[vol]));
-//     AnaHisto->Material_dE_y[vol]->Fill(rapidity,rep_length->getDE(att.name_GeoVolumes[vol]));
+//     LocalHisto.Material_XX0_y[vol]->Fill(rapidity,rep_length->getXX0(att.name_GeoVolumes[vol]));
+//     LocalHisto.Material_dE_y[vol]->Fill(rapidity,rep_length->getDE(att.name_GeoVolumes[vol]));
 //   }
 
 #ifdef VERBOSE_EVE
@@ -931,53 +987,53 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 			      Path_length, Path_lengthMean, beta, mass );
 #endif
 
-          AnaHisto->h_beta->Fill(beta);
-          AnaHisto->h_Mass_All->Fill(mass);
-          AnaHisto->h_Mass_charge_All->Fill(mass, charge);
-          AnaHisto->h_beta_mom->Fill(p, beta);
-          AnaHisto->h_path_tof->Fill(Path_lengthMean / 30., time_of_flight);
+          LocalHisto.h_beta->Fill(beta);
+          LocalHisto.h_Mass_All->Fill(mass);
+          LocalHisto.h_Mass_charge_All->Fill(mass, charge);
+          LocalHisto.h_beta_mom->Fill(p, beta);
+          LocalHisto.h_path_tof->Fill(Path_lengthMean / 30., time_of_flight);
 
-          AnaHisto->h_pv_mom->Fill(p, p_value2);
-          AnaHisto->h_pv_beta->Fill(beta, p_value2);
-          AnaHisto->h_pv_mass->Fill(mass, p_value2);
+          LocalHisto.h_pv_mom->Fill(p, p_value2);
+          LocalHisto.h_pv_beta->Fill(beta, p_value2);
+          LocalHisto.h_pv_mass->Fill(mass, p_value2);
 
           const std::vector<int> hist_to_pdg = {2212, -211, 211, -321, 321};
           for(size_t it_pdg = 0; it_pdg < hist_to_pdg.size(); ++it_pdg)
             {
               if(hist_to_pdg[it_pdg] == PDG)
                 {
-                  AnaHisto->h_mom_res[it_pdg]->Fill(init_p.Mag(), (init_p.Mag() - p3.Mag()) / init_p.Mag());
+                  LocalHisto.h_mom_res[it_pdg]->Fill(init_p.Mag(), (init_p.Mag() - p3.Mag()) / init_p.Mag());
 
-                  AnaHisto->h_ResPull[it_pdg][0]->Fill((charge / stateFit[0] - init_p.Mag()));
-                  AnaHisto->h_ResPull_normal[it_pdg][0]->Fill(init_p.Mag(),(charge / stateFit[0] - init_p.Mag())/init_p.Mag());
+                  LocalHisto.h_ResPull[it_pdg][0]->Fill((charge / stateFit[0] - init_p.Mag()));
+                  LocalHisto.h_ResPull_normal[it_pdg][0]->Fill(init_p.Mag(),(charge / stateFit[0] - init_p.Mag())/init_p.Mag());
                   for(int i_Res = 1; i_Res < 5; ++i_Res)
                     {
-		      AnaHisto->h_ResPull[it_pdg][i_Res]->Fill((stateFit[i_Res] - referenceState[i_Res]));
-		      AnaHisto->h_ResPull_normal[it_pdg][i_Res]->Fill(referenceState[i_Res],(stateFit[i_Res] - referenceState[i_Res])/referenceState[i_Res]);
+		      LocalHisto.h_ResPull[it_pdg][i_Res]->Fill((stateFit[i_Res] - referenceState[i_Res]));
+		      LocalHisto.h_ResPull_normal[it_pdg][i_Res]->Fill(referenceState[i_Res],(stateFit[i_Res] - referenceState[i_Res])/referenceState[i_Res]);
 
 		    }
                   for(int i_Pull = 0; i_Pull < 5; ++i_Pull)
-                    AnaHisto->h_ResPull[it_pdg][i_Pull + 5]->Fill((stateFit[i_Pull] - referenceState[i_Pull]) /
+                    LocalHisto.h_ResPull[it_pdg][i_Pull + 5]->Fill((stateFit[i_Pull] - referenceState[i_Pull]) /
                                                                   sqrt(covPull[i_Pull][i_Pull]));
                 }
             }
 
           if(p_value2 < .75)
             {
-              AnaHisto->h_beta2->Fill(beta);
-              AnaHisto->h_Mass_All2->Fill(mass);
-              AnaHisto->h_beta_mom2->Fill(p, beta);
-              AnaHisto->h_Mass_charge_All2->Fill(mass, charge);
+              LocalHisto.h_beta2->Fill(beta);
+              LocalHisto.h_Mass_All2->Fill(mass);
+              LocalHisto.h_beta_mom2->Fill(p, beta);
+              LocalHisto.h_Mass_charge_All2->Fill(mass, charge);
             }
           if(p_value2 < .1)
             {
-              AnaHisto->h_beta3->Fill(beta);
-              AnaHisto->h_Mass_All3->Fill(mass);
-              AnaHisto->h_beta_mom3->Fill(p, beta);
-              AnaHisto->h_Mass_charge_All3->Fill(mass, charge);
-              AnaHisto->h_mom_tof_cut->Fill(p, time_of_flight);
-              AnaHisto->h_path_mom_cut->Fill(Path_lengthMean / 30., p);
-              AnaHisto->h_path_tof_cut->Fill(Path_lengthMean / 30., time_of_flight);
+              LocalHisto.h_beta3->Fill(beta);
+              LocalHisto.h_Mass_All3->Fill(mass);
+              LocalHisto.h_beta_mom3->Fill(p, beta);
+              LocalHisto.h_Mass_charge_All3->Fill(mass, charge);
+              LocalHisto.h_mom_tof_cut->Fill(p, time_of_flight);
+              LocalHisto.h_path_mom_cut->Fill(Path_lengthMean / 30., p);
+              LocalHisto.h_path_tof_cut->Fill(Path_lengthMean / 30., time_of_flight);
             }
           tempResults.firstHit = id_firstDet;
           tempResults.lastHit = id_lastDet;
@@ -1001,9 +1057,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             if(TMath::Abs(charge - m_charge[i]) < 0.1)
               {
                 // double dmass = TMath::Abs(mass-m_range[i])/m_range[i];
-                AnaHisto->h_Mass[i]->Fill(mass);
-                AnaHisto->h_chi2_particle[i]->Fill(chi2);
-                AnaHisto->h_pv_particle[i]->Fill(p_value2);
+                LocalHisto.h_Mass[i]->Fill(mass);
+                LocalHisto.h_chi2_particle[i]->Fill(chi2);
+                LocalHisto.h_pv_particle[i]->Fill(p_value2);
               }
 
 #ifdef DEBUG_KALMAN

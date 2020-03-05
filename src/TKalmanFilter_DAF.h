@@ -61,11 +61,13 @@ class TKalmanFilter_DAF : public TDataProcessInterface
   ~TKalmanFilter_DAF() final;
 
   // int Init(Ana_Hist* h);
-  int operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) final;
-
+  ReturnRes::InfoM operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) final;
+  void InitMT() final;
   private:
   int Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) final;
-  int SoftExit(int) final;
+  ReturnRes::InfoM SoftExit(int) final;
+  void SelectHists() final;
+
   int Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent);
 
   // genfit::DAF* Fitter;
@@ -80,6 +82,57 @@ class TKalmanFilter_DAF : public TDataProcessInterface
   TVector3 Plane_time;
 
   int Nb_event = 0;
+  struct LocalHists {
+    TH1I* h_stats;
+    TH2I* h_statsLess3Mes;
+    TH2I* h_statsInvalid;
+
+    TH1F* h_pv;
+    TH1F* h_chi2;
+    TH1F* hd_chi[2];
+    TH1F* hd_pv[2];
+
+    TH1F* h_Path;
+    TH1F* h_MeanPath;
+
+    TH1F* h_beta;
+    TH1F* h_beta2;
+    TH1F* h_beta3;
+
+    TH1F* h_Mass_All;
+    TH1F* h_Mass_All2;
+    TH1F* h_Mass_All3;
+
+    TH2F* h_Mass_charge_All;
+    TH2F* h_Mass_charge_All2;
+    TH2F* h_Mass_charge_All3;
+
+    TH2F* h_beta_mom;
+    TH2F* h_beta_mom2;
+    TH2F* h_beta_mom3;
+
+    TH2F* h_pv_mom;
+    TH2F* h_pv_beta;
+    TH2F* h_pv_mass;
+
+    TH2F* h_path_tof;
+
+    TH2F* h_mom_tof_cut;
+    TH2F* h_path_mom_cut;
+    TH2F* h_path_tof_cut;
+    
+    TH1F* h_Mass[4];
+    TH1F* h_chi2_particle[4];
+    TH1F* h_pv_particle[4];
+
+    TH2F* h_mom_res[5];
+    TH1D* h_ResPull[5][10];
+    TH2F* h_ResPull_normal[5][10];
+
+    TH2F* h_total_dE;
+
+  };
+  LocalHists LocalHisto;
 };
 
 #endif

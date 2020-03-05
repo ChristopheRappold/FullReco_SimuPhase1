@@ -10,14 +10,6 @@
 
 using namespace std;
 
-const std::string PDG_fromName::ElName2[] = {"n",  "H",  "He", "Li", "Be", "B",  "C",  "N",  "O",  "F",  "Ne", "Na", "Mg", "Al", "Si", "P",
-                                             "S",  "Cl", "Ar", "K",  "Ca", "Sc", "Ti", "V",  "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga",
-                                             "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y",  "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag",
-                                             "Cd", "In", "Sn", "Sb", "Te", "I",  "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu",
-                                             "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "Hf", "Ta", "W",  "Re", "Os", "Ir", "Pt", "Au",
-                                             "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th", "Pa", "U",  "Np", "Pu", "Am",
-                                             "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds"};
-
 TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes& attribut) : TDataBuilder("build_det"), att(attribut)
 {
   att._logger->info("TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF");
@@ -48,7 +40,7 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
 
 TBuildDetectorLayerPlaneDAF::~TBuildDetectorLayerPlaneDAF() {}
 #ifdef ROOT6
-int TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& event, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits,
+ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& event, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits,
                                             FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 {
   int result = Exec(event, hits, RecoEvent, OutTree);
@@ -56,7 +48,7 @@ int TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& event, const std
   return SoftExit(result);
 }
 #else
-int TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent,
+ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent,
                                             MCAnaEventG4Sol* OutTree)
 {
   int result = Exec(event, hits, RecoEvent, OutTree);
@@ -65,41 +57,46 @@ int TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& event, const std
 }
 
 #endif
-int TBuildDetectorLayerPlaneDAF::SoftExit(int return_build)
+void TBuildDetectorLayerPlaneDAF::SelectHists()
+{
+  LocalHisto.h_stats = AnaHisto->CloneAndRegister(AnaHisto->h_stats);
+}
+
+ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::SoftExit(int return_build)
 {
   if(return_build == -1)
     {
       att._logger->warn("!> Multiplicity > 2 on Start : event rejected");
-      AnaHisto->h_stats->Fill("start M>2", 1);
-      return -1;
+      LocalHisto.h_stats->Fill("start M>2", 1);
+      return ReturnRes::MultiS2_Start;
     }
   else if(return_build == -2)
     {
       att._logger->warn("!> TDC Timing Start cut : event rejected");
-      AnaHisto->h_stats->Fill("start Timing cut", 1);
-      return -1;
+      LocalHisto.h_stats->Fill("start Timing cut", 1);
+      return ReturnRes::StartTimingCut;
     }
   else if(return_build == -3)
     {
       att._logger->warn("!> Chamber Hit > 1000 : event rejected");
-      AnaHisto->h_stats->Fill("chamber hit>1000", 1);
-      return -1;
+      LocalHisto.h_stats->Fill("chamber hit>1000", 1);
+      return ReturnRes::ChamberHitLimit;
     }
   else if(return_build == -9)
     {
       att._logger->warn("!> No Beam : event rejected");
-      AnaHisto->h_stats->Fill("No Beam", 1);
-      return -1;
+      LocalHisto.h_stats->Fill("No Beam", 1);
+      return ReturnRes::NoBeam;
     }
   else if(return_build != 0)
     {
       att._logger->warn("Error in Build Detector !");
-      AnaHisto->h_stats->Fill("Error", 1);
-      return -1;
+      LocalHisto.h_stats->Fill("Error", 1);
+      return ReturnRes::BuildError;
     }
-  AnaHisto->h_stats->Fill("start Ok", 1);
+  LocalHisto.h_stats->Fill("start Ok", 1);
 
-  return return_build;
+  return ReturnRes::Fine;
 }
 #ifdef ROOT6
 int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits,
