@@ -7,13 +7,17 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <sstream>
 #include <unordered_map>
 #include <vector>
+#include <array>
 
 #include "TDatabasePDG.h"
 #include "TLorentzVector.h"
 #include "TMath.h"
 #include "TVector3.h"
+#include "TGeoElement.h"
+#include "TGeoManager.h"
 
 //#include "Genfit/Track.h"
 //#include "Genfit/HypRecoHit.h"
@@ -23,6 +27,8 @@
 #include "ProlateSpacepointMeasurement.h"
 
 #include <cassert>
+
+#include "spdlog/spdlog.h"
 
 class MomRef;
 class CompMomRef;
@@ -131,6 +137,125 @@ namespace G4Sol
 				     TrFwd2 /*22 - 43*/, RPC_l /*23 - 44*/, RPC_h /*24 - 45*/, FMF2Stop0 /*25 - 46*/, FMF2Stop1, FMF2Stop2> ;
   
 }
+
+
+class PDG_fromName {
+
+  static const std::string ElName2[];
+  
+  TGeoElementTable *tableRN; 
+  std::unordered_map<std::string,double> cache_NucleiPID;
+
+  const double u = 0.931494061;
+  const double m_eminus = 5.10998909999999971e-04; // GeV
+
+  int lastPDGIon = 10004; 
+public:
+  PDG_fromName():tableRN(nullptr)
+  {  }
+  ~PDG_fromName()
+  {
+    std::stringstream ss;
+    ss<<"PDG_fromName cache \n";
+    for(const auto& it : cache_NucleiPID)
+      ss<<"["<<it.first<<", "<<it.second<<"] ";
+    spdlog::get("Console")->info(ss.str());
+  }
+  
+  int operator() (const std::string& name)
+  {
+    //std::cout<<"!> PID from name:"<<name<<"\n";
+    
+    if(name=="proton")
+      return 2212;
+    if(name=="He3")
+      return 10003;
+    if(name=="pi-")
+      return -211;
+    if(name=="pi+")
+      return 211;
+    if(name=="neutron")
+      return 2112;
+    if(name=="kaon0")
+      return 311;
+    if(name=="kaon+")
+      return 321;
+    if(name=="kaon-")
+      return -321;
+    if(name=="H3L")
+      return 20001;
+    if(name=="pi0")
+      return 111;
+    if(name=="triton")
+      return 10001;
+    if(name=="deuteron")
+      return 10000;
+    if(name=="alpha")
+      return 10002;
+    if(name=="He3")
+      return 10003;
+    if(name=="Li6")
+      return 10004;
+
+    
+    auto it_name = cache_NucleiPID.find(name);
+    if(it_name!=cache_NucleiPID.end())
+      return it_name->second;
+
+    //std::cout<<"ADD NEW ELEM TO PDG DATABASE: "<<name<<"\n";
+    
+    std::size_t posCharge = name.find_first_of("0123456789");
+
+    if(posCharge == std::string::npos)
+      return 0;
+
+    //std::cout<<"found Charge at"<<posCharge;
+    int AtomMass = std::stoi(name.substr(posCharge,std::string::npos));
+    std::string nameElement = name.substr(0,posCharge);
+
+    //std::cout<<" Unpack into:"<<nameElement<<" "<<AtomMass<<"\n";
+
+    int id_Elem = -1;
+    for(size_t i=0; i<111; ++i)
+      if(nameElement == ElName2[i])
+	{
+	  id_Elem=i;
+	  break;
+	}
+    if(id_Elem<=0)
+      return 0;
+
+    //std::cout<<"Element found :"<<id_Elem<<" "<<ElName2[id_Elem]<<"\n";
+    
+    if(tableRN==nullptr)
+      tableRN = gGeoManager->GetElementTable();    
+    
+    auto* TempElement = tableRN->GetElementRN(AtomMass,id_Elem);
+    double Dmass = 0.;
+    if(TempElement==nullptr)
+      {
+	spdlog::get("Console")->info("E> no element ! {} {} {}", AtomMass, id_Elem, fmt::ptr(TempElement));
+	if(AtomMass==23 && id_Elem==14)
+	  Dmass = 23.073*1e-3; // MeV -> GeV
+	else
+	  return 0;
+      }
+    else
+      Dmass = TempElement->MassEx()*1e-3; // MeV -> GeV
+    
+    double Mass = Dmass+AtomMass*u - id_Elem*m_eminus;
+    
+    TDatabasePDG::Instance()->AddParticle(name.c_str(),name.c_str(),Mass,kFALSE,0.,id_Elem*3.,"Ions",++lastPDGIon);
+
+    cache_NucleiPID.insert(std::make_pair(name,lastPDGIon));
+
+    return lastPDGIon;
+    
+    //return 0;
+  }
+
+};
+
 
 class MomRef
 {
@@ -278,9 +403,81 @@ struct ResSolDAF
   HitInfo Allhit[G4Sol::SIZEOF_G4SOLDETTYPE];
 };
 
+
+struct OutParticle
+{
+  std::string type;
+  int Mc_id;
+  int Mother_id;
+  int Pdg;
+  int Charge;
+  std::array<double,4> MomMass;
+  std::array<double,4> Vtx;
+  double Weigth;
+  bool GeoAcc;
+};
+
+struct OutHit
+{
+  std::string name;
+  int LayerID;
+  int HitID;
+  std::array<double,3> MCHit;
+  std::array<double,3> Hit;
+
+  int MC_id;
+  int Charge;
+  int Pdg;
+  double Brho;
+  double MagnetInteraction;
+  std::array<double,4> MCparticle;
+};
+
+// struct OutTrack
+// {
+//   std::string type;
+//   int MC_status;
+//   double Chi2;
+//   double Chi2_X;
+//   double Chi2_Y;
+//   double Mass;
+//   int pdgcode;
+//   std::array<double,4> MomMass;
+//   std::array<double,3> Mom;
+
+//   int Charge;
+//   int BarId;
+//   double dE;
+//   double Beta;
+//   double Pval2;
+//   int TofsBar;
+//   double PathLength;
+//   double TOF;
+
+//   std::array<double,3> MomIni;
+//   float RChiIni;
+//   double PathLengthIni;
+//   double TOFIni;
+//   double BetaIni;
+//   double MassIni;
+
+//   std::array<double,4> Sim2Vtx;
+
+//   double State[6];
+//   double Cov[6][6];
+// };
+
+
 class FullRecoEvent
 {
   public:
+  unsigned int idThread; 
+  Long64_t idEvent;
+
+  std::vector<OutParticle> ToDumpParticles;
+  std::vector<std::vector<OutHit>> ToDumpHits;
+  //std::vector<OutTrack> ToDumpTracks;
+  
   // map_mom3 Mom_Particle;
   std::unordered_map<int, ResSolDAF> DAF_results;
 
@@ -293,7 +490,7 @@ class FullRecoEvent
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
   std::unordered_map<int, std::tuple<int,double,double,double,double> > TrackMother;
 
-  FullRecoEvent();
+  explicit FullRecoEvent(unsigned int idTh = 1);
   ~FullRecoEvent();
 
   void Clear(int toclean = 0);
