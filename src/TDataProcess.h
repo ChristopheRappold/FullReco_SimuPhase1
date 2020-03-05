@@ -3,6 +3,7 @@
 #include <string>
 #include "Ana_Hist.hh"
 #include "Debug.hh"
+#include "ReturnRes.hh"
 
 template <typename T0,typename T1>
 class TDataProcess 
@@ -15,13 +16,15 @@ class TDataProcess
   explicit TDataProcess(const std::string& name):signature(name),AnaHisto(nullptr) {;}
   virtual ~TDataProcess() { AnaHisto = nullptr;}
 
-  virtual int Init(Ana_Hist* h) { AnaHisto = h; return 0;} 
-  virtual int operator() (T0& t1,T1* t2) = 0;
+  virtual int Init(Ana_Hist* h) { AnaHisto = h; SelectHists(); return 0;} 
+  virtual void InitMT() = 0;
+  virtual ReturnRes::InfoM operator() (T0& t1,T1* t2) = 0;
   private :
   virtual int Exec(T0& t1, T1* t2) = 0;
-
-  virtual int SoftExit(int) = 0;
-
+  
+  virtual ReturnRes::InfoM SoftExit(int) = 0;
+  virtual void SelectHists() = 0;
+  
 };
 /*
 template <typename T0,typename T1>
