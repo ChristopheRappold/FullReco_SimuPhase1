@@ -43,46 +43,51 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
   
   HaveBeenWritten = false;
 
-  h_stats = new TH1I("stats", "stats", 20, 0, 20);
-  h_statsLess3Mes = new TH2I("statsLess3", "statsLess3", 40, 0, 40,40,0,40);
-  h_statsInvalid = new TH2I("statsInvalid", "statsInvalid", 40, 0, 40,40,0,40);
-  h_task_exit = new TH1I("h_task_exit", "h_task_exit", 20, 0, 20);
-
-  HistRegisteredByDir.insert(std::make_pair("stat", std::make_tuple(std::vector<TH1*>({h_stats, h_task_exit, h_statsLess3Mes, h_statsInvalid}),0)));
+  std::vector< std::vector<TH1*>* > Stats;
+  h_stats.emplace_back(new TH1I("stats", "stats", 20, 0, 20));
+  Stats.emplace_back(&h_stats.store);
+  h_statsLess3Mes.emplace_back(new TH2I("statsLess3", "statsLess3", 40, 0, 40,40,0,40));
+  Stats.emplace_back(&h_statsLess3Mes.store);
+  h_statsInvalid.emplace_back(new TH2I("statsInvalid", "statsInvalid", 40, 0, 40,40,0,40));
+  Stats.emplace_back(&h_statsInvalid.store);
+  h_task_exit.emplace_back(new TH1I("h_task_exit", "h_task_exit", 20, 0, 20));
+  Stats.emplace_back(&h_task_exit.store);
+  
+  HistRegisteredByDir.insert(std::make_pair("stat", std::make_tuple(Stats,0)));
 
   std::vector<std::string> name_field = {"Bx","By","Bz"};
-  std::vector<TH1*> h_fields;
+  std::vector<std::vector<TH1*>*> h_fields;
   for(size_t i=0;i<name_field.size();++i)
     {
       std::string name_h_field = "FieldXY_";
       name_h_field+=name_field[i];
-      FieldXY[i] = new TH2F(name_h_field.c_str(),name_h_field.c_str(),600,-150,150,600,-150,150);
-      h_fields.emplace_back(FieldXY[i]);
+      FieldXY[i].emplace_back(new TH2F(name_h_field.c_str(),name_h_field.c_str(),600,-150,150,600,-150,150));
+      h_fields.emplace_back(&FieldXY[i].store);
 
       std::string name_h_field1 = "FieldXZ_";
       name_h_field1+=name_field[i];
-      FieldXZ[i] = new TH2F(name_h_field1.c_str(),name_h_field1.c_str(),600,-150,150,1200,-300,300);
-      h_fields.emplace_back(FieldXZ[i]);
+      FieldXZ[i].emplace_back(new TH2F(name_h_field1.c_str(),name_h_field1.c_str(),600,-150,150,1200,-300,300));
+      h_fields.emplace_back(&FieldXZ[i].store);
 
       std::string name_h_field2 = "FieldYZ_";
       name_h_field2+=name_field[i];
-      FieldYZ[i] = new TH2F(name_h_field2.c_str(),name_h_field2.c_str(),600,-150,150,1200,-300,300);
-      h_fields.emplace_back(FieldYZ[i]);
+      FieldYZ[i].emplace_back(new TH2F(name_h_field2.c_str(),name_h_field2.c_str(),600,-150,150,1200,-300,300));
+      h_fields.emplace_back(&FieldYZ[i].store);
 
       std::string name_h_field_n = "FieldXYn_";
       name_h_field_n+=name_field[i];
-      FieldXY_n[i] = new TH2F(name_h_field_n.c_str(),name_h_field_n.c_str(),600,-150,150,600,-150,150);
-      h_fields.emplace_back(FieldXY_n[i]);
+      FieldXY_n[i].emplace_back(new TH2F(name_h_field_n.c_str(),name_h_field_n.c_str(),600,-150,150,600,-150,150));
+      h_fields.emplace_back(&FieldXY_n[i].store);
 
       std::string name_h_field_n1 = "FieldXZn_";
       name_h_field_n1+=name_field[i];
-      FieldXZ_n[i] = new TH2F(name_h_field_n1.c_str(),name_h_field_n1.c_str(),600,-150,150,1200,-300,300);
-      h_fields.emplace_back(FieldXZ_n[i]);
+      FieldXZ_n[i].emplace_back(new TH2F(name_h_field_n1.c_str(),name_h_field_n1.c_str(),600,-150,150,1200,-300,300));
+      h_fields.emplace_back(&FieldXZ_n[i].store);
 
       std::string name_h_field_n2 = "FieldYZn_";
       name_h_field_n2+=name_field[i];
-      FieldYZ_n[i] = new TH2F(name_h_field_n2.c_str(),name_h_field_n2.c_str(),600,-150,150,1200,-300,300);
-      h_fields.emplace_back(FieldYZ_n[i]);
+      FieldYZ_n[i].emplace_back(new TH2F(name_h_field_n2.c_str(),name_h_field_n2.c_str(),600,-150,150,1200,-300,300));
+      h_fields.emplace_back(&FieldYZ_n[i].store);
 
     }
   
@@ -90,99 +95,99 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
   
   if(EnableState[DAF])
     {
-      std::vector<TH1*> HistReg;
-      h_pv = new TH1F("total_pvalue", "total_pvalue", 200, 0, 1);
-      HistReg.emplace_back(h_pv);
-      h_chi2 = new TH1F("total chi2", "total chi2", 400, 0, 40);
-      HistReg.emplace_back(h_chi2);
+      std::vector<std::vector<TH1*>*> HistReg;
+      h_pv.emplace_back(new TH1F("total_pvalue", "total_pvalue", 200, 0, 1));
+      HistReg.emplace_back(&h_pv.store);
+      h_chi2.emplace_back(new TH1F("total chi2", "total chi2", 400, 0, 40));
+      HistReg.emplace_back(&h_chi2.store);
 
-      hd_pv[0] = new TH1F("AAD_Pval_TOFp", "AAD_Pval_TOFp", 500, 0, 1);
-      HistReg.emplace_back(hd_pv[0]);
-      hd_pv[1] = new TH1F("AAD_Pval_BigTof", "AAD_Pval_BigTof", 500, 0, 1);
-      HistReg.emplace_back(hd_pv[1]);
-      hd_chi[0] = new TH1F("AAD_Chi2_TOFp", "AAD_Chi2_TOFp", 500, 0, 100);
-      HistReg.emplace_back(hd_chi[0]);
-      hd_chi[1] = new TH1F("AAD_Chi2_BigTof", "AAD_Chi2_BigTof", 500, 0, 100);
-      HistReg.emplace_back(hd_chi[0]);
+      hd_pv[0].emplace_back(new TH1F("AAD_Pval_TOFp", "AAD_Pval_TOFp", 500, 0, 1));
+      HistReg.emplace_back(&hd_pv[0].store);
+      hd_pv[1].emplace_back(new TH1F("AAD_Pval_BigTof", "AAD_Pval_BigTof", 500, 0, 1));
+      HistReg.emplace_back(&hd_pv[1].store);
+      hd_chi[0].emplace_back(new TH1F("AAD_Chi2_TOFp", "AAD_Chi2_TOFp", 500, 0, 100));
+      HistReg.emplace_back(&hd_chi[0].store);
+      hd_chi[1].emplace_back(new TH1F("AAD_Chi2_BigTof", "AAD_Chi2_BigTof", 500, 0, 100));
+      HistReg.emplace_back(&hd_chi[1].store);
 
-      h_Path = new TH1F("path_length", "path_length", 200, 0., 400.);
-      HistReg.emplace_back(h_Path);
-      h_Path_Back = new TH1F("path_length_back", "path_length_back", 200, 0., 400.);
-      HistReg.emplace_back(h_Path_Back);
-      h_MeanPath = new TH1F("Mean_path_length", "Mean_path_length", 200, 0., 400.);
-      HistReg.emplace_back(h_MeanPath);
-      h_dpath = new TH1F("Dpath", "Dpath", 200, -10., 10.);
-      HistReg.emplace_back(h_dpath);
+      h_Path.emplace_back(new TH1F("path_length", "path_length", 200, 0., 400.));
+      HistReg.emplace_back(&h_Path.store);
+      h_Path_Back.emplace_back(new TH1F("path_length_back", "path_length_back", 200, 0., 400.));
+      HistReg.emplace_back(&h_Path_Back.store);
+      h_MeanPath.emplace_back(new TH1F("Mean_path_length", "Mean_path_length", 200, 0., 400.));
+      HistReg.emplace_back(&h_MeanPath.store);
+      h_dpath.emplace_back(new TH1F("Dpath", "Dpath", 200, -10., 10.));
+      HistReg.emplace_back(&h_dpath.store);
 
-      h_beta = new TH1F("beta", "beta", 300, 0., 3.);
-      HistReg.emplace_back(h_beta);
-      h_beta2 = new TH1F("beta_pvcut_0.75", "beta_pvcut_0.75", 300, 0., 3.);
-      HistReg.emplace_back(h_beta2);
-      h_beta3 = new TH1F("beta_pvcut_0.5", "beta_pvcut_0.5", 300, 0., 3.);
-      HistReg.emplace_back(h_beta3);
+      h_beta.emplace_back(new TH1F("beta", "beta", 300, 0., 3.));
+      HistReg.emplace_back(&h_beta.store);
+      h_beta2.emplace_back(new TH1F("beta_pvcut_0.75", "beta_pvcut_0.75", 300, 0., 3.));
+      HistReg.emplace_back(&h_beta2.store);
+      h_beta3.emplace_back(new TH1F("beta_pvcut_0.5", "beta_pvcut_0.5", 300, 0., 3.));
+      HistReg.emplace_back(&h_beta3.store);
 
-      h_Mass_All = new TH1F("mass_all", "mass_all", 500, 0, 10.);
-      HistReg.emplace_back(h_Mass_All);
-      h_Mass_All2 = new TH1F("mass_all_pvcut_0.75", "mass_all_pvcut_0.75", 500, 0, 10.);
-      HistReg.emplace_back(h_Mass_All2);
-      h_Mass_All3 = new TH1F("mass_all_pvcut_0.5", "mass_all_pvcut_0.5", 500, 0, 10.);
-      HistReg.emplace_back(h_Mass_All3);
+      h_Mass_All.emplace_back(new TH1F("mass_all", "mass_all", 500, 0, 10.));
+      HistReg.emplace_back(&h_Mass_All.store);
+      h_Mass_All2.emplace_back(new TH1F("mass_all_pvcut_0.75", "mass_all_pvcut_0.75", 500, 0, 10.));
+      HistReg.emplace_back(&h_Mass_All2.store);
+      h_Mass_All3.emplace_back(new TH1F("mass_all_pvcut_0.5", "mass_all_pvcut_0.5", 500, 0, 10.));
+      HistReg.emplace_back(&h_Mass_All3.store);
 
-      h_Mass_charge_All = new TH2F("mass_charge_all", "mass_charge_all", 200, 0., 10., 10, -5, 5);
-      HistReg.emplace_back(h_Mass_charge_All);
-      h_Mass_charge_All2 = new TH2F("mass_charge_all_pvcut_0.75", "mass_charge_all_pvcut_0.75", 200, 0., 10., 10, -5, 5);
-      HistReg.emplace_back(h_Mass_charge_All2);
-      h_Mass_charge_All3 = new TH2F("mass_charge_all_pvcut_0.5", "mass_charge_all_pvcut_0.5", 200, 0., 10., 10, -5, 5);
-      HistReg.emplace_back(h_Mass_charge_All);
+      h_Mass_charge_All.emplace_back(new TH2F("mass_charge_all", "mass_charge_all", 200, 0., 10., 10, -5, 5));
+      HistReg.emplace_back(&h_Mass_charge_All.store);
+      h_Mass_charge_All2.emplace_back(new TH2F("mass_charge_all_pvcut_0.75", "mass_charge_all_pvcut_0.75", 200, 0., 10., 10, -5, 5));
+      HistReg.emplace_back(&h_Mass_charge_All2.store);
+      h_Mass_charge_All3.emplace_back(new TH2F("mass_charge_all_pvcut_0.5", "mass_charge_all_pvcut_0.5", 200, 0., 10., 10, -5, 5));
+      HistReg.emplace_back(&h_Mass_charge_All.store);
 
-      h_beta_mom = new TH2F("beta_mom", "beta_mom", 500, 0., 15., 200, 0., 2.5);
-      HistReg.emplace_back(h_beta_mom);
-      h_beta_mom2 = new TH2F("beta_mom_pvcut_0.75", "beta_mom_pvcut_0.75", 500, 0., 15., 100, 0., 2.5);
-      HistReg.emplace_back(h_beta_mom2);
-      h_beta_mom3 = new TH2F("beta_mom_pvcut_0.5", "beta_mom_pvcut_0.5", 500, 0., 15., 100, 0., 2.5);
-      HistReg.emplace_back(h_beta_mom3);
+      h_beta_mom.emplace_back(new TH2F("beta_mom", "beta_mom", 500, 0., 15., 200, 0., 2.5));
+      HistReg.emplace_back(&h_beta_mom.store);
+      h_beta_mom2.emplace_back(new TH2F("beta_mom_pvcut_0.75", "beta_mom_pvcut_0.75", 500, 0., 15., 100, 0., 2.5));
+      HistReg.emplace_back(&h_beta_mom2.store);
+      h_beta_mom3.emplace_back(new TH2F("beta_mom_pvcut_0.5", "beta_mom_pvcut_0.5", 500, 0., 15., 100, 0., 2.5));
+      HistReg.emplace_back(&h_beta_mom3.store);
 
-      h_pv_mom = new TH2F("mom_pv", "mom_pv", 200, 0., 20., 250, 0, 1);
-      HistReg.emplace_back(h_pv_mom);
-      h_pv_beta = new TH2F("beta_pv", "beta_pv", 250, 0., 2.5, 250, 0, 1);
-      HistReg.emplace_back(h_pv_beta);
-      h_pv_mass = new TH2F("mass_pv", "mass_pv", 200, 0., 10., 250, 0, 1);
-      HistReg.emplace_back(h_pv_mass);
+      h_pv_mom.emplace_back(new TH2F("mom_pv", "mom_pv", 200, 0., 20., 250, 0, 1));
+      HistReg.emplace_back(&h_pv_mom.store);
+      h_pv_beta.emplace_back(new TH2F("beta_pv", "beta_pv", 250, 0., 2.5, 250, 0, 1));
+      HistReg.emplace_back(&h_pv_beta.store);
+      h_pv_mass.emplace_back(new TH2F("mass_pv", "mass_pv", 200, 0., 10., 250, 0, 1));
+      HistReg.emplace_back(&h_pv_mass.store);
 
-      h_path_tof = new TH2F("Mean_path_TOF", "Mean_path_TOF", 500, 15., 20., 90, 10, 40);
-      HistReg.emplace_back(h_path_tof);
+      h_path_tof.emplace_back(new TH2F("Mean_path_TOF", "Mean_path_TOF", 500, 15., 20., 90, 10, 40));
+      HistReg.emplace_back(&h_path_tof.store);
 
-      h_mom_tof_cut = new TH2F("mom_tof_pvcut_0.5", "mom_tof_pvcut_0.5", 200, 0., 20., 500, 0., 50.);
-      HistReg.emplace_back(h_mom_tof_cut);
-      h_path_tof_cut = new TH2F("path_tof_pvcut_0.5", "path_tof_pvcut_0.5", 500, 15., 20., 500, 0., 50.);
-      HistReg.emplace_back(h_path_tof_cut);
-      h_path_mom_cut = new TH2F("path_mom_pvcut", "path_mom_pvcut", 500, 15., 20., 200, 0, 20.);
-      HistReg.emplace_back(h_path_mom_cut);
+      h_mom_tof_cut.emplace_back(new TH2F("mom_tof_pvcut_0.5", "mom_tof_pvcut_0.5", 200, 0., 20., 500, 0., 50.));
+      HistReg.emplace_back(&h_mom_tof_cut.store);
+      h_path_tof_cut.emplace_back(new TH2F("path_tof_pvcut_0.5", "path_tof_pvcut_0.5", 500, 15., 20., 500, 0., 50.));
+      HistReg.emplace_back(&h_path_tof_cut.store);
+      h_path_mom_cut.emplace_back(new TH2F("path_mom_pvcut", "path_mom_pvcut", 500, 15., 20., 200, 0, 20.));
+      HistReg.emplace_back(&h_path_mom_cut.store);
       
-      h_total_dE = new TH2F("total_dE","total_dE",30,0,30,500,0,100);
-      HistReg.emplace_back(h_total_dE);
+      h_total_dE.emplace_back(new TH2F("total_dE","total_dE",30,0,30,500,0,100));
+      HistReg.emplace_back(&h_total_dE.store);
       
       HistRegisteredByDir.insert(std::make_pair("Kalman", std::make_tuple(HistReg,0)));
 
       std::string name[4] = {"_proton", "_alpha", "_pi-", "_he3"};
       for(int i = 0; i < 4; i++)
         {
-          std::vector<TH1*> HistRegPID;
+	  std::vector<std::vector<TH1*>*> HistRegPID;
           std::string temp;
           temp = "mass";
           temp += name[i];
-          h_Mass[i] = new TH1F(temp.c_str(), temp.c_str(), 10000, 0, 10.);
-          HistRegPID.emplace_back(h_Mass[i]);
+          h_Mass[i].emplace_back(new TH1F(temp.c_str(), temp.c_str(), 10000, 0, 10.));
+          HistRegPID.emplace_back(&h_Mass[i].store);
 
           temp = "chi2_";
           temp += name[i];
-          h_chi2_particle[i] = new TH1F(temp.c_str(), temp.c_str(), 1000, 0, 10);
-          HistRegPID.emplace_back(h_chi2_particle[i]);
+          h_chi2_particle[i].emplace_back(new TH1F(temp.c_str(), temp.c_str(), 1000, 0, 10));
+          HistRegPID.emplace_back(&h_chi2_particle[i].store);
 
           temp = "pv_";
           temp += name[i];
-          h_pv_particle[i] = new TH1F(temp.c_str(), temp.c_str(), 100, 0, 1);
-          HistRegPID.emplace_back(h_pv_particle[i]);
+          h_pv_particle[i].emplace_back(new TH1F(temp.c_str(), temp.c_str(), 100, 0, 1));
+          HistRegPID.emplace_back(&h_pv_particle[i].store);
 
           temp = "Kalman";
           temp += name[i];
@@ -198,15 +203,15 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       };
       std::vector<std::string> name_histres = {"h_momRes","h_upRes","h_vpRes","h_uRes","h_vRes","h_qopPull","h_upPull","h_vpPull","h_uPull","h_vPull"};
 
-      std::vector<TH1*> HistRegRes1;
-      std::vector<TH1*> HistRegRes2;
+      std::vector<std::vector<TH1*>*> HistRegRes1;
+      std::vector<std::vector<TH1*>*> HistRegRes2;
       for(size_t id = 0; id<name_res.size();++id)
 	{
 	  std::string tempResHist = "mom_res";
 	  auto temp_nameRes = name_res[id];
 	  tempResHist += temp_nameRes;
-	  h_mom_res[id] = new TH2F(tempResHist.c_str(), tempResHist.c_str(), 25, 0., 5., 50, -1, 1);
-	  HistRegRes1.emplace_back(h_mom_res[id]);
+	  h_mom_res[id].emplace_back(new TH2F(tempResHist.c_str(), tempResHist.c_str(), 25, 0., 5., 50, -1, 1));
+	  HistRegRes1.emplace_back(&h_mom_res[id].store);
 
 	  for(size_t id_h = 0; id_h < name_histres.size();++id_h)
 	    {
@@ -215,11 +220,11 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
 	      int nBin;
 	      double minB, maxB;
 	      std::tie(nBin,minB,maxB) = list_bins[id_h];
-	      h_ResPull[id][id_h] = new TH1D(temp1_ResHist.c_str(),temp1_ResHist.c_str(),nBin, minB, maxB);
-	      HistRegRes2.emplace_back(h_ResPull[id][id_h]);
+	      h_ResPull[id][id_h].emplace_back(new TH1D(temp1_ResHist.c_str(),temp1_ResHist.c_str(),nBin, minB, maxB));
+	      HistRegRes2.emplace_back(&h_ResPull[id][id_h].store);
 	      temp1_ResHist+="2D";
-	      h_ResPull_normal[id][id_h] = new TH2F(temp1_ResHist.c_str(),temp1_ResHist.c_str(),100,0,10,nBin, minB, maxB);
-	      HistRegRes2.emplace_back(h_ResPull_normal[id][id_h]);
+	      h_ResPull_normal[id][id_h].emplace_back(new TH2F(temp1_ResHist.c_str(),temp1_ResHist.c_str(),100,0,10,nBin, minB, maxB));
+	      HistRegRes2.emplace_back(&h_ResPull_normal[id][id_h].store);
 	    }
 	}
       
@@ -230,28 +235,39 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
 
   if(EnableState[FINDING])
     {
-      std::vector<TH1*> HistReg;
+      std::vector<std::vector<TH1*>*> HistReg;
 
-      h_xy = new TH2F("h_xy", "h_xy", 500, -50, 50, 500, -50, 50);
-      HistReg.emplace_back(h_xy);
+      h_xy.emplace_back(new TH2F("h_xy", "h_xy", 500, -50, 50, 500, -50, 50));
+      HistReg.emplace_back(&h_xy.store);
 
-      h_xy_extrap = new TH2F("h_xy_extrap", "h_xy_extrap", 500, -50, 50, 500, -50, 50);
-      HistReg.emplace_back(h_xy_extrap);
+      h_xy_extrap.emplace_back(new TH2F("h_xy_extrap", "h_xy_extrap", 500, -50, 50, 500, -50, 50));
+      HistReg.emplace_back(&h_xy_extrap.store);
 
-      h_PxPy = new TH2F("h_PxPy", "h_PxPy", 200, -1, 1, 200, -1, 1);
-      HistReg.emplace_back(h_PxPy);
+      h_PxPy.emplace_back(new TH2F("h_PxPy", "h_PxPy", 200, -1, 1, 200, -1, 1));
+      HistReg.emplace_back(&h_PxPy.store);
 
-      h_PxPy_extrap = new TH2F("h_PxPy_extrap", "h_PxPy_extrap", 200, -1, 1, 200, -1, 1);
-      HistReg.emplace_back(h_PxPy_extrap);
+      h_PxPy_extrap.emplace_back(new TH2F("h_PxPy_extrap", "h_PxPy_extrap", 200, -1, 1, 200, -1, 1));
+      HistReg.emplace_back(&h_PxPy_extrap.store);
 
-      h_TrackFindingStat = new TH2F("h_TrackFindingStat", "h_TrackFindingStat", 20, 0, 20, 22, -2, 20);
-      HistReg.emplace_back(h_TrackFindingStat);
+      h_TrackFindingStat.emplace_back(new TH2F("h_TrackFindingStat", "h_TrackFindingStat", 20, 0, 20, 22, -2, 20));
+      HistReg.emplace_back(&h_TrackFindingStat.store);
 
       HistRegisteredByDir.insert(std::make_pair("Finder", std::make_tuple(HistReg,0)));
     }
 
   _logger->info( " : done !");
 }
+
+void Ana_Hist::DebugHists()
+{
+  _logger->debug("Histo debuging ");
+  _logger->debug("h_stats: {} / {}",fmt::ptr(h_stats.h), h_stats.h->GetEntries());
+  for(auto& hh : h_stats.store)
+    _logger->debug("h_stats: storing : {} / {}",fmt::ptr(hh), hh->GetEntries());
+    
+}
+
+
 
 int Ana_Hist::Write(TFile* out_file)
 {
@@ -307,22 +323,42 @@ int Ana_Hist::Write(TFile* out_file)
 			    return std::make_tuple(g_resMean, g_resStd);			    
 			  };
 
+  auto Merging = [&](std::vector<TH1*>& vecH) {
+    _logger->debug("merging function: {}",vecH.size());
+    if(vecH.size()==1)
+      return;
+
+    _logger->debug("histo vec {}, name {}, n {}",vecH.size(),vecH[0]->GetName(), vecH[0]->GetEntries());
+    TList list;
+    for(size_t i = 1; i<vecH.size();++i)
+      {
+	_logger->debug("#{}, {}",i,vecH[i]->GetEntries());
+	list.Add(vecH[i]);
+      }
+    
+    vecH[0]->Reset();
+    vecH[0]->Merge(&list);
+    _logger->debug("merged :",vecH[0]->GetEntries());
+    return;
+  };
   
   _logger->info( "making directory ");
   for(auto it : HistRegisteredByDir)
     {
       TDirectory* temp_dir = GetDir(out_file, it.first);
       temp_dir->cd();
-      
-      for(auto it_hist : std::get<0>(it.second))
+      _logger->debug("dir: {}",it.first);
+      for(auto& it_hist : std::get<0>(it.second))
         {
-	  it_hist->Write();
+	  _logger->debug("vecHist[0]: {} / {} {}",it_hist->size(),fmt::ptr(it_hist->at(0)),it_hist->at(0)->GetName()); 
+	  Merging(*it_hist);
+	  it_hist->at(0)->Write();
 	  if(std::get<1>(it.second)==1)
 	    {
 	      TGraphErrors* g1;
 	      TGraphErrors* g2;
 	      
-	      std::tie(g1,g2) = f_DiffResolution(dynamic_cast<TH2F*>(it_hist));
+	      std::tie(g1,g2) = f_DiffResolution(dynamic_cast<TH2F*>(it_hist->at(0)));
 	      if(g1!=nullptr)
 		g1->Write();
 	      if(g2!=nullptr)

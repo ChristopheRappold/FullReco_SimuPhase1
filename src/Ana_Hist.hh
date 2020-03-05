@@ -33,6 +33,16 @@ enum StateHist : int
   SIZEOF_STATEHIST
 };
 
+template <typename T>
+struct Hist {
+  T* h;
+  std::vector<TH1*> store;
+  void emplace_back(T* _h) {
+    h = _h;
+    store.emplace_back(_h);
+  }
+};
+
 class Ana_Hist
 {
   std::shared_ptr<spdlog::logger> _logger;
@@ -41,78 +51,87 @@ class Ana_Hist
   bool HaveBeenWritten;
   std::vector<bool> EnableState;
 
-  TH1I* h_stats;
-  TH2I* h_statsLess3Mes;
-  TH2I* h_statsInvalid;
-  TH1I* h_task_exit;
-  //Field
-  TH2F* FieldXY[3];
-  TH2F* FieldXZ[3];
-  TH2F* FieldYZ[3];
-  TH2F* FieldXY_n[3];
-  TH2F* FieldXZ_n[3];
-  TH2F* FieldYZ_n[3];
-  // Finder
-  TH2F* h_xy;
-  TH2F* h_PxPy;
-  TH2F* h_xy_extrap;
-  TH2F* h_PxPy_extrap;
-  TH2F* h_TrackFindingStat;
-  // Kalman:
-
-  TH1F* h_pv;
-  TH1F* h_chi2;
-  TH1F* hd_pv[2];
-  TH1F* hd_chi[2];
-
-  TH1F* h_Path;
-  TH1F* h_Path_Back;
-  TH1F* h_MeanPath;
-  TH1F* h_dpath;
-
-  TH1F* h_beta;
-  TH1F* h_beta2;
-  TH1F* h_beta3;
-
-  TH1F* h_Mass_All;
-  TH1F* h_Mass_All2;
-  TH1F* h_Mass_All3;
-
-  TH2F* h_Mass_charge_All;
-  TH2F* h_Mass_charge_All2;
-  TH2F* h_Mass_charge_All3;
-
-  TH2F* h_beta_mom;
-  TH2F* h_beta_mom2;
-  TH2F* h_beta_mom3;
-
-  TH2F* h_pv_mom;
-  TH2F* h_pv_beta;
-  TH2F* h_pv_mass;
-
-  TH2F* h_path_tof;
-
-  TH2F* h_mom_tof_cut;
-  TH2F* h_path_mom_cut;
-  TH2F* h_path_tof_cut;
-
-  TH1F* h_Mass[4];
-  TH1F* h_chi2_particle[4];
-  TH1F* h_pv_particle[4];
-
-  TH2F* h_mom_res[5];
-  TH1D* h_ResPull[5][10];
-  TH2F* h_ResPull_normal[5][10];
-
-  TH2F* h_total_dE;
+  Hist<TH1I> h_stats;
+  Hist<TH2I> h_statsLess3Mes;
+  Hist<TH2I> h_statsInvalid;
+  Hist<TH1I> h_task_exit;
+  //Fi>ld
+  Hist<TH2F> FieldXY[3];
+  Hist<TH2F> FieldXZ[3];
+  Hist<TH2F> FieldYZ[3];
+  Hist<TH2F> FieldXY_n[3];
+  Hist<TH2F> FieldXZ_n[3];
+  Hist<TH2F> FieldYZ_n[3];
+  // F>nder
+  Hist<TH2F> h_xy;
+  Hist<TH2F> h_PxPy;
+  Hist<TH2F> h_xy_extrap;
+  Hist<TH2F> h_PxPy_extrap;
+  Hist<TH2F> h_TrackFindingStat;
+  // K>lman:
+  Hist<TH1F> h_pv;
+  Hist<TH1F> h_chi2;
+  Hist<TH1F> hd_pv[2];
+  Hist<TH1F> hd_chi[2];
   
-  std::unordered_map<std::string, std::tuple<std::vector<TH1*>, int> > HistRegisteredByDir;
+  Hist<TH1F> h_Path;
+  Hist<TH1F> h_Path_Back;
+  Hist<TH1F> h_MeanPath;
+  Hist<TH1F> h_dpath;
+  
+  Hist<TH1F> h_beta;
+  Hist<TH1F> h_beta2;
+  Hist<TH1F> h_beta3;
+  
+  Hist<TH1F> h_Mass_All;
+  Hist<TH1F> h_Mass_All2;
+  Hist<TH1F> h_Mass_All3;
+  
+  Hist<TH2F> h_Mass_charge_All;
+  Hist<TH2F> h_Mass_charge_All2;
+  Hist<TH2F> h_Mass_charge_All3;
+  
+  Hist<TH2F> h_beta_mom;
+  Hist<TH2F> h_beta_mom2;
+  Hist<TH2F> h_beta_mom3;
+  
+  Hist<TH2F> h_pv_mom;
+  Hist<TH2F> h_pv_beta;
+  Hist<TH2F> h_pv_mass;
+  
+  Hist<TH2F> h_path_tof;
+  
+  Hist<TH2F> h_mom_tof_cut;
+  Hist<TH2F> h_path_mom_cut;
+  Hist<TH2F> h_path_tof_cut;
+  
+  Hist<TH1F> h_Mass[4];
+  Hist<TH1F> h_chi2_particle[4];
+  Hist<TH1F> h_pv_particle[4];
+  
+  Hist<TH2F> h_mom_res[5];
+  Hist<TH1D> h_ResPull[5][10];
+  Hist<TH2F> h_ResPull_normal[5][10];
+
+  Hist<TH2F> h_total_dE;
+  
+  std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
   Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Hough = true, bool Simu = false);
   ~Ana_Hist();
 
   int Write(TFile*);
   int WriteTemp(char* tempfile);
+
+  void DebugHists();
+  
+  template <typename T>
+  T* CloneAndRegister(Hist<T>& hist) {
+    T* newHist = dynamic_cast<T*>(hist.h->Clone());
+    hist.store.emplace_back(newHist);
+    return newHist;
+  }
+
   TDirectory* GetDir(TFile* out_file, const std::string& name_dir)
   {
     if(!out_file->GetDirectory(name_dir.c_str()))
