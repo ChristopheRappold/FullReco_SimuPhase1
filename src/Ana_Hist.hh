@@ -14,6 +14,7 @@
 #include "TH2F.h"
 #include "TH2I.h"
 #include "TGraphErrors.h"
+#include "TEllipse.h"
 
 //#include "TCanvas.h"
 #include "TDirectory.h"
@@ -68,7 +69,15 @@ class Ana_Hist
   Hist<TH2F> h_xy_extrap;
   Hist<TH2F> h_PxPy_extrap;
   Hist<TH2F> h_TrackFindingStat;
-  // Kalman:
+  Hist<TH2F> h_MDC_Dphi;
+  Hist<TH2F> h_MDC_NextLayer;
+  Hist<TH2F> h_MDC_DiffLayer;
+  Hist<TH2F> h_MDC_DiffLayer2;
+  Hist<TH2F> h_MDC_InLayer;
+  
+  Hist<TH2F> h_SolenoidGeo[3];
+  std::vector<TEllipse*> geoSolenoid;
+  // K>lman:
   Hist<TH1F> h_pv;
   Hist<TH1F> h_chi2;
   Hist<TH1F> hd_pv[2];
