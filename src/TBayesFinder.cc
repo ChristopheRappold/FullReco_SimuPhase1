@@ -19,26 +19,27 @@
 
 using namespace std;
 using namespace G4Sol;
+using namespace BayesFind;
 
+#define DEBUG_BAYES
 
 TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterface("bayes_finder"),att(attribut),ME( 17, std::vector<TGeoNodeMatrix*>()),LayerGeo(17, std::vector<DataLayer>())
 {
-  
   for(auto it : *gGeoManager->GetListOfVolumes() )
     {
       TString name(it->GetName());
       
       if(name.Contains("MD"))
 	{
-	  //cout<<name<<"\n"; it->Print();
+	  att._logger->debug("{} {}",name, fmt::ptr(it));
 	  TGeoTubeSeg* tube = dynamic_cast<TGeoTubeSeg*>( dynamic_cast<TGeoVolume*>(it)->GetShape());
 	  radiusCDC.emplace_back(0.5*(tube->GetRmax()+tube->GetRmin()));
-	  //std::cout<<name<<" "<<radiusCDC.back()<<"\n";
+	  att._logger->debug("{} {}",name, radiusCDC.back());
 	}
     }
 
 
-
+  
 
   auto N00 = gGeoManager->GetListOfNodes();
   TGeoNodeMatrix* WASA_1 = (TGeoNodeMatrix*)N00->At(0);
@@ -59,8 +60,8 @@ TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterfa
       TGeoNodeMatrix* INNER_1 = (TGeoNodeMatrix*)N02->At(0);
       std::cout<<"INNER:\n";
       INNER_1->GetMatrix()->Print();
-
-      TGeoHMatrix ToMaster = (*INNER_1->GetMatrix())*(*MFLD_1->GetMatrix());
+      TGeoHMatrix tempMasterInner(*INNER_1->GetMatrix()), tempMasterMag(*MFLD_1->GetMatrix()); 
+      TGeoHMatrix ToMaster = tempMasterInner*tempMasterMag;
       std::cout<<"ToINNER:\n:";
       ToMaster.Print();
   
@@ -77,22 +78,26 @@ TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterfa
 	  Nsize[i] = MD[i]->GetNodes()->GetEntries()-2;
 
 	  std::cout<<i<<"MD \n";
-	  MD[i]->GetMatrix()->Print();
-      
-	  MatMD.emplace_back((*MD[i]->GetMatrix())*(ToMaster));
+	  //MD[i]->GetMatrix()->Print();
+	  TGeoHMatrix temp1(*MD[i]->GetMatrix());
+	  
+	  MatMD.emplace_back(temp1*ToMaster);
 
 	  MatMD.back().Print();
 	}
 
-      std::vector< std::vector<TGeoNodeMatrix*> > ME( 17, std::vector<TGeoNodeMatrix*>());
-      std::vector< std::vector< DataLayer > LayerGeo(17, std::vector<DataLayer>());
+      //ME.resize( 17, std::vector<TGeoNodeMatrix*>());
+      //LayerGeo.resize(17, std::vector<DataLayer>());
   
       for( auto i = 0 ; i < ME.size(); ++i)
 	{
+	  att._logger->debug("layer:{} nb channels: {}", i, Nsize[i]);
 	  ME[i] = std::vector<TGeoNodeMatrix*>(Nsize[i],nullptr);
+	  LayerGeo[i].resize(Nsize[i]);
 	  auto N04 = MD[i]->GetNodes();
 	  for( auto j = 0; j<Nsize[i]; ++j)
 	    {
+	      //att._logger->debug("ch#{} / {}",j, Nsize[i]);
 	      ME[i][j] = (TGeoNodeMatrix*)N04->At(j);
 
 	      auto TempTube = dynamic_cast<TGeoTube*>(ME[i][j]->GetVolume()->GetShape());
@@ -116,21 +121,19 @@ TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterfa
 	      MatMD[i].LocalToMaster(MinInMaster, MinInLab);
 	      MatMD[i].LocalToMaster(MaxInMaster, MaxInLab);
 	  
-	      DataLayer tempDimData;
+	      LayerGeo[i][j].cenX = CenterInLab[0];
+	      LayerGeo[i][j].cenY = CenterInLab[1];
+	      LayerGeo[i][j].cenZ = CenterInLab[2];
+	      
+	      LayerGeo[i][j].minX = MinInLab[0];
+	      LayerGeo[i][j].minY = MinInLab[1];
+	      LayerGeo[i][j].minZ = MinInLab[2];
+	      
+	      LayerGeo[i][j].maxX = MaxInLab[0];
+	      LayerGeo[i][j].maxY = MaxInLab[1];
+	      LayerGeo[i][j].maxZ = MaxInLab[2];
 
-	      tempDimData.cenX[0] = CenterInLab[0];
-	      tempDimData.cenY[0] = CenterInLab[1];
-	      tempDimData.cenZ[0] = CenterInLab[2];
-
-	      tempDimData.minX[0] = MinInLab[0];
-	      tempDimData.minY[0] = MinInLab[1];
-	      tempDimData.minZ[0] = MinInLab[2];
-
-	      tempDimData.maxX[0] = MaxInLab[0];
-	      tempDimData.maxY[0] = MaxInLab[1];
-	      tempDimData.maxZ[0] = MaxInLab[2];
-
-	      LayerGeo[i][j].emplace_back(tempDimData);
+	      LayerGeo[i][j].radius = TempTube->GetRmax();
 	    }
 	}
     }
@@ -165,6 +168,16 @@ int TBayesFinder::SoftExit(int result_full)
 
 int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
 {
+  int index_ell = 0;
+  for(double radius : radiusCDC)
+    if(index_ell<17)
+      {
+	att._logger->error("GEO: {} {}",fmt::ptr(AnaHisto->geoSolenoid[index_ell]), radius);
+	AnaHisto->geoSolenoid[index_ell] = new TEllipse(0,0,radius);
+	AnaHisto->geoSolenoid[index_ell]->SetFillStyle(2);
+	++index_ell;
+      }
+
   
 #ifdef DEBUG_BAYES
   cout<<"Finder DAF Hit :"<<endl;
@@ -184,8 +197,8 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
       std::vector<std::stringstream> s2(track.second.size()/20+1);
       for(size_t i = 0; i<track.second.size(); ++i)
 	{
-	  s1[i/20] << printW(i,3)<<", ";
-	  s2[i/20] << printW(track.second[i],3)<<", ";
+	  s1[i/20] << printW(G4Sol::nameLiteralDet.begin()[i],6)<<", ";
+	  s2[i/20] << printW(track.second[i],6)<<", ";
 	}
       for(size_t i = 0; i<s1.size();++i)
 	{
@@ -203,7 +216,7 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
       std::vector<std::stringstream> s2(track.second.size()/20+1);
       for(size_t i = 0; i<track.second.size(); ++i)
 	{
-	  s1[i/20] << printW(i,6)<<", ";
+	  s1[i/20] << printW(G4Sol::nameLiteralDet.begin()[i],6)<<", ";
 	  s2[i/20] << printW(track.second[i].pdg,6)<<", ";
 	}
       for(size_t i = 0; i<s1.size();++i)
@@ -230,6 +243,30 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
 	}
     }
 
+  auto DrawMG = [](const auto& ListHits, const auto& LayerG, TH2F* h, TRandom3& rand) {
+    
+    for(SolDetIter i = G4Sol::MG01 ; i != G4Sol::MG17;++i)
+      {
+	for(auto it_hit : ListHits[i.pos])
+	  {
+	    SimHit hit( std::get<0>(it_hit));
+	    double xH = hit.hitX;
+	    double yH = hit.hitY;
+	    int WireID = hit.layerID;
+	    int LayID = i.pos - G4Sol::MG01;
+	    //LayID -= initLayID;
+	    for(int ran = 0;ran<1000;++ran)
+	      {
+		double temp_x,temp_y;
+		rand.Circle(temp_x,temp_y,LayerG[LayID][WireID].radius);
+		h->Fill(xH+temp_x,yH+temp_y);
+	      }
+	  }
+      }
+  };
+
+  DrawMG(AllHits,LayerGeo,AnaHisto->h_SolenoidGeo[0],rand);
+
 #ifdef DEBUG_BAYES
   auto printSimHit = [](const SimHit& hit) {
 		       std::cout<<"     layerID: "<<hit.layerID<<" pdg:"<<hit.pdg<<"\n";
@@ -238,7 +275,7 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
   for(size_t id_det = 0; id_det < AllHits.size() ; ++id_det)
     if(AllHits[id_det].size()>0)
       {
-	std::cout<<"detector: #"<<id_det<<" "<<AllHits[id_det].size()<<"\n";
+	std::cout<<"detector: #"<<id_det<<" "<<G4Sol::nameLiteralDet.begin()[id_det]<<" "<<AllHits[id_det].size()<<"\n";
 	for(auto it_hit : AllHits[id_det])
 	  {
 	    printSimHit(std::get<0>(it_hit));
@@ -276,15 +313,17 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
 		     };
       printMG(ListValidHits);
 #endif
-
-      
+           
       const double charge = -1.;
       double ch =charge*att.Field_Strength/3.10715497;
       
       InfoPar info;
       
       double init_x = 0, init_y = 0, init_momX = 0, init_momY = 0;
-      const std::string nameFinalHit [2] = {"PSCE","PSFE"};
+
+      G4Sol::SolDet LastFrontWall = att.Wasa_Side == 0 ? G4Sol::PSFE : G4Sol::PSBE ;
+      const std::string nameFinalHit[2] = {"PSCE","PSBFE"};
+
       int idFinal = 0;
       if(ListValidHits[G4Sol::PSCE]>=0)
 	{
@@ -295,13 +334,13 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
 	  info = it_det.second[G4Sol::PSCE];
 	  idFinal = 0;
 	}
-      else if(ListValidHits[G4Sol::PSFE]>=0)
+      else if(ListValidHits[LastFrontWall]>=0)
 	{
-	  init_x = ListHits[G4Sol::PSFE].hitX;
-	  init_y = ListHits[G4Sol::PSFE].hitY;
-	  init_momX = ListHits[G4Sol::PSFE].momX;
-	  init_momY = ListHits[G4Sol::PSFE].momY;
-	  info = it_det.second[G4Sol::PSFE];
+	  init_x = ListHits[LastFrontWall].hitX;
+	  init_y = ListHits[LastFrontWall].hitY;
+	  init_momX = ListHits[LastFrontWall].momX;
+	  init_momY = ListHits[LastFrontWall].momY;
+	  info = it_det.second[LastFrontWall];
 	  idFinal = 1;
 	}
 
@@ -379,7 +418,7 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
 #ifdef DEBUG_BAYES
 		std::cout<<" a dPhi^2 + b dPhi + c = 0 \n"<<a<<" "<<b<<" "<<c<<"\n";
 		cout<<"delta:"<<delta<<" "<<r1<<" "<<r2<<"\n";
-		cout<<"dphi2: "<<dphi2_1<<" "<<dphi2_2<<"\n";
+		//cout<<"dphi2: "<<dphi2_1<<" "<<dphi2_2<<"\n";
 #endif
 		double dPhi = TMath::Abs(r1) < TMath::Abs(r2) ? r1 : r2;
 

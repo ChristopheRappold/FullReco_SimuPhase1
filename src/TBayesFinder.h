@@ -6,6 +6,8 @@
 #include "FullRecoEvent.hh"
 
 #include "TGeoMatrix.h"
+#include "TGeoNode.h"
+#include "TRandom3.h"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 
@@ -16,17 +18,19 @@ typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
 namespace BayesFind {
 
   struct DataLayer {
-    double cenX[3] = {0.,0.,0.};
-    double cenY[3] = {0.,0.,0.};
-    double cenZ[3] = {0.,0.,0.};
-    
-    double minX[3] = {0.,0.,0.};
-    double minY[3] = {0.,0.,0.};
-    double minZ[3] = {0.,0.,0.};
-    
-    double maxX[3] = {0.,0.,0.};
-    double maxY[3] = {0.,0.,0.};
-    double maxZ[3] = {0.,0.,0.};
+    double cenX = {0.};
+    double cenY = {0.};
+    double cenZ = {0.};
+    		      
+    double minX = {0.};
+    double minY = {0.};
+    double minZ = {0.};
+    		      
+    double maxX = {0.};
+    double maxY = {0.};
+    double maxZ = {0.};
+
+    double radius = {0.};
   };
 
   struct DataTrack {
@@ -58,8 +62,8 @@ class TBayesFinder :  public TDataProcessInterface
 
   std::vector<TGeoHMatrix> MatMD;
   std::vector< std::vector<TGeoNodeMatrix*> > ME;
-  std::vector< std::vector< DataLayer > LayerGeo;
-
+  std::vector< std::vector< BayesFind::DataLayer >> LayerGeo;
+  TRandom3 rand;
 };
 
 
