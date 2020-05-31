@@ -27,7 +27,7 @@ OutPutOpt     = -o
 
 #CXX           = g++
 CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUILD_DRAFT_API #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
-LIBS          = -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
+LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
 LDFLAGS       = '-Wl,-rpath,$$ORIGIN/lib'
 SOFLAGS       = -shared
 
@@ -44,6 +44,7 @@ GENFITV2FLAGS = -I./Genfit2_v2/include
 SPDLOGFLAGS = -I./spdlog/include
 ZMQFLAGS = -I./cppzmq/include -I./libzmq/include
 MSGFLAGS = -I./msgpack-c/include
+TRICKTRACKFLAGS = -I./TrickTrack/include
 
 CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
 LIBS         += $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol
@@ -52,6 +53,8 @@ GENFIT_LIB = -lgenfit2
 SPDLOG_LIB = -lspdlog
 ZMQ_LIB = -lzmq
 MSG_LIB = -lmsgpackc
+TT_LIB = -ltricktrack
+
 LIB_MERGER =  $(ROOTLIBS) -lAna_Event -lAna_Event_Out
 LIB_PROFILING = #-L/home/christophe/Workspace/gperftools-2.4/lib -ltcmalloc #-lprofiler
 
@@ -65,7 +68,7 @@ Sources = MainSimu.cc FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana
 Headers = $(patsubst %.cc,%.hh,$(Sources))
 Objects = $(patsubst %.cc,%.o,$(Sources))
 
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc #TBayesFinder.cc 
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TFinderCM.cc
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
@@ -87,9 +90,8 @@ CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 
 all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainMonitor 
 
-$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
-
+$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(LDFLAGS)
 
 $(Bindir)/MainMonitor: MainMonitor.o FullRecoConfig.o
 	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
@@ -132,6 +134,12 @@ endif
 libspdlog.a :
 	make -C spdlog/build
 	make -C spdlog/build install
+
+libtricktrack.so :
+	make -C TrickTrack/build
+	make -C TrickTrack/build install
+	ln -sf $(FromLibdir)/TrickTrack/lib/libtricktrack.$(DllSuf) $(Bindir)/lib/
+	@echo "---> $@ done"
 
 libFairBase.so :
 	make -C FairBase
