@@ -37,8 +37,9 @@ class TG4Sol_Hit : public TObject
   Double32_t TrackLength;
   
   std::string Pname;
-    
-  ClassDef(TG4Sol_Hit,2)  
+  Int_t Pdg;
+  
+  ClassDef(TG4Sol_Hit,3)  
 };
 
 #endif // TG4SOL_HIT_H

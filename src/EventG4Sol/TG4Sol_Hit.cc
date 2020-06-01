@@ -11,7 +11,7 @@ TG4Sol_Hit::TG4Sol_Hit():TrackID(-1), LayerID(-1),
 			 ExitPosX(-9999.), ExitPosY(-9999.), ExitPosZ(-9999.),
 			 MomX(-9999.)    , MomY(-9999.)    , MomZ(-9999.)    ,Mass(-9999.),
 			 Energy(-9999.), Time(-9999.), TrackLength(-9999.),
-			 Pname("")
+			 Pname(""),Pdg(-999999)
 			   
 {}
 
