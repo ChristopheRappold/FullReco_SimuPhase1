@@ -27,6 +27,8 @@
 #include "RKTrackRep.h"
 #include "Track.h"
 
+//#include "GFRaveVertexFactory.h"
+
 //#include "Math/ProbFunc.h"
 
 using TDataProcessInterface = TDataProcess<FullRecoEvent, MCAnaEventG4Sol>;
@@ -36,15 +38,15 @@ using TDataProcessInterface = TDataProcess<FullRecoEvent, MCAnaEventG4Sol>;
 //     double operator() (double chi2,double ndf)
 //     {
 //       if (ndf <= 0)
-// 	return 0; // Set CL to zero in case ndf<=0
+//  return 0; // Set CL to zero in case ndf<=0
 
 //       if (chi2 <= 0)
-// 	{
-// 	  if (chi2 < 0)
-// 	    return 0;
-// 	  else
-// 	    return 1;
-// 	}
+//  {
+//    if (chi2 < 0)
+//      return 0;
+//    else
+//      return 1;
+//  }
 
 //       return ::ROOT::Math::chisquared_cdf_c(chi2,ndf);
 //     }
@@ -55,10 +57,10 @@ using TDataProcessInterface = TDataProcess<FullRecoEvent, MCAnaEventG4Sol>;
 class TKalmanFilter_DAF : public TDataProcessInterface
 {
   public:
-  const THyphiAttributes& att;
+    const THyphiAttributes& att;
 
-  explicit TKalmanFilter_DAF(const THyphiAttributes& attr);
-  ~TKalmanFilter_DAF() final;
+    explicit TKalmanFilter_DAF(const THyphiAttributes& attr);
+    ~TKalmanFilter_DAF() final;
 
   // int Init(Ana_Hist* h);
   ReturnRes::InfoM operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) final;
@@ -70,16 +72,17 @@ class TKalmanFilter_DAF : public TDataProcessInterface
 
   int Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent);
 
-  // genfit::DAF* Fitter;
-  genfit::AbsKalmanFitter* Fitter;
-  genfit::AbsKalmanFitter* Fitter_rescue;
-  genfit::Track* Vtracks;
-  genfit::RKTrackRep* rep;
-  genfit::EventDisplay* display;
+    // genfit::DAF* Fitter;
+    genfit::AbsKalmanFitter* Fitter;
+    genfit::AbsKalmanFitter* Fitter_rescue;
+    genfit::Track* Vtracks;
+    genfit::RKTrackRep* rep;
+    genfit::EventDisplay* display;
+    //genfit::GFRaveVertexFactory* vertexFactory;
 
-  std::vector<genfit::DetPlane*> list_Plane;
+    std::vector<genfit::DetPlane*> list_Plane;
 
-  TVector3 Plane_time;
+    TVector3 Plane_time;
 
   int Nb_event = 0;
   struct LocalHists {

@@ -54,6 +54,17 @@ class THyphiTrack : public TObject
   ////////////////////////
   Double_t State[6];
   Double_t Cov[6][6];
+
+  Int_t      NCent;
+  Int_t      iterNum;
+
+  Double32_t ResMDC[17][3];
+  Double32_t ResFiber[9];
+  Double32_t ResPSCE[2];
+  Double32_t WeightMDC[17][3];
+  Double32_t WeightFiber[9];
+  Double32_t WeightPSCE[2];
+
   ////////////////////////
   // TVector3 MomTof;
   // ///////////////////////

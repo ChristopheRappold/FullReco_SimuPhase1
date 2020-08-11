@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "TGeoManager.h"
 
 #include "Debug.hh"
 
@@ -15,27 +16,32 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
   att._logger->info("TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF");
 
   std::vector<std::string> tempName = {"HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
-				       "TR1_log","TR2_log",
-                                       "PSFE",
-                                       "MG01", "MG02", "MG03", "MG04", "MG05", "MG06", "MG07", "MG08", "MG09", "MG10", "MG11", "MG12",
-				       "MG13", "MG14", "MG15", "MG16", "MG17",
-                                       "PSCE", "PSBE",
-                                       "CDC_log0", "CDC_log1", "CDC_log2", "CDC_log3", "CDC_log4", "CDC_log5", "CDC_log6", "CDC_log7",
-                                       "CDC_log8", "CDC_log9", "CDC_log10", "CDC_log11", "CDC_log12", "CDC_log13", "CDC_log14",
-                                       "CDH_log",
-                                       "HypHI_TrackFwd_log", "HypHI_TrackFwd_logDummy1", "HypHI_TrackFwd_logDummy2",
-                                       "HypHI_RPC_l_log", "HypHI_RPC_h_log",
-                                       "FMF2_log"};
+    "TR1_log","TR2_log",
+    "FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v",
+    "FiberD2_Core_log_x", "FiberD2_Core_log_u", "FiberD2_Core_log_v",
+    "FiberD3_Core_log_x", "FiberD3_Core_log_u", "FiberD3_Core_log_v",
+    "PSFE",
+    "MG01", "MG02", "MG03", "MG04", "MG05", "MG06", "MG07", "MG08", "MG09", "MG10", "MG11", "MG12",
+    "MG13", "MG14", "MG15", "MG16", "MG17",
+    "PSCE", "PSBE",
+    "CDC_log0", "CDC_log1", "CDC_log2", "CDC_log3", "CDC_log4", "CDC_log5", "CDC_log6", "CDC_log7",
+    "CDC_log8", "CDC_log9", "CDC_log10", "CDC_log11", "CDC_log12", "CDC_log13", "CDC_log14",
+    "CDH_log",
+    "HypHI_TrackFwd_log", "HypHI_TrackFwd_logDummy1", "HypHI_TrackFwd_logDummy2",
+    "HypHI_RPC_l_log", "HypHI_RPC_h_log",
+    "FMF2_log"};
 
   for(size_t iName = 0; iName < att.InputPar.nameDet->size(); ++iName)
+  {
+    std::string nameDetTemp(att.InputPar.nameDet->at(iName));
+    for(size_t iTypeDet = 0; iTypeDet < tempName.size(); ++iTypeDet)
     {
-      std::string nameDetTemp(att.InputPar.nameDet->at(iName));
-      for(size_t iTypeDet = 0; iTypeDet < tempName.size(); ++iTypeDet)
-        {
-          if(nameDetTemp == tempName[iTypeDet])
-            orderDetectors.insert(std::make_pair(iName, iTypeDet));
-        }
+      if(nameDetTemp == tempName[iTypeDet]){
+        orderDetectors.insert(std::make_pair(iName, iTypeDet));
+        orderDetName.insert(std::make_pair(iTypeDet, nameDetTemp));
+      }
     }
+  }
 }
 
 TBuildDetectorLayerPlaneDAF::~TBuildDetectorLayerPlaneDAF() {}
@@ -100,148 +106,166 @@ ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::SoftExit(int return_build)
 }
 #ifdef ROOT6
 int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits,
-                                      FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+    FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 #else
 int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent,
-                                      MCAnaEventG4Sol* OutTree)
+    MCAnaEventG4Sol* OutTree)
 #endif
 {
   int NumFilled = 0;
-//  std::cout<<"TBuidlDetectorLayerPlaneDAF : Proton = "<<event.n_Proton<<endl;
+  //  std::cout<<"TBuidlDetectorLayerPlaneDAF : Proton = "<<event.n_Proton<<endl;
 
 #ifdef DEBUG_BUILD
   auto printW = [](const auto a, const int width, bool lr = true) -> std::string {
-		  std::stringstream ss;
-		  ss << std::fixed ;
-		  if(lr)
-		    ss << std::right;
-		  else
-		    ss << std::left;
-		  ss.fill(' ');    // fill space around displayed #
-		  ss.width(width); // set  width around displayed #
-		  ss << a;
-		  return ss.str();
-		};
+    std::stringstream ss;
+    ss << std::fixed ;
+    if(lr)
+      ss << std::right;
+    else
+      ss << std::left;
+    ss.fill(' ');    // fill space around displayed #
+    ss.width(width); // set  width around displayed #
+    ss << a;
+    return ss.str();
+  };
   auto printFixed = [](const double a, const int decDigits, const int width) -> std::string {
-		      std::stringstream ss;
-		      ss << std::fixed << std::right;
-		      ss.fill(' ');            // fill space around displayed #
-		      ss.width(width);         // set  width around displayed #
-		      ss.precision(decDigits); // set # places after decimal
-		      ss << a;
-		      return ss.str();
-		    };
+    std::stringstream ss;
+    ss << std::fixed << std::right;
+    ss.fill(' ');            // fill space around displayed #
+    ss.width(width);         // set  width around displayed #
+    ss.precision(decDigits); // set # places after decimal
+    ss << a;
+    return ss.str();
+  };
 
 
   for(size_t id = 0; id < event.BeamNames.size(); ++id)
-    {
-      int trackID = event.BeamTrackID[id];
-      att._logger->debug("beam : {} # {}", event.BeamNames[id],  trackID);
+  {
+    int trackID = event.BeamTrackID[id];
+    att._logger->debug("beam : {} # {}", event.BeamNames[id],  trackID);
 
-      for(auto& det : hits)
-        {
+    for(auto& det : hits)
+    {
 #ifdef ROOT6
-          for(auto hit : *det)
-            {
-              if(hit.TrackID == trackID)
-                att._logger->debug("Branch: {} {} {} {} {} {}", printW(det->GetBranchName(), 18,false), printFixed(hit.HitPosX, 4, 6), printFixed(hit.HitPosY, 4, 6), printFixed(hit.HitPosZ, 4, 6), hit.LayerID, hit.Pname);
-            }
+      for(auto hit : *det)
+      {
+        if(hit.TrackID == trackID)
+          att._logger->debug("Branch: {} {} {} {} {} {}", printW(det->GetBranchName(), 18,false), printFixed(hit.HitPosX, 4, 6), printFixed(hit.HitPosY, 4, 6), printFixed(hit.HitPosZ, 4, 6), hit.LayerID, hit.Pname);
+      }
 #else
-          for(int j = 0; j < det->GetEntries(); ++j)
-            {
-              TG4Sol_Hit* hit = dynamic_cast<TG4Sol_Hit*>(det->At(j));
-              if(hit->TrackID == trackID)
-                att._logger->debug("Branch: {} hit:{} {} {} mom:{} {} {} | {} {}", printW(det->GetName(), 18,false), printFixed(hit->HitPosX,4,9), printFixed(hit->HitPosY,4,9), printFixed(hit->HitPosZ,4,9), printFixed(hit->MomX,4,8), printFixed(hit->MomY,4,8), printFixed(hit->MomZ,4,8), printW(hit->LayerID,2), printW(hit->Pname,6));
-            }
+      for(int j = 0; j < det->GetEntries(); ++j)
+      {
+        TG4Sol_Hit* hit = dynamic_cast<TG4Sol_Hit*>(det->At(j));
+        if(hit->TrackID == trackID)
+          att._logger->debug("Branch: {} hit:{} {} {} mom:{} {} {} | {} {}", printW(det->GetName(), 18,false), printFixed(hit->HitPosX,4,9), printFixed(hit->HitPosY,4,9), printFixed(hit->HitPosZ,4,9), printFixed(hit->MomX,4,8), printFixed(hit->MomY,4,8), printFixed(hit->MomZ,4,8), printW(hit->LayerID,2), printW(hit->Pname,6));
+      }
 #endif
-        }
     }
+  }
   for(size_t id = 0; id < event.DaughterNames.size(); ++id)
-    {
-      int trackID = event.DaughterTrackID[id];
-      att._logger->debug("decayed : {} # {}", event.DaughterNames[id], trackID);
+  {
+    int trackID = event.DaughterTrackID[id];
+    att._logger->debug("decayed : {} # {}", event.DaughterNames[id], trackID);
 
-      for(auto& det : hits)
-        {
+    for(auto& det : hits)
+    {
 #ifdef ROOT6
-          for(auto hit : *det)
-            {
-              // hit.Print();
-              if(hit.TrackID == trackID)
-                att._logger->debug("Branch: {} {} {} {} {} {}", det->GetBranchName(), hit.HitPosX, hit.HitPosY, hit.HitPosZ, hit.LayerID, hit.Pname);
-            }
+      for(auto hit : *det)
+      {
+        // hit.Print();
+        if(hit.TrackID == trackID)
+          att._logger->debug("Branch: {} {} {} {} {} {}", det->GetBranchName(), hit.HitPosX, hit.HitPosY, hit.HitPosZ, hit.LayerID, hit.Pname);
+      }
 #else
-          for(int j = 0; j < det->GetEntries(); ++j)
-            {
-              // hit.Print();
-              TG4Sol_Hit* hit = dynamic_cast<TG4Sol_Hit*>(det->At(j));
-              if(hit->TrackID == trackID)
-                att._logger->debug("Branch: {} hit:{} {} {} mom:{} {} {} | {} {}", printW(det->GetName(), 18,false), printFixed(hit->HitPosX,4,9), printFixed(hit->HitPosY,4,9), printFixed(hit->HitPosZ,4,9), printFixed(hit->MomX,4,8), printFixed(hit->MomY,4,8), printFixed(hit->MomZ,4,8), printW(hit->LayerID,2), printW(hit->Pname,6));
-            }
-	  
+      for(int j = 0; j < det->GetEntries(); ++j)
+      {
+        // hit.Print();
+        TG4Sol_Hit* hit = dynamic_cast<TG4Sol_Hit*>(det->At(j));
+        if(hit->TrackID == trackID)
+          att._logger->debug("Branch: {} hit:{} {} {} mom:{} {} {} | {} {}", printW(det->GetName(), 18,false), printFixed(hit->HitPosX,4,9), printFixed(hit->HitPosY,4,9), printFixed(hit->HitPosZ,4,9), printFixed(hit->MomX,4,8), printFixed(hit->MomY,4,8), printFixed(hit->MomZ,4,8), printW(hit->LayerID,2), printW(hit->Pname,6));
+      }
+
 #endif
-        }
     }
+  }
 #endif
 
   std::string nameMother(event.MotherName);
   int id_mother = event.MotherTrackID;
 
   for(size_t index = 0; index < event.BeamTrackID.size(); ++index)
-    {
-      TMcParticle* OutParticle = dynamic_cast<TMcParticle*>(OutTree->fMC_Particle->ConstructedAt(OutTree->fMC_Particle->GetEntries()));
-      OutParticle->type = event.BeamNames[index];
-      OutParticle->Mc_id = event.BeamTrackID[index];
-      OutParticle->Mother_id = -1;
-      OutParticle->Pdg = pid_fromName(event.BeamNames[index]);
-      OutParticle->Charge = event.BeamCharges[index];
-      OutParticle->MomMass.SetXYZM(event.BeamMomentums_X[index], event.BeamMomentums_Y[index], event.BeamMomentums_Z[index],
-                                   event.BeamMasses[index]);
-      OutParticle->Vtx.SetXYZT(event.InteractionPoint_X, event.InteractionPoint_Y, event.InteractionPoint_Z, 0.);
-      OutParticle->Weigth = event.BeamCharges[index] == 0 ? 0. : 1.;
-      OutParticle->GeoAcc = 1.;
+  {
+    TMcParticle* OutParticle = dynamic_cast<TMcParticle*>(OutTree->fMC_Particle->ConstructedAt(OutTree->fMC_Particle->GetEntries()));
+    OutParticle->type = event.BeamNames[index];
+    OutParticle->Mc_id = event.BeamTrackID[index];
+    OutParticle->Mother_id = -1;
+    OutParticle->Pdg = pid_fromName(event.BeamNames[index]);
+    OutParticle->Charge = event.BeamCharges[index];
+    OutParticle->MomMass.SetXYZM(event.BeamMomentums_X[index], event.BeamMomentums_Y[index], event.BeamMomentums_Z[index],
+        event.BeamMasses[index]);
+    OutParticle->Vtx.SetXYZT(event.InteractionPoint_X, event.InteractionPoint_Y, event.InteractionPoint_Z, 0.);
+    OutParticle->Weigth = event.BeamCharges[index] == 0 ? 0. : 1.;
+    OutParticle->GeoAcc = 1.;
 
-      if(event.BeamNames[index] == nameMother)
-        continue;
-      int TrackID = event.BeamTrackID[index];
+    if(event.BeamNames[index] == nameMother)
+      continue;
+    int TrackID = event.BeamTrackID[index];
 
-      std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
-      RecoEvent.TrackDAF.insert(std::make_pair(event.BeamTrackID[index], tempSetHit));
+    std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
+    RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
 
-      std::vector<SimHit> tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
-      RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));
+    InfoInit tempInit;
+    tempInit.posX = event.InteractionPoint_X;
+    tempInit.posY = event.InteractionPoint_Y;
+    tempInit.posZ = event.InteractionPoint_Z;
+    tempInit.momX = event.BeamMomentums_X[index];
+    tempInit.momY = event.BeamMomentums_Y[index];
+    tempInit.momZ = event.BeamMomentums_Z[index];
+    RecoEvent.TrackDAFInit.insert(std::make_pair(TrackID, tempInit));
 
-      std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
-      RecoEvent.TrackInfo.insert(std::make_pair(TrackID, tempSetInfo));
-    }
+    std::vector<SimHit> tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
+    RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));
+
+    std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
+    RecoEvent.TrackInfo.insert(std::make_pair(TrackID, tempSetInfo));
+  }
   for(size_t index = 0; index < event.DaughterTrackID.size(); ++index)
-    {
+  {
 
-      TMcParticle* OutParticle = dynamic_cast<TMcParticle*>(OutTree->fMC_Particle->ConstructedAt(OutTree->fMC_Particle->GetEntries()));
-      OutParticle->type = event.DaughterNames[index];
-      OutParticle->Mc_id = event.DaughterTrackID[index];
-      OutParticle->Mother_id = event.MotherTrackID;
-      OutParticle->Pdg = pid_fromName(event.DaughterNames[index]);
-      OutParticle->Charge = event.DaughterCharges[index];
-      OutParticle->MomMass.SetXYZM(event.DaughterMomentums_X[index], event.DaughterMomentums_Y[index], event.DaughterMomentums_Z[index],
-                                   event.DaughterMasses[index]);
-      OutParticle->Vtx.SetXYZT(event.DecayVertex_X, event.DecayVertex_Y, event.DecayVertex_Z, event.DecayTime);
-      OutParticle->Weigth = event.DaughterCharges[index] == 0 ? 0. : 1.;
-      OutParticle->GeoAcc = 1.;
+    TMcParticle* OutParticle = dynamic_cast<TMcParticle*>(OutTree->fMC_Particle->ConstructedAt(OutTree->fMC_Particle->GetEntries()));
+    OutParticle->type = event.DaughterNames[index];
+    OutParticle->Mc_id = event.DaughterTrackID[index];
+    OutParticle->Mother_id = event.MotherTrackID;
+    OutParticle->Pdg = pid_fromName(event.DaughterNames[index]);
+    OutParticle->Charge = event.DaughterCharges[index];
+    OutParticle->MomMass.SetXYZM(event.DaughterMomentums_X[index], event.DaughterMomentums_Y[index], event.DaughterMomentums_Z[index],
+        event.DaughterMasses[index]);
+    OutParticle->Vtx.SetXYZT(event.DecayVertex_X, event.DecayVertex_Y, event.DecayVertex_Z, event.DecayTime);
+    OutParticle->Weigth = event.DaughterCharges[index] == 0 ? 0. : 1.;
+    OutParticle->GeoAcc = 1.;
 
-      int TrackID = event.DaughterTrackID[index];
+    int TrackID = event.DaughterTrackID[index];
 
-      std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
-      RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
+    std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
+    RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
 
-      std::vector<SimHit> tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
-      RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));
+    InfoInit tempInit;
+    tempInit.posX = event.DecayVertex_X;
+    tempInit.posY = event.DecayVertex_Y;
+    tempInit.posZ = event.DecayVertex_Z;
+    tempInit.momX = event.DaughterMomentums_X[index];
+    tempInit.momY = event.DaughterMomentums_Y[index];
+    tempInit.momZ = event.DaughterMomentums_Z[index];
+    RecoEvent.TrackDAFInit.insert(std::make_pair(TrackID, tempInit));
 
-      std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
-      RecoEvent.TrackInfo.insert(std::make_pair(TrackID, tempSetInfo));
+    std::vector<SimHit> tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
+    RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));
 
-      RecoEvent.TrackMother.insert(std::make_pair(TrackID,std::make_tuple(event.MotherTrackID, event.DecayVertex_X, event.DecayVertex_Y, event.DecayVertex_Z, event.DecayTime)));
-    }
+    std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
+    RecoEvent.TrackInfo.insert(std::make_pair(TrackID, tempSetInfo));
+
+    RecoEvent.TrackMother.insert(std::make_pair(TrackID,std::make_tuple(event.MotherTrackID, event.DecayVertex_X, event.DecayVertex_Y, event.DecayVertex_Z, event.DecayTime)));
+  }
   OutTree->Nmc = OutTree->fMC_Particle->GetEntries();
 
   RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
@@ -263,250 +287,492 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   };
 
   for(size_t iDet = 0; iDet < hits.size(); ++iDet)
+  {
+#ifdef ROOT6
+    TTreeReaderArray<TG4Sol_Hit>* tempHits = hits[iDet];
+    std::string nameTempBr(tempHits->GetBranchName());
+#else
+    TClonesArray* tempHits = hits[iDet];
+    std::string nameTempBr(tempHits->GetName());
+#endif
+    auto tempPair = orderDetectors.find(iDet);
+    G4Sol::SolDet TypeDet = G4Sol::SolDet(tempPair->second);
+    std::unique_ptr<genfit::AbsMeasurement> measurement = nullptr;
+
+#ifdef DEBUG_BUILD
+    att._logger->debug("iDet # {} {} {}", iDet, nameTempBr, TypeDet);
+#endif
+
+    //double resolution_wire = 0.01;
+    //double resolution_wire_z = 0.1;
+    //double resolution_planar = 0.05; // cm
+    double resolution_wire = 1;
+    double resolution_wire_z = 10;
+    double resolution_planar = 1; // cm
+    double resolution_dl = 0.02; // cm
+    double resolution_fiber = 0.0144;
+    double resolution_psce   = 1.1; // 3.8/sqrt(12.)
+    double resolution_psce_z = 1.0;
+    double time_res = 0.150; // ns
+    if(nameTempBr == "FMF2_log" || nameTempBr == "HypHI_TrackFwd_log")
     {
+      //continue;
 #ifdef ROOT6
-      TTreeReaderArray<TG4Sol_Hit>* tempHits = hits[iDet];
-      std::string nameTempBr(tempHits->GetBranchName());
+      for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
 #else
-      TClonesArray* tempHits = hits[iDet];
-      std::string nameTempBr(tempHits->GetName());
+        for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
 #endif
-      auto tempPair = orderDetectors.find(iDet);
-      G4Sol::SolDet TypeDet = G4Sol::SolDet(tempPair->second);
-      std::unique_ptr<genfit::AbsMeasurement> measurement = nullptr;
-
-#ifdef DEBUG_BUILD
-      att._logger->debug("iDet # {} {} {}", iDet, nameTempBr, TypeDet);
-#endif
-
-      double resolution_wire = 0.01;
-      double resolution_wire_z = 0.1;
-      double resolution_planar = 0.05; // cm
-      double time_res = 0.150; // ns
-      if(nameTempBr == "FMF2_log" || nameTempBr == "HypHI_TrackFwd_log")
         {
 #ifdef ROOT6
-          for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
+          auto hit = *it_hit;
+          int indexInBranch = std::distance(tempHits->begin(), it_hit);
 #else
-          for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
+          const TG4Sol_Hit& hit = *(dynamic_cast<TG4Sol_Hit*>(tempHits->At(it_hit)));
+          int indexInBranch = it_hit;
 #endif
-            {
-#ifdef ROOT6
-              auto hit = *it_hit;
-              int indexInBranch = std::distance(tempHits->begin(), it_hit);
-#else
-              const TG4Sol_Hit& hit = *(dynamic_cast<TG4Sol_Hit*>(tempHits->At(it_hit)));
-              int indexInBranch = it_hit;
-#endif
-              int TrackID = hit.TrackID;
-              int LayerID = hit.LayerID;
+          int TrackID = hit.TrackID;
+          int LayerID = hit.LayerID;
 #ifdef DEBUG_BUILD
-              att._logger->debug(" hit#{} {} {} {}", indexInBranch, hit.Pname, hit.TrackID, hit.LayerID);
+          att._logger->debug(" hit#{} {} {} {}", indexInBranch, hit.Pname, hit.TrackID, hit.LayerID);
 #endif
-              auto tempTrack = RecoEvent.TrackDAF.find(TrackID);
-              if(tempTrack == RecoEvent.TrackDAF.end())
-                continue;
+          auto tempTrack = RecoEvent.TrackDAF.find(TrackID);
+          if(tempTrack == RecoEvent.TrackDAF.end())
+            continue;
 
-              TVectorD hitCoords(2);
-              hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_planar);
-              hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_planar);
-              //hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
+          TVectorD hitCoords(2);
+          hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_planar);
+          hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_planar);
+          //hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
 
-              TVectorD hitCoordsTree(3);
-	      hitCoordsTree(0) = hitCoords(0);
-	      hitCoordsTree(1) = hitCoords(1);
-	      hitCoordsTree(2) = hit.HitPosZ;
-              
-              TMatrixDSym hitCov(2);
-              hitCov(0, 0) = resolution_planar * resolution_planar;
-              hitCov(1, 1) = resolution_planar * resolution_planar;
-              //hitCov(2, 2) = resolution * resolution;
-              measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet) + LayerID, 0, nullptr);
+          TVectorD hitCoordsTree(3);
+          hitCoordsTree(0) = hitCoords(0);
+          hitCoordsTree(1) = hitCoords(1);
+          hitCoordsTree(2) = hit.HitPosZ;
 
-	      TVector3 o(0.,0.,hit.HitPosZ), u(1.,0.,0.), v(0.,1.,0.);
-	      genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
-	      dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
-	      
-              RecoEvent.ListHits[TypeDet + LayerID].emplace_back(measurement.release());
-              int indexHit = RecoEvent.ListHits[TypeDet + LayerID].size() - 1;
+          TMatrixDSym hitCov(2);
+          hitCov(0, 0) = resolution_planar * resolution_planar;
+          hitCov(1, 1) = resolution_planar * resolution_planar;
+          //hitCov(2, 2) = resolution * resolution;
+          //measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet) + LayerID, 0, nullptr);
 
-              tempTrack->second[TypeDet + LayerID] = indexHit;
+          //TVector3 o(0.,0.,hit.HitPosZ), u(1.,0.,0.), v(0.,1.,0.);
+          //genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+          //dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-              int pdg_code = pid_fromName(hit.Pname);
+          //RecoEvent.ListHits[TypeDet + LayerID].emplace_back(measurement.release());
+          //int indexHit = RecoEvent.ListHits[TypeDet + LayerID].size() - 1;
 
-              auto tempTrackSim = RecoEvent.TrackDAFSim.find(TrackID);
-              tempTrackSim->second[TypeDet + LayerID].layerID = LayerID;
-              tempTrackSim->second[TypeDet + LayerID].hitX = hit.HitPosX;
-              tempTrackSim->second[TypeDet + LayerID].hitY = hit.HitPosY;
-              tempTrackSim->second[TypeDet + LayerID].hitZ = hit.HitPosZ;
-              tempTrackSim->second[TypeDet + LayerID].momX = hit.MomX;
-              tempTrackSim->second[TypeDet + LayerID].momY = hit.MomY;
-              tempTrackSim->second[TypeDet + LayerID].momZ = hit.MomZ;
-              tempTrackSim->second[TypeDet + LayerID].pdg = pdg_code;
-              tempTrackSim->second[TypeDet + LayerID].mass = hit.Mass;
-              tempTrackSim->second[TypeDet + LayerID].Eloss = hit.Energy;
-              tempTrackSim->second[TypeDet + LayerID].time = gRandom->Gaus(hit.Time, time_res);
-              tempTrackSim->second[TypeDet + LayerID].length = hit.TrackLength;
+          //tempTrack->second[TypeDet + LayerID] = indexHit;
 
-              auto tempTrackInfo = RecoEvent.TrackInfo.find(TrackID);
-              tempTrackInfo->second[TypeDet + LayerID].pdg = pdg_code;
-              tempTrackInfo->second[TypeDet + LayerID].momX = hit.MomX;
-              tempTrackInfo->second[TypeDet + LayerID].momY = hit.MomY;
-              tempTrackInfo->second[TypeDet + LayerID].momZ = hit.MomZ;
-              tempTrackInfo->second[TypeDet + LayerID].mass = hit.Mass;
-              tempTrackInfo->second[TypeDet + LayerID].Eloss = hit.Energy;
-              tempTrackInfo->second[TypeDet + LayerID].time = hit.Time;
-              tempTrackInfo->second[TypeDet + LayerID].length = hit.TrackLength;
+          int pdg_code = pid_fromName(hit.Pname);
 
-              auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
-              if(PDG_particle == nullptr)
-                {
-                  att._logger->error("E> PDG not found !");
-                  continue;
-                }
-              const double charge = PDG_particle->Charge() / 3.;
+          auto tempTrackSim = RecoEvent.TrackDAFSim.find(TrackID);
+          tempTrackSim->second[TypeDet + LayerID].layerID = LayerID;
+          tempTrackSim->second[TypeDet + LayerID].hitX = hit.HitPosX;
+          tempTrackSim->second[TypeDet + LayerID].hitY = hit.HitPosY;
+          tempTrackSim->second[TypeDet + LayerID].hitZ = hit.HitPosZ;
+          tempTrackSim->second[TypeDet + LayerID].momX = hit.MomX;
+          tempTrackSim->second[TypeDet + LayerID].momY = hit.MomY;
+          tempTrackSim->second[TypeDet + LayerID].momZ = hit.MomZ;
+          tempTrackSim->second[TypeDet + LayerID].pdg = pdg_code;
+          tempTrackSim->second[TypeDet + LayerID].mass = hit.Mass;
+          tempTrackSim->second[TypeDet + LayerID].Eloss = hit.Energy;
+          tempTrackSim->second[TypeDet + LayerID].time = gRandom->Gaus(hit.Time, time_res);
+          tempTrackSim->second[TypeDet + LayerID].length = hit.TrackLength;
 
-              if(TypeDet + LayerID >= G4Sol::TrFwd0 && TypeDet + LayerID <= G4Sol::TrFwd2)
-                fillOutHit(OutTree->FwdTracker, hit, pdg_code, charge, hitCoordsTree, TypeDet + LayerID, 0.);
-              if(TypeDet + LayerID >= G4Sol::FMF2Stop0 && TypeDet + LayerID <= G4Sol::FMF2Stop2)
-                fillOutHit(OutTree->FMF2, hit, pdg_code, charge, hitCoordsTree, TypeDet + LayerID, 0.);
-            }
-        }
-      else
-        {
-#ifdef ROOT6
-          for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
-#else
-          for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
-#endif
-            {
-#ifdef ROOT6
-              auto hit = *it_hit;
-              int indexInBranch = std::distance(tempHits->begin(), it_hit);
-#else
-              const TG4Sol_Hit& hit = *(dynamic_cast<TG4Sol_Hit*>(tempHits->At(it_hit)));
-              int indexInBranch = it_hit;
-#endif
-              int TrackID = hit.TrackID;
-              int LayerID = hit.LayerID;
-#ifdef DEBUG_BUILD
-              att._logger->debug(" hit#{} {} {} {}", indexInBranch, hit.Pname, hit.TrackID, hit.LayerID);
-#endif
-              auto tempTrack = RecoEvent.TrackDAF.find(TrackID);
-              if(tempTrack == RecoEvent.TrackDAF.end())
-                continue;
+          auto tempTrackInfo = RecoEvent.TrackInfo.find(TrackID);
+          tempTrackInfo->second[TypeDet + LayerID].pdg = pdg_code;
+          tempTrackInfo->second[TypeDet + LayerID].momX = hit.MomX;
+          tempTrackInfo->second[TypeDet + LayerID].momY = hit.MomY;
+          tempTrackInfo->second[TypeDet + LayerID].momZ = hit.MomZ;
+          tempTrackInfo->second[TypeDet + LayerID].mass = hit.Mass;
+          tempTrackInfo->second[TypeDet + LayerID].Eloss = hit.Energy;
+          tempTrackInfo->second[TypeDet + LayerID].time = hit.Time;
+          tempTrackInfo->second[TypeDet + LayerID].length = hit.TrackLength;
 
-	      TVectorD hitCoordsTree(3);
-	      if(IsPlanar(TypeDet))
-		{
-		  TVectorD hitCoords(2);
-		  hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_planar);
-		  hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_planar);
-		  //hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
-		  TMatrixDSym hitCov(2);
-		  hitCov(0, 0) = resolution_planar * resolution_planar;
-		  hitCov(1, 1) = resolution_planar * resolution_planar;
-		  //hitCov(2, 2) = resolution * resolution;
-		  measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
-		  
-		  TVector3 o(0.,0.,hit.HitPosZ), u(1.,0.,0.), v(0.,1.,0.);
-		  genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
-		  dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+          auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
+          if(PDG_particle == nullptr)
+          {
+            att._logger->error("E> PDG not found !");
+            continue;
+          }
+          const double charge = PDG_particle->Charge() / 3.;
 
-		  hitCoordsTree(0) = hitCoords(0);
-		  hitCoordsTree(1) = hitCoords(1);
-		  hitCoordsTree(2) = hit.HitPosZ;				  
-		}
-	      else
-		{
-		  TVectorD hitCoords(3);
-
-		  hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_wire);
-		  hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_wire);
-		  hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution_wire_z);
-
-		  TMatrixDSym hitCov(3);
-		  hitCov(0, 0) = resolution_wire * resolution_wire;
-		  hitCov(1, 1) = resolution_wire * resolution_wire;
-		  hitCov(2, 2) = resolution_wire_z * resolution_wire_z;
-
-		  measurement = std::make_unique<genfit::ProlateSpacepointMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
-		  const TVector3 WireDir(0.,0.,1.);
-		  dynamic_cast<genfit::ProlateSpacepointMeasurement*>(measurement.get())->setLargestErrorDirection(WireDir);
-
-		  hitCoordsTree(0) = hitCoords(0);
-		  hitCoordsTree(1) = hitCoords(1);
-		  hitCoordsTree(2) = hitCoords(2);
-		}
-	      
-	      RecoEvent.ListHits[TypeDet].emplace_back(measurement.release());
-	      int indexHit = RecoEvent.ListHits[TypeDet].size() - 1;
-		  
-              tempTrack->second[TypeDet] = indexHit;
-
-              int pdg_code = pid_fromName(hit.Pname);
-
-              auto tempTrackSim = RecoEvent.TrackDAFSim.find(TrackID);
-              tempTrackSim->second[TypeDet].layerID = LayerID;
-              tempTrackSim->second[TypeDet].hitX = hit.HitPosX;
-              tempTrackSim->second[TypeDet].hitY = hit.HitPosY;
-              tempTrackSim->second[TypeDet].hitZ = hit.HitPosZ;
-              tempTrackSim->second[TypeDet].momX = hit.MomX;
-              tempTrackSim->second[TypeDet].momY = hit.MomY;
-              tempTrackSim->second[TypeDet].momZ = hit.MomZ;
-              tempTrackSim->second[TypeDet].pdg = pdg_code;
-              tempTrackSim->second[TypeDet].mass = hit.Mass;
-              tempTrackSim->second[TypeDet].Eloss = hit.Energy;
-              tempTrackSim->second[TypeDet].time = hit.Time;
-              tempTrackSim->second[TypeDet].length = hit.TrackLength;
-
-              auto tempTrackInfo = RecoEvent.TrackInfo.find(TrackID);
-              tempTrackInfo->second[TypeDet].pdg = pdg_code;
-              tempTrackInfo->second[TypeDet].momX = hit.MomX;
-              tempTrackInfo->second[TypeDet].momY = hit.MomY;
-              tempTrackInfo->second[TypeDet].momZ = hit.MomZ;
-              tempTrackInfo->second[TypeDet].mass = hit.Mass;
-              tempTrackInfo->second[TypeDet].Eloss = hit.Energy;
-              tempTrackInfo->second[TypeDet].time = hit.Time;
-              tempTrackInfo->second[TypeDet].length = hit.TrackLength;
-
-              auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
-              if(PDG_particle == nullptr)
-                {
-                  att._logger->error("E> PDG not found !");
-                  continue;
-                }
-              const double charge = PDG_particle->Charge() / 3.;
-
-              if(TypeDet >= G4Sol::InSi0 && TypeDet <= G4Sol::InSi3)
-                fillOutHit(OutTree->InSi, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-
-              if(TypeDet >= G4Sol::TR1 && TypeDet <= G4Sol::TR2)
-                fillOutHit(OutTree->TR, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-
-              if(TypeDet >= G4Sol::CDC_layer0 && TypeDet <= G4Sol::CDC_layer14)
-                fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-
-              if(TypeDet >= G4Sol::MG01 && TypeDet <= G4Sol::MG17)
-                fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-
-              if(TypeDet == G4Sol::CDHBar)
-                fillOutHit(OutTree->CDH, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-
-              if(TypeDet == G4Sol::RPC_l || TypeDet == G4Sol::RPC_h)
-                fillOutHit(OutTree->RPC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-
-              if(TypeDet == G4Sol::PSFE)
-                fillOutHit(OutTree->PSFE, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-
-              if(TypeDet == G4Sol::PSCE)
-                fillOutHit(OutTree->PSCE, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-
-              if(TypeDet == G4Sol::PSBE)
-                fillOutHit(OutTree->PSBE, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-            }
+          if(TypeDet + LayerID >= G4Sol::TrFwd0 && TypeDet + LayerID <= G4Sol::TrFwd2)
+            fillOutHit(OutTree->FwdTracker, hit, pdg_code, charge, hitCoordsTree, TypeDet + LayerID, 0.);
+          if(TypeDet + LayerID >= G4Sol::FMF2Stop0 && TypeDet + LayerID <= G4Sol::FMF2Stop2)
+            fillOutHit(OutTree->FMF2, hit, pdg_code, charge, hitCoordsTree, TypeDet + LayerID, 0.);
         }
     }
+    else
+    {
+#ifdef ROOT6
+      for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
+#else
+        for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
+#endif
+        {
+#ifdef ROOT6
+          auto hit = *it_hit;
+          int indexInBranch = std::distance(tempHits->begin(), it_hit);
+#else
+          const TG4Sol_Hit& hit = *(dynamic_cast<TG4Sol_Hit*>(tempHits->At(it_hit)));
+          int indexInBranch = it_hit;
+#endif
+          int TrackID = hit.TrackID;
+          int LayerID = hit.LayerID;
+#ifdef DEBUG_BUILD
+          att._logger->debug(" hit#{} {} {} {}", indexInBranch, hit.Pname, hit.TrackID, hit.LayerID);
+#endif
+          auto tempTrack = RecoEvent.TrackDAF.find(TrackID);
+          if(tempTrack == RecoEvent.TrackDAF.end())
+            continue;
+
+          TVectorD hitCoordsTree(3);
+          //std::cout << "\nTypeDet : " << TypeDet << std::endl;
+          //if(IsPlanar(TypeDet))
+          //{
+          //  std::cout << "planar"  << std::endl;
+          //  TVectorD hitCoords(2);
+          //  hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_planar);
+          //  hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_planar);
+          //  //hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
+          //  TMatrixDSym hitCov(2);
+          //  hitCov(0, 0) = resolution_planar * resolution_planar;
+          //  hitCov(1, 1) = resolution_planar * resolution_planar;
+          //  //hitCov(2, 2) = resolution * resolution;
+          //  measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+
+          //  TVector3 o(0.,0.,hit.HitPosZ), u(1.,0.,0.), v(0.,1.,0.);
+          //  genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+          //  dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+
+          //  hitCoordsTree(0) = hitCoords(0);
+          //  hitCoordsTree(1) = hitCoords(1);
+          //  hitCoordsTree(2) = hit.HitPosZ;
+          //}
+          if(IsPSCE(TypeDet))
+          {
+#ifdef DEBUG_BUILD
+            std::cout << "PSB"  << std::endl;
+            std::string tmpName = orderDetName.find(TypeDet)->second;
+            std::cout << "name : " << tmpName << std::endl;
+            std::cout << "LayerID : " << LayerID << std::endl;
+            std::cout << "HitPosX : " << hit.HitPosX << std::endl;
+            std::cout << "HitPosY : " << hit.HitPosY << std::endl;
+            std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
+            gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 4 + LayerID-1)->Print();
+            gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 4 + LayerID-1)->GetMatrix()->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
+            gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
+            gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
+#endif
+            TGeoMatrix *g1 = gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 4 + LayerID-1)->GetMatrix(); // PSCE
+            TGeoMatrix *g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNNER
+            TGeoMatrix *g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
+            TGeoHMatrix H1(*g1), H2(*g2), H3(*g3);
+            TGeoHMatrix H = H2 * H1;
+            H = H3 * H;
+#ifdef DEBUG_BUILD
+            H.Print();
+#endif
+            TGeoHMatrix Hsf("Hsf"); // PSCE inner surface
+            Hsf.SetDz(-0.4);
+            H = H * Hsf;
+            double *shift =  H.GetTranslation();
+            TVector3 o(shift[0], shift[1], shift[2]), phidir(shift[0], shift[1], 0), zdir(0.,0.,1.);
+            phidir = phidir.Unit();
+            TVector3 u = zdir.Cross(phidir);
+            TVector3 v = zdir;
+            genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+
+            TVectorD hitCoords(2);
+            hitCoords(0) = 0.;
+            hitCoords(1) = gRandom->Gaus(hit.HitPosZ - shift[2], resolution_psce_z);
+            TMatrixDSym hitCov(2);
+            hitCov(0, 0) = resolution_psce * resolution_psce;
+            hitCov(1, 1) = resolution_psce_z * resolution_psce_z;
+            measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+            dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+
+            hitCoordsTree(0) = hit.HitPosX;
+            hitCoordsTree(1) = hit.HitPosY;
+            hitCoordsTree(2) = hit.HitPosZ;
+          }
+          else if(IsFiberU(TypeDet)){
+            continue;
+            string volumeName;
+            switch(TypeDet){
+              case G4Sol::FiberD1_x :  volumeName = "FiberD1_log_x"; break;
+              case G4Sol::FiberD1_u :  volumeName = "FiberD1_log_u"; break;
+              case G4Sol::FiberD1_v :  volumeName = "FiberD1_log_v"; break;
+              case G4Sol::FiberD2_x :  volumeName = "FiberD2_log_x"; break;
+              case G4Sol::FiberD2_u :  volumeName = "FiberD2_log_u"; break;
+              case G4Sol::FiberD2_v :  volumeName = "FiberD2_log_v"; break;
+              case G4Sol::FiberD3_x :  volumeName = "FiberD3_log_x"; break;
+              case G4Sol::FiberD3_u :  volumeName = "FiberD3_log_u"; break;
+              case G4Sol::FiberD3_v :  volumeName = "FiberD3_log_v"; break;
+              default : std::cerr << "something wrong" << std::endl; break;
+            }
+            string motherName;
+            switch(TypeDet){
+              case G4Sol::FiberD1_x :  motherName = "FiberD1_log_0"; break;
+              case G4Sol::FiberD1_u :  motherName = "FiberD1_log_0"; break;
+              case G4Sol::FiberD1_v :  motherName = "FiberD1_log_0"; break;
+              case G4Sol::FiberD2_x :  motherName = "FiberD2_log_0"; break;
+              case G4Sol::FiberD2_u :  motherName = "FiberD2_log_0"; break;
+              case G4Sol::FiberD2_v :  motherName = "FiberD2_log_0"; break;
+              case G4Sol::FiberD3_x :  motherName = "FiberD3_log_0"; break;
+              case G4Sol::FiberD3_u :  motherName = "FiberD3_log_0"; break;
+              case G4Sol::FiberD3_v :  motherName = "FiberD3_log_0"; break;
+              default : std::cerr << "something wrong" << std::endl; break;
+            }
+#ifdef DEBUG_BUILD
+            std::cout << "fiber"  << std::endl;
+            std::string tmpName = orderDetName.find(TypeDet)->second;
+            std::cout << "name : " << tmpName << std::endl;
+            std::cout << "LayerID : " << LayerID << std::endl;
+            std::cout << "HitPosX : " << hit.HitPosX << std::endl;
+            std::cout << "HitPosY : " << hit.HitPosY << std::endl;
+            std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
+            gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID*2+1)->Print();
+            gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID*2+1)->GetMatrix()->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetVolume()->GetNode( (volumeName + "_0").c_str() )->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetVolume()->GetNode( (volumeName + "_0").c_str() )->GetMatrix()->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix()->Print();
+#endif
+            TGeoMatrix *g1 = gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID*2+1)->GetMatrix(); // fiber core
+            TGeoMatrix *g2 = gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetVolume()->GetNode( (volumeName + "_0").c_str() )->GetMatrix(); // fiber layer
+            TGeoMatrix *g3 = gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // fiber station
+            TGeoMatrix *g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
+            TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
+            TGeoHMatrix H = H2 * H1;
+            H = H3 * H;
+            H = H4 * H;
+            TGeoHMatrix w1("w1");
+            TGeoHMatrix w2("w2");
+            w1.SetDz(-10);
+            w2.SetDz( 10);
+            TGeoHMatrix Hw1 = H * w1;
+            TGeoHMatrix Hw2 = H * w2;
+#ifdef DEBUG_BUILD
+            H.Print();
+            Hw1.Print();
+            Hw2.Print();
+#endif
+            double *edge1 =  Hw1.GetTranslation();
+            double *edge2 =  Hw2.GetTranslation();
+            double *shift =  H.GetTranslation();
+            TVector3 o(0., 0., shift[2]), zdir(0.,0.,1.);
+            TVector3 fiber_dir( edge2[0]-edge1[0], edge2[1]-edge1[1],edge2[2]-edge1[2] );
+            fiber_dir = fiber_dir.Unit();
+            TVector3 u = fiber_dir.Cross(zdir);
+            TVector3 v = fiber_dir;
+            genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+
+            TVectorD hitCoords(1);
+            hitCoords(0) = u.Dot(TVector3(shift[0],0,0));
+            TMatrixDSym hitCov(1);
+            hitCov(0, 0) = resolution_fiber * resolution_fiber;
+            measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+            dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+
+            hitCoordsTree(0) = hit.HitPosX;
+            hitCoordsTree(1) = hit.HitPosY;
+            hitCoordsTree(2) = hit.HitPosZ;
+          }
+          else if(IsWire(TypeDet)){
+#ifdef DEBUG_BUILD
+            std::cout << "wire"  << std::endl;
+            std::string tmpName = orderDetName.find(TypeDet)->second;
+            std::cout << "name : " << tmpName << std::endl;
+            std::cout << "LayerID : " << LayerID << std::endl;
+            std::cout << "HitPosX : " << hit.HitPosX << std::endl;
+            std::cout << "HitPosY : " << hit.HitPosY << std::endl;
+            std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
+            gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetVolume()->GetNode(LayerID-1)->Print();
+            gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetVolume()->GetNode(LayerID-1)->GetMatrix()->Print();
+            gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->Print();
+            gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetMatrix()->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
+            gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
+            gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
+#endif
+            TGeoMatrix *g1 = gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetVolume()->GetNode(LayerID-1)->GetMatrix(); // ME, MG
+            TGeoMatrix *g2 = gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetMatrix(); // MD
+            TGeoMatrix *g3 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNER
+            TGeoMatrix *g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
+            TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
+            TGeoHMatrix H = H2 * H1;
+            H = H3 * H;
+            H = H4 * H;
+            double *shift =  H.GetTranslation();
+            TGeoHMatrix w1("w1");
+            TGeoHMatrix w2("w2");
+            w1.SetDz(-10);
+            w2.SetDz( 10);
+            TGeoHMatrix Hw1 = H * w1;
+            TGeoHMatrix Hw2 = H * w2;
+#ifdef DEBUG_BUILD
+            H.Print();
+            Hw1.Print();
+            Hw2.Print();
+#endif
+            double *edge1 =  Hw1.GetTranslation();
+            double *edge2 =  Hw2.GetTranslation();
+
+            TVector3 x1(shift[0], shift[1], shift[2]);
+            TVector3 p1(edge2[0]-edge1[0], edge2[1]-edge1[1], edge2[2]-edge1[2]);
+            TVector3 x2(hit.HitPosX, hit.HitPosY, hit.HitPosZ);
+            TVector3 p2(hit.MomX, hit.MomY, hit.MomZ);
+            double dl = CloseDist(x1, x2, p1, p2);
+            dl = gRandom->Gaus(dl, resolution_dl);
+            double dlmax = 0;
+            switch(TypeDet - G4Sol::MG01 + 1){
+              case 1:
+              case 2:
+              case 3:
+              case 4:
+              case 5:
+                dlmax = 0.2;
+                break;
+              case 6:
+              case 7:
+              case 8:
+              case 9:
+              case 10:
+              case 11:
+                dlmax = 0.3;
+                break;
+              case 12:
+              case 13:
+              case 14:
+              case 15:
+              case 16:
+              case 17:
+                dlmax = 0.4;
+                break;
+              default:
+                att._logger->warn("Error in WireMeasurement !");
+                break;
+            }
+            if(dl<0)     dl = 0;
+            if(dl>dlmax) dl = dlmax;
+
+            TVectorD hitCoords(7);
+            hitCoords(0) = edge1[0];
+            hitCoords(1) = edge1[1];
+            hitCoords(2) = edge1[2];
+            hitCoords(3) = edge2[0];
+            hitCoords(4) = edge2[1];
+            hitCoords(5) = edge2[2];
+            hitCoords(6) = dl;
+            TMatrixDSym hitCov(7);
+            hitCov(6, 6) = resolution_dl * resolution_dl;
+            measurement = std::make_unique<genfit::WireMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+            dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setLeftRightResolution(0);
+            dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setMaxDistance(dlmax);
+
+            hitCoordsTree(0) = hit.HitPosX;
+            hitCoordsTree(1) = hit.HitPosY;
+            hitCoordsTree(2) = hit.HitPosZ;
+          }
+          else{
+            continue;
+            //std::cout << "else"  << std::endl;
+            TVectorD hitCoords(3);
+            //std::cout << "HitPosX : " << hit.HitPosX << std::endl;
+            //std::cout << "HitPosY : " << hit.HitPosX << std::endl;
+
+            hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_wire);
+            hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_wire);
+            hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution_wire_z);
+
+            TMatrixDSym hitCov(3);
+            hitCov(0, 0) = resolution_wire * resolution_wire;
+            hitCov(1, 1) = resolution_wire * resolution_wire;
+            hitCov(2, 2) = resolution_wire_z * resolution_wire_z;
+
+            measurement = std::make_unique<genfit::ProlateSpacepointMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+            const TVector3 WireDir(0.,0.,1.);
+            dynamic_cast<genfit::ProlateSpacepointMeasurement*>(measurement.get())->setLargestErrorDirection(WireDir);
+
+            hitCoordsTree(0) = hitCoords(0);
+            hitCoordsTree(1) = hitCoords(1);
+            hitCoordsTree(2) = hitCoords(2);
+          }
+
+          RecoEvent.ListHits[TypeDet].emplace_back(measurement.release());
+          int indexHit = RecoEvent.ListHits[TypeDet].size() - 1;
+
+          tempTrack->second[TypeDet] = indexHit;
+
+          int pdg_code = pid_fromName(hit.Pname);
+
+          auto tempTrackSim = RecoEvent.TrackDAFSim.find(TrackID);
+          tempTrackSim->second[TypeDet].layerID = LayerID;
+          tempTrackSim->second[TypeDet].hitX = hit.HitPosX;
+          tempTrackSim->second[TypeDet].hitY = hit.HitPosY;
+          tempTrackSim->second[TypeDet].hitZ = hit.HitPosZ;
+          tempTrackSim->second[TypeDet].momX = hit.MomX;
+          tempTrackSim->second[TypeDet].momY = hit.MomY;
+          tempTrackSim->second[TypeDet].momZ = hit.MomZ;
+          tempTrackSim->second[TypeDet].pdg = pdg_code;
+          tempTrackSim->second[TypeDet].mass = hit.Mass;
+          tempTrackSim->second[TypeDet].Eloss = hit.Energy;
+          tempTrackSim->second[TypeDet].time = hit.Time;
+          tempTrackSim->second[TypeDet].length = hit.TrackLength;
+
+          auto tempTrackInfo = RecoEvent.TrackInfo.find(TrackID);
+          tempTrackInfo->second[TypeDet].pdg = pdg_code;
+          tempTrackInfo->second[TypeDet].momX = hit.MomX;
+          tempTrackInfo->second[TypeDet].momY = hit.MomY;
+          tempTrackInfo->second[TypeDet].momZ = hit.MomZ;
+          tempTrackInfo->second[TypeDet].mass = hit.Mass;
+          tempTrackInfo->second[TypeDet].Eloss = hit.Energy;
+          tempTrackInfo->second[TypeDet].time = hit.Time;
+          tempTrackInfo->second[TypeDet].length = hit.TrackLength;
+
+          auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
+          if(PDG_particle == nullptr)
+          {
+            att._logger->error("E> PDG not found !");
+            continue;
+          }
+          const double charge = PDG_particle->Charge() / 3.;
+
+          if(TypeDet >= G4Sol::InSi0 && TypeDet <= G4Sol::InSi3)
+            fillOutHit(OutTree->InSi, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
+          if(TypeDet >= G4Sol::TR1 && TypeDet <= G4Sol::TR2)
+            fillOutHit(OutTree->TR, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
+          if(TypeDet >= G4Sol::CDC_layer0 && TypeDet <= G4Sol::CDC_layer14)
+            fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
+          if(TypeDet >= G4Sol::MG01 && TypeDet <= G4Sol::MG17)
+            fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
+          if(TypeDet == G4Sol::CDHBar)
+            fillOutHit(OutTree->CDH, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
+          if(TypeDet == G4Sol::RPC_l || TypeDet == G4Sol::RPC_h)
+            fillOutHit(OutTree->RPC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
+          if(TypeDet == G4Sol::PSFE)
+            fillOutHit(OutTree->PSFE, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
+          if(TypeDet == G4Sol::PSCE)
+            fillOutHit(OutTree->PSCE, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
+          if(TypeDet == G4Sol::PSBE)
+            fillOutHit(OutTree->PSBE, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+        }
+    }
+  }
 
   OutTree->Field = att.Field_Strength;
 
@@ -524,56 +790,73 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 #ifdef DEBUG_BUILD
   att._logger->debug( "done !");
 #endif
-  
+
 #ifdef DEBUG_BUILD
   att._logger->debug( " DAF Hit :");
   for(auto track : RecoEvent.TrackDAF)
-    {
-      att._logger->debug( "TrackID # {} hit_id [", track.first);
-      std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
-      std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
-      std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
-      for(size_t i = 0; i < track.second.size(); ++i)
-	{
-	  s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
-	  s2[i / 20] << printW(i, 6) << ", ";
-	  s3[i / 20] << printW(track.second[i], 6) << ", ";
-	}
-      for(size_t i = 0; i < s1.size(); ++i)
-	{
-	  att._logger->debug( "idDet:{}", s1[i].str() );
-	  att._logger->debug( "stat :{}", s3[i].str() );
-	}
-
-      att._logger->debug( "] ");
-    }
-
-  
-  for(auto track : RecoEvent.TrackInfo)
-    {
-      att._logger->debug( "TrackID #{} PID [", track.first);
-      std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
-      std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
-      std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
-      for(size_t i = 0; i < track.second.size(); ++i)
-	{
-	  s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
-	  s2[i / 20] << printW(i, 6) << ", ";
-	  s3[i / 20] << printW(track.second[i].pdg, 6) << ", ";
-	}
-      for(size_t i = 0; i < s1.size(); ++i)
-	{
-	  att._logger->debug( "idDet:{}", s1[i].str() );
-	  att._logger->debug( "stat :{}", s3[i].str() );
-	}
-
-      att._logger->debug( "] ");
-    }
-for(const auto& det : RecoEvent.ListHits)
   {
-     for(const auto& hit : det)
-       hit->Print();
-   }
+    att._logger->debug( "TrackID # {} hit_id [", track.first);
+    std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
+    std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
+    std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
+    for(size_t i = 0; i < track.second.size(); ++i)
+    {
+      s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
+      s2[i / 20] << printW(i, 6) << ", ";
+      s3[i / 20] << printW(track.second[i], 6) << ", ";
+    }
+    for(size_t i = 0; i < s1.size(); ++i)
+    {
+      att._logger->debug( "idDet:{}", s1[i].str() );
+      att._logger->debug( "stat :{}", s3[i].str() );
+    }
+
+    att._logger->debug( "] ");
+  }
+
+
+  for(auto track : RecoEvent.TrackInfo)
+  {
+    att._logger->debug( "TrackID #{} PID [", track.first);
+    std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
+    std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
+    std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
+    for(size_t i = 0; i < track.second.size(); ++i)
+    {
+      s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
+      s2[i / 20] << printW(i, 6) << ", ";
+      s3[i / 20] << printW(track.second[i].pdg, 6) << ", ";
+    }
+    for(size_t i = 0; i < s1.size(); ++i)
+    {
+      att._logger->debug( "idDet:{}", s1[i].str() );
+      att._logger->debug( "stat :{}", s3[i].str() );
+    }
+
+    att._logger->debug( "] ");
+  }
+  for(const auto& det : RecoEvent.ListHits)
+  {
+    for(const auto& hit : det)
+      hit->Print();
+  }
 #endif
   return 0;
+}
+
+
+double CloseDist( const TVector3 & Xin, const TVector3 & Xout,
+    const TVector3 & Pin, const TVector3 & Pout ){
+  double ui=Pin.x()/Pin.z(), vi=Pin.y()/Pin.z();
+  double uo=Pout.x()/Pout.z(), vo=Pout.y()/Pout.z();
+  double xi=Xin.x(), yi=Xin.y();
+  double xo=Xout.x() + Pout.x()/Pout.z()*(Xin.z()-Xout.z());
+  double yo=Xout.y() + Pout.y()/Pout.z()*(Xin.z()-Xout.z());
+
+  double z=((xi-xo)*(uo-ui)+(yi-yo)*(vo-vi))/
+    ((uo-ui)*(uo-ui)+(vo-vi)*(vo-vi));
+  double x1=xi+ui*z, y1=yi+vi*z;
+  double x2=xo+uo*z, y2=yo+vo*z;
+
+  return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
 }

@@ -231,6 +231,24 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistRegisteredByDir.insert(std::make_pair("MomRes", std::make_tuple(HistRegRes1,1)));
       HistRegisteredByDir.insert(std::make_pair("ResPull", std::make_tuple(HistRegRes2,0)));
       
+
+      std::vector<std::vector<TH1*>*> h_residual;
+      for(int i=0;i<17;++i){
+        for(int j=0; j<3; ++j){
+          h_ResMDC[i][j].emplace_back(new TH1F(Form("ResMDC%02d_%d",i,j),Form("ResMDC%02d_%d",i,j),300,-1,1));
+          h_residual.emplace_back(&h_ResMDC[i][j].store);
+        }
+      }
+      for(int i=0;i<9;++i){
+        h_ResFiber[i].emplace_back( new TH1F(Form("ResFiber%d",i),Form("ResFiber%d",i),300,-0.2,0.2));
+        h_residual.emplace_back(&h_ResFiber[i].store);
+      }
+      for(int i=0;i<2;++i){
+        h_ResPSCE[i].emplace_back( new TH1F(Form("ResPSCE%d",i),Form("ResPSCE%d",i),300,-5,5));
+        h_residual.emplace_back(&h_ResPSCE[i].store);
+      }
+
+      HistRegisteredByDir.insert(std::make_pair("Residual", std::make_tuple(h_residual,0)));
     }
 
   if(EnableState[FINDING])

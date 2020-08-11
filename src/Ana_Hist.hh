@@ -114,6 +114,12 @@ class Ana_Hist
   Hist<TH2F> h_ResPull_normal[5][10];
 
   Hist<TH2F> h_total_dE;
+  //residual
+  Hist<TH1F> h_ResFiber[9];
+  Hist<TH1F> h_ResMDC[17][3];
+  Hist<TH1F> h_ResPSCE[2];
+
+
   
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 

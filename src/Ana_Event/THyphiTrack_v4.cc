@@ -5,7 +5,7 @@ using namespace std;
 
 ClassImp(THyphiTrack)
   
-THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1.),Mass(-1.),pdgcode(0),MomMass(0.,0.,0.,0.),Mom(0.,0.,0.),Charge(0),BarId(0),Beta(0),RefPoint(-999.,-999.,-999.),Pval2(-1),TofsBar(-1),PathLength(-999),TOF(-999),MomIni(-999,-999,-999),RChiIni(-1),PathLengthIni(-999.),TOFIni(-999.),BetaIni(-999),MassIni(-999.),Sim2Vtx(-999.,-999.,-999.,-999.)//,state(5,1),cov(5,5)
+THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1.),Mass(-1.),pdgcode(0),MomMass(0.,0.,0.,0.),Mom(0.,0.,0.),Charge(0),BarId(0),Beta(0),RefPoint(-999.,-999.,-999.),Pval2(-1),TofsBar(-1),PathLength(-999),TOF(-999),MomIni(-999,-999,-999),RChiIni(-1),PathLengthIni(-999.),TOFIni(-999.),BetaIni(-999),MassIni(-999.),Sim2Vtx(-999.,-999.,-999.,-999.),NCent(0),iterNum(-1)//,state(5,1),cov(5,5)
 {
   
   //   std::cout<<"THyphiTrack Constructor"<<std::endl;
@@ -19,6 +19,20 @@ THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1
 	  Cov[i][j]=-9999;
 	}
     }
+  for(int i=0; i<17; ++i){
+    for(int j=0; j<3; ++j){
+      ResMDC[i][j] = -999.;
+      WeightMDC[i][j] = -999.;
+    }
+  }
+  for(int i=0; i<9; ++i){
+      ResFiber[i] = -999.;
+      WeightFiber[i] = -999.;
+  }
+  for(int i=0; i<2; ++i){
+    ResPSCE[i] = -999.;
+    WeightPSCE[i] = -999.;
+  }
 
 }
 
@@ -61,7 +75,24 @@ THyphiTrack::THyphiTrack(const THyphiTrack& H)
 	  Cov[i][j]=H.Cov[i][j];
 	}
     }
-  
+
+  NCent  = H.NCent;
+  iterNum= H.iterNum;
+
+  for(int i=0; i<17; ++i){
+    for(int j=0; j<3; ++j){
+      ResMDC[i][j] = H.ResMDC[i][j];
+      WeightMDC[i][j] = H.WeightMDC[i][j];
+    }
+  }
+  for(int i=0; i<9; ++i){
+    ResFiber[i] = H.ResFiber[i];
+    WeightFiber[i] = H.WeightFiber[i];
+  }
+  for(int i=0; i<2; ++i){
+    ResPSCE[i] = H.ResPSCE[i];
+    WeightPSCE[i] = H.WeightPSCE[i];
+  }
 
 }
 
@@ -115,6 +146,22 @@ void THyphiTrack::Clear(Option_t *option)
 	  Cov[i][j]=-9999;
 	}
     }
+
+  NCent = 0;
+  iterNum = -1;
+  for(int i=0; i<17; ++i){
+    for(int j=0; j<3; ++j){
+      ResMDC[i][j] = -999.;
+      WeightMDC[i][j] = -999.;
+    }
+  }
+  for(int i=0; i<9; ++i){
+    ResFiber[i] = -999.;
+    WeightFiber[i] = -999.;
+  }
+  for(int i=0; i<2; ++i){
+    ResPSCE[i] = -999.;
+  }
 
 }
 
