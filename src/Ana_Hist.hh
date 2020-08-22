@@ -55,20 +55,20 @@ class Ana_Hist
   Hist<TH2I> h_statsLess3Mes;
   Hist<TH2I> h_statsInvalid;
   Hist<TH1I> h_task_exit;
-  //Fi>ld
+  //Field
   Hist<TH2F> FieldXY[3];
   Hist<TH2F> FieldXZ[3];
   Hist<TH2F> FieldYZ[3];
   Hist<TH2F> FieldXY_n[3];
   Hist<TH2F> FieldXZ_n[3];
   Hist<TH2F> FieldYZ_n[3];
-  // F>nder
+  // Finder
   Hist<TH2F> h_xy;
   Hist<TH2F> h_PxPy;
   Hist<TH2F> h_xy_extrap;
   Hist<TH2F> h_PxPy_extrap;
   Hist<TH2F> h_TrackFindingStat;
-  // K>lman:
+  // Kalman:
   Hist<TH1F> h_pv;
   Hist<TH1F> h_chi2;
   Hist<TH1F> hd_pv[2];
@@ -114,12 +114,11 @@ class Ana_Hist
   Hist<TH2F> h_ResPull_normal[5][10];
 
   Hist<TH2F> h_total_dE;
+
   //residual
   Hist<TH1F> h_ResFiber[9];
   Hist<TH1F> h_ResMDC[17][3];
   Hist<TH1F> h_ResPSCE[2];
-
-
   
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
