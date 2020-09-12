@@ -63,8 +63,8 @@ mkdir src/.deps
 
 ## Requirements
 
-External: ROOT v6 + boost + Genfit library
-Build: make + gcc > 5.1 or clang > 3.8 
+External: ROOT v6 + boost + Genfit library + spdlog + msgpack-c + zeroMQ
+Build: make + gcc > 9.3 or clang > 9 
 
 Your $PATH must include ROOT bin directory. Example:
 ```sh
@@ -108,6 +108,38 @@ cmake .. -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_TESTS=OFF -DCMAKE_INSTALL_PRE
 
 And spdlog can be built:
 ```sh
+make
+make install
+```
+
+Now msgpack-c (version 3.3.0) must be cloned, configured and built with:
+```sh
+cd src/
+git clone https://github.com/msgpack/msgpack-c.git
+cd msgpack-c
+git checkout tag/cpp-3.3.0 -b v3.3.0
+cmake -DMSGPACK_CXX17=ON -DMSGPACK_BUILD_EXAMPLES=OFF .
+make
+```
+
+Now libzmq (version 4.3.3) & cppzmq must be cloned, configured and built with:
+``` sh
+cd src/
+git clone https://github.com/zeromq/libzmq.git
+git checkout tags/v4.3.3 -b v4.3.3
+cd libzmq
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=.. ..
+make
+make install
+
+cd src/
+git clone https://github.com/zeromq/cppzmq
+cd cppzmq
+mkdir build
+cd build
+cmake -DZeroMQ_DIR=/home/christophe/Workspace/FullReco_SimuPhase1/src/libzmq/lib/cmake/ZeroMQ -DCMAKE_INSTALL_PREFIX=.. ..
 make
 make install
 ```
