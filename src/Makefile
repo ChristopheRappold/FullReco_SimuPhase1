@@ -27,7 +27,7 @@ OutPutOpt     = -o
 
 #CXX           = g++
 CXXFLAGS      = -O3 -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUILD_DRAFT_API #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
-LIBS          = -Lmsgpack-c/lib -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
+LIBS          = -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
 LDFLAGS       = -O
 SOFLAGS       = -shared
 
