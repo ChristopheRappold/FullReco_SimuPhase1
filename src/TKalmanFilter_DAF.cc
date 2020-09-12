@@ -175,7 +175,19 @@ void TKalmanFilter_DAF::SelectHists()
         }
     }
   LocalHisto.h_total_dE = AnaHisto->CloneAndRegister(AnaHisto->h_total_dE);
+
+  for(size_t i = 0;i < 9 ;++i)
+    LocalHisto.h_ResFiber[i] = AnaHisto->CloneAndRegister(AnaHisto->h_ResFiber[i]);
+  
+  for(size_t i = 0;i < 17 ;++i)
+    for(size_t j =0 ; j<3;++j)
+      LocalHisto.h_ResMDC[i][j] = AnaHisto->CloneAndRegister(AnaHisto->h_ResMDC[i][j]);
+
+  for(size_t i = 0;i < 2 ;++i)
+    LocalHisto.h_ResPSCE[i] = AnaHisto->CloneAndRegister(AnaHisto->h_ResPSCE[i]);
+  
 }
+  
 
 int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 {
@@ -252,27 +264,27 @@ int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
           OutTrack->ResPSCE[i] = FitRes.ResPSCE[i];
         }
     }
-}
-OutTree->Ntrack = OutTree->fTrack->GetEntries();
 
-// #ifdef DEBUG_DAISUKE
-//       std::cout<<"HitTR1
-//       ("<<it_mom_pv->second[13]<<","<<it_mom_pv->second[14]<<","<<it_mom_pv->second[15]<<")"<<std::endl;
-//       std::cout<<"HitTR2
-//       ("<<it_mom_pv->second[16]<<","<<it_mom_pv->second[17]<<","<<it_mom_pv->second[18]<<")"<<std::endl;
-//       std::cout<<"HitDC2
-//       ("<<it_mom_pv->second[19]<<","<<it_mom_pv->second[20]<<","<<it_mom_pv->second[21]<<")"<<std::endl;
-//       std::cout<<"NumDC2
-//       ("<<it_mom_pv->second[22]<<","<<it_mom_pv->second[23]<<","<<it_mom_pv->second[24]<<")"<<std::endl;
+  OutTree->Ntrack = OutTree->fTrack->GetEntries();
 
-//       std::cout<<"Pval2 = "<<it_mom_pv->second[27]<<std::endl;
-//       std::cout<<"TofsBar = "<<it_mom_pv->second[28]<<std::endl;
-//       std::cout<<"BarId = "<<it_mom_pv->second[25]<<std::endl;
-//       std::cout<<"Charge = "<<it_mom_pv->second[6]<<std::endl;
-//       std::cout<<"Beta = "<<it_mom_pv->second[26]<<std::endl;
-// #endif
+  // #ifdef DEBUG_DAISUKE
+  //       std::cout<<"HitTR1
+  //       ("<<it_mom_pv->second[13]<<","<<it_mom_pv->second[14]<<","<<it_mom_pv->second[15]<<")"<<std::endl;
+  //       std::cout<<"HitTR2
+  //       ("<<it_mom_pv->second[16]<<","<<it_mom_pv->second[17]<<","<<it_mom_pv->second[18]<<")"<<std::endl;
+  //       std::cout<<"HitDC2
+  //       ("<<it_mom_pv->second[19]<<","<<it_mom_pv->second[20]<<","<<it_mom_pv->second[21]<<")"<<std::endl;
+  //       std::cout<<"NumDC2
+  //       ("<<it_mom_pv->second[22]<<","<<it_mom_pv->second[23]<<","<<it_mom_pv->second[24]<<")"<<std::endl;
 
-return result_kalman;
+  //       std::cout<<"Pval2 = "<<it_mom_pv->second[27]<<std::endl;
+  //       std::cout<<"TofsBar = "<<it_mom_pv->second[28]<<std::endl;
+  //       std::cout<<"BarId = "<<it_mom_pv->second[25]<<std::endl;
+  //       std::cout<<"Charge = "<<it_mom_pv->second[6]<<std::endl;
+  //       std::cout<<"Beta = "<<it_mom_pv->second[26]<<std::endl;
+  // #endif
+
+  return result_kalman;
 }
 
 ReturnRes::InfoM TKalmanFilter_DAF::SoftExit(int result_full) { return ReturnRes::Fine; }
@@ -385,7 +397,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 #ifdef DEBUG_KALMAN
           att._logger->debug("!> less than 3 measurements: {}", id_dets.size());
 #endif
-          AnaHisto->h_stats->Fill("Less3Mes", 1);
+          LocalHisto.h_stats->Fill("Less3Mes", 1);
           int idPDG = 0;
           for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
             if(it_trackInfo.second[i].pdg != idPDG)
@@ -394,7 +406,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                 break;
               }
           std::string namePDG = std::to_string(idPDG);
-          AnaHisto->h_statsLess3Mes->Fill(namePDG.c_str(), "Less3Mes", 1.);
+          LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(), "Less3Mes", 1.);
 
           continue;
         }
@@ -764,34 +776,23 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           att._logger->info("*** FITTER EXCEPTION *** Rescue fitter take place !");
           att._logger->info(e1.what());
-          AnaHisto->h_stats->Fill("Exc:RescueFit", 1.);
+          LocalHisto.h_stats->Fill("Exc:RescueFit", 1.);
 
-          try
-            {
-              Fitter->processTrack(fitTrack.get(), true);
-            }
-          catch(genfit::Exception& e1)
-            {
-
-              att._logger->info("*** FITTER EXCEPTION *** Rescue fitter take place !");
-              att._logger->info(e1.what());
-              LocalHisto.h_stats->Fill("Exc:RescueFit", 1.);
-
-              try
-                {
-                  whoDoFit = 2;
-                  Fitter_rescue->processTrack(fitTrack.get(), true);
-                }
-              catch(genfit::Exception& e2)
-                {
-                  att._logger->info("*** FITTER Rescue EXCEPTION *** cancel fit !");
-                  att._logger->info(e2.what());
-                  LocalHisto.h_stats->Fill("Exc:FitFail", 1.);
-
-                  continue;
-                }
-            }
-
+	  try
+	    {
+	      whoDoFit = 2;
+	      Fitter_rescue->processTrack(fitTrack.get(), true);
+	    }
+	  catch(genfit::Exception& e2)
+	    {
+	      att._logger->info("*** FITTER Rescue EXCEPTION *** cancel fit !");
+	      att._logger->info(e2.what());
+	      LocalHisto.h_stats->Fill("Exc:FitFail", 1.);
+	      
+	      continue;
+	    }
+	}
+      
 #ifdef DISPLAY
           display->addEvent(fitTrack.get()); // Vtracks);
 #endif
@@ -824,7 +825,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                   kfsop = (dynamic_cast<genfit::KalmanFitterInfo*>(tp->getFitterInfo(REP))->getBackwardUpdate());
 
                   // Forward
-                  REP->extrapolateToPlane(kfsop, stateRefOrig.getPlane());
+                  REP->extrapolateToPlane(*kfsop, stateRefOrig.getPlane());
                   // REP->extrapolateToPlane(*kfsop, stateToFinalRef.getPlane());
                 }
               catch(genfit::Exception& e)
@@ -913,11 +914,11 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                             if(fabs(res) < fabs(res_min))
                               res_min = res;
                             // std::cout << "res : " << res << std::endl;
-                            AnaHisto->h_ResMDC[id_det - G4Sol::MG01][j]->Fill(res);
+                            LocalHisto.h_ResMDC[id_det - G4Sol::MG01][j]->Fill(res);
                             tempResults.ResMDC[id_det - G4Sol::MG01][j]    = res;
                             tempResults.WeightMDC[id_det - G4Sol::MG01][j] = weights[j];
                           }
-                        AnaHisto->h_ResMDC[id_det - G4Sol::MG01][2]->Fill(res_min);
+                        LocalHisto.h_ResMDC[id_det - G4Sol::MG01][2]->Fill(res_min);
                         tempResults.ResMDC[id_det - G4Sol::MG01][2] = res_min;
                       }
                     else if(id_det >= G4Sol::FiberD1_x && id_det <= G4Sol::FiberD3_v)
@@ -926,7 +927,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                         const TVectorD& resid(residual.getState());
                         double res = resid(0);
                         // std::cout << "res : " << res << std::endl;
-                        AnaHisto->h_ResFiber[id_det - G4Sol::FiberD1_x]->Fill(res);
+                        LocalHisto.h_ResFiber[id_det - G4Sol::FiberD1_x]->Fill(res);
                         tempResults.ResFiber[id_det - G4Sol::FiberD1_x]    = res;
                         tempResults.WeightFiber[id_det - G4Sol::FiberD1_x] = weights[0];
                       }
@@ -938,8 +939,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                         double resz = resid(1);
                         // double resz  = -999;
                         // std::cout << "res : " << res << std::endl;
-                        AnaHisto->h_ResPSCE[0]->Fill(res);
-                        AnaHisto->h_ResPSCE[1]->Fill(resz);
+                        LocalHisto.h_ResPSCE[0]->Fill(res);
+                        LocalHisto.h_ResPSCE[1]->Fill(resz);
                         tempResults.ResPSCE[0]    = res;
                         tempResults.ResPSCE[1]    = resz;
                         tempResults.WeightPSCE[0] = weights[0];
@@ -1207,6 +1208,6 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 #endif
             }
         }
-
-      return 0;
-    }
+  
+  return 0;
+}
