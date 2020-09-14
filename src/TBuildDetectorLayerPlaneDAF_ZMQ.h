@@ -25,7 +25,7 @@
 #endif
 
 
-class TBuildDetectorLayerPlaneDAF_ZMQ : public TDataBuilder
+class TBuildDetectorLayerPlaneDAF_ZMQ final : public TDataBuilder
 {
 
 public:

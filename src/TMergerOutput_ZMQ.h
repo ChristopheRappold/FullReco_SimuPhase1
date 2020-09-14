@@ -13,7 +13,7 @@
 
 #include <sstream>
 
-class TMergerOutput_ZMQ : public TDataMerger
+class TMergerOutput_ZMQ final : public TDataMerger
 {
 public:
   const THyphiAttributes& att;

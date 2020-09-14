@@ -52,7 +52,7 @@ using TDataProcessInterface = TDataProcess<FullRecoEvent, int>;
 
 //}
 
-class TKalmanFilter_DAF_MT : public TDataProcessInterface
+class TKalmanFilter_DAF_MT final : public TDataProcessInterface
 {
   public:
   const THyphiAttributes& att;

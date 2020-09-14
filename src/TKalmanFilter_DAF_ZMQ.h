@@ -52,7 +52,7 @@ using TDataProcessInterface = TDataProcess<ZMQ::DataBuilderOut, ZMQ::DataFitterO
 
 //}
 
-class TKalmanFilter_DAF_ZMQ : public TDataProcessInterface
+class TKalmanFilter_DAF_ZMQ final : public TDataProcessInterface
 {
   public:
   const THyphiAttributes& att;

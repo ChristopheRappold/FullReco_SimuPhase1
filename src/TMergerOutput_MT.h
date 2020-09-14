@@ -13,7 +13,7 @@
 
 #include <sstream>
 
-class TMergerOutput_MT : public TDataMerger
+class TMergerOutput_MT final : public TDataMerger
 {
 public:
   const THyphiAttributes& att;

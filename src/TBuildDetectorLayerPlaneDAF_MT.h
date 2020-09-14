@@ -167,7 +167,7 @@ constexpr bool IsPlanar(G4Sol::SolDet idDet)
     };
 };
 
-class TBuildDetectorLayerPlaneDAF_MT : public TDataBuilder
+class TBuildDetectorLayerPlaneDAF_MT final : public TDataBuilder
 {
 
 public:

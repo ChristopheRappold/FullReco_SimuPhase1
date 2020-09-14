@@ -11,7 +11,7 @@
 
 using TDataProcessInterface = TDataProcess<FullRecoEvent,MCAnaEventG4Sol>;
 
-class CheckField :  public TDataProcessInterface
+class CheckField final :  public TDataProcessInterface
 {
   public :
   const THyphiAttributes& att;

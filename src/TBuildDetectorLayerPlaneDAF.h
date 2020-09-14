@@ -113,7 +113,7 @@ double CloseDist( const TVector3 & Xin, const TVector3 & Xout,
 
 
 
-class TBuildDetectorLayerPlaneDAF : public TDataBuilder
+class TBuildDetectorLayerPlaneDAF final : public TDataBuilder
 {
 
   public:
