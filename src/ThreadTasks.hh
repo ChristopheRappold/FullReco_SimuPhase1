@@ -42,7 +42,8 @@ struct c_nextEvent
 
     zmq::socket_t control(context, zmq::socket_type::sub);
     control.connect(addr_C.c_str());
-    control.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+    //control.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+    control.set(zmq::sockopt::subscribe, "");
 
     static const std::string tag_stats("stats_nEvent");
     zmq::socket_t monitor(context, zmq::socket_type::pub);
@@ -147,8 +148,11 @@ struct c_nextEvent
             {
               logging->info("MTinit> last ! ");
               zmq::message_t body_msg;
-              control.recv(body_msg);
-              const std::string str_msg(static_cast<const char*>(body_msg.data()), body_msg.size());
+              auto ret = control.recv(body_msg);
+	      if(!ret)
+		logging->warn("MTinit> last : no msg !");
+	      
+	      const std::string str_msg(static_cast<const char*>(body_msg.data()), body_msg.size());
               static const std::string terminate = "TERMINATE";
 
               if(str_msg == terminate)
@@ -288,8 +292,10 @@ struct c_finalEvent
               zmq::message_t body_msg;
               try
                 {
-                  sockQ2_R.recv(body_msg); //,zmq::recv_flags::none);//bufIn,zmq::recv_flags::dontwait);
-                }
+                  auto ret = sockQ2_R.recv(body_msg); //,zmq::recv_flags::none);//bufIn,zmq::recv_flags::dontwait);
+		  if(!ret)
+		    logging->warn("MT_final> process : no msg !");
+		}
               catch(zmq::error_t& e)
                 {
                   logging->error("Error catched in MTfinal#0 receiving ! {} {}", e.what(), e.num());
@@ -534,7 +540,8 @@ struct c_det_build
 	sockOut.connect(addr_FB.c_str());
 
 	control.connect(addr_C.c_str());
-        control.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+        //control.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+	control.set(zmq::sockopt::subscribe, "");
 	
 	monitor.connect(addr_M.c_str());
 	
@@ -613,7 +620,8 @@ struct c_RK
         sockQout.connect(addr_FF.c_str());
 
         controlQ1.connect(addr_C.c_str());
-        controlQ1.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+        //controlQ1.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+	controlQ1.set(zmq::sockopt::subscribe, "");
 
         monitor.connect(addr_M.c_str());
         
@@ -689,7 +697,8 @@ struct c_Output
 
         sockQout.connect(addr_FM.c_str());
         controlQ.connect(addr_C.c_str());
-        controlQ.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+        //controlQ.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+	controlQ.set(zmq::sockopt::subscribe, "");
 
         monitor.connect(addr_M.c_str());
         

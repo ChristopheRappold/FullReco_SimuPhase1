@@ -295,8 +295,9 @@ public:
             if(message_received1)
               {
                 zmq::message_t body_msg;
-                sockIn.recv(body_msg); //,zmq::recv_flags::none);//bufIn,zmq::recv_flags::dontwait);
-
+                auto ret = sockIn.recv(body_msg); //,zmq::recv_flags::none);//bufIn,zmq::recv_flags::dontwait);
+		if(!ret)
+		  this->logging->warn("MT{}#{} received message1: no msg !", this->name, this->idTh);
                 msgpack::object_handle unpacked_body =
                     msgpack::unpack(static_cast<const char*>(body_msg.data()), body_msg.size());
                 msgpack::object obj = unpacked_body.get();
@@ -309,7 +310,9 @@ public:
               {
                 this->logging->info("MT{}#{} Terminate message !", this->name, this->idTh);
                 zmq::message_t body_msg;
-                control.recv(body_msg);
+                auto ret = control.recv(body_msg);
+		if(!ret)
+		  this->logging->warn("MT{}#{} terminate message: no msg !", this->name, this->idTh);
                 const std::string str_msg(static_cast<const char*>(body_msg.data()), body_msg.size());
                 static const std::string terminate = "TERMINATE";
                 if(str_msg == terminate)
@@ -401,8 +404,10 @@ public:
             if(this->message_received1)
               {
                 zmq::message_t body_msg;
-                this->sockIn.recv(body_msg); //,zmq::recv_flags::none);//bufIn,zmq::recv_flags::dontwait);
-
+                auto ret = this->sockIn.recv(body_msg); //,zmq::recv_flags::none);//bufIn,zmq::recv_flags::dontwait);
+		if(!ret)
+		  this->logging->warn("MT{}#{} > no msg !", this->name, this->idTh);
+		
                 msgpack::object_handle unpacked_body =
                     msgpack::unpack(static_cast<const char*>(body_msg.data()), body_msg.size());
                 msgpack::object obj = unpacked_body.get();
@@ -415,7 +420,9 @@ public:
               {
                 this->logging->info("MT{}#{} Terminate message !", this->name, this->idTh);
                 zmq::message_t body_msg;
-                this->control.recv(body_msg);
+                auto ret = this->control.recv(body_msg);
+		if(!ret)
+		  this->logging->warn("MT{}#{} Terminage : no msg !", this->name, this->idTh);
                 const std::string str_msg(static_cast<const char*>(body_msg.data()), body_msg.size());
                 static const std::string terminate = "TERMINATE";
                 if(str_msg == terminate)
@@ -432,8 +439,10 @@ public:
 	    if(message_received3)
               {
                 zmq::message_t body_msg;
-                sockIn2.recv(body_msg); //,zmq::recv_flags::none);//bufIn,zmq::recv_flags::dontwait);
-
+                auto ret = sockIn2.recv(body_msg); //,zmq::recv_flags::none);//bufIn,zmq::recv_flags::dontwait);
+		if(!ret)
+		  this->logging->warn("MT{}#{} message bis : no msg !", this->name, this->idTh);
+		
                 msgpack::object_handle unpacked_body =
 		  msgpack::unpack(static_cast<const char*>(body_msg.data()), body_msg.size());
                 msgpack::object obj = unpacked_body.get();
@@ -475,7 +484,8 @@ public:
     frontend.bind(addr_frontend.c_str());
     backend.bind(addr_backend.c_str());
     control.connect(addr_control.c_str());
-    control.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+    //control.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+    control.set(zmq::sockopt::subscribe, "");
   }
 
   void Run()
