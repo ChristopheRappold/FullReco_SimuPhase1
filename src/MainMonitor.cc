@@ -182,9 +182,10 @@ int main(int argc, char** argv)
 	socket.bind(addr_monitor.c_str());
 	const std::array<std::string,5> tags = {"stats_nEvent","stats_fEvent","stats_det_build","stats_RK","stats_merger"};
 	for(auto& tag : tags) 
-	  socket.setsockopt(ZMQ_SUBSCRIBE, tag.c_str(), tag.size());
+	  socket.set(zmq::sockopt::subscribe, tag);//.c_str(), tag.size());
 
-	socket.setsockopt(ZMQ_LINGER, 1000);
+	//socket.setsockopt(ZMQ_LINGER, 1000);
+	socket.set(zmq::sockopt::linger, 1000);
 
 	
       std::string dash_char("_");
