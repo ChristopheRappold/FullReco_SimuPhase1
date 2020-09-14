@@ -63,9 +63,9 @@ mkdir src/.deps
 
 ## Requirements
 
-External: ROOT v6 + boost + Genfit library + Eigen3 + spdlog + msgpack-c + zeroMQ
-Build: make + gcc > 9.3 or clang > 9 
-Libraries from package manager of the system : libboost-dev + libeigen3-dev 
+External: ROOT v6 + boost + Genfit library + Eigen3 + spdlog + msgpack-c + zeroMQ \
+Build: make + gcc > 9.3 or clang > 9 \
+Libraries from package manager of the system : libboost-dev + libeigen3-dev \
 
 Your $PATH must include ROOT bin directory. Example:
 ```sh
