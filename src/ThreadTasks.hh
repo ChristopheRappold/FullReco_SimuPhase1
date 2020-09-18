@@ -194,10 +194,10 @@ struct c_finalEvent
   void operator()(int totalEvent, const std::string& addr_B, const std::string& addr_C, const std::string& addr_I,
                   const std::string& addr_M)
   {
-    Long64_t countEvent = 0;
-    Long64_t rangeEvent = 0;
+    //Long64_t countEvent = 0;
+    //Long64_t rangeEvent = 0;
 
-    const Long64_t baseCountEvent = N;
+    //const Long64_t baseCountEvent = N;
 
     std::array<bool, N> statusEvents;
     std::array<bool, N> NextstatusEvents;
@@ -206,15 +206,15 @@ struct c_finalEvent
 
     std::set<Long64_t> missingEvents;
 
-    auto f_check = [](const std::array<bool, N>& s, int t) {
-      std::set<Long64_t> missingEvents;
-      for(size_t i = 0; i < t; ++i)
-        {
-          if(s.at(i) == false)
-            missingEvents.insert(i);
-        }
-      return std::move(missingEvents);
-    };
+    // auto f_check = [](const std::array<bool, N>& s, int t) {
+    //   std::set<Long64_t> missingEvents;
+    //   for(size_t i = 0; i < t; ++i)
+    //     {
+    //       if(s.at(i) == false)
+    //         missingEvents.insert(i);
+    //     }
+    //   return std::move(missingEvents);
+    // };
 
     zmq::socket_t sockQ2_R(context, zmq::socket_type::pull);
     zmq::socket_t sockFinal(context, zmq::socket_type::pub);
