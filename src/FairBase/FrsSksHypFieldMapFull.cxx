@@ -687,7 +687,7 @@ void FrsSksHypFieldMapFull::SetPositionSecondFromGeoManager(const TString& name_
 
 
 // ---------   Screen output   --------------------------------------------
-void FrsSksHypFieldMapFull::Print(Option_t *option)
+void FrsSksHypFieldMapFull::Print(Option_t *option) const
 {
   TString type = "MapFull";
   if ( fType == 2 ) type = "Soleniod Map ";
@@ -730,13 +730,13 @@ void FrsSksHypFieldMapFull::Print(Option_t *option)
   if(fromGeoMatrix)
     MagneticField->LocalToMaster(toLoc,AtMas);
 
-  cout<<" MM : "<<AtMas[0]<<" "<<AtMas[1]<<" "<<AtMas[2]<<endl;
-  Double_t Bxyz[] = {0.,0.,0.};
+  // cout<<" MM : "<<AtMas[0]<<" "<<AtMas[1]<<" "<<AtMas[2]<<endl;
+  // Double_t Bxyz[] = {0.,0.,0.};
 
-  GetBxyz(AtMas,Bxyz);
+  // GetBxyz(AtMas,Bxyz);
   
-  cout << "----" << endl;
-  cout << "----  Field at entrance magnet is ( " << setw(6) << Bxyz[0] << " "<< Bxyz[1] <<" "<< Bxyz[2] << ") kG" << endl;
+  // cout << "----" << endl;
+  // cout << "----  Field at entrance magnet is ( " << setw(6) << Bxyz[0] << " "<< Bxyz[1] <<" "<< Bxyz[2] << ") kG" << endl;
 
 
   temp_mag.SetXYZ(0.,194.,0.);
@@ -750,12 +750,12 @@ void FrsSksHypFieldMapFull::Print(Option_t *option)
   if(fromGeoMatrix)
     MagneticField->LocalToMaster(toLoc2,AtMas);
 
-  cout<<" MM : "<<AtMas[0]<<" "<<AtMas[1]<<" "<<AtMas[2]<<endl;
+  // cout<<" MM : "<<AtMas[0]<<" "<<AtMas[1]<<" "<<AtMas[2]<<endl;
 
-  GetBxyz(AtMas,Bxyz);
+  // GetBxyz(AtMas,Bxyz);
 
-  cout << "----" << endl;
-  cout << "----  Field at exit magnet is ( " << setw(6) << Bxyz[0] << " "<< Bxyz[1] <<" "<< Bxyz[2] << ") kG" << endl;
+  // cout << "----" << endl;
+  // cout << "----  Field at exit magnet is ( " << setw(6) << Bxyz[0] << " "<< Bxyz[1] <<" "<< Bxyz[2] << ") kG" << endl;
 
   if(secondMagnet)
     {

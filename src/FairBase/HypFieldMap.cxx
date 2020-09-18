@@ -381,7 +381,7 @@ void HypFieldMap::SetPosition(Double_t x, Double_t y, Double_t z,Double_t angle)
 
 
 // ---------   Screen output   --------------------------------------------
-void HypFieldMap::Print(Option_t *option) {
+void HypFieldMap::Print(Option_t *option) const {
   TString type = "Map";
   if ( fType == 2 ) type = "Soleniod Map ";
   if ( fType == 3 ) type = "Dipole Map ";
@@ -405,10 +405,10 @@ void HypFieldMap::Print(Option_t *option) {
        << setw(6) << fPosY << ", " << setw(6) << fPosZ << ") cm" << endl;
   cout << "----  Field scaling factor: " << fScale << endl;
   //Double_t bx = GetBx(0.,0.,0.);
-  Double_t by = GetBy(0.,0.,0.);
+  //Double_t by = GetBy(0.,0.,0.);
   //Double_t bz = GetBz(0.,0.,0.);
-  cout << "----" << endl;
-  cout << "----  Field at origin is ( " << setw(6) << by << ") kG" << endl;
+  //cout << "----" << endl;
+  //cout << "----  Field at origin is ( " << setw(6) << by << ") kG" << endl;
   //cout << "----  Field at origin is ( " << setw(6) << by << ") T" << endl;
  cout << "======================================================" << endl;
 }

@@ -126,7 +126,7 @@ public:
 
 
   /** Screen output **/
-  virtual void Print(Option_t *option="");
+  virtual void Print(Option_t *option="") const;
 	
 
 	
