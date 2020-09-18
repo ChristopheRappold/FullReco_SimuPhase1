@@ -26,9 +26,9 @@ DictObjSuf    = $(DictpSuf).$(ObjSuf)
 OutPutOpt     = -o
 
 #CXX           = g++
-CXXFLAGS      = -O3 -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUILD_DRAFT_API #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUILD_DRAFT_API #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 LIBS          = -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
-LDFLAGS       = -O
+LDFLAGS       = '-Wl,-rpath,$$ORIGIN/lib'
 SOFLAGS       = -shared
 
 CXX = clang++
@@ -85,14 +85,14 @@ CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 # MathObj = MathematicalTools.o
 # MathSo = libHyphiMathTools.$(DllSuf)
 
-all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so $(Bindir)/MainSimu $(Bindir)/MainMonitor
+all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainMonitor 
 
 $(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB)
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
 
 
 $(Bindir)/MainMonitor: MainMonitor.o FullRecoConfig.o
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB)
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
 
 # $(Bindir)/BatchMerger: BatchMerger.o libAnaEventOut.so libAna_Event.so
 # 	$(CXX) $(CXXFLAGS) BatchMerger.o $(LIBS) $(LIB_MERGER) -o $(Bindir)/BatchMerger
@@ -117,7 +117,7 @@ endif
 libGenfit2_v2.so :
 	make -C Genfit2_v2/build
 	make -C Genfit2_v2/build install
-	ln -sf $(FromLibdir)/Genfit2_v2/lib/libgenfit2.$(DllSuf).2.1 $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Genfit2_v2/lib/libgenfit2.$(DllSuf).2.2 $(Bindir)/lib/
 ifeq ($(ROOTVERSION),6)
 	ln -sf $(FromLibdir)/Genfit2_v2/lib/coreRootDict_rdict.pcm $(Bindir)/lib/
 	ln -sf $(FromLibdir)/Genfit2_v2/lib/eventDisplayRootDict_rdict.pcm $(Bindir)/lib/
@@ -165,6 +165,14 @@ endif
 ifeq ($(ARCH),macosx)
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEvent.$(MacDllSuf) $(Bindir)/lib/
 endif
+	@echo "---> $@ done"
+
+libzmq.so :
+	ln -sf $(FromLibdir)/libzmq/lib/libzmq.so.5 $(Bindir)/lib/
+	@echo "---> $@ done"
+
+libmsgpack.so :
+	ln -sf $(FromLibdir)/msgpack-c/libmsgpackc.so.2 $(Bindir)/lib/
 	@echo "---> $@ done"
 
 

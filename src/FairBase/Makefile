@@ -19,7 +19,7 @@ DictObjSuf    = $(DictpSuf).$(ObjSuf)
 OutPutOpt     = -o
 
 #CXX           = g++
-CXXFLAGS      = -O2 -fPIC -g -Wall
+CXXFLAGS      = -O2 -march=native -fPIC -g -Wall
 LIBS          = 
 LDFLAGS       = -O
 SOFLAGS       = -shared
@@ -155,10 +155,10 @@ print :
 
 $(DictObj):
 	rm -f $*.*; \
-	    rootcint $*.cc -s $(FairBase) -c $(Headers) FairBaseLinkdef.h; \
+	    rootcint $*.cc -s $(FairBase) $(Headers) FairBaseLinkdef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc
 
 $(DictEveObj):
 	rm -f $*.*; \
-	    rootcint $*.cc -s $(EveBase) -c $(Headers) $(HeadersEve) EveFairLinkdef.h; \
+	    rootcint $*.cc -s $(EveBase) $(Headers) $(HeadersEve) EveFairLinkdef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc

@@ -14,7 +14,7 @@ DictObjSuf    = $(DictpSuf).$(ObjSuf)
 OutPutOpt     = -o
 
 #CXX           = g++
-CXXFLAGS      = -O2 -fPIC -g -Wall
+CXXFLAGS      = -O2 -march=native -fPIC -g -Wall
 LIBS          = 
 LDFLAGS       = -O
 SOFLAGS       = -shared
@@ -124,7 +124,7 @@ print :
 
 $(DictObj):
 	rm -f $*.*; \
-	    rootcint $*.cc -s $(G4HypEventSo) -c $(Headers) TG4Sol_LinkDef.h; \
+	    rootcint $*.cc -s $(G4HypEventSo) $(Headers) TG4Sol_LinkDef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc
 
 #.$(HeadSuf).$(DictObjSuf):

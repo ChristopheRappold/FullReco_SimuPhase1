@@ -21,7 +21,7 @@ DictObjSuf    = $(DictpSuf).$(ObjSuf)
 OutPutOpt     = -o
 
 #CXX           = g++
-CXXFLAGS      = -O2 -fPIC -g -Wall
+CXXFLAGS      = -O2 -march=native -fPIC -g -Wall
 LIBS          = 
 LDFLAGS       = -O
 SOFLAGS       = -shared
@@ -223,25 +223,25 @@ print :
 
  .$(HeadSuf).$(DictObjSuf):
 	rm -f $*.$(DictpSuf).*; \
-	    $(ROOTDICGEN) $*.$(DictpSuf).cc -c $<; \
+	    $(ROOTDICGEN) $*.$(DictpSuf).cc $<; \
 	    $(CXX) $(CXXFLAGS) -c $*.$(DictpSuf).cc
 
 $(EventDict_v14):
 	rm -f $*.*; \
-	    $(ROOTDICGEN) $*.cc -s $(EventSo_v14) -c $(EventH_v14) $(EventH_Com_v14) Ana_EventNew_v14_linkdef.h; \
+	    $(ROOTDICGEN) $*.cc -s $(EventSo_v14) $(EventH_v14) $(EventH_Com_v14) Ana_EventNew_v14_linkdef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc
 
 $(EventDict_v16):
 	rm -f $*.*; \
-	    $(ROOTDICGEN) $*.cc -s $(EventSo_v16) -c $(EventH_v16) $(EventH_Com_v16) Ana_EventNew_v16_linkdef.h; \
+	    $(ROOTDICGEN) $*.cc -s $(EventSo_v16) $(EventH_v16) $(EventH_Com_v16) Ana_EventNew_v16_linkdef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc
 
 $(MCEventDict):
 	rm -f $*.*; \
-	    $(ROOTDICGEN) $*.cc -s $(MCEventSo) -c $(MCEventH) $(MCEventH_Com) MCAnaEvent_linkdef.h; \
+	    $(ROOTDICGEN) $*.cc -s $(MCEventSo) $(MCEventH) $(MCEventH_Com) MCAnaEvent_linkdef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc
 
 $(MCEventG4SolDict):
 	rm -f $*.*; \
-	    $(ROOTDICGEN) $*.cc -s $(MCEventG4SolSo) -c $(MCEventG4SolH) $(MCEventG4SolH_Com) MCAnaEventG4Sol_linkdef.h; \
+	    $(ROOTDICGEN) $*.cc -s $(MCEventG4SolSo) $(MCEventG4SolH) $(MCEventG4SolH_Com) MCAnaEventG4Sol_linkdef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc
