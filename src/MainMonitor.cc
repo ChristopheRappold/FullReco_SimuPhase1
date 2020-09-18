@@ -32,7 +32,7 @@ void subscribe(zmq::socket_t& socket, std::string& tag, T& data)
 
   zmq::multipart_t all(socket);
 
-  tag = std::move(std::string(static_cast<const char*>(all.at(0).data()), all.at(0).size()));
+  tag = std::string(static_cast<const char*>(all.at(0).data()), all.at(0).size());
 
   msgpack::unpacked unpacked_body;
   msgpack::object_handle unpack_body = msgpack::unpack(static_cast<const char*>(all.at(1).data()), all.at(1).size());
@@ -189,7 +189,7 @@ int main(int argc, char** argv)
 
 	
       std::string dash_char("_");
-      int count = 0;
+      //int count = 0;
       while(1)
 	{
 	  std::string tag_data;
