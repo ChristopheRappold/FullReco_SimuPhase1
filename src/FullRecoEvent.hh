@@ -55,8 +55,20 @@ enum SolDet : int
   FiberD3_x,
   FiberD3_u,
   FiberD3_v,
-  PSFE /*15*/,
-  MG01 /*16*/,
+  FiberD4_x,
+  FiberD4_u,
+  FiberD4_v,
+  FiberD5_x,
+  FiberD5_u,
+  FiberD5_v,
+  MiniFiberD1_x1,
+  MiniFiberD1_u1,
+  MiniFiberD1_v1,
+  MiniFiberD1_x2,
+  MiniFiberD1_u2,
+  MiniFiberD1_v2,
+  PSFE /*27*/,
+  MG01 /*28*/,
   MG02,
   MG03,
   MG04,
@@ -72,9 +84,9 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17 /*32*/,
-  PSCE /*33*/,
-  PSBE /*34*/,
+  MG17 /*44*/,
+  PSCE /*45*/,
+  PSBE /*46*/,
   CDC_layer0 /*4 - 26*/,
   CDC_layer1,
   CDC_layer2,
@@ -103,13 +115,15 @@ enum SolDet : int
 };
 
 constexpr auto nameLiteralDet = {
-    "InSi0",     "InSi1",     "InSi2",     "InSi3",     "TR1",       "TR2",       "FiberD1_x", "FiberD1_u", "FiberD1_v",
-    "FiberD2_x", "FiberD2_u", "FiberD2_v", "FiberD3_x", "FiberD3_u", "FiberD3_v", "PSFE",      "MG01",      "MG02",
-    "MG03",      "MG04",      "MG05",      "MG06",      "MG07",      "MG08",      "MG09",      "MG10",      "MG11",
-    "MG12",      "MG13",      "MG14",      "MG15",      "MG16",      "MG17",      "PSCE",      "PSBE",      "CDC0",
-    "CDC1",      "CDC2",      "CDC3",      "CDC4",      "CDC5",      "CDC6",      "CDC7",      "CDC8",      "CDC9",
-    "CDC10",     "CDC11",     "CDC12",     "CDC13",     "CDC14",     "CDHBar",    "TrFwd0",    "TrFwd1",    "TrFwd2",
-    "RPCl",      "RPCh",      "FMF2S0",    "FMF2S1",    "FMF2S2"};
+  "InSi0",     "InSi1",     "InSi2",     "InSi3",     "TR1",       "TR2",       "FiberD1_x", "FiberD1_u", "FiberD1_v",
+  "FiberD2_x", "FiberD2_u", "FiberD2_v", "FiberD3_x", "FiberD3_u", "FiberD3_v", "FiberD4_x", "FiberD4_u", "FiberD4_v",
+  "FiberD5_x", "FiberD5_u", "FiberD5_v", "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1","MiniFiberD1_x2",
+  "MiniFiberD1_u2", "MiniFiberD1_v2",    "PSFE",      "MG01",      "MG02",
+  "MG03",      "MG04",      "MG05",      "MG06",      "MG07",      "MG08",      "MG09",      "MG10",      "MG11",
+  "MG12",      "MG13",      "MG14",      "MG15",      "MG16",      "MG17",      "PSCE",      "PSBE",      "CDC0",
+  "CDC1",      "CDC2",      "CDC3",      "CDC4",      "CDC5",      "CDC6",      "CDC7",      "CDC8",      "CDC9",
+  "CDC10",     "CDC11",     "CDC12",     "CDC13",     "CDC14",     "CDHBar",    "TrFwd0",    "TrFwd1",    "TrFwd2",
+  "RPCl",      "RPCh",      "FMF2S0",    "FMF2S1",    "FMF2S2"};
 
 template <typename T, T... args>
 struct EnumIter : public std::iterator<std::input_iterator_tag, T, std::ptrdiff_t, const T*, const T&>
@@ -142,12 +156,14 @@ struct EnumIter : public std::iterator<std::input_iterator_tag, T, std::ptrdiff_
 template <typename T, T... args>
 constexpr T EnumIter<T, args...>::values[];
 using SolDetIter = struct EnumIter<
-    SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/, FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x,
-    FiberD2_u, FiberD2_v, FiberD3_x, FiberD3_u, FiberD3_v, PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07,
-    MG08, MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/, CDC_layer0 /*4 - 26*/,
-    CDC_layer1, CDC_layer2, CDC_layer3, CDC_layer4, CDC_layer5, CDC_layer6, CDC_layer7, CDC_layer8, CDC_layer9,
-    CDC_layer10, CDC_layer11, CDC_layer12, CDC_layer13, CDC_layer14 /*18 - 40*/, CDHBar /*19 - 41*/, TrFwd0 /*20 - 42*/,
-    TrFwd1, TrFwd2 /*22 - 43*/, RPC_l /*23 - 44*/, RPC_h /*24 - 45*/, FMF2Stop0 /*25 - 46*/, FMF2Stop1, FMF2Stop2>;
+  SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/, FiberD1_x, FiberD1_u, FiberD1_v /*6 - 8*/, FiberD2_x,
+  FiberD2_u, FiberD2_v/*9 - 11*/, FiberD3_x, FiberD3_u, FiberD3_v/*12 - 14*/, FiberD4_x, FiberD4_u, FiberD4_v/*15 - 17*/,
+  FiberD5_x, FiberD5_u, FiberD5_v /*18 - 20*/, MiniFiberD1_x1, MiniFiberD1_u1, MiniFiberD1_v1 /*21 - 23*/, MiniFiberD1_x2,
+  MiniFiberD1_u2, MiniFiberD1_v2 /*24 - 26*/,PSFE /*27*/, MG01 /*28*/, MG02, MG03, MG04, MG05, MG06, MG07,
+  MG08, MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*44*/, PSCE /*45*/, PSBE /*46*/, CDC_layer0 /*47*/,
+  CDC_layer1, CDC_layer2, CDC_layer3, CDC_layer4, CDC_layer5, CDC_layer6, CDC_layer7, CDC_layer8, CDC_layer9,
+  CDC_layer10, CDC_layer11, CDC_layer12, CDC_layer13, CDC_layer14 /*61*/, CDHBar /*19 - 41*/, TrFwd0 /*20 - 42*/,
+  TrFwd1, TrFwd2 /*22 - 43*/, RPC_l /*23 - 44*/, RPC_h /*24 - 45*/, FMF2Stop0 /*25 - 46*/, FMF2Stop1, FMF2Stop2>;
 
 } // namespace G4Sol
 
