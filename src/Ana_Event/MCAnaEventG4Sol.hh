@@ -36,6 +36,7 @@ public :
 
   Int_t NInSi;
   Int_t NTr;
+  Int_t NFiber;
   Int_t NCdc;
   Int_t NCdh;
   Int_t NFwdtracker;
@@ -47,6 +48,7 @@ public :
   
   TClonesArray* InSi; //->
   TClonesArray* TR; //->
+  TClonesArray* Fiber; //->
   TClonesArray* CDC; //->
   TClonesArray* CDH; //->
   TClonesArray* FwdTracker; //->
@@ -64,6 +66,7 @@ public :
   
   static TClonesArray* gInSi; //!
   static TClonesArray* gTR; //!
+  static TClonesArray* gFiber; //!
   static TClonesArray* gCDC; //!
   static TClonesArray* gCDH; //!
   static TClonesArray* gFwdTracker; //!
@@ -76,7 +79,7 @@ public :
 
   static TClonesArray* gfTrack; //! 
   
-  ClassDef(MCAnaEventG4Sol,3)
+  ClassDef(MCAnaEventG4Sol,4)
 };
 
 #endif
