@@ -20,6 +20,10 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
     "FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v",
     "FiberD2_Core_log_x", "FiberD2_Core_log_u", "FiberD2_Core_log_v",
     "FiberD3_Core_log_x", "FiberD3_Core_log_u", "FiberD3_Core_log_v",
+    "FiberD4_Core_log_x", "FiberD4_Core_log_u", "FiberD4_Core_log_v",
+    "FiberD5_Core_log_x", "FiberD5_Core_log_u", "FiberD5_Core_log_v",
+    "MiniFiberD1_Core_log_x1", "MiniFiberD1_Core_log_u1", "MiniFiberD1_Core_log_v1",
+    "MiniFiberD1_Core_log_x2", "MiniFiberD1_Core_log_u2", "MiniFiberD1_Core_log_v2",
     "PSFE",
     "MG01", "MG02", "MG03", "MG04", "MG05", "MG06", "MG07", "MG08", "MG09", "MG10", "MG11", "MG12",
     "MG13", "MG14", "MG15", "MG16", "MG17",
@@ -501,7 +505,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             hitCoordsTree(2) = hit.HitPosZ;
           }
           else if(IsFiberU(TypeDet)){
-            continue;
+	    if(IsFiberU_Vetoed(TypeDet))
+	      continue;
             string volumeName;
             switch(TypeDet){
               case G4Sol::FiberD1_x :  volumeName = "FiberD1_log_x"; break;
@@ -513,6 +518,18 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               case G4Sol::FiberD3_x :  volumeName = "FiberD3_log_x"; break;
               case G4Sol::FiberD3_u :  volumeName = "FiberD3_log_u"; break;
               case G4Sol::FiberD3_v :  volumeName = "FiberD3_log_v"; break;
+              case G4Sol::FiberD4_x :  volumeName = "FiberD4_log_x"; break;
+              case G4Sol::FiberD4_u :  volumeName = "FiberD4_log_u"; break;
+              case G4Sol::FiberD4_v :  volumeName = "FiberD4_log_v"; break;
+              case G4Sol::FiberD5_x :  volumeName = "FiberD5_log_x"; break;
+              case G4Sol::FiberD5_u :  volumeName = "FiberD5_log_u"; break;
+              case G4Sol::FiberD5_v :  volumeName = "FiberD5_log_v"; break;
+              case G4Sol::MiniFiberD1_x1 :  volumeName = "MiniFiberD1_log_x1"; break;
+              case G4Sol::MiniFiberD1_u1 :  volumeName = "MiniFiberD1_log_u1"; break;
+              case G4Sol::MiniFiberD1_v1 :  volumeName = "MiniFiberD1_log_v1"; break;
+              case G4Sol::MiniFiberD1_x2 :  volumeName = "MiniFiberD1_log_x2"; break;
+              case G4Sol::MiniFiberD1_u2 :  volumeName = "MiniFiberD1_log_u2"; break;
+              case G4Sol::MiniFiberD1_v2 :  volumeName = "MiniFiberD1_log_v2"; break;
               default : std::cerr << "something wrong" << std::endl; break;
             }
             string motherName;
@@ -526,6 +543,18 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               case G4Sol::FiberD3_x :  motherName = "FiberD3_log_0"; break;
               case G4Sol::FiberD3_u :  motherName = "FiberD3_log_0"; break;
               case G4Sol::FiberD3_v :  motherName = "FiberD3_log_0"; break;
+              case G4Sol::FiberD4_x :  motherName = "FiberD4_log_0"; break;
+              case G4Sol::FiberD4_u :  motherName = "FiberD4_log_0"; break;
+              case G4Sol::FiberD4_v :  motherName = "FiberD4_log_0"; break;
+              case G4Sol::FiberD5_x :  motherName = "FiberD5_log_0"; break;
+              case G4Sol::FiberD5_u :  motherName = "FiberD5_log_0"; break;
+              case G4Sol::FiberD5_v :  motherName = "FiberD5_log_0"; break;
+              case G4Sol::MiniFiberD1_x1 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_u1 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_v1 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_x2 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_u2 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
               default : std::cerr << "something wrong" << std::endl; break;
             }
 #ifdef DEBUG_BUILD
@@ -750,6 +779,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           if(TypeDet >= G4Sol::TR1 && TypeDet <= G4Sol::TR2)
             fillOutHit(OutTree->TR, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
+	  if(TypeDet >= G4Sol::FiberD1_x && TypeDet <= G4Sol::MiniFiberD1_v2)
+            fillOutHit(OutTree->Fiber, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
           if(TypeDet >= G4Sol::CDC_layer0 && TypeDet <= G4Sol::CDC_layer14)
             fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
@@ -778,6 +810,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
   OutTree->NInSi = OutTree->InSi->GetEntries();
   OutTree->NTr = OutTree->TR->GetEntries();
+  OutTree->NFiber = OutTree->Fiber->GetEntries();
   OutTree->NCdc = OutTree->CDC->GetEntries();
   OutTree->NCdh = OutTree->CDH->GetEntries();
   OutTree->NRpc = OutTree->RPC->GetEntries();
@@ -796,14 +829,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   for(auto track : RecoEvent.TrackDAF)
   {
     att._logger->debug( "TrackID # {} hit_id [", track.first);
-    std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
-    std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
-    std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
+    std::vector<std::stringstream> s1(track.second.size() / 8 + 1);
+    std::vector<std::stringstream> s2(track.second.size() / 8 + 1);
+    std::vector<std::stringstream> s3(track.second.size() / 8 + 1);
     for(size_t i = 0; i < track.second.size(); ++i)
     {
-      s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
-      s2[i / 20] << printW(i, 6) << ", ";
-      s3[i / 20] << printW(track.second[i], 6) << ", ";
+      s1[i / 8] << printW(G4Sol::nameLiteralDet.begin()[i], 14) << ", ";
+      s2[i / 8] << printW(i, 14) << ", ";
+      s3[i / 8] << printW(track.second[i], 14) << ", ";
     }
     for(size_t i = 0; i < s1.size(); ++i)
     {
@@ -818,14 +851,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   for(auto track : RecoEvent.TrackInfo)
   {
     att._logger->debug( "TrackID #{} PID [", track.first);
-    std::vector<std::stringstream> s1(track.second.size() / 20 + 1);
-    std::vector<std::stringstream> s2(track.second.size() / 20 + 1);
-    std::vector<std::stringstream> s3(track.second.size() / 20 + 1);
+    std::vector<std::stringstream> s1(track.second.size() / 8 + 1);
+    std::vector<std::stringstream> s2(track.second.size() / 8 + 1);
+    std::vector<std::stringstream> s3(track.second.size() / 8 + 1);
     for(size_t i = 0; i < track.second.size(); ++i)
     {
-      s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
-      s2[i / 20] << printW(i, 6) << ", ";
-      s3[i / 20] << printW(track.second[i].pdg, 6) << ", ";
+      s1[i / 8] << printW(G4Sol::nameLiteralDet.begin()[i], 14) << ", ";
+      s2[i / 8] << printW(i, 14) << ", ";
+      s3[i / 8] << printW(track.second[i].pdg, 14) << ", ";
     }
     for(size_t i = 0; i < s1.size(); ++i)
     {
