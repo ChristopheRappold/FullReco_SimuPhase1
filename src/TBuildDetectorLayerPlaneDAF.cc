@@ -17,6 +17,8 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
 
   std::vector<std::string> tempName = {"HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
     "TR1_log","TR2_log",
+    "MiniFiberD1_Core_log_x1", "MiniFiberD1_Core_log_u1", "MiniFiberD1_Core_log_v1",
+    "MiniFiberD1_Core_log_x2", "MiniFiberD1_Core_log_u2", "MiniFiberD1_Core_log_v2",
     "FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v",
     "FiberD2_Core_log_x", "FiberD2_Core_log_u", "FiberD2_Core_log_v",
     "FiberD3_Core_log_x", "FiberD3_Core_log_u", "FiberD3_Core_log_v",
@@ -603,6 +605,92 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
             TVectorD hitCoords(1);
             hitCoords(0) = u.Dot(TVector3(shift[0],0,0));
+            TMatrixDSym hitCov(1);
+            hitCov(0, 0) = resolution_fiber * resolution_fiber;
+            measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+            dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+
+            hitCoordsTree(0) = hit.HitPosX;
+            hitCoordsTree(1) = hit.HitPosY;
+            hitCoordsTree(2) = hit.HitPosZ;
+          }
+          else if(IsFiberM(TypeDet)){
+            string volumeName;
+            switch(TypeDet){
+              case G4Sol::MiniFiberD1_x1 :  volumeName = "MiniFiberD1_log_x1"; break;
+              case G4Sol::MiniFiberD1_u1 :  volumeName = "MiniFiberD1_log_u1"; break;
+              case G4Sol::MiniFiberD1_v1 :  volumeName = "MiniFiberD1_log_v1"; break;
+              case G4Sol::MiniFiberD1_x2 :  volumeName = "MiniFiberD1_log_x2"; break;
+              case G4Sol::MiniFiberD1_u2 :  volumeName = "MiniFiberD1_log_u2"; break;
+              case G4Sol::MiniFiberD1_v2 :  volumeName = "MiniFiberD1_log_v2"; break;
+              default : std::cerr << "something wrong" << std::endl; break;
+            }
+            string motherName;
+            switch(TypeDet){
+              case G4Sol::MiniFiberD1_x1 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_u1 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_v1 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_x2 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_u2 :  motherName = "MiniFiberD1_log_0"; break;
+              case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
+              default : std::cerr << "something wrong" << std::endl; break;
+            }
+#ifdef DEBUG_BUILD
+            std::cout << "fiberM"  << std::endl;
+            std::string tmpName = orderDetName.find(TypeDet)->second;
+            std::cout << "name : " << tmpName << std::endl;
+            std::cout << "LayerID : " << LayerID << std::endl;
+            std::cout << "HitPosX : " << hit.HitPosX << std::endl;
+            std::cout << "HitPosY : " << hit.HitPosY << std::endl;
+            std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
+            //gGeoManager->GetVolume(volumeName.c_str())->Print();
+            gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID*2+1)->Print();
+            gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID*2+1)->GetMatrix()->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetVolume()->GetNode( (volumeName + "_0").c_str() )->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetVolume()->GetNode( (volumeName + "_0").c_str() )->GetMatrix()->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix()->Print();
+#endif
+            TGeoMatrix *g1 = gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID*2+1)->GetMatrix(); // fiber core
+            TGeoMatrix *g2 = gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetVolume()->GetNode( (volumeName + "_0").c_str() )->GetMatrix(); // fiber layer
+            TGeoMatrix *g3 = gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // fiber station
+            TGeoMatrix *g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
+            TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
+            TGeoHMatrix H = H2 * H1;
+            H = H3 * H;
+            H = H4 * H;
+            TGeoHMatrix w1("w1");
+            TGeoHMatrix w2("w2");
+            w1.SetDz(-10);
+            w2.SetDz( 10);
+            TGeoHMatrix Hw1 = H * w1;
+            TGeoHMatrix Hw2 = H * w2;
+#ifdef DEBUG_BUILD
+            H.Print();
+            Hw1.Print();
+            Hw2.Print();
+#endif
+            double *edge1 =  Hw1.GetTranslation();
+            double *edge2 =  Hw2.GetTranslation();
+            //std::cout << "edge1[0] : " << edge1[0] << std::endl;
+            //std::cout << "edge1[1] : " << edge1[1] << std::endl;
+            //std::cout << "edge1[2] : " << edge1[2] << std::endl;
+            //std::cout << "edge2[0] : " << edge2[0] << std::endl;
+            //std::cout << "edge2[1] : " << edge2[1] << std::endl;
+            //std::cout << "edge2[2] : " << edge2[2] << std::endl;
+            double *shift =  H.GetTranslation();
+            //std::cout << "shift[0] : " << shift[0] << std::endl;
+            //std::cout << "shift[1] : " << shift[1] << std::endl;
+            //std::cout << "shift[2] : " << shift[2] << std::endl;
+            TVector3 o(0., 0., shift[2]), zdir(0.,0.,1.);
+            TVector3 fiber_dir( edge2[0]-edge1[0], edge2[1]-edge1[1],edge2[2]-edge1[2] );
+            fiber_dir = fiber_dir.Unit();
+            TVector3 u = fiber_dir.Cross(zdir);
+            TVector3 v = fiber_dir;
+            genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+
+            TVectorD hitCoords(1);
+            hitCoords(0) = u.Dot(TVector3(shift[0],shift[1],0));
             TMatrixDSym hitCov(1);
             hitCov(0, 0) = resolution_fiber * resolution_fiber;
             measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);

@@ -110,6 +110,21 @@ constexpr bool IsFiberU(G4Sol::SolDet idDet) {
   };
 };
 
+
+constexpr bool IsFiberM(G4Sol::SolDet idDet) {
+  switch (idDet) {
+    case G4Sol::MiniFiberD1_x1 : ;
+    case G4Sol::MiniFiberD1_u1 : ;
+    case G4Sol::MiniFiberD1_v1 : ;
+    case G4Sol::MiniFiberD1_x2 : ;
+    case G4Sol::MiniFiberD1_u2 : ;
+    case G4Sol::MiniFiberD1_v2 : ;
+                                 return true;
+    default:
+                                 return false;
+  };
+};
+
 constexpr bool IsWire(G4Sol::SolDet idDet) {
   switch (idDet) {
   case G4Sol::MG01 : ;

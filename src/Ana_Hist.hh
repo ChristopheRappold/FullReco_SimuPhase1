@@ -117,6 +117,7 @@ class Ana_Hist
 
   //residual
   Hist<TH1F> h_ResFiber[9];
+  Hist<TH1F> h_ResMiniFiber[6];
   Hist<TH1F> h_ResMDC[17][3];
   Hist<TH1F> h_ResPSCE[2];
   

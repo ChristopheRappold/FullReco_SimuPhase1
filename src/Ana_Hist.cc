@@ -244,6 +244,11 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
 	  h_ResFiber[i].emplace_back( new TH1F(Form("ResFiber%d",i),Form("ResFiber%d",i),300,-0.2,0.2));
 	  h_residual.emplace_back(&h_ResFiber[i].store);
 	}
+for(int i=0;i<6;++i)
+	{
+	h_ResMiniFiber[i] = new TH1F(Form("ResMiniFiber%d",i),Form("ResMiniFiber%d",i),300,-0.2,0.2);
+	h_residual.emplace_back(h_ResMiniFiber[i]);
+	}
       for(int i=0;i<2;++i)
 	{
 	  h_ResPSCE[i].emplace_back( new TH1F(Form("ResPSCE%d",i),Form("ResPSCE%d",i),300,-5,5));

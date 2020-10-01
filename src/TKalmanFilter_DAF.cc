@@ -245,6 +245,7 @@ int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
           OutTrack->Cov[row][col] = FitRes.cov_matrix[row][col];
 
       OutTrack->NCent   = FitRes.Ncentral;
+      OutTrack->Nmfib  = FitRes.Nmfiber;
       OutTrack->iterNum = FitRes.iterNum;
       for(int i = 0; i < 17; ++i)
         {
@@ -258,6 +259,11 @@ int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
         {
           OutTrack->ResFiber[i]    = FitRes.ResFiber[i];
           OutTrack->WeightFiber[i] = FitRes.WeightFiber[i];
+        }
+      for(int i=0; i<6; ++i)
+        {
+          OutTrack->ResMiniFiber[i] = FitRes.ResMiniFiber[i];
+          OutTrack->WeightMiniFiber[i] = FitRes.WeightMiniFiber[i];
         }
       for(int i = 0; i < 2; ++i)
         {
@@ -348,6 +354,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       std::set<std::tuple<double, int, int> > id_dets;
       double total_dE = 0.;
       int n_Central   = 0;
+      int n_MiniFiber = 0;
       // std::cout << "it_ListHits->second.size : " << it_ListHits->second.size() << std::endl;
       for(size_t id_det = 0; id_det < it_ListHits->second.size(); ++id_det)
         {
@@ -356,6 +363,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             continue;
           if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
             ++n_Central;
+          if(id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2)
+            ++n_MiniFiber;
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
           total_dE += it_trackInfo.second[id_det].Eloss;
@@ -424,6 +433,20 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(), "Less3MesCentral", 1.);
           continue;
         }
+      if(n_MiniFiber<2)
+      {
+        AnaHisto->h_stats->Fill("LessMiniFiber",1);
+        int idPDG = 0;
+        for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+          if(it_trackInfo.second[i].pdg!=idPDG)
+          {
+            idPDG = it_trackInfo.second[i].pdg;
+            break;
+          }
+        std::string namePDG = std::to_string(idPDG);
+        AnaHisto->h_statsLess3Mes->Fill(namePDG.c_str(),"LessMiniFiber",1.);
+        continue;
+      }
 
       auto f_LastHitIsValid = [](const auto& it_ListHits, const std::set<G4Sol::SolDet>& listToTest) {
         for(auto it_det : listToTest)
@@ -931,6 +954,15 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                         tempResults.ResFiber[id_det - G4Sol::FiberD1_x]    = res;
                         tempResults.WeightFiber[id_det - G4Sol::FiberD1_x] = weights[0];
                       }
+                    else if(id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2){
+                      const genfit::MeasurementOnPlane& residual = kfi->getResidual(0, false, true);
+                      const TVectorD& resid(residual.getState());
+                      double res = resid(0);
+                      //std::cout << "res : " << res << std::endl;
+                      AnaHisto->h_ResMiniFiber[id_det-G4Sol::MiniFiberD1_x1]->Fill(res);
+                      tempResults.ResMiniFiber[id_det-G4Sol::MiniFiberD1_x1] = res;
+                      tempResults.WeightMiniFiber[id_det-G4Sol::MiniFiberD1_x1] = weights[0];
+                    }
                     else if(id_det == G4Sol::PSCE)
                       {
                         const genfit::MeasurementOnPlane& residual = kfi->getResidual(0, false, true);
@@ -1172,6 +1204,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               tempResults.firstHit     = id_firstDet;
               tempResults.lastHit      = id_lastDet;
               tempResults.Ncentral     = n_Central;
+              tempResults.Nmfiber  = n_MiniFiber;
               tempResults.dE           = dE;
               tempResults.path_time    = Path_time;
               tempResults.path_length  = Path_lengthMean;
