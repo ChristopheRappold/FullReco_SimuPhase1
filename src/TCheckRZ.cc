@@ -1,4 +1,5 @@
 #include "TCheckRZ.h"
+#include "ReturnRes.hh"
 
 #include <tuple>
 
@@ -15,7 +16,9 @@ TCheckRZ::~TCheckRZ()
 
 }
 
-int TCheckRZ::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
+void TCheckRZ::InitMT() {att._logger->error("E> Not supposed to be multithreaded !"); }
+
+ReturnRes::InfoM TCheckRZ::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
 {
 
   int result_finder = Exec(RecoEvent,OutTree);
@@ -28,7 +31,7 @@ int TCheckRZ::Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
   return FinderTrack(RecoEvent);
 }
 
-int TCheckRZ::SoftExit(int result_full)
+ReturnRes::InfoM TCheckRZ::SoftExit(int result_full)
 {
   return ReturnRes::Fine;
 }
@@ -37,7 +40,7 @@ int TCheckRZ::SoftExit(int result_full)
 void TCheckRZ::SelectHists()
 {
 
-  LocalHisto.h_RZ           = AnaHisto->CloneAndRegister(AnaHisto->h_RK);
+  LocalHisto.h_RZ           = AnaHisto->CloneAndRegister(AnaHisto->h_RZ);
   LocalHisto.h_MDC_Z_residu = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_Z_residu);
 
 }

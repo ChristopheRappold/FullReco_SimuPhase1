@@ -1,6 +1,7 @@
 #ifndef TCHECKRZ
 #define TCHECKRZ
 
+#include "ReturnRes.hh"
 #include "TDataProcess.h"
 #include "Debug.hh"
 #include "FullRecoEvent.hh"
@@ -15,7 +16,7 @@
 
 typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
 
-class TCheckRZ :  public TDataProcessInterface
+class TCheckRZ final :  public TDataProcessInterface
 {
   public :
   const THyphiAttributes& att;
@@ -24,7 +25,8 @@ class TCheckRZ :  public TDataProcessInterface
   ~TCheckRZ();
 
   //int Init(Ana_Hist* h);
-  int operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
+  void InitMT() final;
+  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
  private:
   int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
 
