@@ -46,7 +46,7 @@ ZMQFLAGS = -I./cppzmq/include -I./libzmq/include
 MSGFLAGS = -I./msgpack-c/include
 TRICKTRACKFLAGS = -I./TrickTrack/include
 
-CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
+CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
 LIBS         += $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol
 
 GENFIT_LIB = -lgenfit2
