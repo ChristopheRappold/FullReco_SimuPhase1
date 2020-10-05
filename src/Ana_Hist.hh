@@ -77,6 +77,9 @@ class Ana_Hist
   
   Hist<TH2F> h_SolenoidGeo[3];
   std::vector<TEllipse*> geoSolenoid;
+
+  Hist<TH2F> h_RZ;
+  Hist<TH2F> h_MDC_Z_residu;
   // K>lman:
   Hist<TH1F> h_pv;
   Hist<TH1F> h_chi2;

@@ -68,7 +68,7 @@ Sources = MainSimu.cc FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana
 Headers = $(patsubst %.cc,%.hh,$(Sources))
 Objects = $(patsubst %.cc,%.o,$(Sources))
 
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TFinderCM.cc
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TFinderCM.cc TCheckRZ.cc
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
