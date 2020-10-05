@@ -135,6 +135,7 @@ private:
     TH2F* h_total_dE;
 
     TH1F* h_ResFiber[9];
+    TH1F* h_ResMiniFiber[6];
     TH1F* h_ResMDC[17][3];
     TH1F* h_ResPSCE[2];
     

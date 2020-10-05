@@ -435,6 +435,7 @@ struct ResSolDAF
   int firstHit = -1;
   int lastHit  = -1;
   int Ncentral = 0;
+  int Nmfiber = 0;
   int iterNum  = -1;
 
   double cov_matrix[6][6] = {{-999., -999., -999., -999., -999., -999.}, {-999., -999., -999., -999., -999., -999.},

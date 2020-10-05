@@ -178,7 +178,10 @@ void TKalmanFilter_DAF::SelectHists()
 
   for(size_t i = 0;i < 9 ;++i)
     LocalHisto.h_ResFiber[i] = AnaHisto->CloneAndRegister(AnaHisto->h_ResFiber[i]);
-  
+
+  for(size_t i = 0;i < 6 ;++i)
+    LocalHisto.h_ResMiniFiber[i] = AnaHisto->CloneAndRegister(AnaHisto->h_ResMiniFiber[i]);
+
   for(size_t i = 0;i < 17 ;++i)
     for(size_t j =0 ; j<3;++j)
       LocalHisto.h_ResMDC[i][j] = AnaHisto->CloneAndRegister(AnaHisto->h_ResMDC[i][j]);
@@ -435,7 +438,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
         }
       if(n_MiniFiber<2)
       {
-        AnaHisto->h_stats->Fill("LessMiniFiber",1);
+        LocalHisto.h_stats->Fill("LessMiniFiber",1);
         int idPDG = 0;
         for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
           if(it_trackInfo.second[i].pdg!=idPDG)
@@ -444,7 +447,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             break;
           }
         std::string namePDG = std::to_string(idPDG);
-        AnaHisto->h_statsLess3Mes->Fill(namePDG.c_str(),"LessMiniFiber",1.);
+        LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(),"LessMiniFiber",1.);
         continue;
       }
 
@@ -959,7 +962,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                       const TVectorD& resid(residual.getState());
                       double res = resid(0);
                       //std::cout << "res : " << res << std::endl;
-                      AnaHisto->h_ResMiniFiber[id_det-G4Sol::MiniFiberD1_x1]->Fill(res);
+                      LocalHisto.h_ResMiniFiber[id_det-G4Sol::MiniFiberD1_x1]->Fill(res);
                       tempResults.ResMiniFiber[id_det-G4Sol::MiniFiberD1_x1] = res;
                       tempResults.WeightMiniFiber[id_det-G4Sol::MiniFiberD1_x1] = weights[0];
                     }
