@@ -5,7 +5,7 @@ using namespace std;
 
 ClassImp(THyphiTrack)
   
-THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1.),Mass(-1.),pdgcode(0),MomMass(0.,0.,0.,0.),Mom(0.,0.,0.),Charge(0),BarId(0),Beta(0),RefPoint(-999.,-999.,-999.),Pval2(-1),TofsBar(-1),PathLength(-999),TOF(-999),MomIni(-999,-999,-999),RChiIni(-1),PathLengthIni(-999.),TOFIni(-999.),BetaIni(-999),MassIni(-999.),Sim2Vtx(-999.,-999.,-999.,-999.),NCent(0),iterNum(-1)//,state(5,1),cov(5,5)
+THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1.),Mass(-1.),pdgcode(0),MomMass(0.,0.,0.,0.),Mom(0.,0.,0.),Charge(0),BarId(0),Beta(0),RefPoint(-999.,-999.,-999.),Pval2(-1),TofsBar(-1),PathLength(-999),TOF(-999),MomIni(-999,-999,-999),RChiIni(-1),PathLengthIni(-999.),TOFIni(-999.),BetaIni(-999),MassIni(-999.),Sim2Vtx(-999.,-999.,-999.,-999.),NCent(0),iterNum(-1),Nmfib(0)//,state(5,1),cov(5,5)
 {
   
   //   std::cout<<"THyphiTrack Constructor"<<std::endl;
@@ -28,6 +28,10 @@ THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1
   for(int i=0; i<9; ++i){
       ResFiber[i] = -999.;
       WeightFiber[i] = -999.;
+  }
+  for(int i=0; i<6; ++i){
+      ResMiniFiber[i] = -999.;
+      WeightMiniFiber[i] = -999.;
   }
   for(int i=0; i<2; ++i){
     ResPSCE[i] = -999.;
@@ -78,6 +82,7 @@ THyphiTrack::THyphiTrack(const THyphiTrack& H)
 
   NCent  = H.NCent;
   iterNum= H.iterNum;
+  Nmfib = H.Nmfib;
 
   for(int i=0; i<17; ++i){
     for(int j=0; j<3; ++j){
@@ -88,6 +93,10 @@ THyphiTrack::THyphiTrack(const THyphiTrack& H)
   for(int i=0; i<9; ++i){
     ResFiber[i] = H.ResFiber[i];
     WeightFiber[i] = H.WeightFiber[i];
+  }
+  for(int i=0; i<6; ++i){
+    ResMiniFiber[i] = H.ResMiniFiber[i];
+    WeightMiniFiber[i] = H.WeightMiniFiber[i];
   }
   for(int i=0; i<2; ++i){
     ResPSCE[i] = H.ResPSCE[i];
@@ -149,6 +158,8 @@ void THyphiTrack::Clear(Option_t *option)
 
   NCent = 0;
   iterNum = -1;
+  Nmfib = 0;
+
   for(int i=0; i<17; ++i){
     for(int j=0; j<3; ++j){
       ResMDC[i][j] = -999.;
@@ -159,8 +170,13 @@ void THyphiTrack::Clear(Option_t *option)
     ResFiber[i] = -999.;
     WeightFiber[i] = -999.;
   }
+  for(int i=0; i<6; ++i){
+    ResMiniFiber[i] = -999.;
+    WeightMiniFiber[i] = -999.;
+  }
   for(int i=0; i<2; ++i){
     ResPSCE[i] = -999.;
+    WeightPSCE[i] = -999.;
   }
 
 }
