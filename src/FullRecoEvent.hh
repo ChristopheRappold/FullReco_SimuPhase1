@@ -61,6 +61,12 @@ enum SolDet : int
   FiberD3_x,
   FiberD3_u,
   FiberD3_v,
+  FiberD4_x,
+  FiberD4_u,
+  FiberD4_v,
+  FiberD5_x,
+  FiberD5_u,
+  FiberD5_v,
   PSFE /*21*/,
   MG01 /*22*/,
   MG02,
@@ -109,16 +115,18 @@ enum SolDet : int
 };
 
 constexpr auto nameLiteralDet = {
-    "InSi0",     "InSi1",     "InSi2",     "InSi3",     "TR1",       "TR2",
-    "MiniFiberD1_x1", "MiniFiberD1_u1","MiniFiberD1_v1",
-    "MiniFiberD1_x2", "MiniFiberD1_u2","MiniFiberD1_v2",
-    "FiberD1_x", "FiberD1_u", "FiberD1_v",
-    "FiberD2_x", "FiberD2_u", "FiberD2_v", "FiberD3_x", "FiberD3_u", "FiberD3_v", "PSFE",      "MG01",      "MG02",
-    "MG03",      "MG04",      "MG05",      "MG06",      "MG07",      "MG08",      "MG09",      "MG10",      "MG11",
-    "MG12",      "MG13",      "MG14",      "MG15",      "MG16",      "MG17",      "PSCE",      "PSBE",      "CDC0",
-    "CDC1",      "CDC2",      "CDC3",      "CDC4",      "CDC5",      "CDC6",      "CDC7",      "CDC8",      "CDC9",
-    "CDC10",     "CDC11",     "CDC12",     "CDC13",     "CDC14",     "CDHBar",    "TrFwd0",    "TrFwd1",    "TrFwd2",
-    "RPCl",      "RPCh",      "FMF2S0",    "FMF2S1",    "FMF2S2"};
+    "InSi0"         ,          "InSi1",          "InSi2",          "InSi3",            "TR1",            "TR2",
+    "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1", "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
+    "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
+    "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      "FiberD4_x",      "FiberD4_u",      "FiberD4_v",
+    "FiberD5_x",           "FiberD5_u",      "FiberD5_v",           "PSFE",           "MG01",           "MG02",
+    "MG03",                     "MG04",           "MG05",           "MG06",           "MG07",           "MG08",
+    "MG09",                     "MG10",           "MG11",           "MG12",           "MG13",           "MG14",
+    "MG15",                     "MG16",           "MG17",           "PSCE",           "PSBE",           "CDC0",
+    "CDC1",                     "CDC2",           "CDC3",           "CDC4",           "CDC5",           "CDC6",
+    "CDC7",                     "CDC8",           "CDC9",          "CDC10",          "CDC11",          "CDC12",
+    "CDC13",                   "CDC14",         "CDHBar",         "TrFwd0",         "TrFwd1",         "TrFwd2",
+    "RPCl",                     "RPCh",         "FMF2S0",         "FMF2S1",         "FMF2S2"};
 
 template <typename T, T... args>
 struct EnumIter : public std::iterator<std::input_iterator_tag, T, std::ptrdiff_t, const T*, const T&>
@@ -150,12 +158,13 @@ struct EnumIter : public std::iterator<std::input_iterator_tag, T, std::ptrdiff_
 };
 template <typename T, T... args>
 constexpr T EnumIter<T, args...>::values[];
-using SolDetIter = struct EnumIter<
+  using SolDetIter = struct EnumIter<
     SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/,
     MiniFiberD1_x1, MiniFiberD1_x1,MiniFiberD1_v1,
     MiniFiberD1_x2, MiniFiberD1_x2,MiniFiberD1_v2,
     FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x,
-    FiberD2_u, FiberD2_v, FiberD3_x, FiberD3_u, FiberD3_v, PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07,
+    FiberD2_u, FiberD2_v, FiberD3_x, FiberD3_u, FiberD3_v, FiberD4_x, FiberD4_u, FiberD4_v,FiberD5_x, FiberD5_u, FiberD5_v,
+    PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07,
     MG08, MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/, CDC_layer0 /*4 - 26*/,
     CDC_layer1, CDC_layer2, CDC_layer3, CDC_layer4, CDC_layer5, CDC_layer6, CDC_layer7, CDC_layer8, CDC_layer9,
     CDC_layer10, CDC_layer11, CDC_layer12, CDC_layer13, CDC_layer14 /*18 - 40*/, CDHBar /*19 - 41*/, TrFwd0 /*20 - 42*/,
