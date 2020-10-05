@@ -867,7 +867,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           if(TypeDet >= G4Sol::TR1 && TypeDet <= G4Sol::TR2)
             fillOutHit(OutTree->TR, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
-	  if(TypeDet >= G4Sol::FiberD1_x && TypeDet <= G4Sol::MiniFiberD1_v2)
+	  if(TypeDet >= G4Sol::MiniFiberD1_x1 && TypeDet <= G4Sol::FiberD5_v)
             fillOutHit(OutTree->Fiber, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
           if(TypeDet >= G4Sol::CDC_layer0 && TypeDet <= G4Sol::CDC_layer14)
