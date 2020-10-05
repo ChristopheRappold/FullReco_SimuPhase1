@@ -1,6 +1,7 @@
 #ifndef TBAYESFINDER 
 #define TBAYESFINDER 
 
+#include "ReturnRes.hh"
 #include "TDataProcess.h"
 #include "Debug.hh"
 #include "FullRecoEvent.hh"
@@ -41,7 +42,7 @@ namespace BayesFind {
 
 };
 
-class TBayesFinder :  public TDataProcessInterface
+class TBayesFinder final :  public TDataProcessInterface
 {
   public :
   const THyphiAttributes& att;
@@ -51,10 +52,13 @@ class TBayesFinder :  public TDataProcessInterface
   ~TBayesFinder();
 
   //int Init(Ana_Hist* h);
-  int operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
+  void InitMT() final;
+  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
  private:
-  int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
-  int SoftExit(int) override;
+  int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
+  ReturnRes::InfoM SoftExit(int) final;
+  void SelectHists() final;
+
   int FinderTrack(FullRecoEvent& RecoEvent);
 
   std::vector<double> radiusCDC;
@@ -64,6 +68,19 @@ class TBayesFinder :  public TDataProcessInterface
   std::vector< std::vector<TGeoNodeMatrix*> > ME;
   std::vector< std::vector< BayesFind::DataLayer >> LayerGeo;
   TRandom3 rand;
+
+  struct LocalHists
+  {
+    TH2F* h_xy;
+    TH2F* h_PxPy;
+    TH2F* h_xy_extrap;
+    TH2F* h_PxPy_extrap;
+    TH2F* h_TrackFindingStat;
+    TH2F* h_SolenoidGeo[3];
+  };
+  LocalHists LocalHisto;
+
+
 };
 
 

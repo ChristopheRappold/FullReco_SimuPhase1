@@ -1,5 +1,6 @@
 #include "TBayesFinder.h"
 
+#include "ReturnRes.hh"
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "TGeoMedium.h"
@@ -31,10 +32,10 @@ TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterfa
       
       if(name.Contains("MD"))
 	{
-	  att._logger->debug("{} {}",name, fmt::ptr(it));
+	  att._logger->debug("{} {}",name.Data(), fmt::ptr(it));
 	  TGeoTubeSeg* tube = dynamic_cast<TGeoTubeSeg*>( dynamic_cast<TGeoVolume*>(it)->GetShape());
 	  radiusCDC.emplace_back(0.5*(tube->GetRmax()+tube->GetRmin()));
-	  att._logger->debug("{} {}",name, radiusCDC.back());
+	  att._logger->debug("{} {}",name.Data(), radiusCDC.back());
 	}
     }
 
@@ -145,8 +146,9 @@ TBayesFinder::~TBayesFinder()
 {
 
 }
+void TBayesFinder::InitMT() {att._logger->error("E> Not supposed to be multithreaded !"); }
 
-int TBayesFinder::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
+ReturnRes::InfoM TBayesFinder::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
 {
 
   int result_finder = Exec(RecoEvent,OutTree);
@@ -160,9 +162,20 @@ int TBayesFinder::Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
   
 }
 
-int TBayesFinder::SoftExit(int result_full)
+ReturnRes::InfoM TBayesFinder::SoftExit(int result_full)
 {
-  return result_full;    
+  return ReturnRes::Fine;
+}
+
+void TBayesFinder::SelectHists()
+{
+    LocalHisto.h_xy          = AnaHisto->CloneAndRegister(AnaHisto->h_xy);
+    LocalHisto.h_PxPy        = AnaHisto->CloneAndRegister(AnaHisto->h_PxPy);
+    LocalHisto.h_xy_extrap   = AnaHisto->CloneAndRegister(AnaHisto->h_xy_extrap);
+    LocalHisto.h_PxPy_extrap = AnaHisto->CloneAndRegister(AnaHisto->h_PxPy_extrap);
+    LocalHisto.h_TrackFindingStat = AnaHisto->CloneAndRegister(AnaHisto->h_TrackFindingStat);
+  for(int i=0;i<3;++i)
+    LocalHisto.h_SolenoidGeo[i]         = AnaHisto->CloneAndRegister(AnaHisto->h_SolenoidGeo[i]);
 }
 
 
@@ -265,7 +278,7 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
       }
   };
 
-  DrawMG(AllHits,LayerGeo,AnaHisto->h_SolenoidGeo[0],rand);
+  DrawMG(AllHits,LayerGeo,LocalHisto.h_SolenoidGeo[0],rand);
 
 #ifdef DEBUG_BAYES
   auto printSimHit = [](const SimHit& hit) {
@@ -354,8 +367,8 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
 	  printInfo(info,ch);
 #endif
 
-      AnaHisto->h_xy->Fill(init_x,init_y);
-      AnaHisto->h_PxPy->Fill(init_momX,init_momY);
+      LocalHisto.h_xy->Fill(init_x,init_y);
+      LocalHisto.h_PxPy->Fill(init_momX,init_momY);
       
       double new_x[2]={0.,0.}, new_y[2]={0.,0.}, new_momX[2]={0.,0.}, new_momY[2]={0.,0.};
       
@@ -392,8 +405,8 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
 #ifdef DEBUG_BAYES
 		std::cout<<"MG "<<idCDC-G4Sol::MG01+1<<" "<<radiusCDC[idCDC-G4Sol::MG01]<<" hit#"<<id_hit<<" \n";
 #endif
-		AnaHisto->h_xy->Fill(it_hit.hitX, it_hit.hitY);
-		AnaHisto->h_PxPy->Fill(it_hit.momX, it_hit.momY);
+		LocalHisto.h_xy->Fill(it_hit.hitX, it_hit.hitY);
+		LocalHisto.h_PxPy->Fill(it_hit.momX, it_hit.momY);
 	    
 		double Px = init_momX; //= ListHits[idCDC].momX;
 		double Py = init_momY; //= ListHits[idCDC].momY;
@@ -475,8 +488,8 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
 		init_momX = best_momX;
 		init_momY = best_momY;
 
-		AnaHisto->h_xy_extrap->Fill(init_x, init_y);
-		AnaHisto->h_PxPy_extrap->Fill(init_momX, init_momY);
+		LocalHisto.h_xy_extrap->Fill(init_x, init_y);
+		LocalHisto.h_PxPy_extrap->Fill(init_momX, init_momY);
 	      }
 	  }
 
@@ -498,8 +511,8 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
       int sameTrack = checkSameTrack(ListValidHits,SetHits);
       std::string nameX ( TDatabasePDG::Instance()->GetParticle(info.pdg)->GetName());
       nameX += nameFinalHit[idFinal];
-      AnaHisto->h_TrackFindingStat->Fill(nameX.c_str(),sameTrack,1);
-      AnaHisto->h_TrackFindingStat->Fill(nameX.c_str(),0.,1);
+      LocalHisto.h_TrackFindingStat->Fill(nameX.c_str(),sameTrack,1);
+      LocalHisto.h_TrackFindingStat->Fill(nameX.c_str(),0.,1);
       
 #ifdef DEBUG_BAYES
       std::cout<<"results:"<<sameTrack <<" \n";

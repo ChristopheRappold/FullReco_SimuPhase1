@@ -277,24 +277,24 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_TrackFindingStat.emplace_back(new TH2F("h_TrackFindingStat", "h_TrackFindingStat", 20, 0, 20, 22, -2, 20));
       HistReg.emplace_back(&h_TrackFindingStat.store);
 
-      h_MDC_Dphi = new TH2F("h_MDC_Dphi","h_MDC_Dphi",25,0,25,640,-3.2,3.2);
-      HistReg.emplace_back(h_MDC_Dphi);
-      h_MDC_NextLayer = new TH2F("h_MDC_NextLayer","h_MDC_NextLayer",25,0,25,40,-20,20);
-      HistReg.emplace_back(h_MDC_NextLayer);
-      h_MDC_DiffLayer = new TH2F("h_MDC_DiffLayer","h_MDC_DiffLayer",25,0,25,500,-1,1);
-      HistReg.emplace_back(h_MDC_DiffLayer);
-      h_MDC_DiffLayer2 = new TH2F("h_MDC_DiffLayer2","h_MDC_DiffLayer2",25,0,25,500,-1,1);
-      HistReg.emplace_back(h_MDC_DiffLayer2);
-      h_MDC_InLayer = new TH2F("h_MDC_InLayer","h_MDC_InLayer",25,0,25,10,0,10);
-      HistReg.emplace_back(h_MDC_InLayer);
+      h_MDC_Dphi.emplace_back(new TH2F("h_MDC_Dphi","h_MDC_Dphi",25,0,25,640,-3.2,3.2));
+      HistReg.emplace_back(&h_MDC_Dphi.store);
+      h_MDC_NextLayer.emplace_back(new TH2F("h_MDC_NextLayer","h_MDC_NextLayer",25,0,25,40,-20,20));
+      HistReg.emplace_back(&h_MDC_NextLayer.store);
+      h_MDC_DiffLayer.emplace_back(new TH2F("h_MDC_DiffLayer","h_MDC_DiffLayer",25,0,25,500,-1,1));
+      HistReg.emplace_back(&h_MDC_DiffLayer.store);
+      h_MDC_DiffLayer2.emplace_back(new TH2F("h_MDC_DiffLayer2","h_MDC_DiffLayer2",25,0,25,500,-1,1));
+      HistReg.emplace_back(&h_MDC_DiffLayer2.store);
+      h_MDC_InLayer.emplace_back(new TH2F("h_MDC_InLayer","h_MDC_InLayer",25,0,25,10,0,10));
+      HistReg.emplace_back(&h_MDC_InLayer.store);
 
       
-      h_SolenoidGeo[0] = new TH2F("h_SolenoidGeoFront","h_SolenoidGeoFront",500,-50,50,500,-50,50);
-      HistReg.emplace_back(h_SolenoidGeo[0]);
-      h_SolenoidGeo[1] = new TH2F("h_SolenoidGeoMid"  ,"h_SolenoidGeoMid"  ,500,-50,50,500,-50,50);
-      HistReg.emplace_back(h_SolenoidGeo[1]);
-      h_SolenoidGeo[2] = new TH2F("h_SolenoidGeoBack" ,"h_SolenoidGeoBack" ,500,-50,50,500,-50,50);
-      HistReg.emplace_back(h_SolenoidGeo[2]);
+      h_SolenoidGeo[0].emplace_back(new TH2F("h_SolenoidGeoFront","h_SolenoidGeoFront",500,-50,50,500,-50,50));
+      HistReg.emplace_back(&h_SolenoidGeo[0].store);
+      h_SolenoidGeo[1].emplace_back(new TH2F("h_SolenoidGeoMid"  ,"h_SolenoidGeoMid"  ,500,-50,50,500,-50,50));
+      HistReg.emplace_back(&h_SolenoidGeo[1].store);
+      h_SolenoidGeo[2].emplace_back(new TH2F("h_SolenoidGeoBack" ,"h_SolenoidGeoBack" ,500,-50,50,500,-50,50));
+      HistReg.emplace_back(&h_SolenoidGeo[2].store);
       
       HistRegisteredByDir.insert(std::make_pair("Finder", std::make_tuple(HistReg,0)));
 
