@@ -46,29 +46,29 @@ enum SolDet : int
   InSi3 /*3*/,
   TR1 /*4*/,
   TR2 /*5*/,
-  MiniFiberD1_x1,
+  MiniFiberD1_x1, /*6*/
   MiniFiberD1_u1,
   MiniFiberD1_v1,
   MiniFiberD1_x2,
   MiniFiberD1_u2,
-  MiniFiberD1_v2,
-  FiberD1_x,
+  MiniFiberD1_v2, /*11*/
+  FiberD1_x, /*12*/
   FiberD1_u,
   FiberD1_v,
-  FiberD2_x,
+  FiberD2_x, /*15*/
   FiberD2_u,
   FiberD2_v,
-  FiberD3_x,
+  FiberD3_x, /*18*/
   FiberD3_u,
   FiberD3_v,
-  FiberD4_x,
+  FiberD4_x, /*21*/
   FiberD4_u,
   FiberD4_v,
-  FiberD5_x,
+  FiberD5_x, /*24*/
   FiberD5_u,
   FiberD5_v,
-  PSFE /*21*/,
-  MG01 /*22*/,
+  PSFE /*27*/,
+  MG01 /*28*/,
   MG02,
   MG03,
   MG04,
@@ -84,10 +84,10 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17 /*38*/,
-  PSCE /*39*/,
-  PSBE /*40*/,
-  CDC_layer0 /*4 - 26*/,
+  MG17 /*44*/,
+  PSCE /*45*/,
+  PSBE /*46*/,
+  CDC_layer0 /*47*/,
   CDC_layer1,
   CDC_layer2,
   CDC_layer3,
@@ -101,16 +101,16 @@ enum SolDet : int
   CDC_layer11,
   CDC_layer12,
   CDC_layer13,
-  CDC_layer14 /*18 - 40*/,
-  CDHBar /*19 - 41*/,
-  TrFwd0 /*20 - 42*/,
+  CDC_layer14 /*61*/,
+  CDHBar /*62*/,
+  TrFwd0 /*63*/,
   TrFwd1,
-  TrFwd2 /*22 - 44*/,
-  RPC_l /*23 - 44*/,
-  RPC_h /*24 - 45*/,
-  FMF2Stop0 /*25 - 46*/,
+  TrFwd2 /*65*/,
+  RPC_l /*66*/,
+  RPC_h /*67*/,
+  FMF2Stop0 /*68*/,
   FMF2Stop1,
-  FMF2Stop2 /*27 - 48*/,
+  FMF2Stop2 /*70*/,
   SIZEOF_G4SOLDETTYPE
 };
 
@@ -544,7 +544,7 @@ public:
   // map_mom3 Mom_Particle;
   std::unordered_map<int, ResSolDAF> DAF_results;
 
-    std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > ListHits;
+  std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > ListHits;
 
   // std::vector< std::vector<std::vector<genfit::AbsMeasurement*> > > ListHitsDAF;
   // std::vector< std::vector<std::vector<std::vector<int> > > > ListIdHitsDAFCluster;

@@ -24,8 +24,6 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
     "FiberD3_Core_log_x", "FiberD3_Core_log_u", "FiberD3_Core_log_v",
     "FiberD4_Core_log_x", "FiberD4_Core_log_u", "FiberD4_Core_log_v",
     "FiberD5_Core_log_x", "FiberD5_Core_log_u", "FiberD5_Core_log_v",
-    "MiniFiberD1_Core_log_x1", "MiniFiberD1_Core_log_u1", "MiniFiberD1_Core_log_v1",
-    "MiniFiberD1_Core_log_x2", "MiniFiberD1_Core_log_u2", "MiniFiberD1_Core_log_v2",
     "PSFE",
     "MG01", "MG02", "MG03", "MG04", "MG05", "MG06", "MG07", "MG08", "MG09", "MG10", "MG11", "MG12",
     "MG13", "MG14", "MG15", "MG16", "MG17",
