@@ -71,6 +71,9 @@ private:
 
   int Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent);
 
+  int Nb_CentralCut;
+  int Nb_MiniFiberCut;
+
   // genfit::DAF* Fitter;
   genfit::AbsKalmanFitter* Fitter;
   genfit::AbsKalmanFitter* Fitter_rescue;

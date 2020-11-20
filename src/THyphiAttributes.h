@@ -80,6 +80,20 @@ class THyphiAttributes
   bool Debug_DAF;
   bool DoNoMaterial;
 
+  bool RZ_ChangeMiniFiber;
+  bool RZ_MDCProlate;
+  bool RZ_MDCWire2;
+  bool RZ_MDCBiasCorr;
+
+  bool KF_Kalman;
+  bool KF_KalmanSqrt;
+  bool KF_KalmanRef;
+  bool KF_DAFRef;
+  bool KF_DAF;
+
+  int KF_NbCentralCut;
+  int KF_NbMiniFiberCut;
+
   FairField* Field;
 
   const FullRecoConfig& Config;

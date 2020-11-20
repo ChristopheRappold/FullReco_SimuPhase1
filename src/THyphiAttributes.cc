@@ -45,6 +45,20 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   Debug_DAF = false;
   DoNoMaterial = false;
 
+  RZ_ChangeMiniFiber = false;
+  RZ_MDCProlate = true;
+  RZ_MDCWire2 = false;
+  RZ_MDCBiasCorr = true;
+
+  KF_Kalman = false;
+  KF_KalmanSqrt = true;
+  KF_KalmanRef = false;
+  KF_DAFRef = false;
+  KF_DAF = false;
+
+  KF_NbCentralCut = 1;
+  KF_NbMiniFiberCut = 4;
+
   if(Config.IsAvailable("G4_simu"))
     G4_simu = true;
   if(Config.IsAvailable("G4_TimeReso"))
@@ -59,7 +73,33 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
     Debug_DAF = true;
   if(Config.IsAvailable( "NoMaterial"))
     DoNoMaterial = true;
-  
+
+  if(Config.IsAvailable("RZ_ChangeMiniFiber"))
+    RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
+  if(Config.IsAvailable("RZ_MDCProlate"))
+    RZ_MDCProlate = Config.Get<bool>("RZ_MDCProlate");
+  if(Config.IsAvailable("RZ_MDCWire2"))
+    RZ_MDCWire2 = Config.Get<bool>("RZ_MDCWire2");
+  if(Config.IsAvailable("RZ_MDCBiasCorr"))
+    RZ_MDCBiasCorr = Config.Get<bool>("RZ_MDCBiasCorr");
+
+  if(Config.IsAvailable("KF_Kalman"))
+    KF_Kalman = Config.Get<bool>("KF_Kalman");
+  if(Config.IsAvailable("KF_KalmanRef"))
+    KF_KalmanRef = Config.Get<bool>("KF_KalmanRef");
+  if(Config.IsAvailable("KF_KalmanSqrt"))
+    KF_KalmanSqrt = Config.Get<bool>("KF_KalmanSqrt");
+  if(Config.IsAvailable("KF_DAF"))
+    KF_DAF = Config.Get<bool>("KF_DAF");
+  if(Config.IsAvailable("KF_DAFRef"))
+    KF_DAF = Config.Get<bool>("KF_DAFRef");
+
+  if(Config.IsAvailable("KF_NbCentralCut"))
+    KF_NbCentralCut= Config.Get<int>("KF_NbCentralCut");
+  if(Config.IsAvailable("KF_NbMiniFiberCut"))
+    KF_NbMiniFiberCut= Config.Get<int>("KF_NbMiniFiberCut");
+
+
   Nb_CPU = Config.Get<int>("Nb_CPU");
   Nb_Fraction = Config.Get<int>("Nb_Fraction");
   NEvent = Config.Get<int>("Nb_Event");

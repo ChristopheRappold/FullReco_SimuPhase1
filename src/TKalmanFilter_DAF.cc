@@ -49,21 +49,32 @@ TKalmanFilter_DAF::TKalmanFilter_DAF(const THyphiAttributes& attribut)
 
   // const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPrediction;
   // const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToPrediction;
-  const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPredictionWire;
+  //const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPredictionWire;
   // const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToPredictionWire;
 
-  // Fitter_rescue = new genfit::DAF();
+  //Fitter_rescue = new genfit::DAF();
   Fitter_rescue = new genfit::KalmanFitterRefTrack(nIter, dPVal); //,1e4);
-  Fitter_rescue->setMultipleMeasurementHandling(mmHandling);
+  //Fitter_rescue->setMultipleMeasurementHandling(mmHandling);
   Fitter_rescue->setMinIterations(2);
   Fitter_rescue->setMaxIterations(nIter);
 
-  // Fitter = new genfit::KalmanFitter(10, dPVal, 1e3, false); //
-  // Fitter = new genfit::DAF();
-  Fitter = new genfit::KalmanFitterRefTrack(nIter, dPVal); //,1e4);
-  Fitter->setMultipleMeasurementHandling(mmHandling);
+  Fitter = nullptr;
+
+  if(att.KF_Kalman || att.KF_KalmanSqrt)
+    Fitter = new genfit::KalmanFitter(10, dPVal, 1e3, att.KF_KalmanSqrt); //
+  else if(att.KF_KalmanRef)
+    Fitter = new genfit::KalmanFitterRefTrack(nIter, dPVal); //,1e4);
+  //Fitter->setMultipleMeasurementHandling(mmHandling);
+  else if(att.KF_DAF || att.KF_DAFRef)
+    Fitter = new genfit::DAF(att.KF_DAFRef);
+  else
+    att._logger->error("E> Kalman Filter fitter not set correctly !");
+
   Fitter->setMinIterations(3);
   Fitter->setMaxIterations(nIter);
+
+  Nb_CentralCut = att.KF_NbCentralCut;
+  Nb_MiniFiberCut = att.KF_NbMiniFiberCut;
 
   // Fitter->setDebugLvl(10);
 
@@ -418,12 +429,20 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                 idPDG = it_trackInfo.second[i].pdg;
                 break;
               }
-          std::string namePDG = std::to_string(idPDG);
+	  if(idPDG==0)
+	    {
+	      att._logger->debug("!> less than 3 measurements: PDG = 0 : id# {}" , id_track);
+	      for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+		{
+		  att._logger->debug("!> #{} : {} {} {}",i,it_trackInfo.second[i].pdg, it_trackInfo.second[i].mass);
+		}
+	    }
+		std::string namePDG = std::to_string(idPDG);
           LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(), "Less3Mes", 1.);
 
           continue;
         }
-      if(n_Central < 4)
+      if(n_Central < Nb_CentralCut)
         {
           LocalHisto.h_stats->Fill("Less3MesCentral", 1);
           int idPDG = 0;
@@ -437,9 +456,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(), "Less3MesCentral", 1.);
           continue;
         }
-      if(n_MiniFiber<2)
+      if(n_MiniFiber< Nb_MiniFiberCut)
       {
-        LocalHisto.h_stats->Fill("LessMiniFiber",1);
+        LocalHisto.h_stats->Fill("LessMiniFiber<4",1);
         int idPDG = 0;
         for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
           if(it_trackInfo.second[i].pdg!=idPDG)
