@@ -24,6 +24,7 @@
 #include "AbsMeasurement.h"
 #include "PlanarMeasurement.h"
 #include "WireMeasurement.h"
+#include "WirePointMeasurement.h"
 //#include "WireMeasurementNew.h"
 #include "ProlateSpacepointMeasurement.h"
 #include "SpacepointMeasurement.h"
@@ -545,6 +546,7 @@ public:
   std::unordered_map<int, ResSolDAF> DAF_results;
 
   std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > ListHits;
+  std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > OldListHits;
 
   // std::vector< std::vector<std::vector<genfit::AbsMeasurement*> > > ListHitsDAF;
   // std::vector< std::vector<std::vector<std::vector<int> > > > ListIdHitsDAFCluster;

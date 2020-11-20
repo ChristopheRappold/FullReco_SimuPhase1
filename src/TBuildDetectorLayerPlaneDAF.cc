@@ -275,6 +275,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   OutTree->Nmc = OutTree->fMC_Particle->GetEntries();
 
   RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
+  RecoEvent.OldListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
 
   auto fillOutHit = [](TClonesArray* out, const TG4Sol_Hit& hit, int PDG, double charge, const TVectorD& hitR, int LayerID, int HitID) {
     TMcHit* OutHit = dynamic_cast<TMcHit*>(out->ConstructedAt(out->GetEntries()));
