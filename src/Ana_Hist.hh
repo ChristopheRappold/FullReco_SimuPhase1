@@ -78,8 +78,13 @@ class Ana_Hist
   Hist<TH2F> h_SolenoidGeo[3];
   std::vector<TEllipse*> geoSolenoid;
 
+  Hist<TH1F> h_RZStats;
   Hist<TH2F> h_RZ;
+  Hist<TH1F> h_RZfit_mom;
+  Hist<TH2F> h_RZfit_Chi2;
+  Hist<TH2F> h_XYfit_miniF;
   Hist<TH2F> h_MDC_Z_residu;
+  Hist<TH2F> h_MDC_R_residu;
   // K>lman:
   Hist<TH1F> h_pv;
   Hist<TH1F> h_chi2;

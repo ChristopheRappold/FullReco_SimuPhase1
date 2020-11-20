@@ -295,7 +295,22 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_SolenoidGeo[1].store);
       h_SolenoidGeo[2].emplace_back(new TH2F("h_SolenoidGeoBack" ,"h_SolenoidGeoBack" ,500,-50,50,500,-50,50));
       HistReg.emplace_back(&h_SolenoidGeo[2].store);
-      
+
+      h_RZStats.emplace_back(new TH1F("h_RZStats","h_RZStats",10,0,10));
+      HistReg.emplace_back(&h_RZStats.store);
+      h_RZ.emplace_back(new TH2F("h_RZ","h_RZ",500.,0.,2.,200,0,0.5));
+      HistReg.emplace_back(&h_RZ.store);
+      h_RZfit_mom.emplace_back(new TH1F("h_RZfit_mom","h_RZfit_mom",500,-1.,1.));
+      HistReg.emplace_back(&h_RZfit_mom.store);
+      h_RZfit_Chi2.emplace_back(new TH2F("h_RZfit_Chi2","h_RZfit_Chi2",10,0,10,500,0,50.));
+      HistReg.emplace_back(&h_RZfit_Chi2.store);
+      h_XYfit_miniF.emplace_back(new TH2F("h_XYfit_miniF","h_XYfit_miniF",15,0,15,1000,-5.,5.));
+      HistReg.emplace_back(&h_XYfit_miniF.store);
+      h_MDC_Z_residu.emplace_back(new TH2F("h_MDC_Z_residu","h_MDC_Z_residu",1000.,-10.,10.,20,0,20));
+      HistReg.emplace_back(&h_MDC_Z_residu.store);
+      h_MDC_R_residu.emplace_back(new TH2F("h_MDC_R_residu","h_MDC_R_residu",1000.,-10.,10.,20,0,20));
+      HistReg.emplace_back(&h_MDC_R_residu.store);
+
       HistRegisteredByDir.insert(std::make_pair("Finder", std::make_tuple(HistReg,0)));
 
       geoSolenoid.resize(17, nullptr);
@@ -322,69 +337,69 @@ int Ana_Hist::Write(TFile* out_file)
   out_file->cd();
 
   auto f_DiffResolution = [](TH2F* h)
-			  {
-			    TGraphErrors* g_resMean = nullptr;
-			    TGraphErrors* g_resStd = nullptr;
+  {
+    TGraphErrors* g_resMean = nullptr;
+    TGraphErrors* g_resStd = nullptr;
 
-			    if(h==nullptr)
-			      return std::make_tuple(g_resMean, g_resStd);
+    if(h==nullptr)
+      return std::make_tuple(g_resMean, g_resStd);
 			    
-			    TString nameHist1(h->GetName());
-			    nameHist1 += "Mean";
-			    TString nameHist2(h->GetName());
-			    nameHist2 += "Std";
+    TString nameHist1(h->GetName());
+    nameHist1 += "Mean";
+    TString nameHist2(h->GetName());
+    nameHist2 += "Std";
 
-			    g_resMean = new TGraphErrors;
-			    g_resStd = new TGraphErrors;
+    g_resMean = new TGraphErrors;
+    g_resStd = new TGraphErrors;
 
-			    g_resMean->SetNameTitle(nameHist1,nameHist1);
-			    g_resStd->SetNameTitle(nameHist2,nameHist2);
+    g_resMean->SetNameTitle(nameHist1,nameHist1);
+    g_resStd->SetNameTitle(nameHist2,nameHist2);
 
-			    for(int i_x = 1; i_x <= h->GetNbinsX(); ++i_x)
-			      {
-				TString nameH("Proj_");
-				nameH+=i_x;
-			        TH1D* h_temp = h->ProjectionY(nameH,i_x,i_x);
+    for(int i_x = 1; i_x <= h->GetNbinsX(); ++i_x)
+      {
+	TString nameH("Proj_");
+	nameH+=i_x;
+	TH1D* h_temp = h->ProjectionY(nameH,i_x,i_x);
 
-				double mean = h_temp->GetMean();
-				double mean_err = h_temp->GetMeanError();
-				double rms = h_temp->GetRMS();
-				double rms_err = h_temp->GetRMSError();
+	double mean = h_temp->GetMean();
+	double mean_err = h_temp->GetMeanError();
+	double rms = h_temp->GetRMS();
+	double rms_err = h_temp->GetRMSError();
 
-				double x_c = h->GetXaxis()->GetBinCenter(i_x);
-				double x_w = h->GetXaxis()->GetBinWidth(i_x);
+	double x_c = h->GetXaxis()->GetBinCenter(i_x);
+	double x_w = h->GetXaxis()->GetBinWidth(i_x);
 				
-				h_temp->GetXaxis()->SetRangeUser(mean-rms*2.,mean+rms*2.);
+	h_temp->GetXaxis()->SetRangeUser(mean-rms*2.,mean+rms*2.);
 				
-				mean = h_temp->GetMean();
-				mean_err = h_temp->GetMeanError();
-				rms = h_temp->GetRMS();
-				rms_err = h_temp->GetRMSError();
+	mean = h_temp->GetMean();
+	mean_err = h_temp->GetMeanError();
+	rms = h_temp->GetRMS();
+	rms_err = h_temp->GetRMSError();
 				
-				g_resMean->SetPoint(i_x-1, x_c, mean);
-				g_resMean->SetPointError(i_x-1,x_w*0.5,mean_err);
-				g_resStd->SetPoint(i_x-1, x_c, rms);
-				g_resStd->SetPointError(i_x-1,x_w*0.5,rms_err);
-			      }
-			    return std::make_tuple(g_resMean, g_resStd);			    
-			  };
+	g_resMean->SetPoint(i_x-1, x_c, mean);
+	g_resMean->SetPointError(i_x-1,x_w*0.5,mean_err);
+	g_resStd->SetPoint(i_x-1, x_c, rms);
+	g_resStd->SetPointError(i_x-1,x_w*0.5,rms_err);
+      }
+    return std::make_tuple(g_resMean, g_resStd);
+  };
 
   auto Merging = [&](std::vector<TH1*>& vecH) {
-    _logger->debug("merging function: {}",vecH.size());
+    //_logger->debug("merging function: {}",vecH.size());
     if(vecH.size()==1)
       return;
 
-    _logger->debug("histo vec {}, name {}, n {}",vecH.size(),vecH[0]->GetName(), vecH[0]->GetEntries());
+    //_logger->debug("histo vec {}, name {}, n {}",vecH.size(),vecH[0]->GetName(), vecH[0]->GetEntries());
     TList list;
     for(size_t i = 1; i<vecH.size();++i)
       {
-	_logger->debug("#{}, {}",i,vecH[i]->GetEntries());
+	//_logger->debug("#{}, {}",i,vecH[i]->GetEntries());
 	list.Add(vecH[i]);
       }
     
     vecH[0]->Reset();
     vecH[0]->Merge(&list);
-    _logger->debug("merged :",vecH[0]->GetEntries());
+    //_logger->debug("merged :",vecH[0]->GetEntries());
     return;
   };
   
@@ -393,10 +408,10 @@ int Ana_Hist::Write(TFile* out_file)
     {
       TDirectory* temp_dir = GetDir(out_file, it.first);
       temp_dir->cd();
-      _logger->debug("dir: {}",it.first);
+      //_logger->debug("dir: {}",it.first);
       for(auto& it_hist : std::get<0>(it.second))
         {
-	  _logger->debug("vecHist[0]: {} / {} {}",it_hist->size(),fmt::ptr(it_hist->at(0)),it_hist->at(0)->GetName()); 
+	  //_logger->debug("vecHist[0]: {} / {} {}",it_hist->size(),fmt::ptr(it_hist->at(0)),it_hist->at(0)->GetName());
 	  Merging(*it_hist);
 	  it_hist->at(0)->Write();
 	  if(std::get<1>(it.second)==1)
@@ -417,7 +432,8 @@ int Ana_Hist::Write(TFile* out_file)
   TDirectory* temp_dir = GetDir(out_file, "Finder");
   temp_dir->cd();
   for(auto el : geoSolenoid)
-    el->Write();
+    if(el!=nullptr)
+      el->Write();
   
   return 0;
 }
