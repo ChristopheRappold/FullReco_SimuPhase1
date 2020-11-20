@@ -448,7 +448,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             break;
           }
         std::string namePDG = std::to_string(idPDG);
-        LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(),"LessMiniFiber",1.);
+        LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(),"LessMiniFiber<4",1.);
         continue;
       }
 
@@ -586,9 +586,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       double seed_Mom_Mag = init_p.Mag();
       if(TMath::Abs(seed_Mom_Mag) < 1e-9)
         {
-#ifdef DEBUG_KALMAN
+	  //#ifdef DEBUG_KALMAN
           att._logger->debug("!> Seed Momemtum with TVector3 is zero ! correcting ");
-#endif
+	  //#endif
           auto tempLastHit = id_dets.crbegin();
           ++tempLastHit;
           auto lastHit2 = tempLastHit;
@@ -678,7 +678,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       init_p.Print();
 #endif
 
-      const double mom_res = .00500;
+      const double mom_res = .0500;
       double new_P         = gRandom->Gaus(seed_Mom_Mag, mom_res * seed_Mom_Mag);
       TVector3 seed_p(init_p);
       seed_p.SetMag(new_P);
@@ -922,18 +922,23 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
               {
                 unsigned int np = fitTrack->getNumPointsWithMeasurement();
-                // std::cout << "np : " << np << std::endl;
+                //std::cout << "np : " << np << std::endl;
                 for(int i = 0; i < np; ++i)
-                  {
-                    genfit::TrackPoint* tp_tmp    = fitTrack->getPointWithMeasurementAndFitterInfo(i, REP);
-                    genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(REP));
+		  {
+                    genfit::TrackPoint* tp_tmp    = fitTrack->getPointWithMeasurementAndFitterInfo(i);//, REP);
+		    if(tp_tmp==nullptr)
+		      {
+			att._logger->debug("E> TrackPoint null ! #i {} / {}\n",i,np);
+			continue;
+		      }
+		    genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(REP));
                     std::vector<double> weights   = kfi->getWeights();
                     int id_det                    = tp_tmp->getRawMeasurement(0)->getDetId();
                     // std::cout << "id_det : " << id_det << std::endl;
                     if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
                       {
                         double res_min = 9999999;
-                        for(int j = 0; j < 2; ++j)
+                        for(int j = 0; j < weights.size() ; ++j)
                           {
                             const genfit::MeasurementOnPlane& residual = kfi->getResidual(j, false, true);
                             const TVectorD& resid(residual.getState());
