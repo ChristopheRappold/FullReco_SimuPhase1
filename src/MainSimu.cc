@@ -191,7 +191,7 @@ int main(int argc, char** argv)
 #endif
 
       Long64_t total_nentries_over_files = InTree->GetEntries();
-      int max_loop                       = 1;
+      //int max_loop                       = 1;
 
       Start_event[0] = Start;
       Stop_event[0]  = Nb_event != -1 ? Nb_event + Start : total_nentries_over_files;
@@ -220,7 +220,7 @@ int main(int argc, char** argv)
       Ana_Hist ListHisto(true /*DAF_Debug*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Hough*/,
                          true);
 
-      ListHisto.DebugHists();
+      //ListHisto.DebugHists();
       if(MT == false && ZMQ == false)
 	{
 	  FullRecoTask ReconstructionTask(config, InputPar);
@@ -308,7 +308,7 @@ int main(int argc, char** argv)
       Anatree->Write();
       ConsoleLogger->info("Tree Filled");
       // ListHisto.Write(offile_hist);
-      ListHisto.DebugHists();
+      //ListHisto.DebugHists();
       ListHisto.Write(offile);
 
       ConsoleLogger->info("Histo Written");
@@ -362,6 +362,17 @@ int main(int argc, char** argv)
       delete Anaevent;
       Anaevent = NULL;
       ConsoleLogger->info("Anaevent deleted");
+
+      for(auto tempBranch : AllHits)
+	if(tempBranch != nullptr)
+	  {
+	    tempBranch->Delete();
+	    tempBranch = nullptr;
+	  }
+      ConsoleLogger->info("AllHits deleted");
+
+      additionalPDG->Delete();
+      additionalPDG = nullptr;
 
 #ifdef TREEPERF
       delete ps;
