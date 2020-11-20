@@ -746,7 +746,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             TVector3 x2(hit.HitPosX, hit.HitPosY, hit.HitPosZ);
             TVector3 p2(hit.MomX, hit.MomY, hit.MomZ);
             double dl = CloseDist(x1, x2, p1, p2);
-            dl = gRandom->Gaus(dl, resolution_dl);
+
             double dlmax = 0;
             switch(TypeDet - G4Sol::MG01 + 1){
               case 1:
@@ -776,8 +776,17 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                 att._logger->warn("Error in WireMeasurement !");
                 break;
             }
-            if(dl<0)     dl = 0;
-            if(dl>dlmax) dl = dlmax;
+	    double temp_dl = gRandom->Gaus(dl, resolution_dl);
+	    bool doneRand = false;
+	    while(doneRand)
+	      {
+		if(temp_dl < 0 || temp_dl > dlmax)
+		  temp_dl = gRandom->Gaus(dl, resolution_dl);
+		else
+		  doneRand = true;
+	      }
+            //if(temp_dl<0)     dl = 0;
+            //if(temp_dl>dlmax) dl = dlmax;
 
             TVectorD hitCoords(7);
             hitCoords(0) = edge1[0];
@@ -786,7 +795,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             hitCoords(3) = edge2[0];
             hitCoords(4) = edge2[1];
             hitCoords(5) = edge2[2];
-            hitCoords(6) = dl;
+            hitCoords(6) = temp_dl;
             TMatrixDSym hitCov(7);
             hitCov(6, 6) = resolution_dl * resolution_dl;
             measurement = std::make_unique<genfit::WireMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
