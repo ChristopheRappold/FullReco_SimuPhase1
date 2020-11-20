@@ -526,12 +526,12 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               case G4Sol::FiberD5_x :  volumeName = "FiberD5_log_x"; break;
               case G4Sol::FiberD5_u :  volumeName = "FiberD5_log_u"; break;
               case G4Sol::FiberD5_v :  volumeName = "FiberD5_log_v"; break;
-              case G4Sol::MiniFiberD1_x1 :  volumeName = "MiniFiberD1_log_x1"; break;
-              case G4Sol::MiniFiberD1_u1 :  volumeName = "MiniFiberD1_log_u1"; break;
-              case G4Sol::MiniFiberD1_v1 :  volumeName = "MiniFiberD1_log_v1"; break;
-              case G4Sol::MiniFiberD1_x2 :  volumeName = "MiniFiberD1_log_x2"; break;
-              case G4Sol::MiniFiberD1_u2 :  volumeName = "MiniFiberD1_log_u2"; break;
-              case G4Sol::MiniFiberD1_v2 :  volumeName = "MiniFiberD1_log_v2"; break;
+              // case G4Sol::MiniFiberD1_x1 :  volumeName = "MiniFiberD1_log_x1"; break;
+              // case G4Sol::MiniFiberD1_u1 :  volumeName = "MiniFiberD1_log_u1"; break;
+              // case G4Sol::MiniFiberD1_v1 :  volumeName = "MiniFiberD1_log_v1"; break;
+              // case G4Sol::MiniFiberD1_x2 :  volumeName = "MiniFiberD1_log_x2"; break;
+              // case G4Sol::MiniFiberD1_u2 :  volumeName = "MiniFiberD1_log_u2"; break;
+              // case G4Sol::MiniFiberD1_v2 :  volumeName = "MiniFiberD1_log_v2"; break;
               default : std::cerr << "something wrong" << std::endl; break;
             }
             string motherName;
@@ -551,12 +551,12 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               case G4Sol::FiberD5_x :  motherName = "FiberD5_log_0"; break;
               case G4Sol::FiberD5_u :  motherName = "FiberD5_log_0"; break;
               case G4Sol::FiberD5_v :  motherName = "FiberD5_log_0"; break;
-              case G4Sol::MiniFiberD1_x1 :  motherName = "MiniFiberD1_log_0"; break;
-              case G4Sol::MiniFiberD1_u1 :  motherName = "MiniFiberD1_log_0"; break;
-              case G4Sol::MiniFiberD1_v1 :  motherName = "MiniFiberD1_log_0"; break;
-              case G4Sol::MiniFiberD1_x2 :  motherName = "MiniFiberD1_log_0"; break;
-              case G4Sol::MiniFiberD1_u2 :  motherName = "MiniFiberD1_log_0"; break;
-              case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
+              // case G4Sol::MiniFiberD1_x1 :  motherName = "MiniFiberD1_log_0"; break;
+              // case G4Sol::MiniFiberD1_u1 :  motherName = "MiniFiberD1_log_0"; break;
+              // case G4Sol::MiniFiberD1_v1 :  motherName = "MiniFiberD1_log_0"; break;
+              // case G4Sol::MiniFiberD1_x2 :  motherName = "MiniFiberD1_log_0"; break;
+              // case G4Sol::MiniFiberD1_u2 :  motherName = "MiniFiberD1_log_0"; break;
+              // case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
               default : std::cerr << "something wrong" << std::endl; break;
             }
 #ifdef DEBUG_BUILD
@@ -604,7 +604,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
 
             TVectorD hitCoords(1);
-            hitCoords(0) = u.Dot(TVector3(shift[0],0,0));
+            hitCoords(0) = u.Dot(TVector3(shift[0],shift[1],0));
             TMatrixDSym hitCov(1);
             hitCov(0, 0) = resolution_fiber * resolution_fiber;
             measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);

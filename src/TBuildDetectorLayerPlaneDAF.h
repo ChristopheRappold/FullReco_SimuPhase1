@@ -98,12 +98,12 @@ constexpr bool IsFiberU(G4Sol::SolDet idDet) {
   case G4Sol::FiberD5_x : ;
   case G4Sol::FiberD5_u : ;
   case G4Sol::FiberD5_v : ;
-  case G4Sol::MiniFiberD1_x1 : ;
-  case G4Sol::MiniFiberD1_u1 : ;
-  case G4Sol::MiniFiberD1_v1 : ;
-  case G4Sol::MiniFiberD1_x2 : ;
-  case G4Sol::MiniFiberD1_u2 : ;
-  case G4Sol::MiniFiberD1_v2 : ;
+  // case G4Sol::MiniFiberD1_x1 : ;
+  // case G4Sol::MiniFiberD1_u1 : ;
+  // case G4Sol::MiniFiberD1_v1 : ;
+  // case G4Sol::MiniFiberD1_x2 : ;
+  // case G4Sol::MiniFiberD1_u2 : ;
+  // case G4Sol::MiniFiberD1_v2 : ;
     return true;
   default:
     return false;
