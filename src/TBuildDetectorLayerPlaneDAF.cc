@@ -213,6 +213,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
     if(event.BeamNames[index] == nameMother)
       continue;
+    if(event.BeamCharges[index] == 0)
+      continue;
     int TrackID = event.BeamTrackID[index];
 
     std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
@@ -826,6 +828,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           tempTrack->second[TypeDet] = indexHit;
 
           int pdg_code = pid_fromName(hit.Pname);
+	  if(pdg_code == 0)
+	    att._logger->debug("!> Builder : pdg_code = 0 ! {}", hit.Pname);
 
           auto tempTrackSim = RecoEvent.TrackDAFSim.find(TrackID);
           tempTrackSim->second[TypeDet].layerID = LayerID;
