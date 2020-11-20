@@ -335,6 +335,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
       const int id_track = it_trackInfo.first;
       auto it_ListHits   = RecoEvent.TrackDAF.find(id_track);
+      auto it_ListHitsSim = RecoEvent.TrackDAFSim.find(id_track);
 
       auto getZpos = [](genfit::AbsMeasurement* m) {
         TVectorD& HitrawRef = m->getRawHitCoords();
@@ -526,7 +527,9 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       // std::cout << "tempHitrawRef 0 : " << tempHitrawRef[0] << std::endl;
       // std::cout << "tempHitrawRef 1 : " << tempHitrawRef[1] << std::endl;
       // const TVector3 firstPos(tempHitrawRef[0], tempHitrawRef[1], getZpos(tempHit));
-      const TVector3 firstPos(0, 0, 0);
+      //const TVector3 firstPos(0, 0, 0);
+      auto it_hitFirstSim = it_ListHitsSim->second[id_firstDet];
+      const TVector3 firstPos(it_hitFirstSim.hitX, it_hitFirstSim.hitY, it_hitFirstSim.hitZ);
 
       const int PDG     = static_cast<int>(track_state.pdg);
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(PDG);
@@ -689,17 +692,16 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       // std::cout<<" -- :"<<id_lastDet<<" "<<std::get<2>(*lastHit)<<" \n";
 
       // Forward
-      genfit::AbsMeasurement* FirstHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
-      TVectorD& HitrawRef              = FirstHit->getRawHitCoords();
+      //genfit::AbsMeasurement* FirstHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
+      //TVectorD& HitrawRef              = FirstHit->getRawHitCoords();
 
-      // genfit::AbsMeasurement* FirstHit = RecoEvent.ListHits[id_lastDet][std::get<2>(*lastHit)].get();
-      // TVectorD& HitrawRef = FirstHit->getRawHitCoords();
+      //const TVector3 init_point(HitrawRef[0], HitrawRef[1], getZpos(FirstHit));
 
-      // const TVector3 init_point(HitrawRef[0], HitrawRef[1], getZpos(FirstHit));
       double init_x = gRandom->Gaus(it_init->second.posX, 1.0);
       double init_y = gRandom->Gaus(it_init->second.posY, 1.0);
       double init_z = gRandom->Gaus(it_init->second.posZ, 3.0);
       const TVector3 init_point(init_x, init_y, init_z);
+      //const TVector3 init_point(it_hitFirstSim.hitX, it_hitFirstSim.hitY, it_hitFirstSim.hitZ);
 
       // TVector3 init_point(track_state[9],track_state[10],track_state[11]);
 
@@ -1076,7 +1078,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               // double Path_lengthMean = Path_length + Path_lengthB;
               double Path_lengthMean = Path_length;
               // Path_lengthMean/=2.;
-              Path_lengthMean += firstPos.Mag(); // DistToTR1;
+              Path_lengthMean += TMath::Sqrt(TMath::Sq(firstPos.X()-att.Target_PositionX)+TMath::Sq(firstPos.Y()-att.Target_PositionY)+TMath::Sq(firstPos.Z()-att.Target_PositionZ)); // DistToTR1;
                                                  // 	  if(ndf==1)
                                                  // 	    Path_lengthMean=Path_length;
 
