@@ -306,10 +306,14 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_RZfit_Chi2.store);
       h_XYfit_miniF.emplace_back(new TH2F("h_XYfit_miniF","h_XYfit_miniF",15,0,15,1000,-5.,5.));
       HistReg.emplace_back(&h_XYfit_miniF.store);
-      h_MDC_Z_residu.emplace_back(new TH2F("h_MDC_Z_residu","h_MDC_Z_residu",1000.,-10.,10.,20,0,20));
+      h_MDC_Z_residu.emplace_back(new TH2F("h_MDC_Z_residu","h_MDC_Z_residu",1000.,-10.,10.,40,0,40));
       HistReg.emplace_back(&h_MDC_Z_residu.store);
-      h_MDC_R_residu.emplace_back(new TH2F("h_MDC_R_residu","h_MDC_R_residu",1000.,-10.,10.,20,0,20));
+      h_MDC_R_residu.emplace_back(new TH2F("h_MDC_R_residu","h_MDC_R_residu",1000.,-10.,10.,40,0,40));
       HistReg.emplace_back(&h_MDC_R_residu.store);
+      h_MDC_Z_pull.emplace_back(new TH2F("h_MDC_Z_pull","h_MDC_Z_pull",1000.,-5.,5.,40,0,40));
+      HistReg.emplace_back(&h_MDC_Z_pull.store);
+      h_MDC_R_pull.emplace_back(new TH2F("h_MDC_R_pull","h_MDC_R_pull",1000.,-5.,5.,40,0,40));
+      HistReg.emplace_back(&h_MDC_R_pull.store);
 
       HistRegisteredByDir.insert(std::make_pair("Finder", std::make_tuple(HistReg,0)));
 
