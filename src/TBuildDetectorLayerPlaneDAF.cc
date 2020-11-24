@@ -461,7 +461,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           if(IsPSCE(TypeDet))
           {
 #ifdef DEBUG_BUILD
-            std::cout << "PSB"  << std::endl;
+            std::cout << "PSC"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
             std::cout << "LayerID : " << LayerID << std::endl;
@@ -500,6 +500,58 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             TMatrixDSym hitCov(2);
             hitCov(0, 0) = resolution_psce * resolution_psce;
             hitCov(1, 1) = resolution_psce_z * resolution_psce_z;
+            measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+            dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+
+            hitCoordsTree(0) = hit.HitPosX;
+            hitCoordsTree(1) = hit.HitPosY;
+            hitCoordsTree(2) = hit.HitPosZ;
+          }
+          else if(IsPSBE(TypeDet))
+	    {
+#ifdef DEBUG_BUILD
+            std::cout << "PSBE"  << std::endl;
+            std::string tmpName = orderDetName.find(TypeDet)->second;
+            std::cout << "name : " << tmpName << std::endl;
+            std::cout << "LayerID : " << LayerID << std::endl;
+            std::cout << "HitPosX : " << hit.HitPosX << std::endl;
+            std::cout << "HitPosY : " << hit.HitPosY << std::endl;
+            std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
+            gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->Print();
+            gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->GetMatrix()->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
+            gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
+            gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
+            gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
+#endif
+            TGeoMatrix *g1 = gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->GetMatrix(); // PSCE
+            TGeoMatrix *g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSB_1")->GetMatrix(); // PSB box
+            TGeoMatrix *g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNNER
+            TGeoMatrix *g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
+            TGeoHMatrix H1(*g1), H1_1(*g1_1), H2(*g2), H3(*g3);
+            TGeoHMatrix H = H1_1 * H1;
+            H = H2 * H;
+            H = H3 * H;
+#ifdef DEBUG_BUILD
+            H.Print();
+#endif
+
+            double *shift =  H.GetTranslation();
+	    double *local_rot = H.GetRotationMatrix();
+	    TVector3 vInit (22.,0.,0.);
+	    TVector3 v (vInit[0]*local_rot[0], vInit[1]*local_rot[3], vInit[2]*local_rot[6]);
+	    v = v.Unit();
+	    TVector3 u (v.Y(), -v.X(),0.);
+	    TVector3 o(shift[0], shift[1], shift[2]);
+            genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+
+            TVectorD hitCoords(2);
+            hitCoords(0) = gRandom->Uniform(-3.75,3.75); // phi ! be aware ! not u-dim
+            hitCoords(1) = gRandom->Uniform(6., 22.); // r -> v dir
+
+            TMatrixDSym hitCov(2);
+            hitCov(0, 0) = TMath::Sq(2*hitCoords(1)*TMath::Sin(3.75*TMath::DegToRad()))/12.;
+            hitCov(1, 1) = TMath::Sq(22.-6.)/12.;
             measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
             dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 

@@ -64,6 +64,14 @@ constexpr bool IsPSCE(G4Sol::SolDet idDet) {
     return false;
   };
 };
+constexpr bool IsPSBE(G4Sol::SolDet idDet) {
+  switch (idDet) {
+  case G4Sol::PSBE :
+    return true;
+  default:
+    return false;
+  };
+};
 constexpr bool IsFiberU_Vetoed(G4Sol::SolDet idDet) {
   switch (idDet) {
   case G4Sol::FiberD1_x : ;
