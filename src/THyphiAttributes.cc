@@ -83,6 +83,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   if(Config.IsAvailable("RZ_MDCBiasCorr"))
     RZ_MDCBiasCorr = Config.Get<bool>("RZ_MDCBiasCorr");
 
+  _logger->info("RZ Settting: Prolate? {} Wire2? {} BiasCorr? {} ChangeMiniF? {}",RZ_MDCProlate, RZ_MDCWire2, RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
+
   if(Config.IsAvailable("KF_Kalman"))
     KF_Kalman = Config.Get<bool>("KF_Kalman");
   if(Config.IsAvailable("KF_KalmanRef"))
@@ -92,13 +94,16 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   if(Config.IsAvailable("KF_DAF"))
     KF_DAF = Config.Get<bool>("KF_DAF");
   if(Config.IsAvailable("KF_DAFRef"))
-    KF_DAF = Config.Get<bool>("KF_DAFRef");
+    KF_DAFRef = Config.Get<bool>("KF_DAFRef");
+
+  _logger->info("KF Setting: Kalman? {} / KalmanRef? {} / KalmanSqrt? {} / DAF? {} / DAFRef? {}",KF_Kalman, KF_KalmanRef, KF_KalmanSqrt, KF_DAF, KF_DAFRef);
 
   if(Config.IsAvailable("KF_NbCentralCut"))
     KF_NbCentralCut= Config.Get<int>("KF_NbCentralCut");
   if(Config.IsAvailable("KF_NbMiniFiberCut"))
     KF_NbMiniFiberCut= Config.Get<int>("KF_NbMiniFiberCut");
 
+  _logger->info("KF_RejectionCut : Central < : {} MiniFiber < : {}",KF_NbCentralCut, KF_NbMiniFiberCut);
 
   Nb_CPU = Config.Get<int>("Nb_CPU");
   Nb_Fraction = Config.Get<int>("Nb_Fraction");
