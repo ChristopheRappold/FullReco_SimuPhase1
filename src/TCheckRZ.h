@@ -68,10 +68,10 @@ class TCheckRZ final :  public TDataProcessInterface
   void SelectHists() final;
 
   int FinderTrack(FullRecoEvent& RecoEvent);
-  //                                 1  2  3  4  5   6     7     8      9      10      11      12      13     14     15     16     17
+  //                                          1   2   3   4   5   6     7     8      9      10      11      12      13     14     15     16     17
   //std::vector<double> correctBias = {0.,0.,0.,0.,0.,-1.4,-0.017,-0.8852,0.069,-0.6512,0.3412,-0.1674,0.4637,0.1999,0.5361,0.3536,0.5534};
-  std::vector<double> correctBias = {0.,0.,0.,0.,0.,-1.56,-0.1328,-1.013,-0.0871,-0.8192,0.1454,-0.3784,0.2278,-0.05195,0.2511,0.04834,0.2226};
-  //std::vector<double> correctBias = {0.,0.,0., 0.,0.,0., 0.,0.,0., 0.,0.,0., 0.,0.,0., 0.,0.};
+  std::vector<double> correctBiasPSCE     = { 0. ,0. ,0. ,0. ,0.,-1.56,-0.1328,-1.013,-0.0871,-0.8192,0.1454,-0.3784,0.2278,-0.05195,0.2511,0.04834,0.2226};
+  std::vector<double> correctBiasPSEndCap = {-4.,-5.,-2.,-2.,-.7,0.26, 0.05,0.21,0.13, 0.5,0.05,0.13, 0.,-1.,-0.1, -1.1,-0.9};
 
   bool ChangeMiniFiber = false;
   int MDCWireType = 0; // 0 -> MeasurementWire2 / 1 -> ProlateSpace
@@ -86,6 +86,8 @@ class TCheckRZ final :  public TDataProcessInterface
     TH2F* h_XYfit_miniF;
     TH2F* h_MDC_Z_residu;
     TH2F* h_MDC_R_residu;
+    TH2F* h_MDC_Z_pull;
+    TH2F* h_MDC_R_pull;
 
   };
   LocalHists LocalHisto;

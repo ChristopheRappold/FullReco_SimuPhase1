@@ -27,9 +27,16 @@ TCheckRZ::TCheckRZ(const THyphiAttributes& attribut) : TDataProcessInterface("Ch
   MDCBiasCorr = att.RZ_MDCBiasCorr;
   if(MDCBiasCorr == false)
     {
-      for(auto id : correctBias)
+      for(auto id : correctBiasPSCE)
+        id = 0.;
+      for(auto id : correctBiasPSEndCap)
         id = 0.;
     }
+  // else
+  //   {
+  //     for(size_t i=0;i<correctBiasPSCE.size();++i)
+  //       correctBiasPSEndCap[i] += correctBiasPSCE[i];
+  //   }
 }
 
 TCheckRZ::~TCheckRZ() {}
@@ -58,6 +65,8 @@ void TCheckRZ::SelectHists()
   LocalHisto.h_RZfit_Chi2   = AnaHisto->CloneAndRegister(AnaHisto->h_RZfit_Chi2);
   LocalHisto.h_MDC_Z_residu = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_Z_residu);
   LocalHisto.h_MDC_R_residu = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_R_residu);
+  LocalHisto.h_MDC_Z_pull   = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_Z_pull);
+  LocalHisto.h_MDC_R_pull   = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_R_pull);
 }
 
 int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
@@ -88,6 +97,8 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
 
   for(size_t id_det = G4Sol::MiniFiberD1_x1; id_det <= G4Sol::MiniFiberD1_v2; ++id_det)
     RecoEvent.OldListHits[id_det].resize(RecoEvent.ListHits[id_det].size());
+
+  RecoEvent.OldListHits[G4Sol::PSBE].resize(RecoEvent.ListHits[G4Sol::PSBE].size());
 
   int ntrack = -1;
   for(auto it_trackInfo : RecoEvent.TrackInfo)
@@ -130,6 +141,10 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
       std::set<std::tuple<int, int> > id_dets_MiniFiber;
       std::set<std::tuple<int, int> > id_dets_PSCE;
 
+      G4Sol::SolDet LastFrontWall = att.Wasa_Side == 0 ? G4Sol::PSFE : G4Sol::PSBE;
+
+      std::set<std::tuple<int, int> > id_dets_PSEndcap;
+
       int n_Central   = 0;
       int n_MiniFiber = 0;
       // std::cout << "it_ListHits->second.size : " << it_ListHits->second.size() << std::endl;
@@ -150,6 +165,9 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
             }
           if(id_det == G4Sol::PSCE)
             id_dets_PSCE.insert(std::make_tuple(id_det, id_hit));
+          if(id_det == LastFrontWall)
+            id_dets_PSEndcap.insert(std::make_tuple(id_det, id_hit));
+
 #ifdef DEBUG_CHECKRZ
           att._logger->debug("id_det / id_hit: {} / {}", id_det, id_hit);
 #endif
@@ -176,7 +194,7 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
       };
 
       // G4Sol::SolDet LastFrontWall = att.Wasa_Side == 0 ? G4Sol::PSFE : G4Sol::PSBE;
-      G4Sol::SolDet lastValidHit = f_LastHitIsValid(it_ListHits, {G4Sol::PSCE});
+      G4Sol::SolDet lastValidHit = f_LastHitIsValid(it_ListHits, {G4Sol::PSCE, LastFrontWall});
 
       if(lastValidHit == G4Sol::SIZEOF_G4SOLDETTYPE)
         {
@@ -192,7 +210,7 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
       LocalHisto.h_RZStats->Fill("Good", 1.);
 
       // auto firstHit   = id_dets.cbegin();
-      //int id_firstDet = std::get<1>(*firstHit);
+      // int id_firstDet = std::get<1>(*firstHit);
 
       // const InfoPar track_state(it_trackInfo.second[id_firstDet]);
 
@@ -204,7 +222,7 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
       // const int id_lastDet = std::get<1>(*lastHit); // std::get<0>(lastHit);
 
       std::vector<std::array<double, 3> > Hits_MiniFiber_RZ;
-      std::vector<std::array<double, 3> > Hits_PSCE_RZ;
+      std::vector<std::array<double, 3> > Hits_PSLast_RZ;
 
       auto f_extractHitLabs = [](const auto& id_dets, auto& Hits_RZ, const auto& ListHits) {
         for(auto ids : id_dets)
@@ -319,6 +337,75 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
             // tempLabPos.Perp()*TMath::Sqrt(currentLabCov(0,0)*tempLabPos.X()*tempLabPos.X()+currentLabCov(1,1)*tempLabPos.Y()*tempLabPos.Y()+2.*currentLabCov(0,1)*tempLabPos.X()*tempLabPos.Y())};
 
             Hits_RZ.emplace_back(temp_hitRZ);
+          }
+      };
+
+      auto f_extractPSEndcapHit = [](const auto& id_dets, auto& Hits_RZ, const auto& ListHits, const auto& TrackFiber,
+                                     const auto& TrackFiberCov) {
+        for(auto ids : id_dets)
+          {
+            int id_det = std::get<0>(ids);
+            int id_hit = std::get<1>(ids);
+
+            genfit::PlanarMeasurement* currentHit =
+                dynamic_cast<genfit::PlanarMeasurement*>(ListHits[id_det][id_hit].get());
+            auto dummyState   = genfit::StateOnPlane();
+            auto currentPlane = currentHit->constructPlane(genfit::StateOnPlane());
+            auto HitCoord     = currentHit->getRawHitCoords();
+            auto HitCov       = currentHit->getRawHitCov();
+            // std::cout<<"f_extractHitLabs :\n";
+
+            TVector3 Orig = currentPlane->getO();
+
+            auto f_sqrtMat = [](const TMatrixD& m) -> TMatrixD {
+              TVectorD EigVal;
+              TMatrixD EigVec = m.EigenVectors(EigVal);
+              TMatrixD m_new(m.GetNrows(), m.GetNcols());
+              m_new.UnitMatrix();
+              for(int i = 0; i < m.GetNrows(); ++i)
+                m_new(i, i) = EigVal(i);
+              m_new.Sqrt();
+              auto EigVecInv = EigVec;
+              EigVecInv.Invert();
+              auto mSqrt = EigVec * m_new * EigVecInv;
+              return mSqrt;
+            };
+
+            TMatrixD SubCovSqrt = f_sqrtMat(TrackFiberCov);
+            SubCovSqrt *= TMath::Sqrt(2 * TrackFiberCov.GetNcols());
+            std::vector<double> Rs;
+            double mean_R = 0.;
+            for(size_t iC = 0; iC < SubCovSqrt.GetNcols(); ++iC)
+              {
+                double XPosAtZ = (TrackFiber(2) + SubCovSqrt(2, iC)) * Orig.Z() + (TrackFiber(0) + SubCovSqrt(0, iC));
+                double YPosAtZ = (TrackFiber(3) + SubCovSqrt(3, iC)) * Orig.Z() + (TrackFiber(1) + SubCovSqrt(1, iC));
+
+                double RPosAtZ = TMath::Sqrt(XPosAtZ * XPosAtZ + YPosAtZ * YPosAtZ);
+
+                Rs.emplace_back(RPosAtZ);
+                mean_R += RPosAtZ;
+
+                double XPosAtZ2 = (TrackFiber(2) - SubCovSqrt(2, iC)) * Orig.Z() + (TrackFiber(0) - SubCovSqrt(0, iC));
+                double YPosAtZ2 = (TrackFiber(3) - SubCovSqrt(3, iC)) * Orig.Z() + (TrackFiber(1) - SubCovSqrt(1, iC));
+
+                double RPosAtZ2 = TMath::Sqrt(XPosAtZ2 * XPosAtZ2 + YPosAtZ2 * YPosAtZ2);
+                Rs.emplace_back(RPosAtZ2);
+                mean_R += RPosAtZ2;
+              }
+
+            mean_R /= (double)Rs.size();
+            double cov_R = 0.;
+            for(auto R : Rs)
+              cov_R += TMath::Sq(R - mean_R);
+            cov_R /= (double)Rs.size();
+
+            std::array<double, 3> temp_hitRZ = {mean_R, Orig.Z(), TMath::Sqrt(cov_R)};
+
+            Hits_RZ.emplace_back(temp_hitRZ);
+
+            // double CovRAtZ = TMath::Sqrt(miniTrackCov(0,0)*XPosAtZ*XPosAtZ/RPosAtZ/RPosAtZ +
+            // miniTrackCov(1,1)*YPosAtZ*YPosAtZ/RPosAtZ/RPosAtZ+2.*miniTrackCov(1,0)*XPosAtZ*YPosAtZ/RPosAtZ/RPosAtZ);
+            // double CovRAtZ = TMath::Sqrt(miniTrackCov(0, 0) + miniTrackCov(1, 1) + 2. * miniTrackCov(1, 0));
           }
       };
 
@@ -532,8 +619,16 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
       att._logger->debug("Ref zy-plane : y = alpha_y*z+y0 : alpha_y={} y0={}", miniTrackRef(3), miniTrackRef(1));
 
 #endif
-
-      f_extractHitLabs(id_dets_PSCE, Hits_PSCE_RZ, RecoEvent.ListHits);
+      int EndCap_Case = 0;
+      if(id_dets_PSCE.size() != 0)
+        f_extractHitLabs(id_dets_PSCE, Hits_PSLast_RZ, RecoEvent.ListHits);
+      else if(id_dets_PSEndcap.size() != 0)
+        {
+          f_extractPSEndcapHit(id_dets_PSEndcap, Hits_PSLast_RZ, RecoEvent.ListHits, miniTrack, miniTrackCov);
+          EndCap_Case = 1;
+        }
+      else
+        att._logger->error("E> CheckRZ does not have PSCE and LastPSE even after selection !");
 
 #ifdef DEBUG_CHECKRZ
       att._logger->debug("Extracted Hit in Lab ref");
@@ -551,8 +646,8 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
                              TMath::Sqrt(it_hit.hitX * it_hit.hitX + it_hit.hitY * it_hit.hitY), it_hit.hitZ);
         }
 
-      att._logger->debug("PSCE {}", Hits_PSCE_RZ.size());
-      for(auto tempHit : Hits_PSCE_RZ)
+      att._logger->debug("PSCE {}", Hits_PSLast_RZ.size());
+      for(auto tempHit : Hits_PSLast_RZ)
         att._logger->debug(" [Z, R, errR] : {}, {}, {}", tempHit[1], tempHit[0], tempHit[2]);
 
       for(auto ids : id_dets_PSCE)
@@ -581,7 +676,7 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
           // miniTrackCov(1,1)*YPosAtZ*YPosAtZ/RPosAtZ/RPosAtZ+2.*miniTrackCov(1,0)*XPosAtZ*YPosAtZ/RPosAtZ/RPosAtZ);
           double CovRAtZ = TMath::Sqrt(miniTrackCov(0, 0) + miniTrackCov(1, 1) + 2. * miniTrackCov(1, 0));
 
-          Hits_MiniFiber_RZ.emplace_back(std::array<double, 3>{RPosAtZ, it_hit.hitZ, TMath::Sqrt(CovRAtZ)});
+          Hits_MiniFiber_RZ.emplace_back(std::array<double, 3>{RPosAtZ, it_hit.hitZ, CovRAtZ});
 
           momAtFiber.SetXYZ(it_hit.momX, it_hit.momY, it_hit.momZ);
         }
@@ -590,15 +685,15 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
       //   {
       //     int id_det = std::get<0>(ids);
       //     auto it_hit = it_ListHitsSim->second[id_det];
-      //     Hits_PSCE_RZ.emplace_back(std::array<double,3>{TMath::Sqrt(it_hit.hitX*it_hit.hitX+it_hit.hitY*it_hit.hitY),
+      //     Hits_PSLast_RZ.emplace_back(std::array<double,3>{TMath::Sqrt(it_hit.hitX*it_hit.hitX+it_hit.hitY*it_hit.hitY),
       //     it_hit.hitZ,0.1});
       //   }
 
       TLinearFitter fitRZ(2, "pol1");
       fitRZ.StoreData(false);
-      std::unique_ptr<Double_t[]> Zall(new Double_t[Hits_MiniFiber_RZ.size() + Hits_PSCE_RZ.size()]);
-      std::unique_ptr<Double_t[]> Rall(new Double_t[Hits_MiniFiber_RZ.size() + Hits_PSCE_RZ.size()]);
-      std::unique_ptr<Double_t[]> Eall(new Double_t[Hits_MiniFiber_RZ.size() + Hits_PSCE_RZ.size()]);
+      std::unique_ptr<Double_t[]> Zall(new Double_t[Hits_MiniFiber_RZ.size() + Hits_PSLast_RZ.size()]);
+      std::unique_ptr<Double_t[]> Rall(new Double_t[Hits_MiniFiber_RZ.size() + Hits_PSLast_RZ.size()]);
+      std::unique_ptr<Double_t[]> Eall(new Double_t[Hits_MiniFiber_RZ.size() + Hits_PSLast_RZ.size()]);
 
       for(size_t iD = 0; iD < Hits_MiniFiber_RZ.size(); ++iD)
         {
@@ -607,15 +702,22 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
           LocalHisto.h_RZ->Fill(Hits_MiniFiber_RZ[iD][1] / 100., Hits_MiniFiber_RZ[iD][0] / 100.);
           Eall.get()[iD] = Hits_MiniFiber_RZ[iD][2];
         }
-      for(size_t iD = 0; iD < Hits_PSCE_RZ.size(); ++iD)
+      for(size_t iD = 0; iD < Hits_PSLast_RZ.size(); ++iD)
         {
-          Rall.get()[iD + Hits_MiniFiber_RZ.size()] = Hits_PSCE_RZ[iD][0];
-          Zall.get()[iD + Hits_MiniFiber_RZ.size()] = Hits_PSCE_RZ[iD][1];
-          LocalHisto.h_RZ->Fill(Hits_PSCE_RZ[iD][1] / 100., Hits_PSCE_RZ[iD][0] / 100.);
-          Eall.get()[iD + Hits_MiniFiber_RZ.size()] = Hits_PSCE_RZ[iD][2];
+          Rall.get()[iD + Hits_MiniFiber_RZ.size()] = Hits_PSLast_RZ[iD][0];
+          Zall.get()[iD + Hits_MiniFiber_RZ.size()] = Hits_PSLast_RZ[iD][1];
+          LocalHisto.h_RZ->Fill(Hits_PSLast_RZ[iD][1] / 100., Hits_PSLast_RZ[iD][0] / 100.);
+          Eall.get()[iD + Hits_MiniFiber_RZ.size()] = Hits_PSLast_RZ[iD][2];
+          if(EndCap_Case == 1)
+            {
+              if(5.8 <= Hits_PSLast_RZ[iD][0] && Hits_PSLast_RZ[iD][0] <= 22.2)
+                LocalHisto.h_RZStats->Fill("PSEndCap_InsideBar", 1);
+              else
+                LocalHisto.h_RZStats->Fill("PSEndCap_OutsideBar", 1);
+            }
         }
 
-      fitRZ.AssignData(Hits_MiniFiber_RZ.size() + Hits_PSCE_RZ.size(), 1, Zall.get(), Rall.get(), Eall.get());
+      fitRZ.AssignData(Hits_MiniFiber_RZ.size() + Hits_PSLast_RZ.size(), 1, Zall.get(), Rall.get(), Eall.get());
       int statusFitRZ = fitRZ.Eval();
       if(statusFitRZ == 1)
         {
@@ -748,11 +850,23 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
                              Mean_CrossRZ[1], Mean_CrossRZ[0]);
 #endif
 
-          LocalHisto.h_MDC_Z_residu->Fill(((Mean_CrossRZ[0] - correctBias[id_det - G4Sol::MG01]) - HitSimulated.hitZ),
-                                          id_det - G4Sol::MG01, 1.);
+          LocalHisto.h_MDC_Z_residu->Fill(
+              ((Mean_CrossRZ[0] -
+                (correctBiasPSCE[id_det - G4Sol::MG01] + EndCap_Case * correctBiasPSEndCap[id_det - G4Sol::MG01])) -
+               HitSimulated.hitZ),
+              id_det - G4Sol::MG01 + EndCap_Case * 20, 1.);
           LocalHisto.h_MDC_R_residu->Fill((Mean_CrossRZ[1] - TMath::Sqrt(HitSimulated.hitX * HitSimulated.hitX +
                                                                          HitSimulated.hitY * HitSimulated.hitY)),
-                                          id_det - G4Sol::MG01, 1.);
+                                          id_det - G4Sol::MG01 + EndCap_Case * 20, 1.);
+          LocalHisto.h_MDC_Z_pull->Fill(((Mean_CrossRZ[0] - (correctBiasPSCE[id_det - G4Sol::MG01] +
+                                                             EndCap_Case * correctBiasPSEndCap[id_det - G4Sol::MG01])) -
+                                         HitSimulated.hitZ) /
+                                            TMath::Sqrt(Cov_CrossRZ(0, 0)),
+                                        id_det - G4Sol::MG01 + EndCap_Case * 20, 1.);
+          LocalHisto.h_MDC_R_pull->Fill((Mean_CrossRZ[1] - TMath::Sqrt(HitSimulated.hitX * HitSimulated.hitX +
+                                                                       HitSimulated.hitY * HitSimulated.hitY)) /
+                                            TMath::Sqrt(Cov_CrossRZ(1, 1)),
+                                        id_det - G4Sol::MG01 + EndCap_Case * 20, 1.);
 
           if(MDCWireType == 0)
             {
@@ -764,7 +878,8 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
               TVectorD hitCoordsNew(3);
               hitCoordsNew(0) = PosAtWire.X();
               hitCoordsNew(1) = PosAtWire.Y();
-              hitCoordsNew(2) = Mean_CrossRZ[0] - correctBias[id_det - G4Sol::MG01];
+              hitCoordsNew(2) = Mean_CrossRZ[0] - (correctBiasPSCE[id_det - G4Sol::MG01] +
+                                                   EndCap_Case * correctBiasPSEndCap[id_det - G4Sol::MG01]);
 
               TMatrixDSym hitCovNew(3);
               hitCovNew.Zero();
@@ -813,15 +928,15 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
                   att._logger->error("E> DriftDist {} ", DriftDist);
                   int indexE = 0;
                   att._logger->error("E> MiniFiber size {}, PSCE size {}", Hits_MiniFiber_RZ.size(),
-                                     Hits_PSCE_RZ.size());
+                                     Hits_PSLast_RZ.size());
                   for(auto vecF : Hits_MiniFiber_RZ)
                     {
                       att._logger->error("MiniFiber : {}, {}, {}", vecF[0], vecF[1], vecF[2]);
                     }
-                  for(size_t iD = 0; iD < Hits_PSCE_RZ.size(); ++iD)
+                  for(size_t iD = 0; iD < Hits_PSLast_RZ.size(); ++iD)
                     {
-                      att._logger->error("PSCE id#{} : {}, {}, {}", iD, Hits_PSCE_RZ[iD][0], Hits_PSCE_RZ[iD][1],
-                                         Hits_PSCE_RZ[iD][2]);
+                      att._logger->error("PSCE id#{} : {}, {}, {}", iD, Hits_PSLast_RZ[iD][0], Hits_PSLast_RZ[iD][1],
+                                         Hits_PSLast_RZ[iD][2]);
                     }
 
                   att._logger->error("Fit in RZ from Fiber & PSCE");
@@ -902,7 +1017,10 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
               hitCoordsNew(4) = wire_side2[1];
               hitCoordsNew(5) = wire_side2[2];
               hitCoordsNew(6) = DriftDist;
-              hitCoordsNew(7) = Mean_CrossRZ[0] - correctBias[id_det - G4Sol::MG01] - wire_side1[2];
+              hitCoordsNew(7) =
+                  Mean_CrossRZ[0] -
+                  (correctBiasPSCE[id_det - G4Sol::MG01] + EndCap_Case * correctBiasPSEndCap[id_det - G4Sol::MG01]) -
+                  wire_side1[2];
               TMatrixDSym hitCovNew(8);
               hitCovNew(6, 6) = ErrDriftDist;
               hitCovNew(7, 7) = Cov_CrossRZ(0, 0);
@@ -915,6 +1033,49 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
         }
 
       LocalHisto.h_RZStats->Fill("RZ_Succeed", 1.);
+
+      if(id_dets_PSEndcap.size() != 0)
+        {
+          int index_RZ = 0;
+          for(auto ids : id_dets_PSEndcap)
+            {
+              int id_det = std::get<0>(ids);
+              int id_hit = std::get<1>(ids);
+
+              genfit::PlanarMeasurement* currentHit =
+                  dynamic_cast<genfit::PlanarMeasurement*>(RecoEvent.ListHits[id_det][id_hit].get());
+              auto dummyState   = genfit::StateOnPlane();
+              auto currentPlane = currentHit->constructPlane(genfit::StateOnPlane());
+              auto HitCoord     = currentHit->getRawHitCoords();
+              auto HitCov       = currentHit->getRawHitCov();
+              // std::cout<<"f_extractHitLabs :\n";
+
+              const double phi_max = 7.5 * TMath::DegToRad();
+              TVector3 Orig        = currentPlane->getO();
+              TVector3 V           = currentPlane->getV();
+              TVector3 U           = currentPlane->getU();
+              genfit::SharedPlanePtr planeNew(new genfit::DetPlane(Orig, U, V));
+
+              double R_est    = Hits_PSLast_RZ[index_RZ][0];
+              double RCov_est = Hits_PSLast_RZ[index_RZ][2];
+              double Phi_Uni  = HitCoord(0) * TMath::DegToRad();
+
+              TVectorD hitCoordsNew(2);
+              hitCoordsNew(0) = R_est * TMath::Sin(Phi_Uni); // u
+              hitCoordsNew(1) = R_est;                       // v
+
+              TMatrixDSym hitCovNew(2);
+              hitCovNew.Zero();
+              hitCovNew(0, 0) = TMath::Sq(2 * R_est * TMath::Sin(0.5 * phi_max)) / 12.;
+              hitCovNew(1, 1) = RCov_est;
+
+              RecoEvent.OldListHits[id_det][id_hit] = std::make_unique<genfit::PlanarMeasurement>(
+                  hitCoordsNew, hitCovNew, currentHit->getDetId(), currentHit->getHitId(), nullptr);
+              dynamic_cast<genfit::PlanarMeasurement*>(RecoEvent.OldListHits[id_det][id_hit].get())->setPlane(planeNew);
+
+              RecoEvent.OldListHits[id_det][id_hit].swap(RecoEvent.ListHits[id_det][id_hit]);
+            }
+        }
 
       if(ChangeMiniFiber)
         {
