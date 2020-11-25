@@ -517,14 +517,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             std::cout << "HitPosX : " << hit.HitPosX << std::endl;
             std::cout << "HitPosY : " << hit.HitPosY << std::endl;
             std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
-            gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->Print();
-            gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->GetMatrix()->Print();
+            gGeoManager->GetVolume("PSB")->GetNode(LayerID)->Print();
+            gGeoManager->GetVolume("PSB")->GetNode(LayerID)->GetMatrix()->Print();
             gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
             gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
             gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
             gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
 #endif
-            TGeoMatrix *g1 = gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->GetMatrix(); // PSCE
+            TGeoMatrix *g1 = gGeoManager->GetVolume("PSB")->GetNode(LayerID)->GetMatrix(); // PSCE
             TGeoMatrix *g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSB_1")->GetMatrix(); // PSB box
             TGeoMatrix *g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNNER
             TGeoMatrix *g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
