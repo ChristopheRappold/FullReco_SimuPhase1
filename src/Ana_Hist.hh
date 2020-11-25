@@ -85,6 +85,8 @@ class Ana_Hist
   Hist<TH2F> h_XYfit_miniF;
   Hist<TH2F> h_MDC_Z_residu;
   Hist<TH2F> h_MDC_R_residu;
+  Hist<TH2F> h_MDC_Z_pull;
+  Hist<TH2F> h_MDC_R_pull;
   // K>lman:
   Hist<TH1F> h_pv;
   Hist<TH1F> h_chi2;
