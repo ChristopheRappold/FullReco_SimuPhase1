@@ -47,6 +47,10 @@ enum SolDet : int
   InSi3 /*3*/,
   TR1 /*4*/,
   TR2 /*5*/,
+  Si1x,
+  Si1y,
+  Si2x,
+  Si2y,
   MiniFiberD1_x1, /*6*/
   MiniFiberD1_u1,
   MiniFiberD1_v1,
@@ -117,6 +121,7 @@ enum SolDet : int
 
 constexpr auto nameLiteralDet = {
     "InSi0"         ,          "InSi1",          "InSi2",          "InSi3",            "TR1",            "TR2",
+    "Si1x"          ,           "Si1y",           "Si2x",           "Si2y",
     "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1", "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
     "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
     "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      "FiberD4_x",      "FiberD4_u",      "FiberD4_v",
@@ -161,6 +166,7 @@ template <typename T, T... args>
 constexpr T EnumIter<T, args...>::values[];
   using SolDetIter = struct EnumIter<
     SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/,
+    Si1x, Si1y, Si2x, Si2y,
     MiniFiberD1_x1, MiniFiberD1_x1,MiniFiberD1_v1,
     MiniFiberD1_x2, MiniFiberD1_x2,MiniFiberD1_v2,
     FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x,

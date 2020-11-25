@@ -40,6 +40,10 @@ constexpr bool IsPlanar(G4Sol::SolDet idDet) {
   case G4Sol::InSi3 : ;
   case G4Sol::TR1 : ;
   case G4Sol::TR2 : ;
+  case G4Sol::Si1x: ;
+  case G4Sol::Si1y: ;
+  case G4Sol::Si2x: ;
+  case G4Sol::Si2y: ;
   case G4Sol::PSFE : ;
   case G4Sol::PSBE : ;
   case G4Sol::TrFwd0 : ;
