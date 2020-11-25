@@ -4,7 +4,7 @@
 
 
 #include "TBayesFinder.h"
-#include "TFinderCM.h"
+//#include "TFinderCM.h"
 #include "TKalmanFilter_DAF.h"
 #include "CheckField.h"
 #include "TCheckRZ.h"
