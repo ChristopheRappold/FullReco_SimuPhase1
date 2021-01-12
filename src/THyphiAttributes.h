@@ -80,6 +80,13 @@ class THyphiAttributes
   bool Debug_DAF;
   bool DoNoMaterial;
 
+  bool Task_CheckField;
+  bool Task_FlatMCOutputML;
+  bool Task_BayesFinder;
+  bool Task_FinderCM;
+  bool Task_CheckRZ;
+  bool Task_KalmanDAF;
+
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
   bool RZ_MDCWire2;
@@ -93,6 +100,8 @@ class THyphiAttributes
 
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
+
+  std::string FlatML_namefile;
 
   FairField* Field;
 

@@ -45,6 +45,13 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   Debug_DAF = false;
   DoNoMaterial = false;
 
+  Task_CheckField = true;
+  Task_FlatMCOutputML = false;
+  Task_BayesFinder = false;
+  Task_FinderCM = false;
+  Task_CheckRZ = true;
+  Task_KalmanDAF = true;
+
   RZ_ChangeMiniFiber = false;
   RZ_MDCProlate = true;
   RZ_MDCWire2 = false;
@@ -73,6 +80,19 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
     Debug_DAF = true;
   if(Config.IsAvailable( "NoMaterial"))
     DoNoMaterial = true;
+
+  if(Config.IsAvailable("Task_CheckField"))
+    Task_CheckField = Config.Get<bool>("Task_CheckField");
+  if(Config.IsAvailable("Task_FlatMCOutputML"))
+    Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");;
+  if(Config.IsAvailable("Task_BayesFinder"))
+    Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
+  if(Config.IsAvailable("Task_FinderCM"))
+    Task_FinderCM = Config.Get<bool>("Task_FinderCM");
+  if(Config.IsAvailable("Task_CheckRZ"))
+    Task_CheckRZ = Config.Get<bool>("Task_CheckRZ");
+  if(Config.IsAvailable("Task_KalmanDAF"))
+    Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
 
   if(Config.IsAvailable("RZ_ChangeMiniFiber"))
     RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
@@ -104,6 +124,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
     KF_NbMiniFiberCut= Config.Get<int>("KF_NbMiniFiberCut");
 
   _logger->info("KF_RejectionCut : Central < : {} MiniFiber < : {}",KF_NbCentralCut, KF_NbMiniFiberCut);
+
+  FlatML_namefile = Config.IsAvailable("FlatML_Namefile") ? Config.Get<std::string>("FlatML_Namefile") : "ML_MCOutput.root";
 
   Nb_CPU = Config.Get<int>("Nb_CPU");
   Nb_Fraction = Config.Get<int>("Nb_Fraction");

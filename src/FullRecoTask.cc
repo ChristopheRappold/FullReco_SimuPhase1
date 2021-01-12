@@ -35,11 +35,21 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
   //det_build = new TTestUnits(Attributes,"layerDAF");
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
-  list_processMC.emplace_back(new CheckField(Attributes));
-  //list_processMC.emplace_back(new TBayesFinder(Attributes));
-  list_processMC.emplace_back(new TCheckRZ(Attributes));
-  //list_processMC.emplace_back(new TFinderCM(Attributes));
-  list_processMC.emplace_back(new TKalmanFilter_DAF(Attributes) );
+  if(Attributes.Task_CheckField)
+    list_processMC.emplace_back(new CheckField(Attributes));
+  if(Attributes.Task_FlatMCOutputML)
+    list_processMC.emplace_back(new TFlatMCOutputML(Attributes));
+  if(Attributes.Task_BayesFinder)
+    list_processMC.emplace_back(new TBayesFinder(Attributes));
+  //if(Attributes.Task_FinderCM)
+  //  list_processMC.emplace_back(new TFinderCM(Attributes));
+  if(Attributes.Task_CheckRZ)
+    list_processMC.emplace_back(new TCheckRZ(Attributes));
+  if(Attributes.Task_KalmanDAF)
+    list_processMC.emplace_back(new TKalmanFilter_DAF(Attributes));
+
+  for(auto task : list_processMC)
+    Attributes._logger->info(" -> Task : {}",task->signature);
 
 }
 
