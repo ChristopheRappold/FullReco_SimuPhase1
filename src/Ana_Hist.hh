@@ -40,6 +40,7 @@ struct Hist {
   std::vector<TH1*> store;
   void emplace_back(T* _h) {
     h = _h;
+    h->SetDirectory(0);
     store.emplace_back(_h);
   }
 };
@@ -154,6 +155,7 @@ class Ana_Hist
   T* CloneAndRegister(Hist<T>& hist) {
     T* newHist = dynamic_cast<T*>(hist.h->Clone());
     hist.store.emplace_back(newHist);
+    newHist->SetDirectory(0);
     return newHist;
   }
 

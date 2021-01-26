@@ -403,7 +403,7 @@ int Ana_Hist::Write(TFile* out_file)
     
     vecH[0]->Reset();
     vecH[0]->Merge(&list);
-    //_logger->debug("merged :",vecH[0]->GetEntries());
+    //_logger->debug("merged : {}",vecH[0]->GetEntries());
     return;
   };
   

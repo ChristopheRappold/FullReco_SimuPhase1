@@ -142,6 +142,7 @@ int main(int argc, char** argv)
       TBranch* branch = Anatree->Branch("MCAnaEventG4Sol", &Anaevent, 32000, 2);
       branch->SetAutoDelete(kFALSE);
       Anatree->BranchRef();
+      Anatree->SetDirectory(offile);
 
       long long int nb = 0;
 
