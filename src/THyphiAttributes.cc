@@ -125,7 +125,14 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
 
   _logger->info("KF_RejectionCut : Central < : {} MiniFiber < : {}",KF_NbCentralCut, KF_NbMiniFiberCut);
 
-  FlatML_namefile = Config.IsAvailable("FlatML_Namefile") ? Config.Get<std::string>("FlatML_Namefile") : "ML_MCOutput.root";
+  std::string temp_name_out = config.Get<std::string>("Output_Namefile");
+  std::string temp_file_base_name = temp_name_out.substr(0,temp_name_out.find_last_of('.'));
+
+  std::string MLSuffix = Config.IsAvailable("FlatML_Suffix") ? Config.Get<std::string>("FlatML_Suffix") : "ML_MCOutput";
+
+  temp_file_base_name += MLSuffix;
+  temp_file_base_name += ".root";
+  FlatML_namefile = temp_file_base_name;
 
   Nb_CPU = Config.Get<int>("Nb_CPU");
   Nb_Fraction = Config.Get<int>("Nb_Fraction");
