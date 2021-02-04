@@ -22,6 +22,10 @@ TFlatMCOutputML::TFlatMCOutputML(const THyphiAttributes& attribut)
   t_flat->Branch("b_y", &b_y, "b_y/F");
   t_flat->Branch("b_z", &b_z, "b_z/F");
 
+  t_flat->Branch("b_pt",&b_pt,"b_pt/F");
+  t_flat->Branch("b_phi",&b_phi,"b_phi/F");
+  t_flat->Branch("b_theta",&b_theta,"b_theta/F");
+
   t_flat->Branch("a_tx", &a_tx, "a_tx/F");
   t_flat->Branch("a_ty", &a_ty, "a_ty/F");
   t_flat->Branch("a_vx", &a_vx, "a_vx/F");
@@ -30,6 +34,10 @@ TFlatMCOutputML::TFlatMCOutputML(const THyphiAttributes& attribut)
   t_flat->Branch("a_x", &a_x, "a_x/F");
   t_flat->Branch("a_y", &a_y, "a_y/F");
   t_flat->Branch("a_z", &a_z, "a_z/F");
+
+  t_flat->Branch("a_pt",&a_pt,"a_pt/F");
+  t_flat->Branch("a_phi",&a_phi,"a_phi/F");
+  t_flat->Branch("a_theta",&a_theta,"a_theta/F");
 
   t_flat->Branch("poq", &poq, "poq/F");
   t_flat->Branch("qop", &qop, "qop/F");
@@ -204,6 +212,10 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       b_vy = it_hitBeforeSim.momY / temp_mom;
       b_vz = it_hitBeforeSim.momZ / temp_mom;
 
+      b_pt = TMath::Sqrt(TMath::Sq(it_hitBeforeSim.momX) + TMath::Sq(it_hitBeforeSim.momY));
+      b_phi = TMath::ATan2(it_hitBeforeSim.momY,it_hitBeforeSim.momX);
+      b_theta = TMath::ASin(a_pt/temp_mom);
+
       b_x = it_hitBeforeSim.hitX;
       b_y = it_hitBeforeSim.hitY;
       b_z = it_hitBeforeSim.hitZ;
@@ -228,6 +240,10 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       a_vx = it_hitAfterSim.momX / temp_mom;
       a_vy = it_hitAfterSim.momY / temp_mom;
       a_vz = it_hitAfterSim.momZ / temp_mom;
+
+      a_pt = TMath::Sqrt(TMath::Sq(it_hitAfterSim.momX) + TMath::Sq(it_hitAfterSim.momY));
+      a_phi = TMath::ATan2(it_hitAfterSim.momY,it_hitAfterSim.momX);
+      a_theta = TMath::ASin(a_pt/temp_mom);
 
       a_x = it_hitAfterSim.hitX;
       a_y = it_hitAfterSim.hitY;
@@ -262,8 +278,8 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       att._logger->debug("filled");
 #endif
 
-      b_tx = 0., b_ty = 0., b_vx = 0., b_vy = 0., b_vz = 0., b_x = 0., b_y = 0., b_z = 0.;
-      a_tx = 0., a_ty = 0., a_vx = 0., a_vy = 0., a_vz = 0., a_x = 0., a_y = 0., a_z = 0.;
+      b_tx = 0., b_ty = 0., b_vx = 0., b_vy = 0., b_vz = 0., b_x = 0., b_y = 0., b_z = 0., b_pt = 0., b_phi = 0., b_theta = 0.;
+      a_tx = 0., a_ty = 0., a_vx = 0., a_vy = 0., a_vz = 0., a_x = 0., a_y = 0., a_z = 0., a_pt = 0., a_phi = 0., a_theta = 0.;
       poq = 0., qop = 0.;
       q         = 0.;
       tof       = 0.;

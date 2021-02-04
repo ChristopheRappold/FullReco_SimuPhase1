@@ -37,8 +37,8 @@ private:
   TFile* f_flat = nullptr;
   TTree* t_flat = nullptr;
 
-  Float_t b_tx, b_ty, b_vx, b_vy, b_vz, b_x, b_y, b_z;
-  Float_t a_tx, a_ty, a_vx, a_vy, a_vz, a_x, a_y, a_z;
+  Float_t b_tx, b_ty, b_vx, b_vy, b_vz, b_x, b_y, b_z, b_pt, b_phi, b_theta;
+  Float_t a_tx, a_ty, a_vx, a_vy, a_vz, a_x, a_y, a_z, a_pt, a_phi, a_theta;
   Float_t poq, qop;
   Float_t q;
   Float_t tof;
