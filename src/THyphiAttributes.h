@@ -102,6 +102,7 @@ class THyphiAttributes
   int KF_NbMiniFiberCut;
 
   std::string FlatML_namefile;
+  std::string DataML_Out;
 
   FairField* Field;
 
