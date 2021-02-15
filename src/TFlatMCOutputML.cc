@@ -6,88 +6,47 @@
 #include <tuple>
 
 //#define DEBUG_FLATTEN
-
-TFlatMCOutputML::TFlatMCOutputML(const THyphiAttributes& attribut)
-    : TDataProcessInterface("FlatMCOutputML"), att(attribut), namefileFlat(att.FlatML_namefile)
+DataML_momfit::DataML_momfit(const THyphiAttributes& att_, TTree* outT) : DataML(att_, outT)
 {
-  f_flat = new TFile(namefileFlat, "RECREATE");
-  t_flat = new TTree("MCDataML_Tree", "Flat data event tracks");
+  out_tree->Branch("b_tx", &b_tx, "b_tx/F");
+  out_tree->Branch("b_ty", &b_ty, "b_ty/F");
+  out_tree->Branch("b_vx", &b_vx, "b_vx/F");
+  out_tree->Branch("b_vy", &b_vy, "b_vy/F");
+  out_tree->Branch("b_vz", &b_vz, "b_vz/F");
+  out_tree->Branch("b_x", &b_x, "b_x/F");
+  out_tree->Branch("b_y", &b_y, "b_y/F");
+  out_tree->Branch("b_z", &b_z, "b_z/F");
 
-  t_flat->Branch("b_tx", &b_tx, "b_tx/F");
-  t_flat->Branch("b_ty", &b_ty, "b_ty/F");
-  t_flat->Branch("b_vx", &b_vx, "b_vx/F");
-  t_flat->Branch("b_vy", &b_vy, "b_vy/F");
-  t_flat->Branch("b_vz", &b_vz, "b_vz/F");
-  t_flat->Branch("b_x", &b_x, "b_x/F");
-  t_flat->Branch("b_y", &b_y, "b_y/F");
-  t_flat->Branch("b_z", &b_z, "b_z/F");
+  out_tree->Branch("b_pt", &b_pt, "b_pt/F");
+  out_tree->Branch("b_phi", &b_phi, "b_phi/F");
+  out_tree->Branch("b_theta", &b_theta, "b_theta/F");
 
-  t_flat->Branch("b_pt",&b_pt,"b_pt/F");
-  t_flat->Branch("b_phi",&b_phi,"b_phi/F");
-  t_flat->Branch("b_theta",&b_theta,"b_theta/F");
+  out_tree->Branch("a_tx", &a_tx, "a_tx/F");
+  out_tree->Branch("a_ty", &a_ty, "a_ty/F");
+  out_tree->Branch("a_vx", &a_vx, "a_vx/F");
+  out_tree->Branch("a_vy", &a_vy, "a_vy/F");
+  out_tree->Branch("a_vz", &a_vz, "a_vz/F");
+  out_tree->Branch("a_x", &a_x, "a_x/F");
+  out_tree->Branch("a_y", &a_y, "a_y/F");
+  out_tree->Branch("a_z", &a_z, "a_z/F");
 
-  t_flat->Branch("a_tx", &a_tx, "a_tx/F");
-  t_flat->Branch("a_ty", &a_ty, "a_ty/F");
-  t_flat->Branch("a_vx", &a_vx, "a_vx/F");
-  t_flat->Branch("a_vy", &a_vy, "a_vy/F");
-  t_flat->Branch("a_vz", &a_vz, "a_vz/F");
-  t_flat->Branch("a_x", &a_x, "a_x/F");
-  t_flat->Branch("a_y", &a_y, "a_y/F");
-  t_flat->Branch("a_z", &a_z, "a_z/F");
+  out_tree->Branch("a_pt", &a_pt, "a_pt/F");
+  out_tree->Branch("a_phi", &a_phi, "a_phi/F");
+  out_tree->Branch("a_theta", &a_theta, "a_theta/F");
 
-  t_flat->Branch("a_pt",&a_pt,"a_pt/F");
-  t_flat->Branch("a_phi",&a_phi,"a_phi/F");
-  t_flat->Branch("a_theta",&a_theta,"a_theta/F");
-
-  t_flat->Branch("poq", &poq, "poq/F");
-  t_flat->Branch("qop", &qop, "qop/F");
-  t_flat->Branch("tof", &tof, "tof/F");
-  t_flat->Branch("psce_psbe", &psce_psbe, "psce_psbe/I");
-  t_flat->Branch("psb_z", &psb_z, "psb_z/F");
-  t_flat->Branch("q", &q, "q/F");
-  t_flat->Branch("pdg", &pdg, "pdg/I");
-
-  t_flat->SetDirectory(f_flat);
-  // t_flat->AutoSave();
-
-  att._logger->info("FlatMC : tree out set ");
+  out_tree->Branch("poq", &poq, "poq/F");
+  out_tree->Branch("qop", &qop, "qop/F");
+  out_tree->Branch("tof", &tof, "tof/F");
+  out_tree->Branch("psce_psbe", &psce_psbe, "psce_psbe/I");
+  out_tree->Branch("psb_z", &psb_z, "psb_z/F");
+  out_tree->Branch("q", &q, "q/F");
+  out_tree->Branch("pdg", &pdg, "pdg/I");
 }
 
-TFlatMCOutputML::~TFlatMCOutputML()
-{
-  f_flat->cd();
-  t_flat->Write();
-  // f_flat->Write();
-  f_flat->Close();
-  if(f_flat != nullptr)
-    {
-      f_flat->Delete();
-      f_flat = nullptr;
-    }
-}
-
-void TFlatMCOutputML::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
-
-ReturnRes::InfoM TFlatMCOutputML::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
-{
-  int result_finder = Exec(RecoEvent, OutTree);
-
-  return SoftExit(result_finder);
-}
-
-int TFlatMCOutputML::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FlattenOut(RecoEvent); }
-
-ReturnRes::InfoM TFlatMCOutputML::SoftExit(int result_full) { return ReturnRes::Fine; }
-
-void TFlatMCOutputML::SelectHists()
-{
-  // LocalHisto.h_RZStats      = AnaHisto->CloneAndRegister(AnaHisto->h_RZStats);
-}
-
-int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
+void DataML_momfit::FillEvent(FullRecoEvent& REvent)
 {
   int ntrack = -1;
-  for(auto it_trackInfo : RecoEvent.TrackInfo)
+  for(auto it_trackInfo : REvent.TrackInfo)
     {
       ntrack++;
 #ifdef DEBUG_FLATTEN
@@ -95,8 +54,8 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
 #endif
 
       const int id_track  = it_trackInfo.first;
-      auto it_ListHits    = RecoEvent.TrackDAF.find(id_track);
-      auto it_ListHitsSim = RecoEvent.TrackDAFSim.find(id_track);
+      auto it_ListHits    = REvent.TrackDAF.find(id_track);
+      auto it_ListHitsSim = REvent.TrackDAFSim.find(id_track);
 
       std::tuple<int, int> id_before_mag = std::make_tuple(-1, -1);
       std::tuple<int, int> id_after_mag  = std::make_tuple(-1, -1);
@@ -119,7 +78,7 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
 #endif
               if(id_det > std::get<0>(id_after_mag))
                 {
-                  // auto temp_hit = RecoEvent.ListHits[id_det][id_hit].get();
+                  // auto temp_hit = REvent.ListHits[id_det][id_hit].get();
                   // id_after_mag = std::make_tuple(id_det,temp_hit->getHitId());
 
                   id_after_mag = std::make_tuple(id_det, id_hit);
@@ -136,7 +95,7 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
 #endif
               if(id_det > std::get<0>(id_before_mag))
                 {
-                  // auto temp_hit = RecoEvent.ListHits[id_det][id_hit].get();
+                  // auto temp_hit = REvent.ListHits[id_det][id_hit].get();
                   // id_before_mag = std::make_tuple(id_det,temp_hit->getHitId());
 
                   id_before_mag = std::make_tuple(id_det, id_hit);
@@ -152,7 +111,7 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
 #endif
               if(id_det > std::get<0>(id_psb))
                 {
-                  // auto temp_hit = RecoEvent.ListHits[id_det][id_hit].get();
+                  // auto temp_hit = REvent.ListHits[id_det][id_hit].get();
                   // id_psb = std::make_tuple(id_det,temp_hit->getHitId());
 
                   id_psb = std::make_tuple(id_det, id_hit);
@@ -171,7 +130,7 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
 #endif
               if(id_det > std::get<0>(id_psb))
                 {
-                  // auto temp_hit = RecoEvent.ListHits[id_det][id_hit].get();
+                  // auto temp_hit = REvent.ListHits[id_det][id_hit].get();
                   // id_psb = std::make_tuple(id_det,temp_hit->getHitId());
 
                   id_psb = std::make_tuple(id_det, id_hit);
@@ -212,9 +171,9 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       b_vy = it_hitBeforeSim.momY / temp_mom;
       b_vz = it_hitBeforeSim.momZ / temp_mom;
 
-      b_pt = TMath::Sqrt(TMath::Sq(it_hitBeforeSim.momX) + TMath::Sq(it_hitBeforeSim.momY));
-      b_phi = TMath::ATan2(it_hitBeforeSim.momY,it_hitBeforeSim.momX);
-      b_theta = TMath::ASin(a_pt/temp_mom);
+      b_pt    = TMath::Sqrt(TMath::Sq(it_hitBeforeSim.momX) + TMath::Sq(it_hitBeforeSim.momY));
+      b_phi   = TMath::ATan2(it_hitBeforeSim.momY, it_hitBeforeSim.momX);
+      b_theta = TMath::ASin(a_pt / temp_mom);
 
       b_x = it_hitBeforeSim.hitX;
       b_y = it_hitBeforeSim.hitY;
@@ -225,7 +184,7 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       temp_pdg = it_hitBeforeSim.pdg;
       //}
       // else
-      // 	att._logger->error("FlatML : Sim Before LayerID different from id_before_mag.id_hit {}
+      // 	logger->error("FlatML : Sim Before LayerID different from id_before_mag.id_hit {}
       // {}",it_hitBeforeSim.layerID, std::get<1>(id_before_mag));
 
       auto it_hitAfterSim = it_ListHitsSim->second[std::get<0>(id_after_mag)];
@@ -241,9 +200,9 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       a_vy = it_hitAfterSim.momY / temp_mom;
       a_vz = it_hitAfterSim.momZ / temp_mom;
 
-      a_pt = TMath::Sqrt(TMath::Sq(it_hitAfterSim.momX) + TMath::Sq(it_hitAfterSim.momY));
-      a_phi = TMath::ATan2(it_hitAfterSim.momY,it_hitAfterSim.momX);
-      a_theta = TMath::ASin(a_pt/temp_mom);
+      a_pt    = TMath::Sqrt(TMath::Sq(it_hitAfterSim.momX) + TMath::Sq(it_hitAfterSim.momY));
+      a_phi   = TMath::ATan2(it_hitAfterSim.momY, it_hitAfterSim.momX);
+      a_theta = TMath::ASin(a_pt / temp_mom);
 
       a_x = it_hitAfterSim.hitX;
       a_y = it_hitAfterSim.hitY;
@@ -252,7 +211,7 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       mom.emplace_back(temp_mom);
       //}
       // else
-      // 	att._logger->error("FlatML : Sim After LayerID different from id_after_mag.id_hit {}
+      // 	logger->error("FlatML : Sim After LayerID different from id_after_mag.id_hit {}
       // {}",it_hitAfterSim.layerID, std::get<1>(id_after_mag));
 
       auto it_hitPSB = it_ListHitsSim->second[std::get<0>(id_psb)];
@@ -262,7 +221,7 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       tof   = it_hitPSB.time;
       //}
       // else
-      // 	att._logger->error("FlatML : Sim PSB LayerID different from id_psb.id_hit {} {}",it_hitPSB.layerID,
+      // 	logger->error("FlatML : Sim PSB LayerID different from id_psb.id_hit {} {}",it_hitPSB.layerID,
       // std::get<1>(id_psb));
 
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(temp_pdg);
@@ -272,14 +231,16 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       poq               = mom[0] / charge;
       qop               = 1. / poq;
 
-      t_flat->Fill();
+      out_tree->Fill();
 
 #ifdef DEBUG_FLATTEN
       att._logger->debug("filled");
 #endif
 
-      b_tx = 0., b_ty = 0., b_vx = 0., b_vy = 0., b_vz = 0., b_x = 0., b_y = 0., b_z = 0., b_pt = 0., b_phi = 0., b_theta = 0.;
-      a_tx = 0., a_ty = 0., a_vx = 0., a_vy = 0., a_vz = 0., a_x = 0., a_y = 0., a_z = 0., a_pt = 0., a_phi = 0., a_theta = 0.;
+      b_tx = 0., b_ty = 0., b_vx = 0., b_vy = 0., b_vz = 0., b_x = 0., b_y = 0., b_z = 0., b_pt = 0., b_phi = 0.,
+      b_theta = 0.;
+      a_tx = 0., a_ty = 0., a_vx = 0., a_vy = 0., a_vz = 0., a_x = 0., a_y = 0., a_z = 0., a_pt = 0., a_phi = 0.,
+      a_theta = 0.;
       poq = 0., qop = 0.;
       q         = 0.;
       tof       = 0.;
@@ -287,6 +248,64 @@ int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
       psce_psbe = -1;
       pdg       = 0;
     }
+}
+
+TFlatMCOutputML::TFlatMCOutputML(const THyphiAttributes& attribut)
+    : TDataProcessInterface("FlatMCOutputML"), att(attribut), namefileFlat(att.FlatML_namefile)
+{
+  f_flat = new TFile(namefileFlat, "RECREATE");
+  t_flat = new TTree("MCDataML_Tree", "Flat data event tracks");
+
+  data_out = nullptr;
+  if(att.DataML_Out == "DataML_momfit")
+    data_out = new DataML_momfit(att, t_flat);
+  else
+    att._logger->error("FlatMC: selection of the data out for the ML study failed {}, check your config file !!",
+                       att.DataML_Out);
+
+  t_flat->SetDirectory(f_flat);
+  // t_flat->AutoSave();
+
+  att._logger->info("FlatMC : tree out set ");
+}
+
+TFlatMCOutputML::~TFlatMCOutputML()
+{
+  f_flat->cd();
+  t_flat->Write();
+  // f_flat->Write();
+  f_flat->Close();
+
+  delete data_out;
+
+  if(f_flat != nullptr)
+    {
+      f_flat->Delete();
+      f_flat = nullptr;
+    }
+}
+
+void TFlatMCOutputML::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+
+ReturnRes::InfoM TFlatMCOutputML::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+{
+  int result_finder = Exec(RecoEvent, OutTree);
+
+  return SoftExit(result_finder);
+}
+
+int TFlatMCOutputML::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FlattenOut(RecoEvent); }
+
+ReturnRes::InfoM TFlatMCOutputML::SoftExit(int result_full) { return ReturnRes::Fine; }
+
+void TFlatMCOutputML::SelectHists()
+{
+  // LocalHisto.h_RZStats      = AnaHisto->CloneAndRegister(AnaHisto->h_RZStats);
+}
+
+int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
+{
+  data_out->FillEvent(RecoEvent);
 
   return 0;
 }

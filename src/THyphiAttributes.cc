@@ -131,10 +131,11 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   std::string temp_file_base_name = temp_name_out.substr(0,temp_name_out.find_last_of('.'));
 
   std::string MLSuffix = Config.IsAvailable("FlatML_Suffix") ? Config.Get<std::string>("FlatML_Suffix") : "ML_MCOutput";
-
   temp_file_base_name += MLSuffix;
   temp_file_base_name += ".root";
   FlatML_namefile = temp_file_base_name;
+
+  DataML_Out = Config.IsAvailable("DataML_Out") ? Config.Get<std::string>("DataML_Out") : "NoneInConfig";
 
   Nb_CPU = Config.Get<int>("Nb_CPU");
   Nb_Fraction = Config.Get<int>("Nb_Fraction");
