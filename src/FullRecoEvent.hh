@@ -562,6 +562,9 @@ public:
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
 
+  std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
+  std::array<double,3> InteractionPoint;
+  
   explicit FullRecoEvent(unsigned int idTh = 1);
   ~FullRecoEvent();
 

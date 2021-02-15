@@ -44,5 +44,7 @@ void FullRecoEvent::Clear(int toclean)
   TrackDAFInit.clear();
   TrackInfo.clear();
   TrackMother.clear();
-
+  
+  Si_HitsEnergyLayer.clear();
+  InteractionPoint = {0.,0.,0.};
 }
