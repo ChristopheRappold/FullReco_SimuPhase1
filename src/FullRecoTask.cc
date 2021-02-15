@@ -8,6 +8,7 @@
 #include "CheckField.h"
 #include "TCheckRZ.h"
 #include "TFlatMCOutputML.h"
+#include "TPrimaryVertex.h"
 //#include "TKalmanFilter_FRS.h"
 
 
@@ -37,6 +38,8 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
   if(Attributes.Task_CheckField)
     list_processMC.emplace_back(new CheckField(Attributes));
+  if(Attributes.Task_PrimaryVtx)
+    list_processMC.emplace_back(new TPrimaryVertex(Attributes));
   if(Attributes.Task_FlatMCOutputML)
     list_processMC.emplace_back(new TFlatMCOutputML(Attributes));
   if(Attributes.Task_BayesFinder)

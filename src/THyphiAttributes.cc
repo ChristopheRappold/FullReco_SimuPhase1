@@ -83,6 +83,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
 
   if(Config.IsAvailable("Task_CheckField"))
     Task_CheckField = Config.Get<bool>("Task_CheckField");
+  if(Config.IsAvailable("Task_PrimaryVtx"))
+    Task_PrimaryVtx = Config.Get<bool>("Task_PrimaryVtx");
   if(Config.IsAvailable("Task_FlatMCOutputML"))
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");;
   if(Config.IsAvailable("Task_BayesFinder"))

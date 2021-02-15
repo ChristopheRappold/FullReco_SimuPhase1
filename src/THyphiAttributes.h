@@ -81,6 +81,7 @@ class THyphiAttributes
   bool DoNoMaterial;
 
   bool Task_CheckField;
+  bool Task_PrimaryVtx;
   bool Task_FlatMCOutputML;
   bool Task_BayesFinder;
   bool Task_FinderCM;
