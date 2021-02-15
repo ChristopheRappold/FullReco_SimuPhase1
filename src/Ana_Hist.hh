@@ -31,6 +31,7 @@ enum StateHist : int
   FINDING,
   HOUGH,
   SIMU,
+  PRIMVTX,
   SIZEOF_STATEHIST
 };
 
@@ -140,10 +141,76 @@ class Ana_Hist
   Hist<TH1F> h_ResMiniFiber[6];
   Hist<TH1F> h_ResMDC[17][3];
   Hist<TH1F> h_ResPSCE[2];
+
+  //Primary Vertex
+  Hist<TH1F> h_HitMultiplicity_Si1;
+  Hist<TH1F> h_HitMultiplicityRecons_Si1;
+  Hist<TH1F> h_HitMultiplicityDiff_Si1;
+  Hist<TH2F> h_HitMultiplicityDiffNHits_Si1;
+
+  Hist<TH1F> h_EnergyDiffStrips_Si1;
+
+  Hist<TH1F> h_nEventsGoodrecons_Si1;
+  Hist<TH1F> h_nEventsGhost_Si1 ;
+  Hist<TH2F> h_nEventsGoodreconsGhost_Si1 ;
+  Hist<TH2F> h_nEventsRealGoodrecons_Si1 ;
+  
+
+
+  Hist<TH1F> h_HitMultiplicity_Si2 ;
+  Hist<TH1F> h_HitMultiplicityRecons_Si2 ;
+  Hist<TH1F> h_HitMultiplicityDiff_Si2 ;
+  Hist<TH2F> h_HitMultiplicityDiffNHits_Si2 ;
+
+  Hist<TH1F> h_EnergyDiffStrips_Si2 ;
+
+  Hist<TH1F> h_nEventsGoodrecons_Si2 ;
+  Hist<TH1F> h_nEventsGhost_Si2 ;
+  Hist<TH2F> h_nEventsGoodreconsGhost_Si2 ;
+  Hist<TH2F> h_nEventsRealGoodrecons_Si2 ;
+
+
+
+  Hist<TH2F> h_EnergyStripEnergyTotalReal ;
+  Hist<TH2F> h_EnergyStripEnergyTotal ;
+  Hist<TH2F> h_EnergyDiffSilicons ;
+
+  Hist<TH2F> h_EnergyDepositionMother ;
+  Hist<TH2F> h_EnergyDepositionDaughters ;
+
+  Hist<TH2F> h_nTrackCandidates ;
+  Hist<TH2F> h_DistanceBeamTracks ;
+  Hist<TH2F> h_PosZBeamTracks ;
+  Hist<TH2F> h_thetaTracks ;
+
+  //Hist<TH1F> h_nHypTrackReal;
+  Hist<TH1F> h_nHypernucleiTrack ;
+  Hist<TH1F> h_fvalues ;
+
+  Hist<TH1F> h_InteractionPointDistance ;
+  Hist<TH1F> h_InteractionPointDistanceX ;
+  Hist<TH1F> h_InteractionPointDistanceY ;
+  Hist<TH1F> h_InteractionPointDistanceZ ;
+
+  Hist<TH1F> h_InteractionPointDistanceX_pull ;
+  Hist<TH1F> h_InteractionPointDistanceY_pull ;
+  Hist<TH1F> h_InteractionPointDistanceZ_pull ;
+
+  Hist<TH1F> h_IP_DecayDistance ;
+  Hist<TH1F> h_IP_DecayDistanceX ;
+  Hist<TH1F> h_IP_DecayDistanceY ;
+  Hist<TH1F> h_IP_DecayDistanceZ ;
+
+  Hist<TH1F> h_DecayPositionDistance ;
+  Hist<TH1F> h_DecayPositionDistanceX ;
+  Hist<TH1F> h_DecayPositionDistanceY ;
+  Hist<TH1F> h_DecayPositionDistanceZ ;
+
+  Hist<TH2F> h_PrimStatus;
   
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Hough = true, bool Simu = false);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Hough = true, bool Simu = false, bool PrimVtx = true);
   ~Ana_Hist();
 
   int Write(TFile*);

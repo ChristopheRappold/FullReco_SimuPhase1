@@ -22,7 +22,7 @@ Ana_Hist::~Ana_Hist()
 }
 
 /********************************************************************/
-Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hough, bool Simu)
+Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hough, bool Simu, bool PrimVtx)
 {
   EnableState.resize(SIZEOF_STATEHIST);
   EnableState[DAF] = Daf;
@@ -31,6 +31,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
   EnableState[FINDING] = Finding;
   EnableState[HOUGH] = Hough;
   EnableState[SIMU] = Simu;
+  EnableState[PRIMVTX] = PrimVtx;
 
   _logger = spdlog::get("Console");
 
@@ -318,6 +319,126 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistRegisteredByDir.insert(std::make_pair("Finder", std::make_tuple(HistReg,0)));
 
       geoSolenoid.resize(17, nullptr);
+    }
+
+  if(EnableState[PRIMVTX])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
+
+      h_HitMultiplicity_Si1.emplace_back(new TH1F("h_HitMultiplicity_Si1","h_HitMultiplicity_Si1", 20, 0, 20));
+      HistReg.emplace_back(&h_HitMultiplicity_Si1.store);
+      h_HitMultiplicityRecons_Si1.emplace_back(new TH1F("h_HitMultiplicityRecons_Si1","h_HitMultiplicityRecons_Si1", 30, 0, 30));
+      HistReg.emplace_back(&h_HitMultiplicityRecons_Si1.store);
+      h_HitMultiplicityDiff_Si1.emplace_back(new TH1F("h_HitMultiplicityDiff_Si1","h_HitMultiplicityDiff_Si1", 50, -5, 45));
+      HistReg.emplace_back(&h_HitMultiplicityDiff_Si1.store);
+      h_HitMultiplicityDiffNHits_Si1.emplace_back(new TH2F("h_HitMultiplicityDiffNHits_Si1","h_HitMultiplicityDiffNHits_Si1", 50, -5, 45, 20, 0, 20));
+      HistReg.emplace_back(&h_HitMultiplicityDiffNHits_Si1.store);
+
+      h_EnergyDiffStrips_Si1.emplace_back(new TH1F("h_EnergyDiffStrips_Si1", "h_EnergyDiffStrips_Si1", 1000, -1, 1));
+      HistReg.emplace_back(&h_EnergyDiffStrips_Si1.store);
+      
+      h_nEventsGoodrecons_Si1.emplace_back(new TH1F("h_nEventsGoodrecons_Si1", "h_nEventsGoodrecons_Si1", 20, 0, 20));
+      HistReg.emplace_back(&h_nEventsGoodrecons_Si1.store);
+       h_nEventsGhost_Si1.emplace_back(new TH1F("h_nEventsGhost_Si1", "h_nEventsGhost_Si1", 40, 0, 40));
+       HistReg.emplace_back(&h_nEventsGhost_Si1.store);
+       h_nEventsGoodreconsGhost_Si1.emplace_back(new TH2F("h_nEventsGoodreconsGhost_Si1", "h_nEventsGoodreconsGhost_Si1", 20, 0, 20, 40, 0, 40));
+       HistReg.emplace_back(&h_nEventsGoodreconsGhost_Si1.store);
+       h_nEventsRealGoodrecons_Si1.emplace_back(new TH2F("h_nEventsRealGoodrecons_Si1", "h_nEventsRealGoodrecons_Si1", 20, 0, 20, 20, 0, 20));
+       HistReg.emplace_back(&h_nEventsRealGoodrecons_Si1.store);
+
+
+
+       h_HitMultiplicity_Si2.emplace_back(new TH1F("h_HitMultiplicity_Si2","h_HitMultiplicity_Si2", 20, 0, 20));
+       HistReg.emplace_back(&h_HitMultiplicity_Si2.store);
+       h_HitMultiplicityRecons_Si2.emplace_back(new TH1F("h_HitMultiplicityRecons_Si2","h_HitMultiplicityRecons_Si2", 30, 0, 30));
+       HistReg.emplace_back(&h_HitMultiplicityRecons_Si2.store);
+       h_HitMultiplicityDiff_Si2.emplace_back(new TH1F("h_HitMultiplicityDiff_Si2","h_HitMultiplicityDiff_Si2", 50, -5, 45));
+       HistReg.emplace_back(&h_HitMultiplicityDiff_Si2.store);
+       h_HitMultiplicityDiffNHits_Si2.emplace_back(new TH2F("h_HitMultiplicityDiffNHits_Si2","h_HitMultiplicityDiffNHits_Si2", 50, -5, 45, 20, 0, 20));
+       HistReg.emplace_back(&h_HitMultiplicityDiffNHits_Si2.store);
+
+       h_EnergyDiffStrips_Si2.emplace_back(new TH1F("h_EnergyDiffStrips_Si2", "h_EnergyDiffStrips_Si2", 1000, -1, 1));
+       HistReg.emplace_back(&h_EnergyDiffStrips_Si2.store);
+
+       h_nEventsGoodrecons_Si2.emplace_back(new TH1F("h_nEventsGoodrecons_Si2","h_nEventsGoodrecons_Si2", 20, 0, 20));
+       HistReg.emplace_back(&h_nEventsGoodrecons_Si2.store);
+       h_nEventsGhost_Si2.emplace_back(new TH1F("h_nEventsGhost_Si2","h_nEventsGhost_Si2", 40, 0, 40));
+       HistReg.emplace_back(&h_nEventsGhost_Si2.store);
+       h_nEventsGoodreconsGhost_Si2.emplace_back(new TH2F("h_nEventsGoodreconsGhost_Si2","h_nEventsGoodreconsGhost_Si2", 20, 0, 20, 40, 0, 40));
+       HistReg.emplace_back(&h_nEventsGoodreconsGhost_Si2.store);
+       h_nEventsRealGoodrecons_Si2.emplace_back(new TH2F("h_nEventsRealGoodrecons_Si2","h_nEventsRealGoodrecons_Si2", 20, 0, 20, 20, 0, 20));
+       HistReg.emplace_back(&h_nEventsRealGoodrecons_Si2.store);
+
+
+       h_EnergyStripEnergyTotalReal.emplace_back(new TH2F("h_EnergyStripEnergyTotalReal", "h_EnergyStripEnergyTotalReal", 400, 0, 0.8, 2000, 0, 4));
+       HistReg.emplace_back(&h_EnergyStripEnergyTotalReal.store);
+       h_EnergyStripEnergyTotal.emplace_back(new TH2F("h_EnergyStripEnergyTotal", "h_EnergyStripEnergyTotal", 400, 0, 0.8, 2000, 0, 4));
+       HistReg.emplace_back(&h_EnergyStripEnergyTotal.store);
+       h_EnergyDiffSilicons.emplace_back(new TH2F("h_EnergyDiffSilicons","h_EnergyDiffSilicons", 10000, -1, 1, 3, 0, 3));
+       HistReg.emplace_back(&h_EnergyDiffSilicons.store);
+
+       h_EnergyDepositionMother.emplace_back(new TH2F("h_EnergyDepositionMother","h_EnergyDepositionMother", 1000, 0, 1, 5, 0, 5));
+       HistReg.emplace_back(&h_EnergyDepositionMother.store);
+       h_EnergyDepositionDaughters.emplace_back(new TH2F("h_EnergyDepositionDaughters","h_EnergyDepositionDaughters", 1500, 0, 1.5, 5, 0, 5));
+       HistReg.emplace_back(&h_EnergyDepositionDaughters.store);
+
+        
+       h_nTrackCandidates.emplace_back(new TH2F("h_nTrackCandidates","h_nTrackCandidates", 400, 0, 400, 4, 0, 4));
+       HistReg.emplace_back(&h_nTrackCandidates.store);
+       h_DistanceBeamTracks.emplace_back(new TH2F("h_DistanceBeamTracks","h_DistanceBeamTracks", 10000, 0, 0.5, 3, 0, 3));
+       HistReg.emplace_back(&h_DistanceBeamTracks.store);
+       h_PosZBeamTracks.emplace_back(new TH2F("h_PosZBeamTracks","h_PosZBeamTracks", 1000, 22, 29, 3, 0, 3));
+       HistReg.emplace_back(&h_PosZBeamTracks.store);
+       h_thetaTracks.emplace_back(new TH2F("h_thetaTracks","h_thetaTracks", 1000, 0, 90, 3, 0, 3));
+       HistReg.emplace_back(&h_thetaTracks.store);
+
+       //h_nHypTrackReal.emplace_back(new TH1F("h_nHypTrackReal", "h_nHypTrackReal", 3, 0, 3));
+       //HistReg.emplace_back(&h_nHypTrackReal.store);
+       h_nHypernucleiTrack.emplace_back(new TH1F("h_nHypernucleiTrack", "h_nHypernucleiTrack", 9, 0, 9));
+       HistReg.emplace_back(&h_nHypernucleiTrack.store);
+
+       h_fvalues.emplace_back(new TH1F("h_fvalues", "h_fvalues", 2000, -0.5, 1.5));
+       HistReg.emplace_back(&h_fvalues.store);
+
+       h_InteractionPointDistance.emplace_back(new TH1F("h_InteractionPointDistance","h_InteractionPointDistance", 1000, 0, 1));
+       HistReg.emplace_back(&h_InteractionPointDistance.store);
+       h_InteractionPointDistanceX.emplace_back(new TH1F("h_InteractionPointDistanceX","h_InteractionPointDistanceX", 2000, -1, 1));
+       HistReg.emplace_back(&h_InteractionPointDistanceX.store);
+       h_InteractionPointDistanceY.emplace_back(new TH1F("h_InteractionPointDistanceY","h_InteractionPointDistanceY", 2000, -1, 1));
+       HistReg.emplace_back(&h_InteractionPointDistanceY.store);
+       h_InteractionPointDistanceZ.emplace_back(new TH1F("h_InteractionPointDistanceZ","h_InteractionPointDistanceZ", 2000, -1, 1));
+       HistReg.emplace_back(&h_InteractionPointDistanceZ.store);
+
+       h_InteractionPointDistanceX_pull.emplace_back(new TH1F("h_InteractionPointDistanceX_pull","h_InteractionPointDistanceX_pull", 2000, -5, 5));
+       HistReg.emplace_back(&h_InteractionPointDistanceX_pull.store);
+       h_InteractionPointDistanceY_pull.emplace_back(new TH1F("h_InteractionPointDistanceY_pull","h_InteractionPointDistanceY_pull", 2000, -5, 5));
+       HistReg.emplace_back(&h_InteractionPointDistanceY_pull.store);
+       h_InteractionPointDistanceZ_pull.emplace_back(new TH1F("h_InteractionPointDistanceZ_pull","h_InteractionPointDistanceZ_pull", 2000, -5, 5));
+       HistReg.emplace_back(&h_InteractionPointDistanceZ_pull.store);
+
+
+       h_IP_DecayDistance.emplace_back(new TH1F("h_IP_DecayDistance","h_IP_DecayDistance", 6000, 0, 24));
+       HistReg.emplace_back(&h_IP_DecayDistance.store);
+       h_IP_DecayDistanceX.emplace_back(new TH1F("h_IP_DecayDistanceX","h_IP_DecayDistanceX", 1000, -2, 2));
+       HistReg.emplace_back(&h_IP_DecayDistanceX.store);
+       h_IP_DecayDistanceY.emplace_back(new TH1F("h_IP_DecayDistanceY","h_IP_DecayDistanceY", 1000, -2, 2));
+       HistReg.emplace_back(&h_IP_DecayDistanceY.store);
+       h_IP_DecayDistanceZ.emplace_back(new TH1F("h_IP_DecayDistanceZ","h_IP_DecayDistanceZ", 6000, -2, 22));
+       HistReg.emplace_back(&h_IP_DecayDistanceZ.store);
+
+       h_DecayPositionDistance.emplace_back(new TH1F("h_DecayPositionDistance","h_DecayPositionDistance", 6000, 0, 24));
+       HistReg.emplace_back(&h_DecayPositionDistance.store);
+       h_DecayPositionDistanceX.emplace_back(new TH1F("h_DecayPositionDistanceX","h_DecayPositionDistanceX", 1000, -2, 2));
+       HistReg.emplace_back(&h_DecayPositionDistanceX.store);
+       h_DecayPositionDistanceY.emplace_back(new TH1F("h_DecayPositionDistanceY","h_DecayPositionDistanceY", 1000, -2, 2));
+       HistReg.emplace_back(&h_DecayPositionDistanceY.store);
+       h_DecayPositionDistanceZ.emplace_back(new TH1F("h_DecayPositionDistanceZ","h_DecayPositionDistanceZ", 6000, -2, 22));
+       HistReg.emplace_back(&h_DecayPositionDistanceZ.store);
+
+       h_PrimStatus.emplace_back(new TH2F("PrimVtxStatus","PrimVtxStatus",20,0,20,20,0,20));
+       HistReg.emplace_back(&h_PrimStatus.store);
+       
+       HistRegisteredByDir.insert(std::make_pair("PrimaryVtx", std::make_tuple(HistReg,0)));
     }
 
   _logger->info( " : done !");
