@@ -197,6 +197,10 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   std::string nameMother(event.MotherName);
   int id_mother = event.MotherTrackID;
 
+  RecoEvent.InteractionPoint[0] = event.InteractionPoint_X;
+  RecoEvent.InteractionPoint[1] = event.InteractionPoint_Y;
+  RecoEvent.InteractionPoint[2] = event.InteractionPoint_Z;
+    
   for(size_t index = 0; index < event.BeamTrackID.size(); ++index)
   {
     TMcParticle* OutParticle = dynamic_cast<TMcParticle*>(OutTree->fMC_Particle->ConstructedAt(OutTree->fMC_Particle->GetEntries()));
@@ -276,7 +280,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
   RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.OldListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
-
+  RecoEvent.Si_HitsEnergyLayer.resize(4);
+  
   auto fillOutHit = [](TClonesArray* out, const TG4Sol_Hit& hit, int PDG, double charge, const TVectorD& hitR, int LayerID, int HitID) {
     TMcHit* OutHit = dynamic_cast<TMcHit*>(out->ConstructedAt(out->GetEntries()));
     OutHit->name = hit.Pname;
@@ -458,7 +463,29 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           //  hitCoordsTree(1) = hitCoords(1);
           //  hitCoordsTree(2) = hit.HitPosZ;
           //}
-          if(IsPSCE(TypeDet))
+	  if(IsSilicon(TypeDet))
+	    {
+	      //void simulHitstoSignals(TTreeReaderArray<TG4Sol_Hit>* DetHits, std::vector<std::tuple<double,size_t>>& HitEnergyLayer)
+	      const double EnergyThreshold = 0.001; //MeV
+#ifdef DEBUG_BUILD
+	      std::cout<<"Silicon \n";
+	      std::string tempName = orderDetName.find(TypeDet)->second;
+	      std::cout<<" name : "<<tempName<<"\n";
+	      std::cout<<" LayerID :"<<LayerID<<"\n";
+	      std::cout<<" Energy :"<<hit.Energy<<"\n";
+#endif
+	      if(hit.Energy < EnergyThreshold)
+		continue;
+	      
+	      int idSi = TypeDet - G4Sol::Si1x;
+	      auto it_SiHit = RecoEvent.Si_HitsEnergyLayer[idSi].find(LayerID);
+	      if(it_SiHit != RecoEvent.Si_HitsEnergyLayer[idSi].end())
+		it_SiHit->second += hit.Energy;
+	      else
+		  RecoEvent.Si_HitsEnergyLayer[idSi].insert(std::make_pair(LayerID, hit.Energy));
+
+	    }
+          else if(IsPSCE(TypeDet))
           {
 #ifdef DEBUG_BUILD
             std::cout << "PSC"  << std::endl;

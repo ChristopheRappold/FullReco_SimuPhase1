@@ -76,6 +76,19 @@ constexpr bool IsPSBE(G4Sol::SolDet idDet) {
     return false;
   };
 };
+
+constexpr bool IsSilicon(G4Sol::SolDet idDet) {
+  switch (idDet) {
+  case G4Sol::Si1x : ;
+  case G4Sol::Si1y : ;
+  case G4Sol::Si2x : ;
+  case G4Sol::Si2y : ;
+    return true;
+  default:
+    return false;
+  };
+};
+
 constexpr bool IsFiberU_Vetoed(G4Sol::SolDet idDet) {
   switch (idDet) {
   case G4Sol::FiberD1_x : ;
