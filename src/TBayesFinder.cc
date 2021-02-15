@@ -251,8 +251,8 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
     {
       for(size_t id_det = 0 ; id_det < it_track.second.size() ; ++id_det )
 	{
-	  if(it_track.second[id_det].layerID>=0)
-	    AllHits[id_det].emplace_back(std::make_tuple(it_track.second[id_det], it_track.first) );
+	  if(it_track.second[id_det][0].layerID>=0)
+	    AllHits[id_det].emplace_back(std::make_tuple(it_track.second[id_det][0], it_track.first) );
 	}
     }
 
@@ -311,7 +311,7 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
 
       std::vector<int> SetHits (G4Sol::SIZEOF_G4SOLDETTYPE,-1);
       
-      auto ListHits = RecoEvent.TrackDAFSim.find(id_track)->second;
+      auto ListHits = RecoEvent.TrackDAFSim.find(id_track)->second[0];
 
 #ifdef DEBUG_BAYES
       auto printValid = [](auto ListValidHits) {

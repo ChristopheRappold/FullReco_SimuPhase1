@@ -547,7 +547,7 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       // std::cout << "tempHitrawRef 1 : " << tempHitrawRef[1] << std::endl;
       // const TVector3 firstPos(tempHitrawRef[0], tempHitrawRef[1], getZpos(tempHit));
       //const TVector3 firstPos(0, 0, 0);
-      auto it_hitFirstSim = it_ListHitsSim->second[id_firstDet];
+      auto it_hitFirstSim = it_ListHitsSim->second[id_firstDet][0];
       const TVector3 firstPos(it_hitFirstSim.hitX, it_hitFirstSim.hitY, it_hitFirstSim.hitZ);
 
       const int PDG     = static_cast<int>(track_state.pdg);

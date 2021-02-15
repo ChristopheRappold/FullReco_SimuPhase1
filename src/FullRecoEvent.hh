@@ -557,7 +557,7 @@ public:
   // std::vector< std::vector<std::vector<genfit::AbsMeasurement*> > > ListHitsDAF;
   // std::vector< std::vector<std::vector<std::vector<int> > > > ListIdHitsDAFCluster;
   std::unordered_map<int, std::vector<int> > TrackDAF;
-  std::unordered_map<int, std::vector<SimHit> > TrackDAFSim;
+  std::unordered_map<int, std::vector<std::vector<SimHit> > > TrackDAFSim;
   std::unordered_map<int, InfoInit> TrackDAFInit;
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;

@@ -294,7 +294,7 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
       std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
       RecoEvent.TrackDAF.insert(std::make_pair(event.BeamTrackID[index], tempSetHit));
 
-      std::vector<SimHit> tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
+      std::vector<std::vector<SimHit> > tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
       RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));
 
       std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
@@ -323,7 +323,7 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
       std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
       RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
 
-      std::vector<SimHit> tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
+      std::vector<std::vector<SimHit> > tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
       RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));
 
       std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
@@ -442,19 +442,21 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
               int pdg_code = pid_fromName(hit.Pname);
 
               auto tempTrackSim                               = RecoEvent.TrackDAFSim.find(TrackID);
-              tempTrackSim->second[TypeDet + LayerID].layerID = LayerID;
-              tempTrackSim->second[TypeDet + LayerID].hitX    = hit.HitPosX;
-              tempTrackSim->second[TypeDet + LayerID].hitY    = hit.HitPosY;
-              tempTrackSim->second[TypeDet + LayerID].hitZ    = hit.HitPosZ;
-              tempTrackSim->second[TypeDet + LayerID].momX    = hit.MomX;
-              tempTrackSim->second[TypeDet + LayerID].momY    = hit.MomY;
-              tempTrackSim->second[TypeDet + LayerID].momZ    = hit.MomZ;
-              tempTrackSim->second[TypeDet + LayerID].pdg     = pdg_code;
-              tempTrackSim->second[TypeDet + LayerID].mass    = hit.Mass;
-              tempTrackSim->second[TypeDet + LayerID].Eloss   = hit.Energy;
-              tempTrackSim->second[TypeDet + LayerID].time    = gRandom->Gaus(hit.Time, time_res);
-              tempTrackSim->second[TypeDet + LayerID].length  = hit.TrackLength;
-
+	      SimHit tempSimHit;
+              tempSimHit.layerID = LayerID;
+              tempSimHit.hitX    = hit.HitPosX;
+              tempSimHit.hitY    = hit.HitPosY;
+              tempSimHit.hitZ    = hit.HitPosZ;
+              tempSimHit.momX    = hit.MomX;
+              tempSimHit.momY    = hit.MomY;
+              tempSimHit.momZ    = hit.MomZ;
+              tempSimHit.pdg     = pdg_code;
+              tempSimHit.mass    = hit.Mass;
+              tempSimHit.Eloss   = hit.Energy;
+              tempSimHit.time    = gRandom->Gaus(hit.Time, time_res);
+              tempSimHit.length  = hit.TrackLength;
+	      tempTrackSim->second[TypeDet + LayerID].emplace_back(tempSimHit);
+				   
               auto tempTrackInfo                              = RecoEvent.TrackInfo.find(TrackID);
               tempTrackInfo->second[TypeDet + LayerID].pdg    = pdg_code;
               tempTrackInfo->second[TypeDet + LayerID].momX   = hit.MomX;
@@ -943,18 +945,20 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
               int pdg_code = pid_fromName(hit.Pname);
 
               auto tempTrackSim                     = RecoEvent.TrackDAFSim.find(TrackID);
-              tempTrackSim->second[TypeDet].layerID = LayerID;
-              tempTrackSim->second[TypeDet].hitX    = hit.HitPosX;
-              tempTrackSim->second[TypeDet].hitY    = hit.HitPosY;
-              tempTrackSim->second[TypeDet].hitZ    = hit.HitPosZ;
-              tempTrackSim->second[TypeDet].momX    = hit.MomX;
-              tempTrackSim->second[TypeDet].momY    = hit.MomY;
-              tempTrackSim->second[TypeDet].momZ    = hit.MomZ;
-              tempTrackSim->second[TypeDet].pdg     = pdg_code;
-              tempTrackSim->second[TypeDet].mass    = hit.Mass;
-              tempTrackSim->second[TypeDet].Eloss   = hit.Energy;
-              tempTrackSim->second[TypeDet].time    = hit.Time;
-              tempTrackSim->second[TypeDet].length  = hit.TrackLength;
+	      SimHit tempSimHit;
+              tempSimHit.layerID = LayerID;
+              tempSimHit.hitX    = hit.HitPosX;
+              tempSimHit.hitY    = hit.HitPosY;
+              tempSimHit.hitZ    = hit.HitPosZ;
+              tempSimHit.momX    = hit.MomX;
+              tempSimHit.momY    = hit.MomY;
+              tempSimHit.momZ    = hit.MomZ;
+              tempSimHit.pdg     = pdg_code;
+              tempSimHit.mass    = hit.Mass;
+              tempSimHit.Eloss   = hit.Energy;
+              tempSimHit.time    = hit.Time;
+              tempSimHit.length  = hit.TrackLength;
+              tempTrackSim->second[TypeDet].emplace_back(tempSimHit);
 
               auto tempTrackInfo                    = RecoEvent.TrackInfo.find(TrackID);
               tempTrackInfo->second[TypeDet].pdg    = pdg_code;

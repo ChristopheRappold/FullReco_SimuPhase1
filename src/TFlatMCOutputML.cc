@@ -158,7 +158,7 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
       std::vector<double> mom;
       int temp_pdg = 0;
 
-      auto it_hitBeforeSim = it_ListHitsSim->second[std::get<0>(id_before_mag)];
+      auto it_hitBeforeSim = it_ListHitsSim->second[std::get<0>(id_before_mag)][0];
       // if(it_hitBeforeSim.layerID==std::get<1>(id_before_mag))
       //{
       b_tx = it_hitBeforeSim.momX / it_hitBeforeSim.momZ;
@@ -187,7 +187,7 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
       // 	logger->error("FlatML : Sim Before LayerID different from id_before_mag.id_hit {}
       // {}",it_hitBeforeSim.layerID, std::get<1>(id_before_mag));
 
-      auto it_hitAfterSim = it_ListHitsSim->second[std::get<0>(id_after_mag)];
+      auto it_hitAfterSim = it_ListHitsSim->second[std::get<0>(id_after_mag)][0];
       // if(it_hitAfterSim.layerID==std::get<1>(id_after_mag))
       //	{
       a_tx = it_hitAfterSim.momX / it_hitAfterSim.momZ;
@@ -214,7 +214,7 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
       // 	logger->error("FlatML : Sim After LayerID different from id_after_mag.id_hit {}
       // {}",it_hitAfterSim.layerID, std::get<1>(id_after_mag));
 
-      auto it_hitPSB = it_ListHitsSim->second[std::get<0>(id_psb)];
+      auto it_hitPSB = it_ListHitsSim->second[std::get<0>(id_psb)][0];
       // if(it_hitPSB.layerID==std::get<1>(id_psb))
       //{
       psb_z = it_hitPSB.hitZ;

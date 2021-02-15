@@ -570,7 +570,7 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
         auto ids = id_dets_MiniFiber.begin();
 
         int id_det  = std::get<0>(*ids);
-        auto it_hit = it_ListHitsSim->second[id_det];
+        auto it_hit = it_ListHitsSim->second[id_det][0];
         PosRefAtminiF.SetXYZ(it_hit.hitX, it_hit.hitY, it_hit.hitZ);
         momRefAtminiF.SetXYZ(it_hit.momX, it_hit.momY, it_hit.momZ);
       }
@@ -664,7 +664,7 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
       for(auto ids : id_dets_MiniFiber)
         {
           int id_det  = std::get<0>(ids);
-          auto it_hit = it_ListHitsSim->second[id_det];
+          auto it_hit = it_ListHitsSim->second[id_det][0];
           // Hits_MiniFiber_RZ.emplace_back(std::array<double,3>{TMath::Sqrt(it_hit.hitX*it_hit.hitX+it_hit.hitY*it_hit.hitY),
           // it_hit.hitZ, 0.1});
 
@@ -841,7 +841,7 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
 
           Cov_CrossRZ *= 1. / (double)list_parametersRZ.size();
 
-          auto HitSimulated = it_ListHitsSim->second[id_det];
+          auto HitSimulated = it_ListHitsSim->second[id_det][0];
 
 #ifdef DEBUG_CHECKRZ
           att._logger->debug("Hit in MDC : {} {} {}, R {} | CalculatedRZ : [R, Z]: {} {}", HitSimulated.hitX,
