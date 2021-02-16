@@ -118,7 +118,7 @@ Now msgpack-c (version 3.3.0) must be cloned, configured and built with:
 cd src/
 git clone https://github.com/msgpack/msgpack-c.git
 cd msgpack-c
-git checkout tag/cpp-3.3.0 -b v3.3.0
+git checkout tags/cpp-3.3.0 -b v3.3.0
 cmake -DMSGPACK_CXX17=ON -DMSGPACK_BUILD_EXAMPLES=OFF .
 make
 ```
@@ -127,8 +127,8 @@ Now libzmq (version 4.3.3) & cppzmq must be cloned, configured and built with:
 ``` sh
 cd src/
 git clone https://github.com/zeromq/libzmq.git
-git checkout tags/v4.3.3 -b v4.3.3
 cd libzmq
+git checkout tags/v4.3.3 -b v4.3.3
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=.. ..
@@ -141,6 +141,19 @@ cd cppzmq
 mkdir build
 cd build
 cmake -DZeroMQ_DIR=/home/christophe/Workspace/FullReco_SimuPhase1/src/libzmq/lib/cmake/ZeroMQ -DCMAKE_INSTALL_PREFIX=.. ..
+make
+make install
+```
+
+Now TrickTrack must be cloned, configured and built with:
+``` sh
+cd src/
+git clone https://github.com/HSF/TrickTrack
+cd TrickTrack
+mkdir build
+cd build
+export EIGEN_INCLUDE_DIR=/usr/include/eigen3
+cmake -DCMAKE_INSTALL_PREFIX=.. ..
 make
 make install
 ```
