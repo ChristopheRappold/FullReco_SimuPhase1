@@ -111,7 +111,7 @@ int FullRecoTask::EventProcess(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree
       if( (*(*process))(RecoEvent,OutTree) != 0)
 	{
 	  AnaHisto->h_task_exit.h->Fill((*process)->signature.c_str(),1);
-	  Attributes._logger->warn("courrent process:{} failed", (*process)->signature);
+	  Attributes._logger->warn("current process:{} failed", (*process)->signature);
 	  return -1;
 	}
     }
