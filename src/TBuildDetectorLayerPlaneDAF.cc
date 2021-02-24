@@ -1054,7 +1054,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   for(const auto& det : RecoEvent.ListHits)
   {
     for(const auto& hit : det)
-      hit->Print();
+      if(hit != nullptr)
+        hit->Print();
   }
 #endif
   return 0;

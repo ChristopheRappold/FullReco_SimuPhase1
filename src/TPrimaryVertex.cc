@@ -11,10 +11,10 @@
 #define N_HITS_CHECK
 #define HIT_RECONS_CHECK
 #define TRACK_RECONS_CHECK
-//#define MOTHER_DAUGHTERS_CHECK
+#define MOTHER_DAUGHTERS_CHECK
 #define VERTEX_RECONS_CHECK
 #define COVARIANCE_MATRIX
-//#define DECAY_VERTEX
+#define DECAY_VERTEX
 
 using namespace std;
 using namespace G4Sol;
@@ -39,7 +39,50 @@ ReturnRes::InfoM TPrimaryVertex::operator()(FullRecoEvent& RecoEvent, MCAnaEvent
 
 int TPrimaryVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FinderPrimaryVertex(RecoEvent); }
 
-ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) { return ReturnRes::Fine; }
+ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
+   
+  if(result_full == -1)
+    {
+      att._logger->debug("No enough candidate tracks for primary vertex recons");
+      LocalHisto.h_PrimVtxstats->Fill("CandidateTracks=0", 1.);
+      //return ReturnRes::PrimVtxError; //Check in the future
+      return ReturnRes::Fine;
+    }
+  else if(result_full == -2)
+    {
+      att._logger->debug("No enough candidate tracks for decay vertex recons");
+      LocalHisto.h_PrimVtxstats->Fill("CandidateDecayTracks=0", 1.);
+      return ReturnRes::Fine;
+    }
+  else if(result_full == -3)
+    {
+      att._logger->debug("No simulated hypernucleus");
+      LocalHisto.h_PrimVtxstats->Fill("Mother=0", 1.);
+      //return ReturnRes::PrimVtxError;
+      return ReturnRes::Fine;
+    }
+  else if(result_full == -4)
+    {
+      att._logger->debug("No enough hits in Silicons");
+      LocalHisto.h_PrimVtxstats->Fill("SiliconHits<2", 1.);
+      //return ReturnRes::PrimVtxError;
+      return ReturnRes::Fine;
+    }
+
+  LocalHisto.h_PrimVtxstats->Fill("Fine", 1.);
+
+
+
+
+
+
+
+  return ReturnRes::Fine; 
+}
+
+
+
+
 
 void TPrimaryVertex::SelectHists()
 {
@@ -101,6 +144,7 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_DecayPositionDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceZ);
 
   LocalHisto.h_PrimStatus = AnaHisto->CloneAndRegister(AnaHisto->h_PrimStatus);
+  LocalHisto.h_PrimVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_PrimVtxstats);
 }
 
 int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
@@ -117,7 +161,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
   if((RecoEvent.Si_HitsEnergyLayer[0].size() < 2 && RecoEvent.Si_HitsEnergyLayer[1].size() < 2) ||
      (RecoEvent.Si_HitsEnergyLayer[2].size() < 2 && RecoEvent.Si_HitsEnergyLayer[3].size() < 2))
-    return -1;
+    return -4;
 
   LocalHisto.h_PrimStatus->Fill("Si_acc", 1., 1);
 
@@ -150,6 +194,8 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
   std::vector<std::vector<double> > HitEnergyPosXY_Si2{};
   SiliconHits_Si2.SignalstoHits(HitEnergyLayerX_Si2, HitEnergyLayerY_Si2, HitEnergyPosXY_Si2);
+
+
 
 #ifdef HIT_RECONS_CHECK
 
@@ -213,10 +259,53 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   std::vector<std::vector<std::vector<double> > > CandidateTracks{};
   HitstoTracks(HitEnergyPosXY_Si1, HitEnergyPosXY_Si2, BeamHit1, BeamHit2, CandidateTracks);
 
+
+#ifdef TRACK_RECONS_CHECK
+
+  // Real tracks
+  std::vector<std::vector<std::vector<double> > > RealTracks{};
+  RealHitstoRealTracks(HitEnergyPosXYreal_Si1, HitEnergyPosXYreal_Si2, RealTracks);
+
+#endif
+
 #ifdef MOTHER_DAUGHTERS_CHECK
+
+  auto it_mother = RecoEvent.TrackMother.begin();
+  if(it_mother == RecoEvent.TrackMother.end())
+    return -3;
+
+  int mother_trackID = std::get<0>(it_mother->second);
+  
+  std::vector<int> daughters_TrackID {};
+  for(auto it_daughters = RecoEvent.TrackMother.begin(); it_daughters != RecoEvent.TrackMother.end(); ++it_daughters)
+    {
+      daughters_TrackID.emplace_back(it_daughters->first);
+    }
+
+  std::vector<std::vector<std::vector<double>>> motherTracks{};
+  std::vector<std::vector<std::vector<double>>> daughtersTracks{};
+
+  for(size_t i = 0; i < RealTracks.size(); ++i)
+    {
+      if(abs(RealTracks[i][0][7] - mother_trackID) < 0.01)
+        motherTracks.emplace_back(RealTracks[i]);
+
+      for(size_t j = 0; j < daughters_TrackID.size(); ++j)
+        {
+          if(abs(RealTracks[i][0][7] - daughters_TrackID[j]) < 0.01)
+            daughtersTracks.emplace_back(RealTracks[i]);
+        }
+    }
+
 
   if(motherTracks.size() == 1)
     {
+      LocalHisto.h_EnergyDepositionMother->Fill(motherTracks[0][0][0] + motherTracks[0][1][0], "Total", 1.);
+      LocalHisto.h_EnergyDepositionMother->Fill(motherTracks[0][0][4], "Si1 X", 1.);
+      LocalHisto.h_EnergyDepositionMother->Fill(motherTracks[0][0][5], "Si1 Y", 1.);
+      LocalHisto.h_EnergyDepositionMother->Fill(motherTracks[0][1][4], "Si2 X", 1.);
+      LocalHisto.h_EnergyDepositionMother->Fill(motherTracks[0][1][5], "Si2 Y", 1.);
+
       for(size_t i = 0; i < CandidateTracks.size(); ++i)
         {
           if((abs(motherTracks[0][0][1] - CandidateTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
@@ -239,6 +328,13 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
   for(size_t j = 0; j < daughtersTracks.size(); ++j)
     {
+      LocalHisto.h_EnergyDepositionDaughters->Fill(daughtersTracks[j][0][0] + daughtersTracks[j][1][0], "Total", 1.);
+      LocalHisto.h_EnergyDepositionDaughters->Fill(daughtersTracks[j][0][4], "Si1 X", 1.);
+      LocalHisto.h_EnergyDepositionDaughters->Fill(daughtersTracks[j][0][5], "Si1 Y", 1.);
+      LocalHisto.h_EnergyDepositionDaughters->Fill(daughtersTracks[j][1][4], "Si2 X", 1.);
+      LocalHisto.h_EnergyDepositionDaughters->Fill(daughtersTracks[j][1][5], "Si2 Y", 1.);
+
+
       for(size_t i = 0; i < CandidateTracks.size(); ++i)
         {
           if((abs(daughtersTracks[j][0][1] - CandidateTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
@@ -261,7 +357,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
       double distance = 0.;
       double z        = 0.;
 
-      SiliconVertexRecons.CloseDist(BeamHit1, BeamHit2, daughtersTracks[j][0], daughtersTracks[j][1], distance, z);
+      CloseDist(BeamHit1, BeamHit2, daughtersTracks[j][0], daughtersTracks[j][1], distance, z);
 
       LocalHisto.h_DistanceBeamTracks->Fill(distance, "Daughters", 1.);
       LocalHisto.h_PosZBeamTracks->Fill(z, "Daughters", 1.);
@@ -325,10 +421,6 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
         }
     }
 
-  // Real tracks
-  std::vector<std::vector<std::vector<double> > > RealTracks{};
-  RealHitstoRealTracks(HitEnergyPosXYreal_Si1, HitEnergyPosXYreal_Si2, RealTracks);
-
   for(size_t i = 0; i < RealTracks.size(); ++i)
     {
       double distance = 0.;
@@ -373,8 +465,8 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
     LocalHisto.h_fvalues->Fill(f_values_IP[i], 1.);
 
   double distance  = sqrt(pow((InteractionPoint_real_X - InteractionPointRecons[0]), 2.) +
-                         pow((InteractionPoint_real_Y - InteractionPointRecons[1]), 2.) +
-                         pow((InteractionPoint_real_Z - InteractionPointRecons[2]), 2.));
+                          pow((InteractionPoint_real_Y - InteractionPointRecons[1]), 2.) +
+                          pow((InteractionPoint_real_Z - InteractionPointRecons[2]), 2.));
   double distanceX = InteractionPoint_real_X - InteractionPointRecons[0];
   double distanceY = InteractionPoint_real_Y - InteractionPointRecons[1];
   double distanceZ = InteractionPoint_real_Z - InteractionPointRecons[2];
@@ -413,9 +505,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 #endif
 
 #ifdef DECAY_VERTEX
-
-  it_mother = RecoEvent.TrackMother.begin();
-
+  
   double DecayPosition_real_X = std::get<1>(it_mother->second);
   double DecayPosition_real_Y = std::get<2>(it_mother->second);
   double DecayPosition_real_Z = std::get<3>(it_mother->second);
@@ -436,8 +526,11 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
                     CandidateDecayTracks);
   LocalHisto.h_nTrackCandidates->Fill(CandidateDecayTracks.size(), "Decay", 1.);
 
+
   if(CandidateDecayTracks.size() == 0)
-    continue;
+    {
+      return -2;
+    }
 
   std::vector<double> DecayPositionRecons(3, 0.);
   DecayTrackstoDecayPosition(CandidateDecayTracks, InteractionPointRecons, DecayPositionRecons);
@@ -1217,6 +1310,8 @@ void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double
         }
     }
 
+  LocalHisto.h_nTrackCandidates->Fill(DecisiveTracks.size(), "Decisive", 1.);
+
   std::vector<double> temp_IP(3, 0.);
   std::vector<double> temp_f_values_IP(DecisiveTracks.size() + 1, 0.);
 
@@ -1237,7 +1332,7 @@ void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double
                 {
                   double value_not_variation = DecisiveTracks[idDecisiveTrack][idSilicon][idStrip];
                   DecisiveTracks[idDecisiveTrack][idSilicon][idStrip] += pow(-1., static_cast<double>(variationsign)) *
-                                                                         sqrt(nDimensions) * sqrt(12.) *
+                                                                         sqrt(nDimensions) *
                                                                          sigma_Si[idSilicon];
 
                   TrackstoVertexPosition(DecisiveTracks, BeamHit1, BeamHit2, temp_IP, temp_f_values_IP);
@@ -1255,9 +1350,9 @@ void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double
           double value_not_variation3 = BeamHit2[idSilicon + 1];
 
           BeamHit1[idSilicon + 1] +=
-              pow(-1., static_cast<double>(variationsign)) * sqrt(nDimensions) * sqrt(12.) * sigma_beam;
+              pow(-1., static_cast<double>(variationsign)) * sqrt(nDimensions) * sigma_beam;
           BeamHit2[idSilicon + 1] +=
-              pow(-1., static_cast<double>(variationsign)) * sqrt(nDimensions) * sqrt(12.) * sigma_beam;
+              pow(-1., static_cast<double>(variationsign)) * sqrt(nDimensions) * sigma_beam;
 
           TrackstoVertexPosition(DecisiveTracks, BeamHit1, BeamHit2, temp_IP, temp_f_values_IP);
           variations_IP.emplace_back(temp_IP);
@@ -1473,14 +1568,16 @@ void TPrimaryVertex::RealHitstoRealTracks(
                                                Z_plane_Si1,
                                                get<4>(HitEnergyPosXYreal_Si1[i]),
                                                get<5>(HitEnergyPosXYreal_Si1[i]),
-                                               particletype};
+                                               particletype,
+                                               static_cast<double>(get<3>(HitEnergyPosXYreal_Si1[i]))};
               std::vector<double> temp_PosHit2{get<0>(HitEnergyPosXYreal_Si2[j]),
                                                get<1>(HitEnergyPosXYreal_Si2[j]),
                                                get<2>(HitEnergyPosXYreal_Si2[j]),
                                                Z_plane_Si2,
                                                get<4>(HitEnergyPosXYreal_Si2[j]),
                                                get<5>(HitEnergyPosXYreal_Si2[j]),
-                                               particletype};
+                                               particletype,
+                                               static_cast<double>(get<3>(HitEnergyPosXYreal_Si2[j]))};
 
               std::vector<std::vector<double> > temp_RealTracks{temp_PosHit1, temp_PosHit2};
               RealTracks.emplace_back(temp_RealTracks);

@@ -13,6 +13,7 @@ namespace ReturnRes
       ChamberHitLimit,
       NoBeam,
       BuildError,
+      PrimVtxError,
       KalmanError,
       EndRun,
       CloseRun,

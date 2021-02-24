@@ -383,7 +383,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
        HistReg.emplace_back(&h_EnergyDepositionDaughters.store);
 
         
-       h_nTrackCandidates.emplace_back(new TH2F("h_nTrackCandidates","h_nTrackCandidates", 400, 0, 400, 4, 0, 4));
+       h_nTrackCandidates.emplace_back(new TH2F("h_nTrackCandidates","h_nTrackCandidates", 400, 0, 400, 5, 0, 5));
        HistReg.emplace_back(&h_nTrackCandidates.store);
        h_DistanceBeamTracks.emplace_back(new TH2F("h_DistanceBeamTracks","h_DistanceBeamTracks", 10000, 0, 0.5, 3, 0, 3));
        HistReg.emplace_back(&h_DistanceBeamTracks.store);
@@ -437,6 +437,9 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
 
        h_PrimStatus.emplace_back(new TH2F("PrimVtxStatus","PrimVtxStatus",20,0,20,20,0,20));
        HistReg.emplace_back(&h_PrimStatus.store);
+
+       h_PrimVtxstats.emplace_back(new TH1F("PrimVtxstats", "PrimVtxstats", 10, 0, 10));
+       HistReg.emplace_back(&h_PrimVtxstats.store);
        
        HistRegisteredByDir.insert(std::make_pair("PrimaryVtx", std::make_tuple(HistReg,0)));
     }

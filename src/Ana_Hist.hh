@@ -206,6 +206,8 @@ class Ana_Hist
   Hist<TH1F> h_DecayPositionDistanceY ;
   Hist<TH1F> h_DecayPositionDistanceZ ;
 
+  Hist<TH1F> h_PrimVtxstats ;
+
   Hist<TH2F> h_PrimStatus;
   
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
