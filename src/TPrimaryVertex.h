@@ -250,6 +250,8 @@ private:
     TH1F* h_DecayPositionDistanceY;
     TH1F* h_DecayPositionDistanceZ;
 
+    TH1F* h_PrimVtxstats;
+
     TH2F* h_PrimStatus;
   };
   LocalHists LocalHisto;
