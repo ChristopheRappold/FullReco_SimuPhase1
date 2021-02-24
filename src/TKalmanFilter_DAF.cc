@@ -376,6 +376,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           int id_hit = it_ListHits->second[id_det];
           if(id_hit < 0)
             continue;
+          if(id_det >= G4Sol::Si1x && id_det <= G4Sol::Si2y)
+            continue;
           if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
             ++n_Central;
           if(id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2)
