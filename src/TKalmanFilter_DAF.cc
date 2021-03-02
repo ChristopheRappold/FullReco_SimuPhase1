@@ -541,6 +541,8 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       att._logger->debug(" Id_track: {}", id_track);
 #endif
 
+
+
       const InfoPar track_state(it_trackInfo.second[id_firstDet]);
 
       genfit::AbsMeasurement* tempHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
@@ -554,6 +556,11 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
       const int PDG     = static_cast<int>(track_state.pdg);
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(PDG);
+      
+      LocalHisto.h_stats->Fill("Beginning Kalman", 1.);
+
+      std::string temp_namePDG = std::to_string(PDG);
+      LocalHisto.h_statsLess3Mes->Fill(temp_namePDG.c_str(),"Beginning Kalman", 1.);
 
       LocalHisto.h_total_dE->Fill(PDG_particle->GetName(), total_dE, 1.);
 
@@ -856,6 +863,10 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             {
               assert(fitTrack->hasKalmanFitStatus() == true);
               // assert(fitTrack->checkConsistency());
+              
+              LocalHisto.h_stats->Fill("Converged Kalman", 1.);
+              LocalHisto.h_statsLess3Mes->Fill(temp_namePDG.c_str(),"Converged Kalman", 1.);
+
               fitTrack->checkConsistency();
               genfit::TrackPoint* tp = fitTrack->getPointWithMeasurementAndFitterInfo(0, REP);
               if(tp == NULL)
