@@ -44,7 +44,12 @@ void FullRecoEvent::Clear(int toclean)
   TrackDAFInit.clear();
   TrackInfo.clear();
   TrackMother.clear();
+
+  FragmentTracks.clear();
+  PionTracks.clear();
   
   Si_HitsEnergyLayer.clear();
+
   InteractionPoint = {0.,0.,0.};
+  DecayVertex = {0.,0.,0.};
 }

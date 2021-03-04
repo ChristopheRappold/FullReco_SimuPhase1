@@ -475,6 +475,18 @@ struct ResSolDAF
   HitInfo Allhit[G4Sol::SIZEOF_G4SOLDETTYPE];
 };
 
+
+struct DecayTrackInfo
+{
+  int Pdg       = 0;
+  int Id        = 0;
+  double Chi2   = -1.;
+  TVector3 Hit_Pos = TVector3(0.,0.,0.);
+  TLorentzVector Hit_MomEnergy = TLorentzVector(0.,0.,0.,0.);
+};
+
+
+
 struct OutParticle
 {
   std::string type;
@@ -562,8 +574,16 @@ public:
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
 
+  std::vector<DecayTrackInfo> FragmentTracks;
+  std::vector<DecayTrackInfo> PionTracks;
+
+
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
   std::array<double,3> InteractionPoint;
+  std::array<double,3> DecayVertex;
+
+  TVector3 PrimVtxRecons;
+  TVector3 DecayVtxRecons;
   
   explicit FullRecoEvent(unsigned int idTh = 1);
   ~FullRecoEvent();

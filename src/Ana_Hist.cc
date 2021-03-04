@@ -22,7 +22,7 @@ Ana_Hist::~Ana_Hist()
 }
 
 /********************************************************************/
-Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hough, bool Simu, bool PrimVtx)
+Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hough, bool Simu, bool PrimVtx, bool DecayVtx)
 {
   EnableState.resize(SIZEOF_STATEHIST);
   EnableState[DAF] = Daf;
@@ -32,6 +32,9 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
   EnableState[HOUGH] = Hough;
   EnableState[SIMU] = Simu;
   EnableState[PRIMVTX] = PrimVtx;
+  EnableState[DECAYVTX] = DecayVtx;
+
+
 
   _logger = spdlog::get("Console");
 
@@ -443,6 +446,44 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
        
        HistRegisteredByDir.insert(std::make_pair("PrimaryVtx", std::make_tuple(HistReg,0)));
     }
+
+  if(EnableState[DECAYVTX])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
+      
+      h_Pt_fragments.emplace_back(new TH1F("h_Pt_fragments", "h_Pt_fragments", 1000, 0, 2));
+      HistReg.emplace_back(&h_Pt_fragments.store);
+      h_Pz_fragments.emplace_back(new TH1F("h_Pz_fragments", "h_Pz_fragments", 1000, 0, 10));
+      HistReg.emplace_back(&h_Pz_fragments.store);
+
+
+      h_Pt_pions.emplace_back(new TH1F("h_Pt_pions", "h_Pt_pions", 1000, 0, 1));
+      HistReg.emplace_back(&h_Pt_pions.store);
+      h_Pz_pions.emplace_back(new TH1F("h_Pz_pions", "h_Pz_pions", 1000, -3, 5));
+      HistReg.emplace_back(&h_Pz_pions.store);
+      h_Chi2ndf_pions.emplace_back(new TH1F("h_Chi2ndf_pions", "h_Chi2ndf_pions", 2000, 0, 200));
+      HistReg.emplace_back(&h_Chi2ndf_pions.store);
+
+      h_Closedist_Distance.emplace_back(new TH1F("h_Closedist_Distance","h_Closedist_Distance", 1000, 0, 10));
+      HistReg.emplace_back(&h_Closedist_Distance.store);
+      h_Closedist_PosZ.emplace_back(new TH1F("h_Closedist_PosZ","h_Closedist_PosZ", 3000, 20, 50));
+      HistReg.emplace_back(&h_Closedist_PosZ.store);
+
+      h_DecayVertexDistance.emplace_back(new TH1F("h_DecayVertexDistance", "h_DecayVertexDistance", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexDistance.store);
+      h_DecayVertexDistanceX.emplace_back(new TH1F("h_DecayVertexDistanceX", "h_DecayVertexDistanceX", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceX.store);
+      h_DecayVertexDistanceY.emplace_back(new TH1F("h_DecayVertexDistanceY", "h_DecayVertexDistanceY", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceY.store);
+      h_DecayVertexDistanceZ.emplace_back(new TH1F("h_DecayVertexDistanceZ", "h_DecayVertexDistanceZ", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexDistanceZ.store);
+
+      h_DecayVtxstats.emplace_back(new TH1F("h_DecayVtxstats", "h_DecayVtxstats", 10, 0, 10));
+      HistReg.emplace_back(&h_DecayVtxstats.store);
+       
+      HistRegisteredByDir.insert(std::make_pair("DecayVtx", std::make_tuple(HistReg,0)));
+    }
+
 
   _logger->info( " : done !");
 }

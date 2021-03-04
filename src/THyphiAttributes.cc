@@ -46,11 +46,13 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   DoNoMaterial = false;
 
   Task_CheckField = true;
+  Task_PrimaryVtx = false;
   Task_FlatMCOutputML = false;
   Task_BayesFinder = false;
   Task_FinderCM = false;
   Task_CheckRZ = true;
   Task_KalmanDAF = true;
+  Task_DecayVtx = false;
 
   RZ_ChangeMiniFiber = false;
   RZ_MDCProlate = true;
@@ -95,6 +97,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
     Task_CheckRZ = Config.Get<bool>("Task_CheckRZ");
   if(Config.IsAvailable("Task_KalmanDAF"))
     Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
+  if(Config.IsAvailable("Task_DecayVtx"))
+    Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
 
   if(Config.IsAvailable("RZ_ChangeMiniFiber"))
     RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
@@ -105,7 +109,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   if(Config.IsAvailable("RZ_MDCBiasCorr"))
     RZ_MDCBiasCorr = Config.Get<bool>("RZ_MDCBiasCorr");
 
-  _logger->info("RZ Settting: Prolate? {} Wire2? {} BiasCorr? {} ChangeMiniF? {}",RZ_MDCProlate, RZ_MDCWire2, RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
+  _logger->info("RZ Settting: Prolate? {} Wire2? {} BiasCorr? {} ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2, RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
 
   if(Config.IsAvailable("KF_Kalman"))
     KF_Kalman = Config.Get<bool>("KF_Kalman");
@@ -118,7 +122,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   if(Config.IsAvailable("KF_DAFRef"))
     KF_DAFRef = Config.Get<bool>("KF_DAFRef");
 
-  _logger->info("KF Setting: Kalman? {} / KalmanRef? {} / KalmanSqrt? {} / DAF? {} / DAFRef? {}",KF_Kalman, KF_KalmanRef, KF_KalmanSqrt, KF_DAF, KF_DAFRef);
+  _logger->info("KF Setting: Kalman? {} / KalmanRef? {} / KalmanSqrt? {} / DAF? {} / DAFRef? {}", KF_Kalman, KF_KalmanRef, KF_KalmanSqrt, KF_DAF, KF_DAFRef);
 
   if(Config.IsAvailable("KF_NbCentralCut"))
     KF_NbCentralCut= Config.Get<int>("KF_NbCentralCut");

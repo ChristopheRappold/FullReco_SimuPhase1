@@ -15,6 +15,7 @@ namespace ReturnRes
       BuildError,
       PrimVtxError,
       KalmanError,
+      DecayVtxError,
       EndRun,
       CloseRun,
       SIZEOF_INFOM

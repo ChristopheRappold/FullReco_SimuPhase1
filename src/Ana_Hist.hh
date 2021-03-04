@@ -32,6 +32,7 @@ enum StateHist : int
   HOUGH,
   SIMU,
   PRIMVTX,
+  DECAYVTX,
   SIZEOF_STATEHIST
 };
 
@@ -205,14 +206,31 @@ class Ana_Hist
   Hist<TH1F> h_DecayPositionDistanceX ;
   Hist<TH1F> h_DecayPositionDistanceY ;
   Hist<TH1F> h_DecayPositionDistanceZ ;
-
+  
+  Hist<TH2F> h_PrimStatus;
   Hist<TH1F> h_PrimVtxstats ;
 
-  Hist<TH2F> h_PrimStatus;
-  
+  //Decay Vertex
+  Hist<TH1F> h_Pt_fragments ;
+  Hist<TH1F> h_Pz_fragments ;
+
+  Hist<TH1F> h_Pt_pions ;
+  Hist<TH1F> h_Pz_pions ;
+  Hist<TH1F> h_Chi2ndf_pions ;
+
+  Hist<TH1F> h_Closedist_Distance ;
+  Hist<TH1F> h_Closedist_PosZ ;
+
+  Hist<TH1F> h_DecayVertexDistance ;
+  Hist<TH1F> h_DecayVertexDistanceX ;
+  Hist<TH1F> h_DecayVertexDistanceY ;
+  Hist<TH1F> h_DecayVertexDistanceZ ;
+
+  Hist<TH1F> h_DecayVtxstats ;
+
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Hough = true, bool Simu = false, bool PrimVtx = true);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Hough = true, bool Simu = false, bool PrimVtx = true, bool DecayVtx = true);
   ~Ana_Hist();
 
   int Write(TFile*);
