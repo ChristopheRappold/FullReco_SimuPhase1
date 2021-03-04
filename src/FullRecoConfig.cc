@@ -226,7 +226,7 @@ double FullRecoConfig::GetDimension(const std::string& dimension)
   if(dimension == "rad")
     return 1.;
   //
-  std::cerr << "!> Unckown dimension " << dimension << "\n";
+  std::cerr << "!> Unknown dimension " << dimension << "\n";
   std::cerr << "!> Exiting !!!\n";
   std::exit(1);
 }
