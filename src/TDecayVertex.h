@@ -32,9 +32,9 @@ private:
 
   int FinderDecayVertex(FullRecoEvent& RecoEvent);
 
-  void FragmentTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
+  void RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                             int& pdgParticle,
-                            std::vector<DecayTrackInfo>& FragmentTracks);
+                            std::vector<DecayTrackInfo>& RealTracks);
 
   void PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
                         std::vector<DecayTrackInfo>& PionTracks);
@@ -80,6 +80,9 @@ private:
 
   double MaxDistTracks = 0.2;
 
+  int He3_pdg = 10003;
+  int pi_pdg = -211;
+
 
   TRandom3* rand;
   PDG_fromName pid_fromName;
@@ -93,17 +96,28 @@ private:
     TH1F* h_Pz_pions;
     TH1F* h_Chi2ndf_pions;
 
+    TH1F* h_Pt_realpions;
+    TH1F* h_Pz_realpions;
+
     TH1F* h_Closedist_Distance;
     TH1F* h_Closedist_PosZ;
+
+    TH1F* h_Closedist_realDistance;
+    TH1F* h_Closedist_realPosZ;
 
     TH1F* h_DecayVertexDistance;
     TH1F* h_DecayVertexDistanceX;
     TH1F* h_DecayVertexDistanceY;
     TH1F* h_DecayVertexDistanceZ;
 
+    TH1F* h_DecayVertexrealDistance;
+    TH1F* h_DecayVertexrealDistanceX;
+    TH1F* h_DecayVertexrealDistanceY;
+    TH1F* h_DecayVertexrealDistanceZ;
+
     TH1F* h_DecayVtxstats;
   };
-  
+
   LocalHists LocalHisto;
 };
 

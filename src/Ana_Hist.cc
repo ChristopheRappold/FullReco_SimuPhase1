@@ -464,10 +464,20 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_Chi2ndf_pions.emplace_back(new TH1F("h_Chi2ndf_pions", "h_Chi2ndf_pions", 2000, 0, 200));
       HistReg.emplace_back(&h_Chi2ndf_pions.store);
 
+      h_Pt_realpions.emplace_back(new TH1F("h_Pt_realpions", "h_Pt_realpions", 1000, 0, 1));
+      HistReg.emplace_back(&h_Pt_realpions.store);
+      h_Pz_realpions.emplace_back(new TH1F("h_Pz_realpions", "h_Pz_realpions", 1000, -3, 5));
+      HistReg.emplace_back(&h_Pz_realpions.store);
+
       h_Closedist_Distance.emplace_back(new TH1F("h_Closedist_Distance","h_Closedist_Distance", 1000, 0, 10));
       HistReg.emplace_back(&h_Closedist_Distance.store);
       h_Closedist_PosZ.emplace_back(new TH1F("h_Closedist_PosZ","h_Closedist_PosZ", 3000, 20, 50));
       HistReg.emplace_back(&h_Closedist_PosZ.store);
+
+      h_Closedist_realDistance.emplace_back(new TH1F("h_Closedist_realDistance","h_Closedist_realDistance", 1000, 0, 10));
+      HistReg.emplace_back(&h_Closedist_realDistance.store);
+      h_Closedist_realPosZ.emplace_back(new TH1F("h_Closedist_realPosZ","h_Closedist_realPosZ", 3000, 20, 50));
+      HistReg.emplace_back(&h_Closedist_realPosZ.store);
 
       h_DecayVertexDistance.emplace_back(new TH1F("h_DecayVertexDistance", "h_DecayVertexDistance", 4000, 0, 40));
       HistReg.emplace_back(&h_DecayVertexDistance.store);
@@ -477,6 +487,15 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_DecayVertexDistanceY.store);
       h_DecayVertexDistanceZ.emplace_back(new TH1F("h_DecayVertexDistanceZ", "h_DecayVertexDistanceZ", 2000, -10, 10));
       HistReg.emplace_back(&h_DecayVertexDistanceZ.store);
+
+      h_DecayVertexrealDistance.emplace_back(new TH1F("h_DecayVertexrealDistance", "h_DecayVertexrealDistance", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexrealDistance.store);
+      h_DecayVertexrealDistanceX.emplace_back(new TH1F("h_DecayVertexrealDistanceX", "h_DecayVertexrealDistanceX", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexrealDistanceX.store);
+      h_DecayVertexrealDistanceY.emplace_back(new TH1F("h_DecayVertexrealDistanceY", "h_DecayVertexrealDistanceY", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexrealDistanceY.store);
+      h_DecayVertexrealDistanceZ.emplace_back(new TH1F("h_DecayVertexrealDistanceZ", "h_DecayVertexrealDistanceZ", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexrealDistanceZ.store);
 
       h_DecayVtxstats.emplace_back(new TH1F("h_DecayVtxstats", "h_DecayVtxstats", 10, 0, 10));
       HistReg.emplace_back(&h_DecayVtxstats.store);
