@@ -108,10 +108,14 @@ private:
 
   void CloseDist(std::vector<double>& BeamHit1, std::vector<double>& BeamHit2, std::vector<double>& TrackHit1,
                  std::vector<double>& TrackHit2, double& distance, double& z);
+
   double f_function(std::vector<double>& Hit1, std::vector<double>& Hit2, std::vector<double>& PosXYZ);
+
   double V_function(std::vector<double>& f_vector);
+
   void SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf, size_t& NstepsY, double& Zi,
                            double& Zf, size_t& NstepsZ, size_t& border, std::vector<std::vector<double> >& PosXYZ);
+  
   void HitstoTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
                     std::vector<std::vector<double> >& HitEnergyPosXY_Si2, std::vector<double>& BeamHit1,
                     std::vector<double>& BeamHit2, std::vector<std::vector<std::vector<double> > >& CandidateTracks);
@@ -146,11 +150,9 @@ private:
   double Z_plane_Si1    = 27.;  // in cm
   double widthStrip_Si1 = 0.03; // in cm
   double sigma_Si1      = widthStrip_Si1 / std::sqrt(12.);
-
   double thicknessSi_Si1 = 0.03; // cm
   double lenghtSi_Si1    = 4.;   // in cm
   int nStrips_Si1        = (int)(lenghtSi_Si1 / widthStrip_Si1);
-  // double finalStrip_Si1 = -lenghtSi_Si1/2. + nStrips_Si1*widthStrip_Si1;
 
   double Z_plane_Si2     = 30.;  // in cm
   double widthStrip_Si2  = 0.03; // in cm
@@ -158,7 +160,6 @@ private:
   double thicknessSi_Si2 = 0.03; // cm
   double lenghtSi_Si2    = 6.;   // in cm
   int nStrips_Si2        = (int)(lenghtSi_Si2 / widthStrip_Si2);
-  // double finalStrip_Si2 = -lenghtSi_Si2/2. + nStrips_Si2*widthStrip_Si2;
 
   double ErrorDistTarget    = 0.2;  // in cm
   double MaxClosestDistance = 0.04; // in cm
@@ -251,7 +252,6 @@ private:
     TH1F* h_DecayPositionDistanceZ;
 
     TH1F* h_PrimVtxstats;
-
     TH2F* h_PrimStatus;
   };
   LocalHists LocalHisto;

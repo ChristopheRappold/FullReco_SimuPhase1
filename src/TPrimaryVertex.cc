@@ -8,13 +8,12 @@
 //#define DEBUG_PRIMVTX
 
 //#define RECONS_HITS_MULTIPLICITY
-#define N_HITS_CHECK
 #define HIT_RECONS_CHECK
 #define TRACK_RECONS_CHECK
 #define MOTHER_DAUGHTERS_CHECK
 #define VERTEX_RECONS_CHECK
-#define COVARIANCE_MATRIX
-#define DECAY_VERTEX
+//#define COVARIANCE_MATRIX
+//#define DECAY_VERTEX
 
 using namespace std;
 using namespace G4Sol;
@@ -48,12 +47,14 @@ ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
       //return ReturnRes::PrimVtxError; //Check in the future
       return ReturnRes::Fine;
     }
+
   else if(result_full == -2)
     {
       att._logger->debug("No enough candidate tracks for decay vertex recons");
       LocalHisto.h_PrimVtxstats->Fill("CandidateDecayTracks=0", 1.);
       return ReturnRes::Fine;
     }
+
   else if(result_full == -3)
     {
       att._logger->debug("No simulated hypernucleus");
@@ -61,6 +62,7 @@ ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
       //return ReturnRes::PrimVtxError;
       return ReturnRes::Fine;
     }
+
   else if(result_full == -4)
     {
       att._logger->debug("No enough hits in Silicons");
@@ -70,12 +72,6 @@ ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
     }
 
   LocalHisto.h_PrimVtxstats->Fill("Fine", 1.);
-
-
-
-
-
-
 
   return ReturnRes::Fine; 
 }
@@ -143,8 +139,8 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_DecayPositionDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceY);
   LocalHisto.h_DecayPositionDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceZ);
 
-  LocalHisto.h_PrimStatus = AnaHisto->CloneAndRegister(AnaHisto->h_PrimStatus);
   LocalHisto.h_PrimVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_PrimVtxstats);
+  LocalHisto.h_PrimStatus = AnaHisto->CloneAndRegister(AnaHisto->h_PrimStatus);
 }
 
 int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
@@ -458,6 +454,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   std::vector<double> f_values_IP(CandidateTracks.size() + 1, 0.);
 
   TrackstoVertexPosition(CandidateTracks, BeamHit1, BeamHit2, InteractionPointRecons, f_values_IP);
+  RecoEvent.PrimVtxRecons.SetXYZ(InteractionPointRecons[0],InteractionPointRecons[1],InteractionPointRecons[2]);
 
 #ifdef VERTEX_RECONS_CHECK
 
