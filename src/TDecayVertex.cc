@@ -163,11 +163,11 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
   double realdistance  = sqrt(pow((DecayVertex_real_X - DecayVertexReconsreal.X()), 2.) +
-                              pow((DecayVertex_real_X - DecayVertexReconsreal.Y()), 2.) +
-                              pow((DecayVertex_real_X - DecayVertexReconsreal.Z()), 2.));
+                              pow((DecayVertex_real_Y - DecayVertexReconsreal.Y()), 2.) +
+                              pow((DecayVertex_real_Z - DecayVertexReconsreal.Z()), 2.));
   double realdistanceX = DecayVertex_real_X - DecayVertexReconsreal.X();
-  double realdistanceY = DecayVertex_real_X - DecayVertexReconsreal.Y();
-  double realdistanceZ = DecayVertex_real_X - DecayVertexReconsreal.Z();
+  double realdistanceY = DecayVertex_real_Y - DecayVertexReconsreal.Y();
+  double realdistanceZ = DecayVertex_real_Z - DecayVertexReconsreal.Z();
 
   LocalHisto.h_DecayVertexrealDistance->Fill(realdistance, 1.);
   LocalHisto.h_DecayVertexrealDistanceX->Fill(realdistanceX, 1.);
@@ -213,11 +213,11 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
   double distance  = sqrt(pow((DecayVertex_real_X - DecayVertexRecons.X()), 2.) +
-                          pow((DecayVertex_real_X - DecayVertexRecons.Y()), 2.) +
-                          pow((DecayVertex_real_X - DecayVertexRecons.Z()), 2.));
+                          pow((DecayVertex_real_Y - DecayVertexRecons.Y()), 2.) +
+                          pow((DecayVertex_real_Z - DecayVertexRecons.Z()), 2.));
   double distanceX = DecayVertex_real_X - DecayVertexRecons.X();
-  double distanceY = DecayVertex_real_X - DecayVertexRecons.Y();
-  double distanceZ = DecayVertex_real_X - DecayVertexRecons.Z();
+  double distanceY = DecayVertex_real_Y - DecayVertexRecons.Y();
+  double distanceZ = DecayVertex_real_Z - DecayVertexRecons.Z();
 
   LocalHisto.h_DecayVertexDistance->Fill(distance, 1.);
   LocalHisto.h_DecayVertexDistanceX->Fill(distanceX, 1.);
@@ -285,7 +285,7 @@ void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_resu
   std::unordered_map<int, ResSolDAF>::iterator itr;
   for(itr = DAF_results.begin(); itr != DAF_results.end(); ++itr)
     {
-      if(itr->second.charge == -1)
+      if((itr->second.charge == -1) && (itr->second.chi2 / itr->second.ndf < 3.) && (itr->second.Ncentral >= 6))
         {
           LocalHisto.h_Chi2ndf_pions->Fill(itr->second.chi2 / itr->second.ndf, 1.);
 
@@ -352,7 +352,7 @@ double TDecayVertex::f_function(DecayTrackInfo& DecayTrack, TVector3& PosXYZ)
   double slope_y     = DecayTrack.Hit_MomEnergy.Py() / DecayTrack.Hit_MomEnergy.Pz();
   double intercept_y = DecayTrack.Hit_Pos.Y() - slope_y * DecayTrack.Hit_Pos.Z();
 
-  double distanceStepX = 2. * boxDistXY / static_cast<double>(NstepsdiscretXY - 1);
+  double distanceStepX = 2. * boxDistXY / static_cast<double>(NstepsdiscretXY - 1); //Change(?)
   double sigma2        = pow(distanceStepX, 2.) / 12.;
 
   double f = exp(-0.5 *
