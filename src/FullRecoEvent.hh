@@ -44,36 +44,36 @@ enum SolDet : int
   InSi0 = 0,
   InSi1,
   InSi2,
-  InSi3 /*3*/,
-  TR1 /*4*/,
-  TR2 /*5*/,
-  Si1x,
+  InSi3, /*3*/,
+  TR1, /*4*/,
+  TR2, /*5*/,
+  Si1x, /*6*/
   Si1y,
   Si2x,
-  Si2y,
-  MiniFiberD1_x1, /*6*/
+  Si2y, /*9*/
+  MiniFiberD1_x1, /*10*/
   MiniFiberD1_u1,
   MiniFiberD1_v1,
   MiniFiberD1_x2,
   MiniFiberD1_u2,
-  MiniFiberD1_v2, /*11*/
-  FiberD1_x, /*12*/
+  MiniFiberD1_v2, /*15*/
+  FiberD1_x, /*16*/
   FiberD1_u,
   FiberD1_v,
-  FiberD2_x, /*15*/
+  FiberD2_x, /*19*/
   FiberD2_u,
   FiberD2_v,
-  FiberD3_x, /*18*/
+  FiberD3_x, /*22*/
   FiberD3_u,
   FiberD3_v,
-  FiberD4_x, /*21*/
+  FiberD4_x, /*25*/
   FiberD4_u,
   FiberD4_v,
-  FiberD5_x, /*24*/
+  FiberD5_x, /*28*/
   FiberD5_u,
   FiberD5_v,
-  PSFE /*27*/,
-  MG01 /*28*/,
+  PSFE, /*31*/,
+  MG01 /*32*/,
   MG02,
   MG03,
   MG04,
@@ -89,10 +89,10 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17 /*44*/,
-  PSCE /*45*/,
-  PSBE /*46*/,
-  CDC_layer0 /*47*/,
+  MG17 /*48*/,
+  PSCE /*49*/,
+  PSBE /*50*/,
+  CDC_layer0 /*51*/,
   CDC_layer1,
   CDC_layer2,
   CDC_layer3,
@@ -106,16 +106,16 @@ enum SolDet : int
   CDC_layer11,
   CDC_layer12,
   CDC_layer13,
-  CDC_layer14 /*61*/,
-  CDHBar /*62*/,
-  TrFwd0 /*63*/,
+  CDC_layer14 /*65*/,
+  CDHBar /*66*/,
+  TrFwd0 /*67*/,
   TrFwd1,
-  TrFwd2 /*65*/,
-  RPC_l /*66*/,
-  RPC_h /*67*/,
-  FMF2Stop0 /*68*/,
+  TrFwd2 /*69*/,
+  RPC_l /*70*/,
+  RPC_h /*71*/,
+  FMF2Stop0 /*72*/,
   FMF2Stop1,
-  FMF2Stop2 /*70*/,
+  FMF2Stop2 /*74*/,
   SIZEOF_G4SOLDETTYPE
 };
 
