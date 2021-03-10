@@ -256,6 +256,12 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexcutDistanceY ;
   Hist<TH1F> h_DecayVertexcutDistanceZ ;
 
+  Hist<TH1F> h_DecayVertexPosZ_real ;
+  Hist<TH1F> h_DecayVertexPosZ_vfunction ;
+  Hist<TH1F> h_DecayVertexPosZ_centroid ;
+
+  Hist<TH1F> h_HypInvariantMass ;
+
   Hist<TH1F> h_DecayVtxstats ;
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;

@@ -531,6 +531,16 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_DecayVertexcutDistanceZ.emplace_back(new TH1F("h_DecayVertexcutDistanceZ", "h_DecayVertexcutDistanceZ", 2000, -10, 10));
       HistReg.emplace_back(&h_DecayVertexcutDistanceZ.store);
 
+      h_DecayVertexPosZ_real.emplace_back(new TH1F("h_DecayVertexPosZ_real", "h_DecayVertexPosZ_real", 300, 20, 50));
+      HistReg.emplace_back(&h_DecayVertexPosZ_real.store);
+      h_DecayVertexPosZ_vfunction.emplace_back(new TH1F("h_DecayVertexPosZ_vfunction", "h_DecayVertexPosZ_vfunction", 300, 20, 50));
+      HistReg.emplace_back(&h_DecayVertexPosZ_vfunction.store);
+      h_DecayVertexPosZ_centroid.emplace_back(new TH1F("h_DecayVertexPosZ_centroid", "h_DecayVertexPosZ_centroid", 300, 20, 50));
+      HistReg.emplace_back(&h_DecayVertexPosZ_centroid.store);
+
+      h_HypInvariantMass.emplace_back(new TH1F("h_HypInvariantMass", "h_HypInvariantMass", 1000, 0, 10));
+      HistReg.emplace_back(&h_HypInvariantMass.store);
+
       h_DecayVtxstats.emplace_back(new TH1F("h_DecayVtxstats", "h_DecayVtxstats", 10, 0, 10));
       HistReg.emplace_back(&h_DecayVtxstats.store);
        

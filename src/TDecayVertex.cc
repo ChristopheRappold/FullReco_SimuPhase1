@@ -129,6 +129,12 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_DecayVertexcutDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceX);
   LocalHisto.h_DecayVertexcutDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceY);
   LocalHisto.h_DecayVertexcutDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceZ);
+
+  LocalHisto.h_DecayVertexPosZ_real = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_real);
+  LocalHisto.h_DecayVertexPosZ_vfunction = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_vfunction);
+  LocalHisto.h_DecayVertexPosZ_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_centroid);
+
+  LocalHisto.h_HypInvariantMass = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass);
   
   LocalHisto.h_DecayVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVtxstats);
 }
@@ -139,6 +145,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   double DecayVertex_real_X = RecoEvent.DecayVertex[0];
   double DecayVertex_real_Y = RecoEvent.DecayVertex[1];
   double DecayVertex_real_Z = RecoEvent.DecayVertex[2];
+
+  LocalHisto.h_DecayVertexPosZ_real->Fill(DecayVertex_real_Z, 1.);
 
   //Fragment tracks
   RealTracksFinder(RecoEvent.TrackDAFSim, He3_pdg, 0, RecoEvent.FragmentTracks);
@@ -295,6 +303,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexDistanceY_centroid->Fill(distanceY_centroid, 1.);
   LocalHisto.h_DecayVertexDistanceZ_centroid->Fill(distanceZ_centroid, 1.);
 
+  LocalHisto.h_DecayVertexPosZ_centroid->Fill(closedist_pos.Z(), 1.);
+
 
   //Decay vertex reconstruction
   TVector3 DecayVertexRecons;
@@ -321,6 +331,13 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexDistanceX->Fill(distanceX, 1.);
   LocalHisto.h_DecayVertexDistanceY->Fill(distanceY, 1.);
   LocalHisto.h_DecayVertexDistanceZ->Fill(distanceZ, 1.);
+
+  LocalHisto.h_DecayVertexPosZ_centroid->Fill(DecayVertexRecons.Z(), 1.);
+
+
+  //Hypernucleus reconstruction
+  TLorentzVector Hypernucleus_MomEnergy = RecoEvent.FragmentTracks[0].Hit_MomEnergy + RecoEvent.PionTracks[0].Hit_MomEnergy;  
+  LocalHisto.h_HypInvariantMass->Fill(Hypernucleus_MomEnergy.M(), 1.);
 
   return 0;
 }

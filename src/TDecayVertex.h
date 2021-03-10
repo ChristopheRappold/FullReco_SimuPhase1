@@ -137,6 +137,12 @@ private:
     TH1F* h_DecayVertexcutDistanceY;
     TH1F* h_DecayVertexcutDistanceZ;
 
+    TH1F* h_DecayVertexPosZ_real;
+    TH1F* h_DecayVertexPosZ_vfunction;
+    TH1F* h_DecayVertexPosZ_centroid;
+
+    TH1F* h_HypInvariantMass;
+
     TH1F* h_DecayVtxstats;
   };
 
