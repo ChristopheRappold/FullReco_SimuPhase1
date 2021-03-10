@@ -85,11 +85,22 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_Pt_realpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_realpions);
   LocalHisto.h_Pz_realpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_realpions);
 
+  LocalHisto.h_Pt_cutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_cutpions);
+  LocalHisto.h_Pz_cutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_cutpions);
+
   LocalHisto.h_Closedist_Distance = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_Distance);
   LocalHisto.h_Closedist_PosZ = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_PosZ);
+  LocalHisto.h_Dist_DecayTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_DecayTrackPrimVtx);
+
 
   LocalHisto.h_Closedist_realDistance = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_realDistance);
   LocalHisto.h_Closedist_realPosZ = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_realPosZ);
+  LocalHisto.h_Dist_realDecayTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_realDecayTrackPrimVtx);
+
+  LocalHisto.h_Closedist_cutDistance = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_cutDistance);
+  LocalHisto.h_Closedist_cutPosZ = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_cutPosZ);
+  LocalHisto.h_Dist_cutDecayTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_cutDecayTrackPrimVtx);
+
 
   LocalHisto.h_DecayVertexDistance = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance);
   LocalHisto.h_DecayVertexDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX);
@@ -100,6 +111,11 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_DecayVertexrealDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexrealDistanceX);
   LocalHisto.h_DecayVertexrealDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexrealDistanceY);
   LocalHisto.h_DecayVertexrealDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexrealDistanceZ);
+
+  LocalHisto.h_DecayVertexcutDistance = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistance);
+  LocalHisto.h_DecayVertexcutDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceX);
+  LocalHisto.h_DecayVertexcutDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceY);
+  LocalHisto.h_DecayVertexcutDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceZ);
   
   LocalHisto.h_DecayVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVtxstats);
 }
@@ -112,7 +128,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   double DecayVertex_real_Z = RecoEvent.DecayVertex[2];
 
   //Fragment tracks
-  RealTracksFinder(RecoEvent.TrackDAFSim, He3_pdg, RecoEvent.FragmentTracks);
+  RealTracksFinder(RecoEvent.TrackDAFSim, He3_pdg, 0, RecoEvent.FragmentTracks);
 
   if(RecoEvent.FragmentTracks.size() == 0)
     return -1;
@@ -127,13 +143,14 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   //Real pion tracks
   std::vector<DecayTrackInfo> RealPionTracks {};
-  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, RealPionTracks);
+  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, 0, RealPionTracks);
 
   if(RealPionTracks.size() == 0)
     return -2;
 
   double closedist_realdistance = 0.;
   double closedist_realposz = 0.;
+  double dist_realDecayTrackPrimVtx = 0.;
 
   for(size_t i = 0; i < RealPionTracks.size(); ++i)
     {
@@ -142,11 +159,11 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Pz_realpions->Fill(RealPionTracks[i].Hit_MomEnergy.Pz(), 1.);
 
       CloseDist(RecoEvent.FragmentTracks[0], RealPionTracks[i], closedist_realdistance, closedist_realposz);
-
       LocalHisto.h_Closedist_realDistance->Fill(closedist_realdistance, 1.);
       LocalHisto.h_Closedist_realPosZ->Fill(closedist_realposz, 1.);
 
-      //std::cout << "Distance:\t" << closedist_distance << "\t\tPosZ:\t" << closedist_posz << "\n";
+      Dist_DecayTrackPrimVtx(RealPionTracks[i], RecoEvent.PrimVtxRecons, dist_realDecayTrackPrimVtx);
+      LocalHisto.h_Dist_realDecayTrackPrimVtx->Fill(dist_realDecayTrackPrimVtx, 1.);
     }
 
   //Decay vertex reconstruction
@@ -174,6 +191,59 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexrealDistanceY->Fill(realdistanceY, 1.);
   LocalHisto.h_DecayVertexrealDistanceZ->Fill(realdistanceZ, 1.);
 
+
+ //Cut pion tracks
+  std::vector<DecayTrackInfo> CutPionTracks {};
+  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, 1, CutPionTracks);
+
+  if(CutPionTracks.size() == 0)
+    return -2;
+
+  double closedist_cutdistance = 0.;
+  double closedist_cutposz = 0.;
+  double dist_cutDecayTrackPrimVtx = 0.;
+
+  for(size_t i = 0; i < CutPionTracks.size(); ++i)
+    {
+      LocalHisto.h_Pt_cutpions->Fill(sqrt(pow(CutPionTracks[i].Hit_MomEnergy.Px(),2.)
+                                        + pow(CutPionTracks[i].Hit_MomEnergy.Py(),2.)), 1.);
+      LocalHisto.h_Pz_cutpions->Fill(CutPionTracks[i].Hit_MomEnergy.Pz(), 1.);
+
+      CloseDist(RecoEvent.FragmentTracks[0], CutPionTracks[i], closedist_cutdistance, closedist_cutposz);
+      LocalHisto.h_Closedist_cutDistance->Fill(closedist_cutdistance, 1.);
+      LocalHisto.h_Closedist_cutPosZ->Fill(closedist_cutposz, 1.);
+
+      Dist_DecayTrackPrimVtx(CutPionTracks[i], RecoEvent.PrimVtxRecons, dist_cutDecayTrackPrimVtx);
+      LocalHisto.h_Dist_cutDecayTrackPrimVtx->Fill(dist_cutDecayTrackPrimVtx, 1.);
+    }
+
+  //Decay vertex reconstruction
+  TVector3 DecayVertexReconscut;
+
+  TrackstoDecayVertex(RecoEvent.FragmentTracks, CutPionTracks, RecoEvent.PrimVtxRecons, DecayVertexReconscut);
+
+  /*
+  std::cout << "X:\t" << DecayVertex_cut_X << "\t" << RecoEvent.DecayVtxRecons.X() << "\n";
+  std::cout << "Y:\t" << DecayVertex_cut_Y << "\t" << RecoEvent.DecayVtxRecons.Y() << "\n";
+  std::cout << "Z:\t" << DecayVertex_cut_Z << "\t" << RecoEvent.DecayVtxRecons.Z() << "\n";
+  std::cout << "\n";
+  */
+
+
+  double cutdistance  = sqrt(pow((DecayVertex_real_X - DecayVertexReconscut.X()), 2.) +
+                              pow((DecayVertex_real_Y - DecayVertexReconscut.Y()), 2.) +
+                              pow((DecayVertex_real_Z - DecayVertexReconscut.Z()), 2.));
+  double cutdistanceX = DecayVertex_real_X - DecayVertexReconscut.X();
+  double cutdistanceY = DecayVertex_real_Y - DecayVertexReconscut.Y();
+  double cutdistanceZ = DecayVertex_real_Z - DecayVertexReconscut.Z();
+
+  LocalHisto.h_DecayVertexcutDistance->Fill(cutdistance, 1.);
+  LocalHisto.h_DecayVertexcutDistanceX->Fill(cutdistanceX, 1.);
+  LocalHisto.h_DecayVertexcutDistanceY->Fill(cutdistanceY, 1.);
+  LocalHisto.h_DecayVertexcutDistanceZ->Fill(cutdistanceZ, 1.);
+
+
+
   //Pion tracks
   PionTracksFinder(RecoEvent.DAF_results, RecoEvent.PionTracks);
 
@@ -182,6 +252,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   double closedist_distance = 0.;
   double closedist_posz = 0.;
+  double dist_DecayTrackPrimVtx = 0.;
 
   for(size_t i = 0; i < RecoEvent.PionTracks.size(); ++i)
     {
@@ -194,7 +265,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Closedist_Distance->Fill(closedist_distance, 1.);
       LocalHisto.h_Closedist_PosZ->Fill(closedist_posz, 1.);
 
-      //std::cout << "Distance:\t" << closedist_distance << "\t\tPosZ:\t" << closedist_posz << "\n";
+      Dist_DecayTrackPrimVtx(RecoEvent.PionTracks[i], RecoEvent.PrimVtxRecons, dist_DecayTrackPrimVtx);
+      LocalHisto.h_Dist_DecayTrackPrimVtx->Fill(dist_DecayTrackPrimVtx, 1.);
     }
 
 
@@ -229,7 +301,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
 void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
-                                        int& pdgParticle,
+                                        int& pdgParticle, int& cutConditions,
                                         std::vector<DecayTrackInfo>& RealTracks)
 {
 
@@ -247,12 +319,26 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
   for(itr = TrackDAFSim.begin(); itr != TrackDAFSim.end(); ++itr)
     {
       size_t iDetFirst = -1;
+      
+      size_t nHits_MDC = 0;
+      size_t nHits_MiniFiber = 0;
+      size_t nHits_PSCE = 0;
+      size_t nHits_PSBE = 0;
+
       for(size_t iDet = 0; iDet < itr->second.size(); ++iDet)
         {
           if(itr->second[iDet].size() == 0)
             continue;
           if(iDetFirst == -1)
             iDetFirst = iDet;
+          if(iDet >= G4Sol::MG01 && iDet <= G4Sol::MG17)
+            nHits_MDC += 1;
+          if(iDet >= G4Sol::MiniFiberD1_x1 && iDet <= G4Sol::MiniFiberD1_v2)
+            nHits_MiniFiber += 1;
+          if(iDet == G4Sol::PSCE)
+            nHits_PSCE += 1;
+          if(iDet == G4Sol::PSBE)
+            nHits_PSBE += 1;
         }
 
       if(iDetFirst == -1)
@@ -273,7 +359,14 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
                                      itr->second[iDetFirst][0].momZ, itr->second[iDetFirst][0].mass);
           temp_track.Hit_MomEnergy = temp_Hit_MomEnergy;
 
-          RealTracks.emplace_back(temp_track);
+          if(cutConditions == 0)
+            {
+              RealTracks.emplace_back(temp_track);
+            }
+          else if((cutConditions == 1) && (nHits_MDC >= 6) && (nHits_MiniFiber >= 4) && ((nHits_PSCE != 0) || (nHits_PSBE != 0)))
+            {
+              RealTracks.emplace_back(temp_track);
+            }
         }
     }
 }
@@ -487,5 +580,13 @@ void TDecayVertex::TrackstoDecayVertex(std::vector<DecayTrackInfo>& FragmentTrac
             }
         }
     }
+}
+
+void TDecayVertex::Dist_DecayTrackPrimVtx(DecayTrackInfo& PionTrack, TVector3& PrimVtxRecons, double& distance)
+{
+  TVector3 u(PionTrack.Hit_MomEnergy.Px(), PionTrack.Hit_MomEnergy.Py(), PionTrack.Hit_MomEnergy.Pz());
+  TVector3 PA = PrimVtxRecons - PionTrack.Hit_Pos;
+
+  distance = (PA.Cross(u)).Mag()/u.Mag();
 }
 

@@ -221,11 +221,20 @@ class Ana_Hist
   Hist<TH1F> h_Pt_realpions ;
   Hist<TH1F> h_Pz_realpions ;
 
+  Hist<TH1F> h_Pt_cutpions ;
+  Hist<TH1F> h_Pz_cutpions ;
+
   Hist<TH1F> h_Closedist_Distance ;
   Hist<TH1F> h_Closedist_PosZ ;
+  Hist<TH1F> h_Dist_DecayTrackPrimVtx ;
 
   Hist<TH1F> h_Closedist_realDistance ;
   Hist<TH1F> h_Closedist_realPosZ ;
+  Hist<TH1F> h_Dist_realDecayTrackPrimVtx ;
+
+  Hist<TH1F> h_Closedist_cutDistance ;
+  Hist<TH1F> h_Closedist_cutPosZ ;
+  Hist<TH1F> h_Dist_cutDecayTrackPrimVtx ;
 
   Hist<TH1F> h_DecayVertexDistance ;
   Hist<TH1F> h_DecayVertexDistanceX ;
@@ -236,6 +245,11 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexrealDistanceX ;
   Hist<TH1F> h_DecayVertexrealDistanceY ;
   Hist<TH1F> h_DecayVertexrealDistanceZ ;
+
+  Hist<TH1F> h_DecayVertexcutDistance ;
+  Hist<TH1F> h_DecayVertexcutDistanceX ;
+  Hist<TH1F> h_DecayVertexcutDistanceY ;
+  Hist<TH1F> h_DecayVertexcutDistanceZ ;
 
   Hist<TH1F> h_DecayVtxstats ;
 

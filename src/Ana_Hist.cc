@@ -469,15 +469,31 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_Pz_realpions.emplace_back(new TH1F("h_Pz_realpions", "h_Pz_realpions", 1000, -3, 5));
       HistReg.emplace_back(&h_Pz_realpions.store);
 
+      h_Pt_cutpions.emplace_back(new TH1F("h_Pt_cutpions", "h_Pt_cutpions", 1000, 0, 1));
+      HistReg.emplace_back(&h_Pt_cutpions.store);
+      h_Pz_cutpions.emplace_back(new TH1F("h_Pz_cutpions", "h_Pz_cutpions", 1000, -3, 5));
+      HistReg.emplace_back(&h_Pz_cutpions.store);
+
       h_Closedist_Distance.emplace_back(new TH1F("h_Closedist_Distance","h_Closedist_Distance", 1000, 0, 10));
       HistReg.emplace_back(&h_Closedist_Distance.store);
       h_Closedist_PosZ.emplace_back(new TH1F("h_Closedist_PosZ","h_Closedist_PosZ", 3000, 20, 50));
       HistReg.emplace_back(&h_Closedist_PosZ.store);
+      h_Dist_DecayTrackPrimVtx.emplace_back(new TH1F("h_Dist_DecayTrackPrimVtx", "h_Dist_DecayTrackPrimVtx", 2000, 0, 20));
+      HistReg.emplace_back(&h_Dist_DecayTrackPrimVtx.store);
 
       h_Closedist_realDistance.emplace_back(new TH1F("h_Closedist_realDistance","h_Closedist_realDistance", 1000, 0, 10));
       HistReg.emplace_back(&h_Closedist_realDistance.store);
       h_Closedist_realPosZ.emplace_back(new TH1F("h_Closedist_realPosZ","h_Closedist_realPosZ", 3000, 20, 50));
       HistReg.emplace_back(&h_Closedist_realPosZ.store);
+      h_Dist_realDecayTrackPrimVtx.emplace_back(new TH1F("h_Dist_realDecayTrackPrimVtx", "h_Dist_realDecayTrackPrimVtx", 2000, 0, 20));
+      HistReg.emplace_back(&h_Dist_realDecayTrackPrimVtx.store);
+
+      h_Closedist_cutDistance.emplace_back(new TH1F("h_Closedist_cutDistance","h_Closedist_cutDistance", 1000, 0, 10));
+      HistReg.emplace_back(&h_Closedist_cutDistance.store);
+      h_Closedist_cutPosZ.emplace_back(new TH1F("h_Closedist_cutPosZ","h_Closedist_cutPosZ", 3000, 20, 50));
+      HistReg.emplace_back(&h_Closedist_cutPosZ.store);
+      h_Dist_cutDecayTrackPrimVtx.emplace_back(new TH1F("h_Dist_cutDecayTrackPrimVtx", "h_Dist_cutDecayTrackPrimVtx", 2000, 0, 20));
+      HistReg.emplace_back(&h_Dist_cutDecayTrackPrimVtx.store);
 
       h_DecayVertexDistance.emplace_back(new TH1F("h_DecayVertexDistance", "h_DecayVertexDistance", 4000, 0, 40));
       HistReg.emplace_back(&h_DecayVertexDistance.store);
@@ -496,6 +512,15 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_DecayVertexrealDistanceY.store);
       h_DecayVertexrealDistanceZ.emplace_back(new TH1F("h_DecayVertexrealDistanceZ", "h_DecayVertexrealDistanceZ", 2000, -10, 10));
       HistReg.emplace_back(&h_DecayVertexrealDistanceZ.store);
+
+      h_DecayVertexcutDistance.emplace_back(new TH1F("h_DecayVertexcutDistance", "h_DecayVertexcutDistance", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexcutDistance.store);
+      h_DecayVertexcutDistanceX.emplace_back(new TH1F("h_DecayVertexcutDistanceX", "h_DecayVertexcutDistanceX", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexcutDistanceX.store);
+      h_DecayVertexcutDistanceY.emplace_back(new TH1F("h_DecayVertexcutDistanceY", "h_DecayVertexcutDistanceY", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexcutDistanceY.store);
+      h_DecayVertexcutDistanceZ.emplace_back(new TH1F("h_DecayVertexcutDistanceZ", "h_DecayVertexcutDistanceZ", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexcutDistanceZ.store);
 
       h_DecayVtxstats.emplace_back(new TH1F("h_DecayVtxstats", "h_DecayVtxstats", 10, 0, 10));
       HistReg.emplace_back(&h_DecayVtxstats.store);
