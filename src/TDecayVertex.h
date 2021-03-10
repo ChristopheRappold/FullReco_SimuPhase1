@@ -39,7 +39,7 @@ private:
   void PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
                         std::vector<DecayTrackInfo>& PionTracks);
 
-  void CloseDist(DecayTrackInfo& FragmentTrack, DecayTrackInfo& PionTrack, double& distance, double& z);
+  void CloseDist(DecayTrackInfo& FragmentTrack, DecayTrackInfo& PionTrack, double& distance, TVector3& centroid);
 
   double f_function(DecayTrackInfo& DecayTrack, TVector3& PosXYZ);
 
@@ -121,6 +121,11 @@ private:
     TH1F* h_DecayVertexDistanceX;
     TH1F* h_DecayVertexDistanceY;
     TH1F* h_DecayVertexDistanceZ;
+
+    TH1F* h_DecayVertexDistance_centroid;
+    TH1F* h_DecayVertexDistanceX_centroid;
+    TH1F* h_DecayVertexDistanceY_centroid;
+    TH1F* h_DecayVertexDistanceZ_centroid;
 
     TH1F* h_DecayVertexrealDistance;
     TH1F* h_DecayVertexrealDistanceX;

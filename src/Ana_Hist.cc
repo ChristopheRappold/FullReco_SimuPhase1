@@ -504,6 +504,15 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_DecayVertexDistanceZ.emplace_back(new TH1F("h_DecayVertexDistanceZ", "h_DecayVertexDistanceZ", 2000, -10, 10));
       HistReg.emplace_back(&h_DecayVertexDistanceZ.store);
 
+      h_DecayVertexDistance_centroid.emplace_back(new TH1F("h_DecayVertexDistance_centroid", "h_DecayVertexDistance_centroid", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexDistance_centroid.store);
+      h_DecayVertexDistanceX_centroid.emplace_back(new TH1F("h_DecayVertexDistanceX_centroid", "h_DecayVertexDistanceX_centroid", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceX_centroid.store);
+      h_DecayVertexDistanceY_centroid.emplace_back(new TH1F("h_DecayVertexDistanceY_centroid", "h_DecayVertexDistanceY_centroid", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceY_centroid.store);
+      h_DecayVertexDistanceZ_centroid.emplace_back(new TH1F("h_DecayVertexDistanceZ_centroid", "h_DecayVertexDistanceZ_centroid", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexDistanceZ_centroid.store);
+
       h_DecayVertexrealDistance.emplace_back(new TH1F("h_DecayVertexrealDistance", "h_DecayVertexrealDistance", 4000, 0, 40));
       HistReg.emplace_back(&h_DecayVertexrealDistance.store);
       h_DecayVertexrealDistanceX.emplace_back(new TH1F("h_DecayVertexrealDistanceX", "h_DecayVertexrealDistanceX", 1000, -5, 5));
