@@ -44,9 +44,9 @@ enum SolDet : int
   InSi0 = 0,
   InSi1,
   InSi2,
-  InSi3, /*3*/,
-  TR1, /*4*/,
-  TR2, /*5*/,
+  InSi3, /*3*/
+  TR1, /*4*/
+  TR2, /*5*/
   Si1x, /*6*/
   Si1y,
   Si2x,
@@ -72,8 +72,8 @@ enum SolDet : int
   FiberD5_x, /*28*/
   FiberD5_u,
   FiberD5_v,
-  PSFE, /*31*/,
-  MG01 /*32*/,
+  PSFE, /*31*/
+  MG01, /*32*/
   MG02,
   MG03,
   MG04,
@@ -89,10 +89,10 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17 /*48*/,
-  PSCE /*49*/,
-  PSBE /*50*/,
-  CDC_layer0 /*51*/,
+  MG17, /*48*/
+  PSCE, /*49*/
+  PSBE, /*50*/
+  CDC_layer0, /*51*/
   CDC_layer1,
   CDC_layer2,
   CDC_layer3,
@@ -106,16 +106,16 @@ enum SolDet : int
   CDC_layer11,
   CDC_layer12,
   CDC_layer13,
-  CDC_layer14 /*65*/,
-  CDHBar /*66*/,
-  TrFwd0 /*67*/,
+  CDC_layer14, /*65*/
+  CDHBar, /*66*/
+  TrFwd0, /*67*/
   TrFwd1,
-  TrFwd2 /*69*/,
-  RPC_l /*70*/,
-  RPC_h /*71*/,
-  FMF2Stop0 /*72*/,
+  TrFwd2, /*69*/
+  RPC_l, /*70*/
+  RPC_h, /*71*/
+  FMF2Stop0, /*72*/
   FMF2Stop1,
-  FMF2Stop2 /*74*/,
+  FMF2Stop2, /*74*/
   SIZEOF_G4SOLDETTYPE
 };
 

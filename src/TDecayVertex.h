@@ -33,7 +33,7 @@ private:
   int FinderDecayVertex(FullRecoEvent& RecoEvent);
 
   void RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
-                            int& pdgParticle, int& cutConditions,
+                            int& pdgParticle, int cutConditions,
                             std::vector<DecayTrackInfo>& RealTracks);
 
   void PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,

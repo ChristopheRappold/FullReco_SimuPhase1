@@ -301,7 +301,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
 void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
-                                        int& pdgParticle, int& cutConditions,
+                                        int& pdgParticle, int cutConditions,
                                         std::vector<DecayTrackInfo>& RealTracks)
 {
 
