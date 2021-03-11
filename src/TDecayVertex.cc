@@ -316,8 +316,6 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   closedist_pos *= (1./vect_closedist_pos.size());
 
-  std::cout << closedist_pos.X() << "\t" << closedist_pos.Z() << "\n";
-
   double distance_centroid  = sqrt(pow((DecayVertex_real_X - closedist_pos.X()), 2.) +
                           pow((DecayVertex_real_Y - closedist_pos.Y()), 2.) +
                           pow((DecayVertex_real_Z - closedist_pos.Z()), 2.));
