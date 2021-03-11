@@ -284,7 +284,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
     return -4;
 
   double closedist_distance = 0.;
-  TVector3 closedist_pos;
+  TVector3 temp_closedist_pos;
+  std::vector<TVector3> vect_closedist_pos;
   double dist_DecayTrackPrimVtx = 0.;
 
   for(size_t i = 0; i < RecoEvent.PionTracks.size(); ++i)
@@ -293,10 +294,11 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
                                         + pow(RecoEvent.PionTracks[i].Hit_MomEnergy.Py(),2.)), 1.);
       LocalHisto.h_Pz_pions->Fill(RecoEvent.PionTracks[i].Hit_MomEnergy.Pz(), 1.);
 
-      CloseDist(RecoEvent.FragmentTracks[0], RecoEvent.PionTracks[i], closedist_distance, closedist_pos);
+      CloseDist(RecoEvent.FragmentTracks[0], RecoEvent.PionTracks[i], closedist_distance, temp_closedist_pos);
+      vect_closedist_pos.emplace_back(temp_closedist_pos);
 
       LocalHisto.h_Closedist_Distance->Fill(closedist_distance, 1.);
-      LocalHisto.h_Closedist_PosZ->Fill(closedist_pos.Z(), 1.);
+      LocalHisto.h_Closedist_PosZ->Fill(temp_closedist_pos.Z(), 1.);
 
       Dist_DecayTrackPrimVtx(RecoEvent.PionTracks[i], RecoEvent.PrimVtxRecons, dist_DecayTrackPrimVtx);
       LocalHisto.h_Dist_DecayTrackPrimVtx->Fill(dist_DecayTrackPrimVtx, 1.);
@@ -304,6 +306,17 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
 #ifdef CENTROID_METHOD
+
+  TVector3 closedist_pos;
+
+  for(size_t i = 0; i < vect_closedist_pos.size(); ++i)
+    {
+      closedist_pos += vect_closedist_pos[i];
+    }
+
+  closedist_pos *= (1./vect_closedist_pos.size());
+
+  std::cout << closedist_pos.X() << "\t" << closedist_pos.Z() << "\n";
 
   double distance_centroid  = sqrt(pow((DecayVertex_real_X - closedist_pos.X()), 2.) +
                           pow((DecayVertex_real_Y - closedist_pos.Y()), 2.) +
