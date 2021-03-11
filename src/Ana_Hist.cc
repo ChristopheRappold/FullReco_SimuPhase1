@@ -474,6 +474,13 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_Pz_cutpions.emplace_back(new TH1F("h_Pz_cutpions", "h_Pz_cutpions", 1000, -3, 5));
       HistReg.emplace_back(&h_Pz_cutpions.store);
 
+      h_Nrealpions.emplace_back(new TH1F("h_Nrealpions", "h_Nrealpions", 10, 0, 10));
+      HistReg.emplace_back(&h_Nrealpions.store);
+      h_Ncutpions.emplace_back(new TH1F("h_Ncutpions", "h_Ncutpions", 10, 0, 10));
+      HistReg.emplace_back(&h_Ncutpions.store);
+      h_Npions.emplace_back(new TH1F("h_Npions", "h_Npions", 10, 0, 10));
+      HistReg.emplace_back(&h_Npions.store);
+
       h_Closedist_Distance.emplace_back(new TH1F("h_Closedist_Distance","h_Closedist_Distance", 1000, 0, 10));
       HistReg.emplace_back(&h_Closedist_Distance.store);
       h_Closedist_PosZ.emplace_back(new TH1F("h_Closedist_PosZ","h_Closedist_PosZ", 3000, 20, 50));

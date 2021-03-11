@@ -90,10 +90,13 @@ private:
     TH1F* h_Pt_cutpions;
     TH1F* h_Pz_cutpions;
 
+    TH1F* h_Nrealpions;
+    TH1F* h_Ncutpions;
+    TH1F* h_Npions;
+
     TH1F* h_Closedist_Distance;
     TH1F* h_Closedist_PosZ;
     TH1F* h_Dist_DecayTrackPrimVtx;
-
 
     TH1F* h_Closedist_realDistance;
     TH1F* h_Closedist_realPosZ;

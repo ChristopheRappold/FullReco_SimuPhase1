@@ -96,6 +96,10 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_Pt_cutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_cutpions);
   LocalHisto.h_Pz_cutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_cutpions);
 
+  LocalHisto.h_Nrealpions = AnaHisto->CloneAndRegister(AnaHisto->h_Nrealpions);
+  LocalHisto.h_Ncutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Ncutpions);
+  LocalHisto.h_Npions = AnaHisto->CloneAndRegister(AnaHisto->h_Npions);
+
   LocalHisto.h_Closedist_Distance = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_Distance);
   LocalHisto.h_Closedist_PosZ = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_PosZ);
   LocalHisto.h_Dist_DecayTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_DecayTrackPrimVtx);
@@ -168,6 +172,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   std::vector<DecayTrackInfo> RealPionTracks {};
   RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, 0, RealPionTracks);
 
+  LocalHisto.h_Nrealpions->Fill(RealPionTracks.size(), 1.);
   if(RealPionTracks.size() == 0)
     return -2;
 
@@ -222,6 +227,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   std::vector<DecayTrackInfo> CutPionTracks {};
   RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, 1, CutPionTracks);
 
+  LocalHisto.h_Ncutpions->Fill(CutPionTracks.size(), 1.);
   if(CutPionTracks.size() == 0)
     return -3;
 
@@ -273,6 +279,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   //Pion tracks
   PionTracksFinder(RecoEvent.DAF_results, RecoEvent.PionTracks);
 
+  LocalHisto.h_Npions->Fill(RecoEvent.PionTracks.size(), 1.);
   if(RecoEvent.PionTracks.size() == 0)
     return -4;
 

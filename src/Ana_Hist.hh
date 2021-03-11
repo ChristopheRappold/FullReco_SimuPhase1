@@ -224,6 +224,10 @@ class Ana_Hist
   Hist<TH1F> h_Pt_cutpions ;
   Hist<TH1F> h_Pz_cutpions ;
 
+  Hist<TH1F> h_Nrealpions ;
+  Hist<TH1F> h_Ncutpions ;
+  Hist<TH1F> h_Npions ;
+
   Hist<TH1F> h_Closedist_Distance ;
   Hist<TH1F> h_Closedist_PosZ ;
   Hist<TH1F> h_Dist_DecayTrackPrimVtx ;
