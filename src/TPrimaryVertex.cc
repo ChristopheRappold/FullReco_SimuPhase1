@@ -198,7 +198,6 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   size_t nGoodrecons_Si1 = 0;
   nGoodEventsCounter(HitEnergyPosXY_Si1, HitEnergyPosXYreal_Si1, widthStrip_Si1, nGoodrecons_Si1);
   int nGhost_Si1    = HitEnergyPosXY_Si1.size() - nGoodrecons_Si1;
-  int nNorecons_Si1 = HitEnergyPosXYreal_Si1.size() - nGoodrecons_Si1;
 
   LocalHisto.h_HitMultiplicity_Si1->Fill(HitEnergyPosXYreal_Si1.size(), 1.);
   LocalHisto.h_HitMultiplicityRecons_Si1->Fill(HitEnergyPosXY_Si1.size(), 1.);
@@ -216,7 +215,6 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   size_t nGoodrecons_Si2 = 0;
   nGoodEventsCounter(HitEnergyPosXY_Si2, HitEnergyPosXYreal_Si2, widthStrip_Si2, nGoodrecons_Si2);
   int nGhost_Si2    = HitEnergyPosXY_Si2.size() - nGoodrecons_Si2;
-  int nNorecons_Si2 = HitEnergyPosXYreal_Si2.size() - nGoodrecons_Si2;
 
   LocalHisto.h_HitMultiplicity_Si2->Fill(HitEnergyPosXYreal_Si2.size(), 1.);
   LocalHisto.h_HitMultiplicityRecons_Si2->Fill(HitEnergyPosXY_Si2.size(), 1.);
@@ -1604,7 +1602,6 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
       double realPosX_Si2 = RealTracks[i][1][1];
       double realPosY_Si2 = RealTracks[i][1][2];
 
-      double particletype = RealTracks[i][0][6];
       double thetareal    = atan(sqrt(pow((realPosY_Si2 - realPosY_Si1), 2.) + pow((realPosX_Si2 - realPosX_Si1), 2.)) /
                               (Z_plane_Si2 - Z_plane_Si1)) *
                          180. / M_PI;

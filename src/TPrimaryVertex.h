@@ -21,7 +21,6 @@ class SiliconHits
   double widthStrip_Si2 = 0.03; // in cm
   double lenghtSi_Si2   = 6.;   // in cm
 
-  double EnergyThreshold     = 0.001; // in MeV
   double MaxEnergyDiffStrips = 0.2;   // in MeV
 
   double MaxEnergyMultiplicity = 0.03; // in MeV
@@ -142,24 +141,16 @@ private:
 
   double Zo_target = 24.5; // in cm
   double Zf_target = 25.5; // in cm
-  double Xo_target = -1.;
-  double Xf_target = 1.;
-  double Yo_target = -1.;
-  double Yf_target = +1.;
 
   double Z_plane_Si1    = 27.;  // in cm
   double widthStrip_Si1 = 0.03; // in cm
   double sigma_Si1      = widthStrip_Si1 / std::sqrt(12.);
-  double thicknessSi_Si1 = 0.03; // cm
   double lenghtSi_Si1    = 4.;   // in cm
-  int nStrips_Si1        = (int)(lenghtSi_Si1 / widthStrip_Si1);
 
   double Z_plane_Si2     = 30.;  // in cm
   double widthStrip_Si2  = 0.03; // in cm
   double sigma_Si2       = widthStrip_Si2 / std::sqrt(12.);
-  double thicknessSi_Si2 = 0.03; // cm
   double lenghtSi_Si2    = 6.;   // in cm
-  int nStrips_Si2        = (int)(lenghtSi_Si2 / widthStrip_Si2);
 
   double ErrorDistTarget    = 0.2;  // in cm
   double MaxClosestDistance = 0.04; // in cm
@@ -183,11 +174,8 @@ private:
   std::vector<double> sigma_Si{sigma_Si1, sigma_Si2};
   double sigma_beam = 2. * randInteractionPointXY / std::sqrt(12.);
 
-  double EnergyThreshold       = 0.001; // in MeV
-  double MaxEnergyDiffStrips   = 0.2;   // in MeV
+  double EnergyThreshold     = 0.001; // in MeV
   double MaxEnergyDiffSilicons = 0.1;   // in MeV
-
-  double MaxDistTracks = 0.2;
 
   TRandom3* rand;
 

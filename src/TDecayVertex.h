@@ -58,29 +58,15 @@ private:
 
 
   double Zo_target = 24.5; // in cm
-  double Zf_target = 25.5; // in cm
-  double Xo_target = -1.;
-  double Xf_target = 1.;
-  double Yo_target = -1.;
-  double Yf_target = +1.;
-
   double Zo_minifibers = 45;
+
+  double k_factor       = 3.; // multiplies the fragment track f function value
 
   size_t NstepsdiscretXY      = 7;
   size_t NstepsdiscretZ       = 21;
   size_t Nstepsdiscretbox     = 5;
   size_t nTimesDiscretization = 7;
   double boxDistXY        = 3.;
-
-  double k_factor       = 3.; // multiplies the fragment track f function value
-
-  double min_f_value = 0.5;
-
-  double EnergyThreshold       = 0.001; // in MeV
-  double MaxEnergyDiffStrips   = 0.2;   // in MeV
-  double MaxEnergyDiffSilicons = 0.1;   // in MeV
-
-  double MaxDistTracks = 0.2;
 
   int He3_pdg = 10003;
   int pi_pdg = -211;
