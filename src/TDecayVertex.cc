@@ -124,6 +124,16 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_DecayVertexDistanceY_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_centroid);
   LocalHisto.h_DecayVertexDistanceZ_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_centroid);
 
+  LocalHisto.h_DecayVertexDistance_2centroid_average = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_2centroid_average);
+  LocalHisto.h_DecayVertexDistanceX_2centroid_average = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_2centroid_average);
+  LocalHisto.h_DecayVertexDistanceY_2centroid_average = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_2centroid_average);
+  LocalHisto.h_DecayVertexDistanceZ_2centroid_average = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_2centroid_average);
+
+  LocalHisto.h_DecayVertexDistance_2centroid_closest = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_2centroid_closest);
+  LocalHisto.h_DecayVertexDistanceX_2centroid_closest = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_2centroid_closest);
+  LocalHisto.h_DecayVertexDistanceY_2centroid_closest = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_2centroid_closest);
+  LocalHisto.h_DecayVertexDistanceZ_2centroid_closest = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_2centroid_closest);
+
   LocalHisto.h_DecayVertexrealDistance = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexrealDistance);
   LocalHisto.h_DecayVertexrealDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexrealDistanceX);
   LocalHisto.h_DecayVertexrealDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexrealDistanceY);
@@ -285,6 +295,10 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   double closedist_distance = 0.;
   TVector3 temp_closedist_pos;
+
+  double newclosest_distance = 1000.;
+  TVector3 new_closedist_pos;
+
   std::vector<TVector3> vect_closedist_pos;
   double dist_DecayTrackPrimVtx = 0.;
 
@@ -302,6 +316,12 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       Dist_DecayTrackPrimVtx(RecoEvent.PionTracks[i], RecoEvent.PrimVtxRecons, dist_DecayTrackPrimVtx);
       LocalHisto.h_Dist_DecayTrackPrimVtx->Fill(dist_DecayTrackPrimVtx, 1.);
+
+      if(closedist_distance < newclosest_distance)
+        {
+          newclosest_distance = closedist_distance;
+          new_closedist_pos = temp_closedist_pos;
+        }
     }
 
 
@@ -313,12 +333,11 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
     {
       closedist_pos += vect_closedist_pos[i];
     }
-
   closedist_pos *= (1./vect_closedist_pos.size());
 
   double distance_centroid  = sqrt(pow((DecayVertex_real_X - closedist_pos.X()), 2.) +
-                          pow((DecayVertex_real_Y - closedist_pos.Y()), 2.) +
-                          pow((DecayVertex_real_Z - closedist_pos.Z()), 2.));
+                                   pow((DecayVertex_real_Y - closedist_pos.Y()), 2.) +
+                                   pow((DecayVertex_real_Z - closedist_pos.Z()), 2.));
   double distanceX_centroid = DecayVertex_real_X - closedist_pos.X();
   double distanceY_centroid = DecayVertex_real_Y - closedist_pos.Y();
   double distanceZ_centroid = DecayVertex_real_Z - closedist_pos.Z();
@@ -329,6 +348,26 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexDistanceZ_centroid->Fill(distanceZ_centroid, 1.);
 
   LocalHisto.h_DecayVertexPosZ_centroid->Fill(closedist_pos.Z(), 1.);
+
+  if(RecoEvent.PionTracks.size() > 1)
+    {
+      LocalHisto.h_DecayVertexDistance_2centroid_average->Fill(distance_centroid, 1.);
+      LocalHisto.h_DecayVertexDistanceX_2centroid_average->Fill(distanceX_centroid, 1.);
+      LocalHisto.h_DecayVertexDistanceY_2centroid_average->Fill(distanceY_centroid, 1.);
+      LocalHisto.h_DecayVertexDistanceZ_2centroid_average->Fill(distanceZ_centroid, 1.);
+
+      double distance_2centroid_closest  = sqrt(pow((DecayVertex_real_X - new_closedist_pos.X()), 2.) +
+                                                pow((DecayVertex_real_Y - new_closedist_pos.Y()), 2.) +
+                                                pow((DecayVertex_real_Z - new_closedist_pos.Z()), 2.));
+      double distanceX_2centroid_closest = DecayVertex_real_X - new_closedist_pos.X();
+      double distanceY_2centroid_closest = DecayVertex_real_Y - new_closedist_pos.Y();
+      double distanceZ_2centroid_closest = DecayVertex_real_Z - new_closedist_pos.Z();
+
+      LocalHisto.h_DecayVertexDistance_2centroid_closest->Fill(distance_2centroid_closest, 1.);
+      LocalHisto.h_DecayVertexDistanceX_2centroid_closest->Fill(distanceX_2centroid_closest, 1.);
+      LocalHisto.h_DecayVertexDistanceY_2centroid_closest->Fill(distanceY_2centroid_closest, 1.);
+      LocalHisto.h_DecayVertexDistanceZ_2centroid_closest->Fill(distanceZ_2centroid_closest, 1.);
+    }
 
 #endif
 

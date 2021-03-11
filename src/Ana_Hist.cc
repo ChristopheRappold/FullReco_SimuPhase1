@@ -520,6 +520,24 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_DecayVertexDistanceZ_centroid.emplace_back(new TH1F("h_DecayVertexDistanceZ_centroid", "h_DecayVertexDistanceZ_centroid", 2000, -10, 10));
       HistReg.emplace_back(&h_DecayVertexDistanceZ_centroid.store);
 
+      h_DecayVertexDistance_2centroid_average.emplace_back(new TH1F("h_DecayVertexDistance_2centroid_average", "h_DecayVertexDistance_2centroid_average", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexDistance_2centroid_average.store);
+      h_DecayVertexDistanceX_2centroid_average.emplace_back(new TH1F("h_DecayVertexDistanceX_2centroid_average", "h_DecayVertexDistanceX_2centroid_average", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceX_2centroid_average.store);
+      h_DecayVertexDistanceY_2centroid_average.emplace_back(new TH1F("h_DecayVertexDistanceY_2centroid_average", "h_DecayVertexDistanceY_2centroid_average", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceY_2centroid_average.store);
+      h_DecayVertexDistanceZ_2centroid_average.emplace_back(new TH1F("h_DecayVertexDistanceZ_2centroid_average", "h_DecayVertexDistanceZ_2centroid_average", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexDistanceZ_2centroid_average.store);
+
+      h_DecayVertexDistance_2centroid_closest.emplace_back(new TH1F("h_DecayVertexDistance_2centroid_closest", "h_DecayVertexDistance_2centroid_closest", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexDistance_2centroid_closest.store);
+      h_DecayVertexDistanceX_2centroid_closest.emplace_back(new TH1F("h_DecayVertexDistanceX_2centroid_closest", "h_DecayVertexDistanceX_2centroid_closest", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceX_2centroid_closest.store);
+      h_DecayVertexDistanceY_2centroid_closest.emplace_back(new TH1F("h_DecayVertexDistanceY_2centroid_closest", "h_DecayVertexDistanceY_2centroid_closest", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceY_2centroid_closest.store);
+      h_DecayVertexDistanceZ_2centroid_closest.emplace_back(new TH1F("h_DecayVertexDistanceZ_2centroid_closest", "h_DecayVertexDistanceZ_2centroid_closest", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexDistanceZ_2centroid_closest.store);
+
       h_DecayVertexrealDistance.emplace_back(new TH1F("h_DecayVertexrealDistance", "h_DecayVertexrealDistance", 4000, 0, 40));
       HistReg.emplace_back(&h_DecayVertexrealDistance.store);
       h_DecayVertexrealDistanceX.emplace_back(new TH1F("h_DecayVertexrealDistanceX", "h_DecayVertexrealDistanceX", 1000, -5, 5));
