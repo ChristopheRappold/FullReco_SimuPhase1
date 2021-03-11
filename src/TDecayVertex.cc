@@ -11,11 +11,11 @@
 
 //#define DEBUG_DECAYVTX
 
-/* CHANGE
-#define RECONS_HITS_MULTIPLICITY
-#define N_HITS_CHECK
-#define DECAY_VERTEX
-*/
+#define REAL_PIONS_CHECK
+#define CUT_PIONS_CHECK
+#define CENTROID_METHOD
+#define VFUNCTION_METHOD
+
 using namespace std;
 using namespace G4Sol;
 
@@ -162,6 +162,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
     }
   
 
+#ifdef REAL_PIONS_CHECK
+
   //Real pion tracks
   std::vector<DecayTrackInfo> RealPionTracks {};
   RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, 0, RealPionTracks);
@@ -212,6 +214,9 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexrealDistanceY->Fill(realdistanceY, 1.);
   LocalHisto.h_DecayVertexrealDistanceZ->Fill(realdistanceZ, 1.);
 
+#endif
+
+#ifdef CUT_PIONS_CHECK
 
  //Cut pion tracks
   std::vector<DecayTrackInfo> CutPionTracks {};
@@ -263,7 +268,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexcutDistanceY->Fill(cutdistanceY, 1.);
   LocalHisto.h_DecayVertexcutDistanceZ->Fill(cutdistanceZ, 1.);
 
-
+#endif
 
   //Pion tracks
   PionTracksFinder(RecoEvent.DAF_results, RecoEvent.PionTracks);
@@ -291,6 +296,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
     }
 
 
+#ifdef CENTROID_METHOD
+
   double distance_centroid  = sqrt(pow((DecayVertex_real_X - closedist_pos.X()), 2.) +
                           pow((DecayVertex_real_Y - closedist_pos.Y()), 2.) +
                           pow((DecayVertex_real_Z - closedist_pos.Z()), 2.));
@@ -305,6 +312,9 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   LocalHisto.h_DecayVertexPosZ_centroid->Fill(closedist_pos.Z(), 1.);
 
+#endif
+
+#ifdef VFUNCTION_METHOD
 
   //Decay vertex reconstruction
   TVector3 DecayVertexRecons;
@@ -332,8 +342,9 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexDistanceY->Fill(distanceY, 1.);
   LocalHisto.h_DecayVertexDistanceZ->Fill(distanceZ, 1.);
 
-  LocalHisto.h_DecayVertexPosZ_centroid->Fill(DecayVertexRecons.Z(), 1.);
+  LocalHisto.h_DecayVertexPosZ_vfunction->Fill(DecayVertexRecons.Z(), 1.);
 
+#endif
 
   //Hypernucleus reconstruction
   TLorentzVector Hypernucleus_MomEnergy = RecoEvent.FragmentTracks[0].Hit_MomEnergy + RecoEvent.PionTracks[0].Hit_MomEnergy;  
