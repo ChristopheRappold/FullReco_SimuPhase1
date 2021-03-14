@@ -229,6 +229,10 @@ private:
     TH1F* h_InteractionPointDistanceY_pull;
     TH1F* h_InteractionPointDistanceZ_pull;
 
+    TH1F* h_CovarianceSigmaX;
+    TH1F* h_CovarianceSigmaY;
+    TH1F* h_CovarianceSigmaZ;
+
     TH1F* h_IP_DecayDistance;
     TH1F* h_IP_DecayDistanceX;
     TH1F* h_IP_DecayDistanceY;

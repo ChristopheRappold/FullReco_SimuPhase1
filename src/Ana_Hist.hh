@@ -197,6 +197,10 @@ class Ana_Hist
   Hist<TH1F> h_InteractionPointDistanceY_pull ;
   Hist<TH1F> h_InteractionPointDistanceZ_pull ;
 
+  Hist<TH1F> h_CovarianceSigmaX ;
+  Hist<TH1F> h_CovarianceSigmaY ;
+  Hist<TH1F> h_CovarianceSigmaZ ;
+
   Hist<TH1F> h_IP_DecayDistance ;
   Hist<TH1F> h_IP_DecayDistanceX ;
   Hist<TH1F> h_IP_DecayDistanceY ;

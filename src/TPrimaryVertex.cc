@@ -12,7 +12,7 @@
 #define TRACK_RECONS_CHECK
 #define MOTHER_DAUGHTERS_CHECK
 #define VERTEX_RECONS_CHECK
-//#define COVARIANCE_MATRIX
+#define COVARIANCE_MATRIX
 //#define DECAY_VERTEX
 
 using namespace std;
@@ -128,6 +128,10 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_InteractionPointDistanceX_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceX_pull);
   LocalHisto.h_InteractionPointDistanceY_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceY_pull);
   LocalHisto.h_InteractionPointDistanceZ_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceZ_pull);
+
+  LocalHisto.h_CovarianceSigmaX = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaX);
+  LocalHisto.h_CovarianceSigmaY = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaY);
+  LocalHisto.h_CovarianceSigmaZ = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaZ);
 
   LocalHisto.h_IP_DecayDistance  = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistance);
   LocalHisto.h_IP_DecayDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistanceX);
@@ -497,6 +501,11 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
     std::cout << CovMatrix[1][0] << "\t" << CovMatrix[1][1] << "\t" << CovMatrix[1][2] << "\n";
     std::cout << CovMatrix[2][0] << "\t" << CovMatrix[2][1] << "\t" << CovMatrix[2][2] << "\n\n";
   */
+
+  LocalHisto.h_CovarianceSigmaX->Fill(sqrt(CovMatrix[0][0]), 1.);
+  LocalHisto.h_CovarianceSigmaY->Fill(sqrt(CovMatrix[1][1]), 1.);
+  LocalHisto.h_CovarianceSigmaZ->Fill(sqrt(CovMatrix[2][2]), 1.);
+
 #endif
 
 #ifdef DECAY_VERTEX

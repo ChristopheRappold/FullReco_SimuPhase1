@@ -419,6 +419,12 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
        h_InteractionPointDistanceZ_pull.emplace_back(new TH1F("h_InteractionPointDistanceZ_pull","h_InteractionPointDistanceZ_pull", 2000, -5, 5));
        HistReg.emplace_back(&h_InteractionPointDistanceZ_pull.store);
 
+       h_CovarianceSigmaX.emplace_back(new TH1F("h_CovarianceSigmaX", "h_CovarianceSigmaX", 3000, -3, 3));
+       HistReg.emplace_back(&h_CovarianceSigmaX.store);
+       h_CovarianceSigmaY.emplace_back(new TH1F("h_CovarianceSigmaY", "h_CovarianceSigmaY", 3000, -3, 3));
+       HistReg.emplace_back(&h_CovarianceSigmaY.store);
+       h_CovarianceSigmaZ.emplace_back(new TH1F("h_CovarianceSigmaZ", "h_CovarianceSigmaZ", 3000, -3, 3));
+       HistReg.emplace_back(&h_CovarianceSigmaZ.store);
 
        h_IP_DecayDistance.emplace_back(new TH1F("h_IP_DecayDistance","h_IP_DecayDistance", 6000, 0, 24));
        HistReg.emplace_back(&h_IP_DecayDistance.store);
