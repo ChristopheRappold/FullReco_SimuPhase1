@@ -503,7 +503,7 @@ void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_resu
           temp_track.Hit_Pos = temp_Hit_Pos;
 
           TLorentzVector temp_Hit_MomEnergy;
-          temp_Hit_MomEnergy.SetXYZM(itr->second.momX, itr->second.momY, itr->second.momZ, itr->second.mass);
+          temp_Hit_MomEnergy.SetXYZM(itr->second.momX, itr->second.momY, itr->second.momZ, pi_mass);
           temp_track.Hit_MomEnergy = temp_Hit_MomEnergy;
 
           PionTracks.emplace_back(temp_track);

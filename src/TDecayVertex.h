@@ -71,6 +71,8 @@ private:
   int He3_pdg = 10003;
   int pi_pdg = -211;
 
+  double pi_mass = 139.57018; //in MeV
+
 
   TRandom3* rand;
   PDG_fromName pid_fromName;
