@@ -419,11 +419,11 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
        h_InteractionPointDistanceZ_pull.emplace_back(new TH1F("h_InteractionPointDistanceZ_pull","h_InteractionPointDistanceZ_pull", 2000, -5, 5));
        HistReg.emplace_back(&h_InteractionPointDistanceZ_pull.store);
 
-       h_CovarianceSigmaX.emplace_back(new TH1F("h_CovarianceSigmaX", "h_CovarianceSigmaX", 3000, -3, 3));
+       h_CovarianceSigmaX.emplace_back(new TH1F("h_SqrtCovariance_SigmaX", "h_SqrtCovariance_SigmaX", 1000, 0, 0.1));
        HistReg.emplace_back(&h_CovarianceSigmaX.store);
-       h_CovarianceSigmaY.emplace_back(new TH1F("h_CovarianceSigmaY", "h_CovarianceSigmaY", 3000, -3, 3));
+       h_CovarianceSigmaY.emplace_back(new TH1F("h_SqrtCovariance_SigmaY", "h_SqrtCovariance_SigmaY", 1000, 0, 0.1));
        HistReg.emplace_back(&h_CovarianceSigmaY.store);
-       h_CovarianceSigmaZ.emplace_back(new TH1F("h_CovarianceSigmaZ", "h_CovarianceSigmaZ", 3000, -3, 3));
+       h_CovarianceSigmaZ.emplace_back(new TH1F("h_SqrtCovariance_SigmaZ", "h_SqrtCovariance_SigmaZ", 2000, 0, 0.2));
        HistReg.emplace_back(&h_CovarianceSigmaZ.store);
 
        h_IP_DecayDistance.emplace_back(new TH1F("h_IP_DecayDistance","h_IP_DecayDistance", 6000, 0, 24));
