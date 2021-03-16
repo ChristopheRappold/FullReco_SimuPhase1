@@ -27,7 +27,7 @@ OutPutOpt     = -o
 
 #CXX           = g++
 CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUILD_DRAFT_API # -fsanitize=address -fno-omit-frame-pointer #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
-LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
+LIBS          = -L./KFParticle/install/lib -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
 LDFLAGS       = '-Wl,-rpath,$$ORIGIN/lib'
 SOFLAGS       = -shared
 
@@ -45,8 +45,9 @@ SPDLOGFLAGS = -I./spdlog/include
 ZMQFLAGS = -I./cppzmq/include -I./libzmq/include
 MSGFLAGS = -I./msgpack-c/include
 TRICKTRACKFLAGS = -I./TrickTrack/include
+KFPARTICLEFLAGS = -I./KFParticle/install/include
 
-CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
+CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
 LIBS         += $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol
 
 GENFIT_LIB = -lgenfit2
@@ -54,6 +55,7 @@ SPDLOG_LIB = -lspdlog
 ZMQ_LIB = -lzmq
 MSG_LIB = -lmsgpackc
 TT_LIB = -ltricktrack
+KF_LIB = -lKFParticle
 
 LIB_MERGER =  $(ROOTLIBS) -lAna_Event -lAna_Event_Out
 LIB_PROFILING = #-L/home/christophe/Workspace/gperftools-2.4/lib -ltcmalloc #-lprofiler
@@ -90,8 +92,8 @@ CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 
 all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainMonitor 
 
-$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(LDFLAGS)
+$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
 
 $(Bindir)/MainMonitor: MainMonitor.o FullRecoConfig.o
 	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
@@ -139,6 +141,12 @@ libtricktrack.so :
 	make -C TrickTrack/build
 	make -C TrickTrack/build install
 	ln -sf $(FromLibdir)/TrickTrack/lib/libtricktrack.$(DllSuf) $(Bindir)/lib/
+	@echo "---> $@ done"
+
+libKFParticle.so :
+	make -C KFParticle/build
+	make -C KFParticle/build install
+	ln -sf $(FromLibdir)/KFParticle/install/lib/libKFParticle.$(DllSuf) $(Bindir)/lib/
 	@echo "---> $@ done"
 
 libFairBase.so :
