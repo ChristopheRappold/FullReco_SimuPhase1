@@ -273,7 +273,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Closedist_cutPosZ->Fill(closedist_cutpos.Z(), 1.);
 
       Dist_DecayTrackPrimVtx(CutPionTracks[i], RecoEvent.PrimVtxRecons, dist_cutDecayTrackPrimVtx);
-      LocalHisto.h_Dist_cutDecayTrackPrimVtx->Fill(dist_cutDecayTrackPrimVtx, 1.);
+      LocalHisto.h_Dist_cutDecayTrackPrimVtx->Fill(dist_cutDecayTrackPrimVtx, "All", 1.);
 
       for(itr_cut = RecoEvent.DaughtersTrackDAFInit.begin(); itr_cut != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_cut)
         {
@@ -346,7 +346,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Closedist_PosZ->Fill(temp_closedist_pos.Z(), 1.);
 
       Dist_DecayTrackPrimVtx(RecoEvent.PionTracks[i], RecoEvent.PrimVtxRecons, dist_DecayTrackPrimVtx);
-      LocalHisto.h_Dist_DecayTrackPrimVtx->Fill(dist_DecayTrackPrimVtx, 1.);
+      LocalHisto.h_Dist_DecayTrackPrimVtx->Fill(dist_DecayTrackPrimVtx, "All", 1.);
 
       for(itr_recons = RecoEvent.DaughtersTrackDAFInit.begin(); itr_recons != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_recons)
         {
