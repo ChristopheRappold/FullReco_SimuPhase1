@@ -87,6 +87,7 @@ class THyphiAttributes
   bool Task_FinderCM;
   bool Task_CheckRZ;
   bool Task_KalmanDAF;
+  bool Task_DecayVtx;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;

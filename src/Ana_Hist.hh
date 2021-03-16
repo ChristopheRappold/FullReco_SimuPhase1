@@ -32,6 +32,7 @@ enum StateHist : int
   HOUGH,
   SIMU,
   PRIMVTX,
+  DECAYVTX,
   SIZEOF_STATEHIST
 };
 
@@ -196,6 +197,10 @@ class Ana_Hist
   Hist<TH1F> h_InteractionPointDistanceY_pull ;
   Hist<TH1F> h_InteractionPointDistanceZ_pull ;
 
+  Hist<TH1F> h_CovarianceSigmaX ;
+  Hist<TH1F> h_CovarianceSigmaY ;
+  Hist<TH1F> h_CovarianceSigmaZ ;
+
   Hist<TH1F> h_IP_DecayDistance ;
   Hist<TH1F> h_IP_DecayDistanceX ;
   Hist<TH1F> h_IP_DecayDistanceY ;
@@ -205,14 +210,81 @@ class Ana_Hist
   Hist<TH1F> h_DecayPositionDistanceX ;
   Hist<TH1F> h_DecayPositionDistanceY ;
   Hist<TH1F> h_DecayPositionDistanceZ ;
-
+  
+  Hist<TH2F> h_PrimStatus;
   Hist<TH1F> h_PrimVtxstats ;
 
-  Hist<TH2F> h_PrimStatus;
-  
+  //Decay Vertex
+  Hist<TH1F> h_Pt_fragments ;
+  Hist<TH1F> h_Pz_fragments ;
+
+  Hist<TH1F> h_Pt_pions ;
+  Hist<TH1F> h_Pz_pions ;
+  Hist<TH1F> h_Chi2ndf_pions ;
+
+  Hist<TH1F> h_Pt_realpions ;
+  Hist<TH1F> h_Pz_realpions ;
+
+  Hist<TH1F> h_Pt_cutpions ;
+  Hist<TH1F> h_Pz_cutpions ;
+
+  Hist<TH1F> h_Nrealpions ;
+  Hist<TH1F> h_Ncutpions ;
+  Hist<TH1F> h_Npions ;
+
+  Hist<TH1F> h_Closedist_Distance ;
+  Hist<TH1F> h_Closedist_PosZ ;
+  Hist<TH2F> h_Dist_DecayTrackPrimVtx ;
+
+  Hist<TH1F> h_Closedist_realDistance ;
+  Hist<TH1F> h_Closedist_realPosZ ;
+  Hist<TH2F> h_Dist_realDecayTrackPrimVtx ;
+
+  Hist<TH1F> h_Closedist_cutDistance ;
+  Hist<TH1F> h_Closedist_cutPosZ ;
+  Hist<TH2F> h_Dist_cutDecayTrackPrimVtx ;
+
+  Hist<TH1F> h_DecayVertexDistance ;
+  Hist<TH1F> h_DecayVertexDistanceX ;
+  Hist<TH1F> h_DecayVertexDistanceY ;
+  Hist<TH1F> h_DecayVertexDistanceZ ;
+
+  Hist<TH1F> h_DecayVertexDistance_centroid ;
+  Hist<TH1F> h_DecayVertexDistanceX_centroid ;
+  Hist<TH1F> h_DecayVertexDistanceY_centroid ;
+  Hist<TH1F> h_DecayVertexDistanceZ_centroid ;
+
+  Hist<TH1F> h_DecayVertexDistance_2centroid_average ;
+  Hist<TH1F> h_DecayVertexDistanceX_2centroid_average ;
+  Hist<TH1F> h_DecayVertexDistanceY_2centroid_average ;
+  Hist<TH1F> h_DecayVertexDistanceZ_2centroid_average ;
+
+  Hist<TH1F> h_DecayVertexDistance_2centroid_closest ;
+  Hist<TH1F> h_DecayVertexDistanceX_2centroid_closest ;
+  Hist<TH1F> h_DecayVertexDistanceY_2centroid_closest ;
+  Hist<TH1F> h_DecayVertexDistanceZ_2centroid_closest ;
+
+  Hist<TH1F> h_DecayVertexrealDistance ;
+  Hist<TH1F> h_DecayVertexrealDistanceX ;
+  Hist<TH1F> h_DecayVertexrealDistanceY ;
+  Hist<TH1F> h_DecayVertexrealDistanceZ ;
+
+  Hist<TH1F> h_DecayVertexcutDistance ;
+  Hist<TH1F> h_DecayVertexcutDistanceX ;
+  Hist<TH1F> h_DecayVertexcutDistanceY ;
+  Hist<TH1F> h_DecayVertexcutDistanceZ ;
+
+  Hist<TH1F> h_DecayVertexPosZ_real ;
+  Hist<TH1F> h_DecayVertexPosZ_vfunction ;
+  Hist<TH1F> h_DecayVertexPosZ_centroid ;
+
+  Hist<TH1F> h_HypInvariantMass ;
+
+  Hist<TH1F> h_DecayVtxstats ;
+
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Hough = true, bool Simu = false, bool PrimVtx = true);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Hough = true, bool Simu = false, bool PrimVtx = true, bool DecayVtx = true);
   ~Ana_Hist();
 
   int Write(TFile*);

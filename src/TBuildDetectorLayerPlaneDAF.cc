@@ -200,7 +200,11 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   RecoEvent.InteractionPoint[0] = event.InteractionPoint_X;
   RecoEvent.InteractionPoint[1] = event.InteractionPoint_Y;
   RecoEvent.InteractionPoint[2] = event.InteractionPoint_Z;
-    
+
+  RecoEvent.DecayVertex[0] = event.DecayVertex_X;
+  RecoEvent.DecayVertex[1] = event.DecayVertex_Y;
+  RecoEvent.DecayVertex[2] = event.DecayVertex_Z;
+
   for(size_t index = 0; index < event.BeamTrackID.size(); ++index)
   {
     TMcParticle* OutParticle = dynamic_cast<TMcParticle*>(OutTree->fMC_Particle->ConstructedAt(OutTree->fMC_Particle->GetEntries()));
@@ -267,6 +271,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
     tempInit.momY = event.DaughterMomentums_Y[index];
     tempInit.momZ = event.DaughterMomentums_Z[index];
     RecoEvent.TrackDAFInit.insert(std::make_pair(TrackID, tempInit));
+    RecoEvent.DaughtersTrackDAFInit.insert(std::make_pair(TrackID, tempInit));
 
     std::vector<std::vector<SimHit> > tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
     RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));

@@ -9,6 +9,7 @@
 #include "TCheckRZ.h"
 #include "TFlatMCOutputML.h"
 #include "TPrimaryVertex.h"
+#include "TDecayVertex.h"
 //#include "TKalmanFilter_FRS.h"
 
 
@@ -50,6 +51,8 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
     list_processMC.emplace_back(new TCheckRZ(Attributes));
   if(Attributes.Task_KalmanDAF)
     list_processMC.emplace_back(new TKalmanFilter_DAF(Attributes));
+  if(Attributes.Task_DecayVtx)
+    list_processMC.emplace_back(new TDecayVertex(Attributes));
 
   for(auto task : list_processMC)
     Attributes._logger->info(" -> Task : {}",task->signature);

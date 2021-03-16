@@ -8,13 +8,12 @@
 //#define DEBUG_PRIMVTX
 
 //#define RECONS_HITS_MULTIPLICITY
-#define N_HITS_CHECK
 #define HIT_RECONS_CHECK
 #define TRACK_RECONS_CHECK
 #define MOTHER_DAUGHTERS_CHECK
 #define VERTEX_RECONS_CHECK
-#define COVARIANCE_MATRIX
-#define DECAY_VERTEX
+//#define COVARIANCE_MATRIX
+//#define DECAY_VERTEX
 
 using namespace std;
 using namespace G4Sol;
@@ -48,12 +47,14 @@ ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
       //return ReturnRes::PrimVtxError; //Check in the future
       return ReturnRes::Fine;
     }
+
   else if(result_full == -2)
     {
       att._logger->debug("No enough candidate tracks for decay vertex recons");
       LocalHisto.h_PrimVtxstats->Fill("CandidateDecayTracks=0", 1.);
       return ReturnRes::Fine;
     }
+
   else if(result_full == -3)
     {
       att._logger->debug("No simulated hypernucleus");
@@ -61,6 +62,7 @@ ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
       //return ReturnRes::PrimVtxError;
       return ReturnRes::Fine;
     }
+
   else if(result_full == -4)
     {
       att._logger->debug("No enough hits in Silicons");
@@ -70,12 +72,6 @@ ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
     }
 
   LocalHisto.h_PrimVtxstats->Fill("Fine", 1.);
-
-
-
-
-
-
 
   return ReturnRes::Fine; 
 }
@@ -133,6 +129,10 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_InteractionPointDistanceY_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceY_pull);
   LocalHisto.h_InteractionPointDistanceZ_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceZ_pull);
 
+  LocalHisto.h_CovarianceSigmaX = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaX);
+  LocalHisto.h_CovarianceSigmaY = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaY);
+  LocalHisto.h_CovarianceSigmaZ = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaZ);
+
   LocalHisto.h_IP_DecayDistance  = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistance);
   LocalHisto.h_IP_DecayDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistanceX);
   LocalHisto.h_IP_DecayDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistanceY);
@@ -143,8 +143,8 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_DecayPositionDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceY);
   LocalHisto.h_DecayPositionDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceZ);
 
-  LocalHisto.h_PrimStatus = AnaHisto->CloneAndRegister(AnaHisto->h_PrimStatus);
   LocalHisto.h_PrimVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_PrimVtxstats);
+  LocalHisto.h_PrimStatus = AnaHisto->CloneAndRegister(AnaHisto->h_PrimStatus);
 }
 
 int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
@@ -202,7 +202,6 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   size_t nGoodrecons_Si1 = 0;
   nGoodEventsCounter(HitEnergyPosXY_Si1, HitEnergyPosXYreal_Si1, widthStrip_Si1, nGoodrecons_Si1);
   int nGhost_Si1    = HitEnergyPosXY_Si1.size() - nGoodrecons_Si1;
-  int nNorecons_Si1 = HitEnergyPosXYreal_Si1.size() - nGoodrecons_Si1;
 
   LocalHisto.h_HitMultiplicity_Si1->Fill(HitEnergyPosXYreal_Si1.size(), 1.);
   LocalHisto.h_HitMultiplicityRecons_Si1->Fill(HitEnergyPosXY_Si1.size(), 1.);
@@ -220,7 +219,6 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   size_t nGoodrecons_Si2 = 0;
   nGoodEventsCounter(HitEnergyPosXY_Si2, HitEnergyPosXYreal_Si2, widthStrip_Si2, nGoodrecons_Si2);
   int nGhost_Si2    = HitEnergyPosXY_Si2.size() - nGoodrecons_Si2;
-  int nNorecons_Si2 = HitEnergyPosXYreal_Si2.size() - nGoodrecons_Si2;
 
   LocalHisto.h_HitMultiplicity_Si2->Fill(HitEnergyPosXYreal_Si2.size(), 1.);
   LocalHisto.h_HitMultiplicityRecons_Si2->Fill(HitEnergyPosXY_Si2.size(), 1.);
@@ -458,6 +456,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   std::vector<double> f_values_IP(CandidateTracks.size() + 1, 0.);
 
   TrackstoVertexPosition(CandidateTracks, BeamHit1, BeamHit2, InteractionPointRecons, f_values_IP);
+  RecoEvent.PrimVtxRecons.SetXYZ(InteractionPointRecons[0],InteractionPointRecons[1],InteractionPointRecons[2]);
 
 #ifdef VERTEX_RECONS_CHECK
 
@@ -502,6 +501,11 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
     std::cout << CovMatrix[1][0] << "\t" << CovMatrix[1][1] << "\t" << CovMatrix[1][2] << "\n";
     std::cout << CovMatrix[2][0] << "\t" << CovMatrix[2][1] << "\t" << CovMatrix[2][2] << "\n\n";
   */
+
+  LocalHisto.h_CovarianceSigmaX->Fill(sqrt(CovMatrix[0][0]), 1.);
+  LocalHisto.h_CovarianceSigmaY->Fill(sqrt(CovMatrix[1][1]), 1.);
+  LocalHisto.h_CovarianceSigmaZ->Fill(sqrt(CovMatrix[2][2]), 1.);
+
 #endif
 
 #ifdef DECAY_VERTEX
@@ -1607,7 +1611,6 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
       double realPosX_Si2 = RealTracks[i][1][1];
       double realPosY_Si2 = RealTracks[i][1][2];
 
-      double particletype = RealTracks[i][0][6];
       double thetareal    = atan(sqrt(pow((realPosY_Si2 - realPosY_Si1), 2.) + pow((realPosX_Si2 - realPosX_Si1), 2.)) /
                               (Z_plane_Si2 - Z_plane_Si1)) *
                          180. / M_PI;
