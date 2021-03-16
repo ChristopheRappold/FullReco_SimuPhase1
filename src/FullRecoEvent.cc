@@ -44,6 +44,7 @@ void FullRecoEvent::Clear(int toclean)
   TrackDAFInit.clear();
   TrackInfo.clear();
   TrackMother.clear();
+  DaughtersTrackDAFInit.clear();
 
   FragmentTracks.clear();
   PionTracks.clear();

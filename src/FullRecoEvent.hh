@@ -573,6 +573,7 @@ public:
   std::unordered_map<int, InfoInit> TrackDAFInit;
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
+  std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 
   std::vector<DecayTrackInfo> FragmentTracks;
   std::vector<DecayTrackInfo> PionTracks;

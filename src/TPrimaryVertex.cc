@@ -12,7 +12,7 @@
 #define TRACK_RECONS_CHECK
 #define MOTHER_DAUGHTERS_CHECK
 #define VERTEX_RECONS_CHECK
-#define COVARIANCE_MATRIX
+//#define COVARIANCE_MATRIX
 //#define DECAY_VERTEX
 
 using namespace std;

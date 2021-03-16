@@ -190,6 +190,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   TVector3 closedist_realpos;
   double dist_realDecayTrackPrimVtx = 0.;
 
+  std::unordered_map<int, InfoInit>::iterator itr_real;
+
   for(size_t i = 0; i < RealPionTracks.size(); ++i)
     {
       LocalHisto.h_Pt_realpions->Fill(sqrt(pow(RealPionTracks[i].Hit_MomEnergy.Px(),2.)
@@ -201,7 +203,15 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Closedist_realPosZ->Fill(closedist_realpos.Z(), 1.);
 
       Dist_DecayTrackPrimVtx(RealPionTracks[i], RecoEvent.PrimVtxRecons, dist_realDecayTrackPrimVtx);
-      LocalHisto.h_Dist_realDecayTrackPrimVtx->Fill(dist_realDecayTrackPrimVtx, 1.);
+      LocalHisto.h_Dist_realDecayTrackPrimVtx->Fill(dist_realDecayTrackPrimVtx, "All", 1.);
+
+      for(itr_real = RecoEvent.DaughtersTrackDAFInit.begin(); itr_real != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_real)
+        {
+          if(itr_real->first == RealPionTracks[i].Id)
+            LocalHisto.h_Dist_realDecayTrackPrimVtx->Fill(dist_realDecayTrackPrimVtx, "Daughters", 1.);
+          else
+            LocalHisto.h_Dist_realDecayTrackPrimVtx->Fill(dist_realDecayTrackPrimVtx, "Primaries", 1.);
+        }
     }
 
   //Decay vertex reconstruction
@@ -245,6 +255,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   TVector3 closedist_cutpos;
   double dist_cutDecayTrackPrimVtx = 0.;
 
+  std::unordered_map<int, InfoInit>::iterator itr_cut;
+
   for(size_t i = 0; i < CutPionTracks.size(); ++i)
     {
       LocalHisto.h_Pt_cutpions->Fill(sqrt(pow(CutPionTracks[i].Hit_MomEnergy.Px(),2.)
@@ -257,6 +269,14 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       Dist_DecayTrackPrimVtx(CutPionTracks[i], RecoEvent.PrimVtxRecons, dist_cutDecayTrackPrimVtx);
       LocalHisto.h_Dist_cutDecayTrackPrimVtx->Fill(dist_cutDecayTrackPrimVtx, 1.);
+
+      for(itr_cut = RecoEvent.DaughtersTrackDAFInit.begin(); itr_cut != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_cut)
+        {
+          if(itr_cut->first == CutPionTracks[i].Id)
+            LocalHisto.h_Dist_cutDecayTrackPrimVtx->Fill(dist_cutDecayTrackPrimVtx, "Daughters", 1.);
+          else
+            LocalHisto.h_Dist_cutDecayTrackPrimVtx->Fill(dist_cutDecayTrackPrimVtx, "Primaries", 1.);
+        }
     }
 
   //Decay vertex reconstruction
@@ -302,6 +322,9 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   std::vector<TVector3> vect_closedist_pos;
   double dist_DecayTrackPrimVtx = 0.;
 
+  std::unordered_map<int, InfoInit>::iterator itr_recons;
+
+
   for(size_t i = 0; i < RecoEvent.PionTracks.size(); ++i)
     {
       LocalHisto.h_Pt_pions->Fill(sqrt(pow(RecoEvent.PionTracks[i].Hit_MomEnergy.Px(),2.)
@@ -316,6 +339,14 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       Dist_DecayTrackPrimVtx(RecoEvent.PionTracks[i], RecoEvent.PrimVtxRecons, dist_DecayTrackPrimVtx);
       LocalHisto.h_Dist_DecayTrackPrimVtx->Fill(dist_DecayTrackPrimVtx, 1.);
+
+      for(itr_recons = RecoEvent.DaughtersTrackDAFInit.begin(); itr_recons != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_recons)
+        {
+          if(itr_recons->first == RecoEvent.PionTracks[i].Id)
+            LocalHisto.h_Dist_DecayTrackPrimVtx->Fill(dist_DecayTrackPrimVtx, "Daughters", 1.);
+          else
+            LocalHisto.h_Dist_DecayTrackPrimVtx->Fill(dist_DecayTrackPrimVtx, "Primaries", 1.);
+        }
 
       if(closedist_distance < newclosest_distance)
         {

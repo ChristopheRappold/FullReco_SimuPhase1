@@ -271,6 +271,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
     tempInit.momY = event.DaughterMomentums_Y[index];
     tempInit.momZ = event.DaughterMomentums_Z[index];
     RecoEvent.TrackDAFInit.insert(std::make_pair(TrackID, tempInit));
+    RecoEvent.DaughtersTrackDAFInit.insert(std::make_pair(TrackID, tempInit));
 
     std::vector<std::vector<SimHit> > tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
     RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));

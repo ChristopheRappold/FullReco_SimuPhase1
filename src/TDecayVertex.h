@@ -71,7 +71,7 @@ private:
   int He3_pdg = 10003;
   int pi_pdg = -211;
 
-  double pi_mass = 139.57018; //in MeV
+  double pi_mass = 0.13957018; //in GeV
 
 
   TRandom3* rand;
@@ -98,15 +98,15 @@ private:
 
     TH1F* h_Closedist_Distance;
     TH1F* h_Closedist_PosZ;
-    TH1F* h_Dist_DecayTrackPrimVtx;
+    TH2F* h_Dist_DecayTrackPrimVtx;
 
     TH1F* h_Closedist_realDistance;
     TH1F* h_Closedist_realPosZ;
-    TH1F* h_Dist_realDecayTrackPrimVtx;
+    TH2F* h_Dist_realDecayTrackPrimVtx;
 
     TH1F* h_Closedist_cutDistance;
     TH1F* h_Closedist_cutPosZ;
-    TH1F* h_Dist_cutDecayTrackPrimVtx;
+    TH2F* h_Dist_cutDecayTrackPrimVtx;
 
     TH1F* h_DecayVertexDistance;
     TH1F* h_DecayVertexDistanceX;
