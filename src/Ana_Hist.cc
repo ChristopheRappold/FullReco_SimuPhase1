@@ -544,6 +544,15 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_DecayVertexDistanceZ_2centroid_closest.emplace_back(new TH1F("h_DecayVertexDistanceZ_2centroid_closest", "h_DecayVertexDistanceZ_2centroid_closest", 2000, -10, 10));
       HistReg.emplace_back(&h_DecayVertexDistanceZ_2centroid_closest.store);
 
+      h_DecayVertexDistance_2centroid_IPCheck.emplace_back(new TH1F("h_DecayVertexDistance_2centroid_IPCheck", "h_DecayVertexDistance_2centroid_IPCheck", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexDistance_2centroid_IPCheck.store);
+      h_DecayVertexDistanceX_2centroid_IPCheck.emplace_back(new TH1F("h_DecayVertexDistanceX_2centroid_IPCheck", "h_DecayVertexDistanceX_2centroid_IPCheck", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceX_2centroid_IPCheck.store);
+      h_DecayVertexDistanceY_2centroid_IPCheck.emplace_back(new TH1F("h_DecayVertexDistanceY_2centroid_IPCheck", "h_DecayVertexDistanceY_2centroid_IPCheck", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceY_2centroid_IPCheck.store);
+      h_DecayVertexDistanceZ_2centroid_IPCheck.emplace_back(new TH1F("h_DecayVertexDistanceZ_2centroid_IPCheck", "h_DecayVertexDistanceZ_2centroid_IPCheck", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexDistanceZ_2centroid_IPCheck.store);
+
       h_DecayVertexrealDistance.emplace_back(new TH1F("h_DecayVertexrealDistance", "h_DecayVertexrealDistance", 4000, 0, 40));
       HistReg.emplace_back(&h_DecayVertexrealDistance.store);
       h_DecayVertexrealDistanceX.emplace_back(new TH1F("h_DecayVertexrealDistanceX", "h_DecayVertexrealDistanceX", 1000, -5, 5));

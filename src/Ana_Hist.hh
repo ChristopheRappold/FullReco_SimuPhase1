@@ -264,6 +264,11 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexDistanceY_2centroid_closest ;
   Hist<TH1F> h_DecayVertexDistanceZ_2centroid_closest ;
 
+  Hist<TH1F> h_DecayVertexDistance_2centroid_IPCheck ;
+  Hist<TH1F> h_DecayVertexDistanceX_2centroid_IPCheck ;
+  Hist<TH1F> h_DecayVertexDistanceY_2centroid_IPCheck ;
+  Hist<TH1F> h_DecayVertexDistanceZ_2centroid_IPCheck ;
+
   Hist<TH1F> h_DecayVertexrealDistance ;
   Hist<TH1F> h_DecayVertexrealDistanceX ;
   Hist<TH1F> h_DecayVertexrealDistanceY ;

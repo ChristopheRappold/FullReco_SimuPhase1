@@ -134,6 +134,11 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_DecayVertexDistanceY_2centroid_closest = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_2centroid_closest);
   LocalHisto.h_DecayVertexDistanceZ_2centroid_closest = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_2centroid_closest);
 
+  LocalHisto.h_DecayVertexDistance_2centroid_IPCheck = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_2centroid_IPCheck);
+  LocalHisto.h_DecayVertexDistanceX_2centroid_IPCheck = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_2centroid_IPCheck);
+  LocalHisto.h_DecayVertexDistanceY_2centroid_IPCheck = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_2centroid_IPCheck);
+  LocalHisto.h_DecayVertexDistanceZ_2centroid_IPCheck = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_2centroid_IPCheck);
+
   LocalHisto.h_DecayVertexrealDistance = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexrealDistance);
   LocalHisto.h_DecayVertexrealDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexrealDistanceX);
   LocalHisto.h_DecayVertexrealDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexrealDistanceY);
@@ -409,6 +414,44 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_DecayVertexDistanceX_2centroid_closest->Fill(distanceX_2centroid_closest, 1.);
       LocalHisto.h_DecayVertexDistanceY_2centroid_closest->Fill(distanceY_2centroid_closest, 1.);
       LocalHisto.h_DecayVertexDistanceZ_2centroid_closest->Fill(distanceZ_2centroid_closest, 1.);
+
+
+      double dist_2DecayTrackPrimVtx = 0.;
+
+      double closedist_2distance = 0.;
+      TVector3 temp_closedist_2pos;
+
+      double newclosest_2distance = 1000.;
+      TVector3 new_closedist_2pos;
+
+      for(size_t i = 0; i < RecoEvent.PionTracks.size(); ++i)
+        {
+          Dist_DecayTrackPrimVtx(RecoEvent.PionTracks[i], RecoEvent.PrimVtxRecons, dist_2DecayTrackPrimVtx);
+
+          if(dist_2DecayTrackPrimVtx <= MinDist_DecayTracksPrimVtx)
+            continue;
+
+          CloseDist(RecoEvent.FragmentTracks[0], RecoEvent.PionTracks[i], closedist_2distance, temp_closedist_2pos);
+
+          if(closedist_2distance < newclosest_2distance)
+            {
+              newclosest_2distance = closedist_2distance;
+              new_closedist_2pos = temp_closedist_2pos;
+            }
+
+        }
+
+      double distance_2centroid_IPCheck  = sqrt(pow((DecayVertex_real_X - new_closedist_2pos.X()), 2.) +
+                                                pow((DecayVertex_real_Y - new_closedist_2pos.Y()), 2.) +
+                                                pow((DecayVertex_real_Z - new_closedist_2pos.Z()), 2.));
+      double distanceX_2centroid_IPCheck = DecayVertex_real_X - new_closedist_2pos.X();
+      double distanceY_2centroid_IPCheck = DecayVertex_real_Y - new_closedist_2pos.Y();
+      double distanceZ_2centroid_IPCheck = DecayVertex_real_Z - new_closedist_2pos.Z();
+
+      LocalHisto.h_DecayVertexDistance_2centroid_IPCheck->Fill(distance_2centroid_IPCheck, 1.);
+      LocalHisto.h_DecayVertexDistanceX_2centroid_IPCheck->Fill(distanceX_2centroid_IPCheck, 1.);
+      LocalHisto.h_DecayVertexDistanceY_2centroid_IPCheck->Fill(distanceY_2centroid_IPCheck, 1.);
+      LocalHisto.h_DecayVertexDistanceZ_2centroid_IPCheck->Fill(distanceZ_2centroid_IPCheck, 1.);
     }
 
 #endif

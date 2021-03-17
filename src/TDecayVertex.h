@@ -73,6 +73,8 @@ private:
 
   double pi_mass = 0.13957018; //in GeV
 
+  double MinDist_DecayTracksPrimVtx = 0.05;
+
 
   TRandom3* rand;
   PDG_fromName pid_fromName;
@@ -127,6 +129,11 @@ private:
     TH1F* h_DecayVertexDistanceX_2centroid_closest;
     TH1F* h_DecayVertexDistanceY_2centroid_closest;
     TH1F* h_DecayVertexDistanceZ_2centroid_closest;
+
+    TH1F* h_DecayVertexDistance_2centroid_IPCheck;
+    TH1F* h_DecayVertexDistanceX_2centroid_IPCheck;
+    TH1F* h_DecayVertexDistanceY_2centroid_IPCheck;
+    TH1F* h_DecayVertexDistanceZ_2centroid_IPCheck;
 
     TH1F* h_DecayVertexrealDistance;
     TH1F* h_DecayVertexrealDistanceX;
