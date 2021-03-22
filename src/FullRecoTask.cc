@@ -10,6 +10,7 @@
 #include "TFlatMCOutputML.h"
 #include "TPrimaryVertex.h"
 #include "TDecayVertex.h"
+#include "TRiemannFinder.h"
 //#include "TKalmanFilter_FRS.h"
 
 
@@ -45,6 +46,8 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
     list_processMC.emplace_back(new TFlatMCOutputML(Attributes));
   if(Attributes.Task_BayesFinder)
     list_processMC.emplace_back(new TBayesFinder(Attributes));
+  if(Attributes.Task_RiemannFinder)
+    list_processMC.emplace_back(new TRiemannFinder(Attributes));
   //if(Attributes.Task_FinderCM)
   //  list_processMC.emplace_back(new TFinderCM(Attributes));
   if(Attributes.Task_CheckRZ)

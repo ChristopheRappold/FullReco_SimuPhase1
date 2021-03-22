@@ -84,6 +84,7 @@ class THyphiAttributes
   bool Task_PrimaryVtx;
   bool Task_FlatMCOutputML;
   bool Task_BayesFinder;
+  bool Task_RiemannFinder;
   bool Task_FinderCM;
   bool Task_CheckRZ;
   bool Task_KalmanDAF;
