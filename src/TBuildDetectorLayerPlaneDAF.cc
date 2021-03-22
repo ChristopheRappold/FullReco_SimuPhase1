@@ -474,7 +474,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 	    {
 	      //void simulHitstoSignals(TTreeReaderArray<TG4Sol_Hit>* DetHits, std::vector<std::tuple<double,size_t>>& HitEnergyLayer)
 	      const double EnergyThreshold = 0.001; //MeV
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
 	      std::cout<<"Silicon \n";
 	      std::string tempName = orderDetName.find(TypeDet)->second;
 	      std::cout<<" name : "<<tempName<<"\n";
@@ -494,7 +494,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 	    }
           else if(IsPSCE(TypeDet))
           {
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "PSC"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -515,7 +515,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             TGeoHMatrix H1(*g1), H2(*g2), H3(*g3);
             TGeoHMatrix H = H2 * H1;
             H = H3 * H;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
 #endif
             TGeoHMatrix Hsf("Hsf"); // PSCE inner surface
@@ -543,7 +543,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           }
           else if(IsPSBE(TypeDet))
 	    {
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "PSBE"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -566,7 +566,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             TGeoHMatrix H = H1_1 * H1;
             H = H2 * H;
             H = H3 * H;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
 #endif
 
@@ -646,7 +646,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               // case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
               default : std::cerr << "something wrong" << std::endl; break;
             }
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "fiber"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -675,7 +675,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             w2.SetDz( 10);
             TGeoHMatrix Hw1 = H * w1;
             TGeoHMatrix Hw2 = H * w2;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
             Hw1.Print();
             Hw2.Print();
@@ -722,7 +722,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
               default : std::cerr << "something wrong" << std::endl; break;
             }
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "fiberM"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -752,7 +752,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             w2.SetDz( 10);
             TGeoHMatrix Hw1 = H * w1;
             TGeoHMatrix Hw2 = H * w2;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
             Hw1.Print();
             Hw2.Print();
@@ -788,7 +788,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             hitCoordsTree(2) = hit.HitPosZ;
           }
           else if(IsWire(TypeDet)){
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "wire"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -1068,12 +1068,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
     att._logger->debug( "] ");
   }
-  for(const auto& det : RecoEvent.ListHits)
-  {
-    for(const auto& hit : det)
-      if(hit != nullptr)
-        hit->Print();
-  }
+
+  for(size_t i_det = 0 ; i_det < RecoEvent.ListHits.size();++i_det)//const auto& det : RecoEvent.ListHits)
+    {
+      att._logger->debug("RecoListHits det {} size {}",i_det,RecoEvent.ListHits[i_det].size());
+  //   for(const auto& hit : det)
+  //     if(hit != nullptr)
+  //       hit->Print();
+    }
 #endif
   return 0;
 }
