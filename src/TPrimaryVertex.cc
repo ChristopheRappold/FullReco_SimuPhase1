@@ -661,7 +661,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
             {
               double EnergyDiff = abs(get<0>(HitEnergyLayerX[i]) - get<0>(HitEnergyLayerY[j]));
               double HitX       = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i]) + 0.5) * widthStrip;
-              double HitY       = lenghtSi / 2. - (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
+              double HitY       = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
 
               if(EnergyDiff < MaxEnergyDiffStrips)
                 {
@@ -719,7 +719,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                                                     (get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j])) +
                                                 0.5) *
                                                    widthStrip;
-                          double HitY = lenghtSi / 2. - (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
+                          double HitY = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
                           double HitEnergy =
                               get<0>(HitEnergyLayerY[k]) + get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]);
                           std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
@@ -732,7 +732,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                       else
                         {
                           double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i]) + 0.5) * widthStrip;
-                          double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
+                          double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
                           double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerY[k]) / 2.;
                           std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                           HitEnergyPosXY.emplace_back(tempEnergyPosXY);
@@ -788,7 +788,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                           (get<0>(HitEnergyLayerY[j]) < MaxEnergyMultiplicity)))
                         {
                           double HitX = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[k]) + 0.5) * widthStrip;
-                          double HitY = lenghtSi / 2. - ((get<0>(HitEnergyLayerY[i]) * get<1>(HitEnergyLayerY[i]) +
+                          double HitY = -lenghtSi / 2. + ((get<0>(HitEnergyLayerY[i]) * get<1>(HitEnergyLayerY[i]) +
                                                           get<0>(HitEnergyLayerY[j]) * get<1>(HitEnergyLayerY[j])) /
                                                              (get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j])) +
                                                          0.5) *
@@ -805,12 +805,12 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                       else
                         {
                           double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[k]) + 0.5) * widthStrip;
-                          double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
+                          double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
                           double HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerX[k]) / 2.;
                           std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                           HitEnergyPosXY.emplace_back(tempEnergyPosXY);
 
-                          HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
+                          HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
                           HitEnergy = get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerX[k]) / 2.;
                           std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
                           HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
@@ -868,7 +868,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                                                         (get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j])) +
                                                     0.5) *
                                                        widthStrip;
-                              double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
+                              double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
                               double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]) +
                                                  get<0>(HitEnergyLayerY[l]) / 2.;
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
@@ -894,7 +894,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                                                         (get<0>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerX[k])) +
                                                     0.5) *
                                                        widthStrip;
-                              double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
+                              double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
                               double HitEnergy = get<0>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerX[k]) +
                                                  get<0>(HitEnergyLayerY[l]) / 2.;
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
@@ -913,7 +913,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                           else
                             {
                               double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i]) + 0.5) * widthStrip;
-                              double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
+                              double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
                               double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerY[l]) / 3.;
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY);
@@ -979,7 +979,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                             {
                               double HitX = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[l]) + 0.5) * widthStrip;
                               double HitY =
-                                  lenghtSi / 2. - ((get<0>(HitEnergyLayerY[i]) * get<1>(HitEnergyLayerY[i]) +
+                                  -lenghtSi / 2. + ((get<0>(HitEnergyLayerY[i]) * get<1>(HitEnergyLayerY[i]) +
                                                     get<0>(HitEnergyLayerY[j]) * get<1>(HitEnergyLayerY[j])) /
                                                        (get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j])) +
                                                    0.5) *
@@ -989,7 +989,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY);
 
-                              HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
                               HitEnergy = get<0>(HitEnergyLayerY[k]) + get<0>(HitEnergyLayerX[l]) / 2.;
                               std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
@@ -1005,7 +1005,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                             {
                               double HitX = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[l]) + 0.5) * widthStrip;
                               double HitY =
-                                  lenghtSi / 2. - ((get<0>(HitEnergyLayerY[j]) * get<1>(HitEnergyLayerY[j]) +
+                                  -lenghtSi / 2. + ((get<0>(HitEnergyLayerY[j]) * get<1>(HitEnergyLayerY[j]) +
                                                     get<0>(HitEnergyLayerY[k]) * get<1>(HitEnergyLayerY[k])) /
                                                        (get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerY[k])) +
                                                    0.5) *
@@ -1015,7 +1015,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY);
 
-                              HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
                               HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerX[l]) / 2.;
                               std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
@@ -1028,17 +1028,17 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                           else
                             {
                               double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[l]) + 0.5) * widthStrip;
-                              double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
+                              double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
                               double HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerX[l]) / 3.;
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY);
 
-                              HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
                               HitEnergy = get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerX[l]) / 3.;
                               std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
 
-                              HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
                               HitEnergy = get<0>(HitEnergyLayerY[k]) + get<0>(HitEnergyLayerX[l]) / 3.;
                               std::vector<double> tempEnergyPosXY3{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY3);

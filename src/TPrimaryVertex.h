@@ -139,8 +139,8 @@ private:
   SiliconHits SiliconHits_Si1;
   SiliconHits SiliconHits_Si2;
 
-  double Zo_target = 24.5; // in cm
-  double Zf_target = 25.5; // in cm
+  double Zo_target = 24.; // in cm
+  double Zf_target = 26.; // in cm
 
   double Z_plane_Si1    = 27.;  // in cm
   double widthStrip_Si1 = 0.03; // in cm

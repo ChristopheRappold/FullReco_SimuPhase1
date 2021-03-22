@@ -57,7 +57,7 @@ private:
 
 
 
-  double Zo_target = 24.5; // in cm
+  double Zo_target = 24.; // in cm
   double Zo_minifibers = 45;
 
   double k_factor       = 3.; // multiplies the fragment track f function value
