@@ -806,6 +806,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
 #endif
             TGeoMatrix *g1 = gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetVolume()->GetNode(LayerID-1)->GetMatrix(); // ME, MG
+	    TGeoShape* tempShape = gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetVolume()->GetShape();
             TGeoMatrix *g2 = gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetMatrix(); // MD
             TGeoMatrix *g3 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNER
             TGeoMatrix *g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
@@ -816,11 +817,13 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             double *shift =  H.GetTranslation();
             TGeoHMatrix w1("w1");
             TGeoHMatrix w2("w2");
-            w1.SetDz(-10);
-            w2.SetDz( 10);
+	    Double_t minZ,maxZ;
+	    tempShape->GetAxisRange(3,minZ,maxZ);
+            w1.SetDz(minZ);
+            w2.SetDz(maxZ);
             TGeoHMatrix Hw1 = H * w1;
             TGeoHMatrix Hw2 = H * w2;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
             Hw1.Print();
             Hw2.Print();
@@ -882,7 +885,16 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             hitCoords(3) = edge2[0];
             hitCoords(4) = edge2[1];
             hitCoords(5) = edge2[2];
-            hitCoords(6) = temp_dl;
+	    hitCoords(6) = temp_dl;
+	    if(edge1[2]>edge2[2])
+	      {
+		hitCoords(0) = edge2[0];
+		hitCoords(1) = edge2[1];
+		hitCoords(2) = edge2[2];
+		hitCoords(3) = edge1[0];
+		hitCoords(4) = edge1[1];
+		hitCoords(5) = edge1[2];
+	      }
             TMatrixDSym hitCov(7);
             hitCov(6, 6) = resolution_dl * resolution_dl;
             measurement = std::make_unique<genfit::WireMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
