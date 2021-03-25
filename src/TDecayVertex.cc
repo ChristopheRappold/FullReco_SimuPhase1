@@ -74,6 +74,14 @@ ReturnRes::InfoM TDecayVertex::SoftExit(int result_full) {
       return ReturnRes::Fine;
     }
 
+  else if(result_full == -5)
+    {
+      att._logger->debug("No Si_MotherTrack reconstructed for decay vertex");
+      LocalHisto.h_DecayVtxstats->Fill("N_Si_MotherTracks=0", 1.);
+      //return ReturnRes::DecayVtxError; //Check in the future
+      return ReturnRes::Fine;
+    }
+
   LocalHisto.h_DecayVtxstats->Fill("Fine", 1.);
 
   return ReturnRes::Fine; 
@@ -153,12 +161,25 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_DecayVertexPosZ_real = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_real);
   LocalHisto.h_DecayVertexPosZ_vfunction = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_vfunction);
   LocalHisto.h_DecayVertexPosZ_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_centroid);
+  LocalHisto.h_DecayVertexPosZ_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_AllVfunc);
+  LocalHisto.h_DecayVertexPosZ_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_AllCentroid);
+
 
   LocalHisto.h_Dist_MotherTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_MotherTrackPrimVtx);
   LocalHisto.h_Theta_MotherTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Theta_MotherTrackPrimVtx);
   LocalHisto.h_HypInvariantMass = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass);
 
   LocalHisto.h_N_Si_MotherTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_Si_MotherTracks);
+
+  LocalHisto.h_DecayVertexDistance_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_AllVfunc);
+  LocalHisto.h_DecayVertexDistanceX_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_AllVfunc);
+  LocalHisto.h_DecayVertexDistanceY_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_AllVfunc);
+  LocalHisto.h_DecayVertexDistanceZ_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_AllVfunc);
+
+  LocalHisto.h_DecayVertexDistance_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_AllCentroid);
+  LocalHisto.h_DecayVertexDistanceX_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_AllCentroid);
+  LocalHisto.h_DecayVertexDistanceY_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_AllCentroid);
+  LocalHisto.h_DecayVertexDistanceZ_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_AllCentroid);
   
   LocalHisto.h_DecayVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVtxstats);
 }
@@ -408,7 +429,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
     {
       closedist_pos += vect_closedist_pos[i];
     }
-  closedist_pos *= (1./vect_closedist_pos.size());
+  closedist_pos *= (1./static_cast<double>(vect_closedist_pos.size()));
 
   double distance_centroid  = sqrt(pow((DecayVertex_real_X - closedist_pos.X()), 2.) +
                                    pow((DecayVertex_real_Y - closedist_pos.Y()), 2.) +
@@ -542,8 +563,56 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       TLorentzVector LorentzVect_Zero;
       MotherTrackSiliconHits(RecoEvent.PrimVtxRecons, DecayVertexRecons, RecoEvent.Hits_Si1, RecoEvent.Hits_Si2, Si_MotherTrack);
       
-      if(Si_MotherTrack.Hit_MomEnergy != LorentzVect_Zero)
-        LocalHisto.h_N_Si_MotherTracks->Fill(2.5, 1.);
+      LocalHisto.h_N_Si_MotherTracks->Fill(0.5, 1.);
+
+      if(Si_MotherTrack.Hit_MomEnergy == LorentzVect_Zero)
+        return -5;
+                  
+      LocalHisto.h_N_Si_MotherTracks->Fill(2.5, 1.);
+
+      std::vector<DecayTrackInfo> AllTracks;
+      AllTracks.emplace_back(PionTracks[0]);
+      AllTracks.emplace_back(FragmentTracks[0]);
+      AllTracks.emplace_back(Si_MotherTrack);
+
+      TVector3 AllVfunc_DecayVertexRecons;
+      AllTrackstoDecayVertex_Vfunction(AllTracks, closedist_pos, AllVfunc_DecayVertexRecons);
+
+      double AllVfunc_distance  = sqrt(pow((DecayVertex_real_X - AllVfunc_DecayVertexRecons.X()), 2.) +
+                                         pow((DecayVertex_real_Y - AllVfunc_DecayVertexRecons.Y()), 2.) +
+                                          pow((DecayVertex_real_Z - AllVfunc_DecayVertexRecons.Z()), 2.));
+      double AllVfunc_distanceX = DecayVertex_real_X - AllVfunc_DecayVertexRecons.X();
+      double AllVfunc_distanceY = DecayVertex_real_Y - AllVfunc_DecayVertexRecons.Y();
+      double AllVfunc_distanceZ = DecayVertex_real_Z - AllVfunc_DecayVertexRecons.Z();
+
+      LocalHisto.h_DecayVertexDistance_AllVfunc->Fill(AllVfunc_distance, 1.);
+      LocalHisto.h_DecayVertexDistanceX_AllVfunc->Fill(AllVfunc_distanceX, 1.);
+      LocalHisto.h_DecayVertexDistanceY_AllVfunc->Fill(AllVfunc_distanceY, 1.);
+      LocalHisto.h_DecayVertexDistanceZ_AllVfunc->Fill(AllVfunc_distanceZ, 1.);
+
+      LocalHisto.h_DecayVertexPosZ_AllVfunc->Fill(AllVfunc_DecayVertexRecons.Z(), 1.);
+
+
+
+      TVector3 AllCentroid_DecayVertexRecons;
+      AllTrackstoDecayVertex_Centroids(AllTracks, AllCentroid_DecayVertexRecons);
+
+      double AllCentroid_distance  = sqrt(pow((DecayVertex_real_X - AllCentroid_DecayVertexRecons.X()), 2.) +
+                                            pow((DecayVertex_real_Y - AllCentroid_DecayVertexRecons.Y()), 2.) +
+                                             pow((DecayVertex_real_Z - AllCentroid_DecayVertexRecons.Z()), 2.));
+      double AllCentroid_distanceX = DecayVertex_real_X - AllCentroid_DecayVertexRecons.X();
+      double AllCentroid_distanceY = DecayVertex_real_Y - AllCentroid_DecayVertexRecons.Y();
+      double AllCentroid_distanceZ = DecayVertex_real_Z - AllCentroid_DecayVertexRecons.Z();
+
+      LocalHisto.h_DecayVertexDistance_AllCentroid->Fill(AllCentroid_distance, 1.);
+      LocalHisto.h_DecayVertexDistanceX_AllCentroid->Fill(AllCentroid_distanceX, 1.);
+      LocalHisto.h_DecayVertexDistanceY_AllCentroid->Fill(AllCentroid_distanceY, 1.);
+      LocalHisto.h_DecayVertexDistanceZ_AllCentroid->Fill(AllCentroid_distanceZ, 1.);
+
+      LocalHisto.h_DecayVertexPosZ_AllCentroid->Fill(AllCentroid_DecayVertexRecons.Z(), 1.);
+
+
+
     }
 
   return 0;
@@ -979,4 +1048,92 @@ void TDecayVertex::MotherTrackSiliconHits(TVector3& PrimVtxRecons, TVector3& Dec
 
   Si_MotherTrack.Hit_MomEnergy = Si_MotherMomEnergy;
   Si_MotherTrack.Hit_Pos = Mother_Hit_Si1;
+}
+
+void TDecayVertex::AllTrackstoDecayVertex_Vfunction(std::vector<DecayTrackInfo>& AllTracks, TVector3& Old_DecayVertexRecons, TVector3& DecayVertexRecons)
+{
+  std::vector<double> temp_f(AllTracks.size(), 0.);
+
+  double V    = 0.;
+  double Vnew = 0.;
+
+  double Xi            = Old_DecayVertexRecons.X() - boxXYZ;
+  double Xf            = Old_DecayVertexRecons.X() + boxXYZ;
+  double distanceStepX = (Xf - Xi) / static_cast<double>(NstepsdiscretboxXYZ - 1);
+
+  double Yi            = Old_DecayVertexRecons.Y() - boxXYZ;
+  double Yf            = Old_DecayVertexRecons.Y() + boxXYZ;
+  double distanceStepY = (Yf - Yi) / static_cast<double>(NstepsdiscretboxXYZ - 1);
+
+  double Zi            = Old_DecayVertexRecons.Z() - boxXYZ;
+  double Zf            = Old_DecayVertexRecons.Z() + boxXYZ;
+  double distanceStepZ = (Zf - Zi) / static_cast<double>(NstepsdiscretboxXYZ - 1);
+
+  size_t border = 0;
+  std::vector<TVector3> PosXYZ{};
+  SpaceDiscretization(Xi, Xf, NstepsdiscretboxXYZ, Yi, Yf, NstepsdiscretboxXYZ, Zi, Zf, NstepsdiscretboxXYZ, border, PosXYZ);
+
+  border = 1;
+
+  for(size_t k = 0; k < nTimesBoxXYZ; ++k)
+    {
+      if(k != 0)
+        {
+          Xi            = DecayVertexRecons.X() - distanceStepX;
+          Xf            = DecayVertexRecons.X() + distanceStepX;
+          distanceStepX = (Xf - Xi) / static_cast<double>(Nstepsdiscretbox - 1);
+
+          Yi            = DecayVertexRecons.Y() - distanceStepY;
+          Yf            = DecayVertexRecons.Y() + distanceStepY;
+          distanceStepY = (Yf - Yi) / static_cast<double>(Nstepsdiscretbox - 1);
+
+          Zi            = DecayVertexRecons.Z() - distanceStepZ;
+          Zf            = DecayVertexRecons.Z() + distanceStepZ;
+          distanceStepZ = (Zf - Zi) / static_cast<double>(Nstepsdiscretbox - 1);
+
+          SpaceDiscretization(Xi, Xf, NstepsdiscretboxXYZ, Yi, Yf, NstepsdiscretboxXYZ, Zi, Zf, NstepsdiscretboxXYZ, border,
+                              PosXYZ);
+        }
+
+      for(size_t i = 0; i < PosXYZ.size(); ++i)
+        {
+          TVector3 temp_PosXYZ = PosXYZ[i];
+          
+          for(size_t j = 0; j < AllTracks.size(); ++j)
+            {
+              temp_f[j] = f_function(AllTracks[j], temp_PosXYZ);
+            }
+
+          Vnew = V_function(temp_f);
+
+          if(Vnew > V)
+            {
+              V = Vnew;
+
+              DecayVertexRecons.SetXYZ(temp_PosXYZ.X(), temp_PosXYZ.Y(), temp_PosXYZ.Z());
+            }
+        }
+    }
+}
+
+void TDecayVertex::AllTrackstoDecayVertex_Centroids(std::vector<DecayTrackInfo>& AllTracks, TVector3& DecayVertexRecons)
+{
+  std::vector<TVector3> Vect_Centroids;
+
+  double temp_distance;
+  TVector3 temp_centroid;
+
+  for(size_t i = 0; i < AllTracks.size()-1; ++i)
+    {
+      for(size_t j = i+1; j < AllTracks.size(); ++j)
+        {
+            CloseDist(AllTracks[i], AllTracks[j], temp_distance, temp_centroid);
+            Vect_Centroids.emplace_back(temp_centroid);
+        }
+    }
+
+  for(size_t i = 0; i < Vect_Centroids.size(); ++i)
+    DecayVertexRecons += Vect_Centroids[i];
+
+  DecayVertexRecons *= 1. / static_cast<double>(Vect_Centroids.size());
 }

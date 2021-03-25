@@ -283,11 +283,24 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexPosZ_real ;
   Hist<TH1F> h_DecayVertexPosZ_vfunction ;
   Hist<TH1F> h_DecayVertexPosZ_centroid ;
+  Hist<TH1F> h_DecayVertexPosZ_AllVfunc ;
+  Hist<TH1F> h_DecayVertexPosZ_AllCentroid ;
 
   Hist<TH1F> h_Dist_MotherTrackPrimVtx ;
   Hist<TH1F> h_Theta_MotherTrackPrimVtx ;
   Hist<TH1F> h_HypInvariantMass ;
+
   Hist<TH1F> h_N_Si_MotherTracks ;
+
+  Hist<TH1F> h_DecayVertexDistance_AllVfunc ;
+  Hist<TH1F> h_DecayVertexDistanceX_AllVfunc ;
+  Hist<TH1F> h_DecayVertexDistanceY_AllVfunc ;
+  Hist<TH1F> h_DecayVertexDistanceZ_AllVfunc ;
+
+  Hist<TH1F> h_DecayVertexDistance_AllCentroid ;
+  Hist<TH1F> h_DecayVertexDistanceX_AllCentroid ;
+  Hist<TH1F> h_DecayVertexDistanceY_AllCentroid ;
+  Hist<TH1F> h_DecayVertexDistanceZ_AllCentroid ;
 
   Hist<TH1F> h_DecayVtxstats ;
 

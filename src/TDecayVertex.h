@@ -67,6 +67,9 @@ private:
   void MotherTrackSiliconHits(TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, std::vector<std::vector<double> >& Hits_Si1,
                                std::vector<std::vector<double> >& Hits_Si2, DecayTrackInfo& Si_MotherTrack);
 
+  void AllTrackstoDecayVertex_Vfunction(std::vector<DecayTrackInfo>& AllTracks, TVector3& Old_DecayVertexRecons, TVector3& DecayVertexRecons);
+
+  void AllTrackstoDecayVertex_Centroids(std::vector<DecayTrackInfo>& AllTracks, TVector3& DecayVertexRecons);
 
 
 
@@ -83,7 +86,12 @@ private:
   size_t NstepsdiscretZ       = 21;
   size_t Nstepsdiscretbox     = 5;
   size_t nTimesDiscretization = 7;
-  double boxDistXY        = 3.;
+  double boxDistXY            = 3.;
+
+  size_t NstepsdiscretboxXYZ  = 9;
+  double boxXYZ               = 2.;
+  size_t nTimesBoxXYZ         = 5;
+
 
   int He3_pdg = 10003;
   int pi_pdg = -211;
@@ -173,12 +181,25 @@ private:
     TH1F* h_DecayVertexPosZ_real;
     TH1F* h_DecayVertexPosZ_vfunction;
     TH1F* h_DecayVertexPosZ_centroid;
+    TH1F* h_DecayVertexPosZ_AllVfunc;
+    TH1F* h_DecayVertexPosZ_AllCentroid;
+
 
     TH1F* h_Dist_MotherTrackPrimVtx;
     TH1F* h_Theta_MotherTrackPrimVtx;
     TH1F* h_HypInvariantMass;
 
     TH1F* h_N_Si_MotherTracks;
+
+    TH1F* h_DecayVertexDistance_AllVfunc;
+    TH1F* h_DecayVertexDistanceX_AllVfunc;
+    TH1F* h_DecayVertexDistanceY_AllVfunc;
+    TH1F* h_DecayVertexDistanceZ_AllVfunc;
+
+    TH1F* h_DecayVertexDistance_AllCentroid;
+    TH1F* h_DecayVertexDistanceX_AllCentroid;
+    TH1F* h_DecayVertexDistanceY_AllCentroid;
+    TH1F* h_DecayVertexDistanceZ_AllCentroid;
 
     TH1F* h_DecayVtxstats;
   };
