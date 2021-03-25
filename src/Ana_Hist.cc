@@ -461,7 +461,8 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_Pt_fragments.store);
       h_Pz_fragments.emplace_back(new TH1F("h_Pz_fragments", "h_Pz_fragments", 1000, 0, 10));
       HistReg.emplace_back(&h_Pz_fragments.store);
-
+      h_Dist_FragmentTrackPrimVtx.emplace_back(new TH1F("h_Dist_FragmentTrackPrimVtx", "h_Dist_FragmentTrackPrimVtx", 10000, 0, 10));
+      HistReg.emplace_back(&h_Dist_FragmentTrackPrimVtx.store);
 
       h_Pt_pions.emplace_back(new TH1F("h_Pt_pions", "h_Pt_pions", 1000, 0, 1));
       HistReg.emplace_back(&h_Pt_pions.store);
@@ -578,6 +579,10 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_DecayVertexPosZ_centroid.emplace_back(new TH1F("h_DecayVertexPosZ_centroid", "h_DecayVertexPosZ_centroid", 300, 20, 50));
       HistReg.emplace_back(&h_DecayVertexPosZ_centroid.store);
 
+      h_Dist_MotherTrackPrimVtx.emplace_back(new TH1F("h_Dist_MotherTrackPrimVtx", "h_Dist_MotherTrackPrimVtx", 10000, 0, 10));
+      HistReg.emplace_back(&h_Dist_MotherTrackPrimVtx.store);
+      h_Theta_MotherTrackPrimVtx.emplace_back(new TH1F("h_Theta_MotherTrackPrimVtx", "h_Theta_MotherTrackPrimVtx", 10000, 0, 10));
+      HistReg.emplace_back(&h_Theta_MotherTrackPrimVtx.store);
       h_HypInvariantMass.emplace_back(new TH1F("h_HypInvariantMass", "h_HypInvariantMass", 3000, 0, 6));
       HistReg.emplace_back(&h_HypInvariantMass.store);
 

@@ -575,10 +575,6 @@ public:
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 
-  std::vector<DecayTrackInfo> FragmentTracks;
-  std::vector<DecayTrackInfo> PionTracks;
-
-
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
   std::array<double,3> InteractionPoint;
   std::array<double,3> DecayVertex;

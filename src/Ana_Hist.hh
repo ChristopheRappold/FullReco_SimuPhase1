@@ -217,6 +217,7 @@ class Ana_Hist
   //Decay Vertex
   Hist<TH1F> h_Pt_fragments ;
   Hist<TH1F> h_Pz_fragments ;
+  Hist<TH1F> h_Dist_FragmentTrackPrimVtx ;
 
   Hist<TH1F> h_Pt_pions ;
   Hist<TH1F> h_Pz_pions ;
@@ -283,6 +284,8 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexPosZ_vfunction ;
   Hist<TH1F> h_DecayVertexPosZ_centroid ;
 
+  Hist<TH1F> h_Dist_MotherTrackPrimVtx ;
+  Hist<TH1F> h_Theta_MotherTrackPrimVtx ;
   Hist<TH1F> h_HypInvariantMass ;
 
   Hist<TH1F> h_DecayVtxstats ;

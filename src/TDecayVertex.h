@@ -36,8 +36,12 @@ private:
                             int& pdgParticle, int cutConditions,
                             std::vector<DecayTrackInfo>& RealTracks);
 
+  void FragmentSelector(std::vector<DecayTrackInfo>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<DecayTrackInfo>& FragmentTracks);
+
   void PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
                         std::vector<DecayTrackInfo>& PionTracks);
+
+  void PionSelector(std::vector<DecayTrackInfo>& PionTracks_All, TVector3& PrimVtxRecons, std::vector<DecayTrackInfo>& PionTracks);
 
   void CloseDist(DecayTrackInfo& FragmentTrack, DecayTrackInfo& PionTrack, double& distance, TVector3& centroid);
 
@@ -51,8 +55,11 @@ private:
   void TrackstoDecayVertex(std::vector<DecayTrackInfo>& FragmentTracks, std::vector<DecayTrackInfo>& PionTracks,
                                           TVector3& PrimVtxRecons, TVector3& DecayVertexRecons);
 
-  void Dist_DecayTrackPrimVtx(DecayTrackInfo& PionTrack, TVector3& PrimVtxRecons, double& distance);
+  void ThetaDist_TrackPrimVtx(DecayTrackInfo& Track, TVector3& PrimVtxRecons, double& theta, double& distance);
 
+  void MotherTracksRecons(std::vector<DecayTrackInfo>& FragmentTracks, std::vector<DecayTrackInfo>& PionTracks,
+                          TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, std::vector<DecayTrackInfo>& MotherTracks,
+                          std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks);
 
 
 
@@ -73,7 +80,12 @@ private:
 
   double pi_mass = 0.13957018; //in GeV
 
-  double MinDist_DecayTracksPrimVtx = 0.05;
+  double MinDist_FragmentTracksPrimVtx = 0.;
+  double MinDist_PionTracksPrimVtx = 0.05;
+
+  double Max_DaughtersTracks_closedist = 0.5;
+  double Max_Dist_MotherTrackPrimVtx = 20.;
+  double Max_Theta_MotherTrackPrimVtx = 30.;
 
 
   TRandom3* rand;
@@ -83,6 +95,7 @@ private:
   {
     TH1F* h_Pt_fragments;
     TH1F* h_Pz_fragments;
+    TH1F* h_Dist_FragmentTrackPrimVtx;
 
     TH1F* h_Pt_pions;
     TH1F* h_Pz_pions;
@@ -149,6 +162,8 @@ private:
     TH1F* h_DecayVertexPosZ_vfunction;
     TH1F* h_DecayVertexPosZ_centroid;
 
+    TH1F* h_Dist_MotherTrackPrimVtx;
+    TH1F* h_Theta_MotherTrackPrimVtx;
     TH1F* h_HypInvariantMass;
 
     TH1F* h_DecayVtxstats;
