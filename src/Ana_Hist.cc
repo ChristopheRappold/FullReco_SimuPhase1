@@ -586,6 +586,9 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_HypInvariantMass.emplace_back(new TH1F("h_HypInvariantMass", "h_HypInvariantMass", 3000, 0, 6));
       HistReg.emplace_back(&h_HypInvariantMass.store);
 
+      h_N_Si_MotherTracks.emplace_back(new TH1F("h_N_Si_MotherTracks", "h_N_Si_MotherTracks", 10, 0, 10));
+      HistReg.emplace_back(&h_N_Si_MotherTracks.store);
+
       h_DecayVtxstats.emplace_back(new TH1F("h_DecayVtxstats", "h_DecayVtxstats", 10, 0, 10));
       HistReg.emplace_back(&h_DecayVtxstats.store);
        

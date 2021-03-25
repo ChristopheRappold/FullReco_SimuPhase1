@@ -158,6 +158,7 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_Theta_MotherTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Theta_MotherTrackPrimVtx);
   LocalHisto.h_HypInvariantMass = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass);
 
+  LocalHisto.h_N_Si_MotherTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_Si_MotherTracks);
   
   LocalHisto.h_DecayVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVtxstats);
 }
@@ -532,6 +533,17 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Theta_MotherTrackPrimVtx->Fill(theta_MotherTrackPrimVtx, 1.);
 
       LocalHisto.h_HypInvariantMass->Fill(MotherTracks[i].Hit_MomEnergy.M(), 1.);
+    }
+
+
+  if(DecayVertexRecons.Z() > Z_plane_Si2 + Dist_to_Silicons)
+    {
+      DecayTrackInfo Si_MotherTrack;
+      TLorentzVector LorentzVect_Zero;
+      MotherTrackSiliconHits(RecoEvent.PrimVtxRecons, DecayVertexRecons, RecoEvent.Hits_Si1, RecoEvent.Hits_Si2, Si_MotherTrack);
+      
+      if(Si_MotherTrack.Hit_MomEnergy != LorentzVect_Zero)
+        LocalHisto.h_N_Si_MotherTracks->Fill(2.5, 1.);
     }
 
   return 0;
@@ -911,4 +923,60 @@ void TDecayVertex::MotherTracksRecons(std::vector<DecayTrackInfo>& FragmentTrack
           RefDaughtersTracks.emplace_back(std::make_tuple(i,j));
         }
     }
+}
+
+void TDecayVertex::MotherTrack_SiHit(TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, double& Z_plane,
+                                      std::vector<std::vector<double> >& Hits_Si, TVector3& Mother_Sihit)
+{
+  TVector3 IP_SV = DecayVtxRecons - PrimVtxRecons;
+
+  double track_parameter = (Z_plane - PrimVtxRecons.Z()) / IP_SV.Z();
+  double X_track = PrimVtxRecons.X() + track_parameter * IP_SV.X();
+  double Y_track = PrimVtxRecons.Y() + track_parameter * IP_SV.Y();
+
+  TVector3 Hit_track (X_track, Y_track, Z_plane);
+
+  double new_dist = 50.;
+
+  for(size_t i = 0; i < Hits_Si.size(); ++i)
+    {
+      if(Hits_Si[i][0] < Min_EnergyDeposition_Si)
+        continue;
+
+      TVector3 temp_hit (Hits_Si[i][1], Hits_Si[i][2], Hits_Si[i][3]);
+      TVector3 temp_Vect_dist = Hit_track - temp_hit;
+      double temp_dist = temp_Vect_dist.Mag();
+
+      if(temp_dist < new_dist)
+      {
+        new_dist = temp_dist;
+        Mother_Sihit = temp_hit;
+      }
+    }
+
+  if(new_dist > Max_dist_Mother_SiHit)
+    Mother_Sihit.SetXYZ(0.,0.,0.);
+}
+
+void TDecayVertex::MotherTrackSiliconHits(TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, std::vector<std::vector<double> >& Hits_Si1,
+                                            std::vector<std::vector<double> >& Hits_Si2, DecayTrackInfo& Si_MotherTrack)
+{
+  TVector3 Vect_Zero;
+
+  TVector3 Mother_Hit_Si1;
+  MotherTrack_SiHit(PrimVtxRecons, DecayVtxRecons, Z_plane_Si1, Hits_Si1, Mother_Hit_Si1);
+  if(Mother_Hit_Si1 == Vect_Zero)
+    return;
+
+  TVector3 Mother_Hit_Si2;
+  MotherTrack_SiHit(PrimVtxRecons, DecayVtxRecons, Z_plane_Si2, Hits_Si2, Mother_Hit_Si2);
+  if(Mother_Hit_Si2 == Vect_Zero)
+    return;
+
+  TVector3 Si_MotherMom = Mother_Hit_Si2 - Mother_Hit_Si1;
+  TLorentzVector Si_MotherMomEnergy;
+  Si_MotherMomEnergy.SetPxPyPzE(Si_MotherMom.X(), Si_MotherMom.Y(), Si_MotherMom.Z(), 1.);
+
+  Si_MotherTrack.Hit_MomEnergy = Si_MotherMomEnergy;
+  Si_MotherTrack.Hit_Pos = Mother_Hit_Si1;
 }

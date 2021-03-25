@@ -576,6 +576,9 @@ public:
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
+  std::vector<std::vector<double> > Hits_Si1{};
+  std::vector<std::vector<double> > Hits_Si2{};
+
   std::array<double,3> InteractionPoint;
   std::array<double,3> DecayVertex;
 

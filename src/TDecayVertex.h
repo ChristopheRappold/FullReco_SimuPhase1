@@ -61,11 +61,21 @@ private:
                           TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, std::vector<DecayTrackInfo>& MotherTracks,
                           std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks);
 
+  void MotherTrack_SiHit(TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, double& Z_plane,
+                          std::vector<std::vector<double> >& Hits_Si, TVector3& Mother_Sihit);
+
+  void MotherTrackSiliconHits(TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, std::vector<std::vector<double> >& Hits_Si1,
+                               std::vector<std::vector<double> >& Hits_Si2, DecayTrackInfo& Si_MotherTrack);
+
 
 
 
   double Zo_target = 24.; // in cm
   double Zo_minifibers = 45;
+
+  double Z_plane_Si1    = 27.;  // in cm
+  double Z_plane_Si2    = 30.;  // in cm
+  double Dist_to_Silicons = 0.5;
 
   double k_factor       = 3.; // multiplies the fragment track f function value
 
@@ -87,6 +97,8 @@ private:
   double Max_Dist_MotherTrackPrimVtx = 20.;
   double Max_Theta_MotherTrackPrimVtx = 30.;
 
+  double Max_dist_Mother_SiHit = 0.5;
+  double Min_EnergyDeposition_Si = 0.08;
 
   TRandom3* rand;
   PDG_fromName pid_fromName;
@@ -165,6 +177,8 @@ private:
     TH1F* h_Dist_MotherTrackPrimVtx;
     TH1F* h_Theta_MotherTrackPrimVtx;
     TH1F* h_HypInvariantMass;
+
+    TH1F* h_N_Si_MotherTracks;
 
     TH1F* h_DecayVtxstats;
   };

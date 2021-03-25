@@ -287,6 +287,7 @@ class Ana_Hist
   Hist<TH1F> h_Dist_MotherTrackPrimVtx ;
   Hist<TH1F> h_Theta_MotherTrackPrimVtx ;
   Hist<TH1F> h_HypInvariantMass ;
+  Hist<TH1F> h_N_Si_MotherTracks ;
 
   Hist<TH1F> h_DecayVtxstats ;
 

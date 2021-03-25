@@ -191,10 +191,11 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   // Obtain the hits from the energy signals
   std::vector<std::vector<double> > HitEnergyPosXY_Si1{};
   SiliconHits_Si1.SignalstoHits(HitEnergyLayerX_Si1, HitEnergyLayerY_Si1, HitEnergyPosXY_Si1);
+  RecoEvent.Hits_Si1 = HitEnergyPosXY_Si1;
 
   std::vector<std::vector<double> > HitEnergyPosXY_Si2{};
   SiliconHits_Si2.SignalstoHits(HitEnergyLayerX_Si2, HitEnergyLayerY_Si2, HitEnergyPosXY_Si2);
-
+  RecoEvent.Hits_Si2 = HitEnergyPosXY_Si2;
 
 
 #ifdef HIT_RECONS_CHECK
