@@ -516,6 +516,19 @@ struct OutHit
   std::array<double, 4> MCparticle;
 };
 
+struct CandTrack
+{
+  std::vector<int> orderedHitIds;
+  bool Rfitted = false;
+  int q = 0;
+  std::vector<double> par = std::vector<double>(5);
+  TMatrixD Cov = TMatrixD(5,5);
+  double chi2_circle = -1.;
+  double chi2_line = -1.;
+
+  CandTrack(const std::vector<int>& Hits, bool R, int Q, const std::vector<double>& P, const TMatrixD& C, double chi2_1, double chi2_2):orderedHitIds(Hits),Rfitted(R),q(Q),par(P),Cov(C),chi2_circle(chi2_1),chi2_line(chi2_2) {};
+};
+
 // struct OutTrack
 // {
 //   std::string type;
@@ -572,6 +585,9 @@ public:
   std::unordered_map<int, std::vector<std::vector<SimHit> > > TrackDAFSim;
   std::unordered_map<int, InfoInit> TrackDAFInit;
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
+
+  std::vector<CandTrack> TracksFound;
+
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 

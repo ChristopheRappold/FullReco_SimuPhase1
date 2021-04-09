@@ -16,14 +16,26 @@
 
 #include "tricktrack/FKDPoint.h"
 #include "tricktrack/FKDTree.h"
+#include "tricktrack/RiemannFit.h"
 
 
 typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
 
 using RPhiHit = tricktrack::FKDPoint<double, 3>;
 
+struct HTrack {
+
+  std::vector<double> Par = std::vector<double>(5);
+  TMatrixD Cov = TMatrixD(5,5);
+  int q = 0;
+  double chi2_circle = -1.;
+  double chi2_line = -1.;
+
+};
+
 struct RTrack {
   std::set<int> hits;
+  std::vector<int> sortedHits;
   double x0;
   double y0;
   double r0;
@@ -31,8 +43,11 @@ struct RTrack {
   double minPhi;
   double maxPhi;
   int q;
+  bool toRefit = false;
+  HTrack helix;
   RTrack(const std::set<int>& h, double x,double y,double r,double c2, double minP, double maxP, int Q_):hits(h),x0(x),y0(y),r0(r),chi2(c2),minPhi(minP),maxPhi(maxP),q(Q_) {};
 };
+
 
 class TRiemannFinder final :  public TDataProcessInterface
 {
@@ -55,7 +70,12 @@ class TRiemannFinder final :  public TDataProcessInterface
   void BuildTrackCand(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree, const std::vector<RPhiHit>& TempHits, std::vector<RTrack>& newTracksCand);
   void AddStereoWire(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand);
   void AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand);
-  int FinderTrack(FullRecoEvent& RecoEvent);
+  void AddOtherMDC(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand);
+  void AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand);
+  void SortAndPosZ(std::vector<RTrack>& newTracksCand);
+  void FitterRiemann(std::vector<RTrack>& newTracksCand);
+
+  int FinderTrack(FullRecoEvent& RecoEvent,  std::vector<RTrack>& newTracksCand);
 
   std::vector<std::tuple<int, int, int> > TempHitToAllHits;
   std::vector<TVector3> TempHitXYZ;
@@ -66,6 +86,10 @@ class TRiemannFinder final :  public TDataProcessInterface
 
   std::vector<std::tuple<int, int, int> > TempHitPSBE;
 
+  tricktrack::helix_fit res_h;
+
+  bool OutputEvents = false;
+
   TString namefileFinder;
   TFile* f_finder = nullptr;
   TTree* t_finder = nullptr;
@@ -75,11 +99,11 @@ class TRiemannFinder final :  public TDataProcessInterface
   TH2I* h_XYReco;
   TH2I* h_RPhi;
   TH2I* h_RPhiSim;
+  TH2I* h_ZPhiSim;
   TH2I* h_XYConformal;
   TH2I* h_XYRiemann;
   TH2I* h_XYTracks;
   TH2I* h_XYRiemannTracks;
-
 
   constexpr double dl_max(int idDet) {
     switch(idDet){
@@ -112,10 +136,19 @@ class TRiemannFinder final :  public TDataProcessInterface
     }
   };
 
+  constexpr int ch_max(int idDet) {
+    int ch[17] = {52,64,76,88,100,76,86,96,106,116,126,104,112,120,130,138,148};
+    return ch[idDet];
+  };
+
   G4Sol::SolDet LastFrontWall;
 
   struct LocalHists
   {
+    TH2F* h_Chi2;
+    TH2F* h_residus;
+    TH2F* h_Stats;
+    TH2F* h_mom;
 
   };
   LocalHists LocalHisto;
