@@ -107,6 +107,8 @@ class THyphiAttributes
   std::string FlatML_namefile;
   std::string DataML_Out;
 
+  bool RF_OutputEvents;
+
   FairField* Field;
 
   const FullRecoConfig& Config;

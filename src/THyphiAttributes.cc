@@ -69,6 +69,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   KF_NbCentralCut = 1;
   KF_NbMiniFiberCut = 4;
 
+  RF_OutputEvents = false;
+
   if(Config.IsAvailable("G4_simu"))
     G4_simu = true;
   if(Config.IsAvailable("G4_TimeReso"))
@@ -141,6 +143,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   temp_file_base_name += MLSuffix;
   temp_file_base_name += ".root";
   FlatML_namefile = temp_file_base_name;
+
+  if(Config.IsAvailable("RF_OutputEvents"))
+    RF_OutputEvents = Config.Get<bool>("RF_OutputEvents");
 
   DataML_Out = Config.IsAvailable("DataML_Out") ? Config.Get<std::string>("DataML_Out") : "NoneInConfig";
 
