@@ -580,7 +580,10 @@ public:
   std::vector<std::vector<double> > Hits_Si2{};
 
   std::array<double,3> InteractionPoint;
+  std::array<double,6> CovMatrix_IP; //lower triangle
+
   std::array<double,3> DecayVertex;
+  std::array<double,6> CovMatrix_SV; //lower triangle
 
   TVector3 PrimVtxRecons;
   TVector3 DecayVtxRecons;

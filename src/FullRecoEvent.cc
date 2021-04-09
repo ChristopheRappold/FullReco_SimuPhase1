@@ -50,6 +50,9 @@ void FullRecoEvent::Clear(int toclean)
   Hits_Si1.clear();
   Hits_Si2.clear();
   
-  InteractionPoint = {0.,0.,0.};
-  DecayVertex = {0.,0.,0.};
+  InteractionPoint.fill(0.);
+  CovMatrix_IP.fill(0.);
+
+  DecayVertex.fill(0.);
+  CovMatrix_SV.fill(0.);
 }

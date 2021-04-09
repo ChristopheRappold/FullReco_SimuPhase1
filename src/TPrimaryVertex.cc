@@ -12,7 +12,7 @@
 #define TRACK_RECONS_CHECK
 #define MOTHER_DAUGHTERS_CHECK
 #define VERTEX_RECONS_CHECK
-//#define COVARIANCE_MATRIX
+#define COVARIANCE_MATRIX
 //#define DECAY_VERTEX
 
 using namespace std;
@@ -483,25 +483,14 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   std::vector<std::vector<double> > CovMatrix;
   CovarianceMatrix(CandidateTracks, BeamHit1, BeamHit2, InteractionPointAverage, f_values_IP, CovMatrix);
 
+  RecoEvent.CovMatrix_IP = {CovMatrix[0][0],
+                            CovMatrix[1][0], CovMatrix[1][1],
+                            CovMatrix[2][0], CovMatrix[2][1], CovMatrix[2][2]};
+
   LocalHisto.h_InteractionPointDistanceX_pull->Fill(distanceX / sqrt(TMath::Max(CovMatrix[0][0], 1e-10)), 1.);
   LocalHisto.h_InteractionPointDistanceY_pull->Fill(distanceY / sqrt(TMath::Max(CovMatrix[1][1], 1e-10)), 1.);
   LocalHisto.h_InteractionPointDistanceZ_pull->Fill(distanceZ / sqrt(TMath::Max(CovMatrix[2][2], 1e-10)), 1.);
 
-  /*
-    LocalHisto.h_InteractionPointDistanceX_pull->Fill((InteractionPoint_real_X -
-    InteractionPointAverage[0])/sqrt(TMath::Max(CovMatrix[0][0], 1e-10)), 1.);
-    LocalHisto.h_InteractionPointDistanceY_pull->Fill((InteractionPoint_real_Y -
-    InteractionPointAverage[1])/sqrt(TMath::Max(CovMatrix[1][1], 1e-10)), 1.);
-    LocalHisto.h_InteractionPointDistanceZ_pull->Fill((InteractionPoint_real_Z -
-    InteractionPointAverage[2])/sqrt(TMath::Max(CovMatrix[2][2], 1e-10)), 1.);
-  */
-
-  /*
-    std::cout << "Covariance matrix:\n";
-    std::cout << CovMatrix[0][0] << "\t" << CovMatrix[0][1] << "\t" << CovMatrix[0][2] << "\n";
-    std::cout << CovMatrix[1][0] << "\t" << CovMatrix[1][1] << "\t" << CovMatrix[1][2] << "\n";
-    std::cout << CovMatrix[2][0] << "\t" << CovMatrix[2][1] << "\t" << CovMatrix[2][2] << "\n\n";
-  */
 
   LocalHisto.h_CovarianceSigmaX->Fill(sqrt(CovMatrix[0][0]), 1.);
   LocalHisto.h_CovarianceSigmaY->Fill(sqrt(CovMatrix[1][1]), 1.);

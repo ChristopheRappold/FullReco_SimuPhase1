@@ -223,9 +223,6 @@ class Ana_Hist
   Hist<TH1F> h_Pz_pions ;
   Hist<TH1F> h_Chi2ndf_pions ;
 
-  Hist<TH1F> h_Pt_realpions ;
-  Hist<TH1F> h_Pz_realpions ;
-
   Hist<TH1F> h_Pt_cutpions ;
   Hist<TH1F> h_Pz_cutpions ;
 
@@ -233,17 +230,15 @@ class Ana_Hist
   Hist<TH1F> h_Ncutpions ;
   Hist<TH1F> h_Npions ;
 
+
   Hist<TH1F> h_Closedist_Distance ;
   Hist<TH1F> h_Closedist_PosZ ;
   Hist<TH2F> h_Dist_DecayTrackPrimVtx ;
 
-  Hist<TH1F> h_Closedist_realDistance ;
-  Hist<TH1F> h_Closedist_realPosZ ;
-  Hist<TH2F> h_Dist_realDecayTrackPrimVtx ;
-
   Hist<TH1F> h_Closedist_cutDistance ;
   Hist<TH1F> h_Closedist_cutPosZ ;
   Hist<TH2F> h_Dist_cutDecayTrackPrimVtx ;
+
 
   Hist<TH1F> h_DecayVertexDistance ;
   Hist<TH1F> h_DecayVertexDistanceX ;
@@ -255,42 +250,26 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexDistanceY_centroid ;
   Hist<TH1F> h_DecayVertexDistanceZ_centroid ;
 
-  Hist<TH1F> h_DecayVertexDistance_2centroid_average ;
-  Hist<TH1F> h_DecayVertexDistanceX_2centroid_average ;
-  Hist<TH1F> h_DecayVertexDistanceY_2centroid_average ;
-  Hist<TH1F> h_DecayVertexDistanceZ_2centroid_average ;
-
-  Hist<TH1F> h_DecayVertexDistance_2centroid_closest ;
-  Hist<TH1F> h_DecayVertexDistanceX_2centroid_closest ;
-  Hist<TH1F> h_DecayVertexDistanceY_2centroid_closest ;
-  Hist<TH1F> h_DecayVertexDistanceZ_2centroid_closest ;
-
-  Hist<TH1F> h_DecayVertexDistance_2centroid_IPCheck ;
-  Hist<TH1F> h_DecayVertexDistanceX_2centroid_IPCheck ;
-  Hist<TH1F> h_DecayVertexDistanceY_2centroid_IPCheck ;
-  Hist<TH1F> h_DecayVertexDistanceZ_2centroid_IPCheck ;
-
-  Hist<TH1F> h_DecayVertexrealDistance ;
-  Hist<TH1F> h_DecayVertexrealDistanceX ;
-  Hist<TH1F> h_DecayVertexrealDistanceY ;
-  Hist<TH1F> h_DecayVertexrealDistanceZ ;
-
   Hist<TH1F> h_DecayVertexcutDistance ;
   Hist<TH1F> h_DecayVertexcutDistanceX ;
   Hist<TH1F> h_DecayVertexcutDistanceY ;
   Hist<TH1F> h_DecayVertexcutDistanceZ ;
+
 
   Hist<TH1F> h_DecayVertexPosZ_real ;
   Hist<TH1F> h_DecayVertexPosZ_vfunction ;
   Hist<TH1F> h_DecayVertexPosZ_centroid ;
   Hist<TH1F> h_DecayVertexPosZ_AllVfunc ;
   Hist<TH1F> h_DecayVertexPosZ_AllCentroid ;
+  Hist<TH1F> h_DecayVertexPosZ_AllKFPart ;
 
-  Hist<TH1F> h_Dist_MotherTrackPrimVtx ;
-  Hist<TH1F> h_Theta_MotherTrackPrimVtx ;
+
+  Hist<TH2F> h_N_MotherTracks ;
+  Hist<TH2F> h_Dist_MotherTrackPrimVtx ;
+  Hist<TH2F> h_Theta_MotherTrackPrimVtx ;
   Hist<TH1F> h_HypInvariantMass ;
-
   Hist<TH1F> h_N_Si_MotherTracks ;
+
 
   Hist<TH1F> h_DecayVertexDistance_AllVfunc ;
   Hist<TH1F> h_DecayVertexDistanceX_AllVfunc ;
@@ -301,6 +280,11 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexDistanceX_AllCentroid ;
   Hist<TH1F> h_DecayVertexDistanceY_AllCentroid ;
   Hist<TH1F> h_DecayVertexDistanceZ_AllCentroid ;
+
+  Hist<TH1F> h_DecayVertexDistance_AllKFPart ;
+  Hist<TH1F> h_DecayVertexDistanceX_AllKFPart ;
+  Hist<TH1F> h_DecayVertexDistanceY_AllKFPart ;
+  Hist<TH1F> h_DecayVertexDistanceZ_AllKFPart ;
 
   Hist<TH1F> h_DecayVtxstats ;
 
