@@ -205,8 +205,10 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Dist_FragmentTrackPrimVtx->Fill(dist_FragmentTrackPrimVtx, 1.);
 
       std::cout<< "Mass: " << FragmentTracks[i].GetMass() << "\n";
-      std::cout<< "Pt: " << FragmentTracks[i].GetPt() << "\n";
-      std::cout<< "Pz: " << FragmentTracks[i].GetPz() << "\n";
+      std::cout<< "Energy: " << FragmentTracks[i].GetE() << "\n";
+      std::cout<< "Mom: " << FragmentTracks[i].GetPx() << "\t" << FragmentTracks[i].GetPy() << "\t" << FragmentTracks[i].GetPz() << "\n";
+      std::cout << "Pos: " << FragmentTracks[i].GetX() << "\t" << FragmentTracks[i].GetY() << "\t" << FragmentTracks[i].GetZ() << "\n";
+
     }
     std::cout << "\n";
 
@@ -325,8 +327,9 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   
 
       std::cout<< "Mass: "  << CutPionTracks[i].GetMass(m, error) << "\t"  << m  << "\n";
-      std::cout<< "Pt: " << CutPionTracks[i].GetPt() << "\n";
-      std::cout<< "Pz: " << CutPionTracks[i].GetPz() << "\n";
+      std::cout<< "Energy: " << CutPionTracks[i].GetE() << "\n";
+      std::cout<< "Mom: " << CutPionTracks[i].GetPx() << "\t" << CutPionTracks[i].GetPy() << "\t" << CutPionTracks[i].GetPz() << "\n";
+      std::cout << "Pos: " << CutPionTracks[i].GetX() << "\t" << CutPionTracks[i].GetY() << "\t" << CutPionTracks[i].GetZ() << "\n";
     }
     std::cout << "\n";
 
@@ -407,8 +410,10 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
         }
 
       std::cout<< "Mass: " << PionTracks[i].GetMass() << "\n";
-      std::cout<< "Pt: " << PionTracks[i].GetPt() << "\n";
-      std::cout<< "Pz: " << PionTracks[i].GetPz() << "\n";
+      std::cout<< "Energy: " << PionTracks[i].GetE() << "\n";
+      std::cout<< "Mom: " << PionTracks[i].GetPx() << "\t" << PionTracks[i].GetPy() << "\t" << PionTracks[i].GetPz() << "\n";
+      std::cout << "Pos: " << PionTracks[i].GetX() << "\t" << PionTracks[i].GetY() << "\t" << PionTracks[i].GetZ() << "\n";
+
     }
     std::cout << "\n";
 
@@ -491,8 +496,9 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       std::cout<< "Mass: " << MotherTracks[i].GetMass(m, error) << "\t" << m << "\n";
       std::cout<< "Energy: " << MotherTracks[i].GetE() << "\n";
-      std::cout<< "Pt: " << MotherTracks[i].GetPt() << "\n";
-      std::cout<< "Pz: " << MotherTracks[i].GetPz() << "\n";
+      std::cout<< "Mom: " << MotherTracks[i].GetPx() << "\t" << MotherTracks[i].GetPy() << "\t" << MotherTracks[i].GetPz() << "\n";
+      std::cout<< "Pos: " << MotherTracks[i].GetX() << "\t" << MotherTracks[i].GetY() << "\t" << MotherTracks[i].GetZ() << "\n";
+
     }
     std::cout << "\n";
 
@@ -1025,16 +1031,40 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
 */
           KFParticleSIMD particleSIMD1(FragmentTracks[i]);    // the same particle is copied to each SIMD element
           KFParticleSIMD particleSIMD2(PionTracks[j]);
-    
+
+          std::cout << "Original Fragment Pos: " << particleSIMD1.GetX() << "\t" << particleSIMD1.GetY() << "\t" << particleSIMD1.GetZ() << "\n";
+          std::cout << "Original Pion Pos: " << particleSIMD2.GetX() << "\t" << particleSIMD2.GetY() << "\t" << particleSIMD2.GetZ() << "\n";
+          std::cout << "\n";
+
+          float_v field = 0.f;
+
+/*
+          particleSIMD1.SetField(field);
+          particleSIMD2.SetField(field);
+*/
+          
           float_v ds[2] = {0.f,0.f};
           float_v dsdr[4][6];
 
           particleSIMD1.GetDStoParticle( particleSIMD2, ds, dsdr ); //Needs magnetic field initialization
+
+          std::cout << "DS: " << ds[0] << "\t" << ds[1] << "\n";
+
+          std::cout << "NoTrans Fragment Pos: " << particleSIMD1.GetX() << "\t" << particleSIMD1.GetY() << "\t" << particleSIMD1.GetZ() << "\n";
+          std::cout << "NoTrans Pion Pos: " << particleSIMD2.GetX() << "\t" << particleSIMD2.GetY() << "\t" << particleSIMD2.GetZ() << "\n";
+          std::cout << "\n";
+
           particleSIMD1.TransportToDS(ds[0], dsdr[0]); //Needs magnetic field initialization
           particleSIMD2.TransportToDS(ds[1], dsdr[3]); //Needs magnetic field initialization
-          const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD1, &particleSIMD2};
+
+          std::cout << "Trans Fragment Pos: " << particleSIMD1.GetX() << "\t" << particleSIMD1.GetY() << "\t" << particleSIMD1.GetZ() << "\n";
+          std::cout << "Trans Pion Pos: " << particleSIMD2.GetX() << "\t" << particleSIMD2.GetY() << "\t" << particleSIMD2.GetZ() << "\n";
+          std::cout << "\n";
+
+          const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD2, &particleSIMD1};
           
           KFParticleSIMD mother;
+          mother.SetConstructMethod(0);
           mother.Construct(vDaughtersPointer, 2, nullptr);
 
           KFParticle temp_MotherTrack;
