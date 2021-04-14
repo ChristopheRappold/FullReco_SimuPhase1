@@ -1023,16 +1023,47 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
           MotherTracks.emplace_back(temp_MotherTrack);
           RefDaughtersTracks.emplace_back(std::make_tuple(i,j));
 */
-          KFParticleSIMD particleSIMD1(FragmentTracks[i]);    // the same particle is copied to each SIMD element
+	  std::cout<<"Fr"<<FragmentTracks[i]<<" Field ?"<<FragmentTracks[i].IsHomogeneous()<<"\n";
+	  std::cout<<"Pion"<<PionTracks[j]<<" Field ?"<<FragmentTracks[i].IsHomogeneous()<<"\n";
+	  // for(int iFd =0;iFd<10;++iFd)
+	  //   {
+	  //     FragmentTracks[i].SetFieldCoeff(0.,iFd);
+	  //     FragmentTracks[i].SetField(0.,iFd);
+	  //     PionTracks[i].SetFieldCoeff(0.,iFd);
+	  //   }
+
+
+	  KFParticle temp1,temp2;
+
+	  std::cout<<"----- after init simd\n";
+	  KFParticleSIMD particleSIMD1(FragmentTracks[i]);    // the same particle is copied to each SIMD element
+	  particleSIMD1.GetKFParticle(temp1,0);
+	  std::cout<<"2 Fr "<<temp1<<"\n";
+	  std::cout<<" Field ? "<<temp1.IsHomogeneous()<<"\n";
           KFParticleSIMD particleSIMD2(PionTracks[j]);
-    
-          float_v ds[2] = {0.f,0.f};
+    	  particleSIMD2.GetKFParticle(temp2,0);
+	  std::cout<<"2 Pion "<<temp2<<"\n";
+	  std::cout<<" Field ? "<<temp2.IsHomogeneous()<<"\n";
+
+	  float_v ds[2] = {0.f,0.f};
           float_v dsdr[4][6];
+	  float_v VV[8];
+
+	  particleSIMD1.TransportCBM(ds[0],VV);
 
           particleSIMD1.GetDStoParticle( particleSIMD2, ds, dsdr ); //Needs magnetic field initialization
           particleSIMD1.TransportToDS(ds[0], dsdr[0]); //Needs magnetic field initialization
           particleSIMD2.TransportToDS(ds[1], dsdr[3]); //Needs magnetic field initialization
           const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD1, &particleSIMD2};
+
+	  KFParticle temp11,temp21;
+	  std::cout<<"----- after transport\n";
+	  particleSIMD1.GetKFParticle(temp11,0);
+	  std::cout<<"3 Fr "<<temp11<<"\n";
+	  std::cout<<" Field ? "<<temp21.IsHomogeneous()<<"\n";
+	  particleSIMD2.GetKFParticle(temp21,0);
+	  std::cout<<"3 Pion "<<temp21<<"\n";
+	  std::cout<<" Field ? "<<temp21.IsHomogeneous()<<"\n";
           
           KFParticleSIMD mother;
           mother.Construct(vDaughtersPointer, 2, nullptr);
