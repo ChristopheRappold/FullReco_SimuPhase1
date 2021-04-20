@@ -517,6 +517,24 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_DecayVertexDistanceZ_centroid.emplace_back(new TH1F("h_DecayVertexDistanceZ_centroid", "h_DecayVertexDistanceZ_centroid", 2000, -10, 10));
       HistReg.emplace_back(&h_DecayVertexDistanceZ_centroid.store);
 
+      h_DecayVertexDistance_KFPart.emplace_back(new TH1F("h_DecayVertexDistance_KFPart", "h_DecayVertexDistance_KFPart", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexDistance_KFPart.store);
+      h_DecayVertexDistanceX_KFPart.emplace_back(new TH1F("h_DecayVertexDistanceX_KFPart", "h_DecayVertexDistanceX_KFPart", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceX_KFPart.store);
+      h_DecayVertexDistanceY_KFPart.emplace_back(new TH1F("h_DecayVertexDistanceY_KFPart", "h_DecayVertexDistanceY_KFPart", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceY_KFPart.store);
+      h_DecayVertexDistanceZ_KFPart.emplace_back(new TH1F("h_DecayVertexDistanceZ_KFPart", "h_DecayVertexDistanceZ_KFPart", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexDistanceZ_KFPart.store);
+
+      h_DecayVertexDistance_KFPart_PrimVtx.emplace_back(new TH1F("h_DecayVertexDistance_KFPart_PrimVtx", "h_DecayVertexDistance_KFPart_PrimVtx", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexDistance_KFPart_PrimVtx.store);
+      h_DecayVertexDistanceX_KFPart_PrimVtx.emplace_back(new TH1F("h_DecayVertexDistanceX_KFPart_PrimVtx", "h_DecayVertexDistanceX_KFPart_PrimVtx", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceX_KFPart_PrimVtx.store);
+      h_DecayVertexDistanceY_KFPart_PrimVtx.emplace_back(new TH1F("h_DecayVertexDistanceY_KFPart_PrimVtx", "h_DecayVertexDistanceY_KFPart_PrimVtx", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexDistanceY_KFPart_PrimVtx.store);
+      h_DecayVertexDistanceZ_KFPart_PrimVtx.emplace_back(new TH1F("h_DecayVertexDistanceZ_KFPart_PrimVtx", "h_DecayVertexDistanceZ_KFPart_PrimVtx", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexDistanceZ_KFPart_PrimVtx.store);
+
       h_DecayVertexcutDistance.emplace_back(new TH1F("h_DecayVertexcutDistance", "h_DecayVertexcutDistance", 4000, 0, 40));
       HistReg.emplace_back(&h_DecayVertexcutDistance.store);
       h_DecayVertexcutDistanceX.emplace_back(new TH1F("h_DecayVertexcutDistanceX", "h_DecayVertexcutDistanceX", 1000, -5, 5));
@@ -526,6 +544,23 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_DecayVertexcutDistanceZ.emplace_back(new TH1F("h_DecayVertexcutDistanceZ", "h_DecayVertexcutDistanceZ", 2000, -10, 10));
       HistReg.emplace_back(&h_DecayVertexcutDistanceZ.store);
 
+      h_DecayVertexcutDistance_KFPart.emplace_back(new TH1F("h_DecayVertexcutDistance_KFPart", "h_DecayVertexcutDistance_KFPart", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexcutDistance_KFPart.store);
+      h_DecayVertexcutDistanceX_KFPart.emplace_back(new TH1F("h_DecayVertexcutDistanceX_KFPart", "h_DecayVertexcutDistanceX_KFPart", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexcutDistanceX_KFPart.store);
+      h_DecayVertexcutDistanceY_KFPart.emplace_back(new TH1F("h_DecayVertexcutDistanceY_KFPart", "h_DecayVertexcutDistanceY_KFPart", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexcutDistanceY_KFPart.store);
+      h_DecayVertexcutDistanceZ_KFPart.emplace_back(new TH1F("h_DecayVertexcutDistanceZ_KFPart", "h_DecayVertexcutDistanceZ_KFPart", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexcutDistanceZ_KFPart.store);
+
+      h_DecayVertexcutDistance_KFPart_PrimVtx.emplace_back(new TH1F("h_DecayVertexcutDistance_KFPart_PrimVtx", "h_DecayVertexcutDistance_KFPart_PrimVtx", 4000, 0, 40));
+      HistReg.emplace_back(&h_DecayVertexcutDistance_KFPart_PrimVtx.store);
+      h_DecayVertexcutDistanceX_KFPart_PrimVtx.emplace_back(new TH1F("h_DecayVertexcutDistanceX_KFPart_PrimVtx", "h_DecayVertexcutDistanceX_KFPart_PrimVtx", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexcutDistanceX_KFPart_PrimVtx.store);
+      h_DecayVertexcutDistanceY_KFPart_PrimVtx.emplace_back(new TH1F("h_DecayVertexcutDistanceY_KFPart_PrimVtx", "h_DecayVertexcutDistanceY_KFPart_PrimVtx", 1000, -5, 5));
+      HistReg.emplace_back(&h_DecayVertexcutDistanceY_KFPart_PrimVtx.store);
+      h_DecayVertexcutDistanceZ_KFPart_PrimVtx.emplace_back(new TH1F("h_DecayVertexcutDistanceZ_KFPart_PrimVtx", "h_DecayVertexcutDistanceZ_KFPart_PrimVtx", 2000, -10, 10));
+      HistReg.emplace_back(&h_DecayVertexcutDistanceZ_KFPart_PrimVtx.store);
 
       h_DecayVertexPosZ_real.emplace_back(new TH1F("h_DecayVertexPosZ_real", "h_DecayVertexPosZ_real", 300, 20, 50));
       HistReg.emplace_back(&h_DecayVertexPosZ_real.store);
@@ -533,6 +568,10 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_DecayVertexPosZ_vfunction.store);
       h_DecayVertexPosZ_centroid.emplace_back(new TH1F("h_DecayVertexPosZ_centroid", "h_DecayVertexPosZ_centroid", 300, 20, 50));
       HistReg.emplace_back(&h_DecayVertexPosZ_centroid.store);
+      h_DecayVertexPosZ_KFPart.emplace_back(new TH1F("h_DecayVertexPosZ_KFPart", "h_DecayVertexPosZ_KFPart", 300, 20, 50));
+      HistReg.emplace_back(&h_DecayVertexPosZ_KFPart.store);
+      h_DecayVertexPosZ_KFPart_PrimVtx.emplace_back(new TH1F("h_DecayVertexPosZ_KFPart_PrimVtx", "h_DecayVertexPosZ_KFPart_PrimVtx", 300, 20, 50));
+      HistReg.emplace_back(&h_DecayVertexPosZ_KFPart_PrimVtx.store);
       h_DecayVertexPosZ_AllVfunc.emplace_back(new TH1F("h_DecayVertexPosZ_AllVfunc", "h_DecayVertexPosZ_AllVfunc", 300, 20, 50));
       HistReg.emplace_back(&h_DecayVertexPosZ_AllVfunc.store);
       h_DecayVertexPosZ_AllCentroid.emplace_back(new TH1F("h_DecayVertexPosZ_AllCentroid", "h_DecayVertexPosZ_AllCentroid", 300, 20, 50));
@@ -540,14 +579,35 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_DecayVertexPosZ_AllKFPart.emplace_back(new TH1F("h_DecayVertexPosZ_AllKFPart", "h_DecayVertexPosZ_AllKFPart", 300, 20, 50));
       HistReg.emplace_back(&h_DecayVertexPosZ_AllKFPart.store);
 
-      h_N_MotherTracks.emplace_back(new TH2F("h_N_MotherTracks", "h_N_MotherTracks", 10, 0, 10, 1000, 0, 100));
+      h_N_MotherTracks.emplace_back(new TH2F("h_N_MotherTracks", "h_N_MotherTracks", 10, 0, 10, 2000, 2, 4));
       HistReg.emplace_back(&h_N_MotherTracks.store);
       h_Dist_MotherTrackPrimVtx.emplace_back(new TH2F("h_Dist_MotherTrackPrimVtx", "h_Dist_MotherTrackPrimVtx", 3000, 0, 3, 2000, 2, 4));
       HistReg.emplace_back(&h_Dist_MotherTrackPrimVtx.store);
       h_Theta_MotherTrackPrimVtx.emplace_back(new TH2F("h_Theta_MotherTrackPrimVtx", "h_Theta_MotherTrackPrimVtx", 3000, 0, 30, 2000, 2, 4));
       HistReg.emplace_back(&h_Theta_MotherTrackPrimVtx.store);
+
       h_HypInvariantMass.emplace_back(new TH1F("h_HypInvariantMass", "h_HypInvariantMass", 2000, 2, 4));
       HistReg.emplace_back(&h_HypInvariantMass.store);
+      h_HypInvariantMassCheck.emplace_back(new TH1F("h_HypInvariantMassCheck", "h_HypInvariantMassCheck", 8000, -4, 4));
+      HistReg.emplace_back(&h_HypInvariantMassCheck.store);
+      h_HypErrorInvariantMass.emplace_back(new TH1F("h_HypErrorInvariantMass", "h_HypErrorInvariantMass", 1000, 0, 0.5));
+      HistReg.emplace_back(&h_HypErrorInvariantMass.store);
+      h_HypLifeTime_PrimVtx.emplace_back(new TH1F("h_HypLifeTime_PrimVtx", "h_HypLifeTime_PrimVtx", 1000, 0, 1000));
+      HistReg.emplace_back(&h_HypLifeTime_PrimVtx.store);
+      h_HypErrorLifeTime_PrimVtx.emplace_back(new TH1F("h_HypErrorLifeTime_PrimVtx", "h_HypErrorLifeTime_PrimVtx", 2000, 0, 200));
+      HistReg.emplace_back(&h_HypErrorLifeTime_PrimVtx.store);
+      h_HypcutLifeTime_PrimVtx.emplace_back(new TH1F("h_HypcutLifeTime_PrimVtx", "h_HypcutLifeTime_PrimVtx", 1000, 0, 1000));
+      HistReg.emplace_back(&h_HypcutLifeTime_PrimVtx.store);
+      h_Hyp_ArmenterosPodolanski.emplace_back(new TH2F("h_Hyp_ArmenterosPodolanski", "h_Hyp_ArmenterosPodolanski", 1000, 0, 1, 1000, 0, 1));
+      HistReg.emplace_back(&h_Hyp_ArmenterosPodolanski.store);
+      h_Hyp_CutArmenterosPodolanski.emplace_back(new TH2F("h_Hyp_CutArmenterosPodolanski", "h_Hyp_CutArmenterosPodolanski", 1000, 0, 1, 1000, 0, 1));
+      HistReg.emplace_back(&h_Hyp_CutArmenterosPodolanski.store);
+
+      h_HypInvariantMass_LorentzVect.emplace_back(new TH1F("h_HypInvariantMass_LorentzVect", "h_HypInvariantMass_LorentzVect", 2000, 2, 4));
+      HistReg.emplace_back(&h_HypInvariantMass_LorentzVect.store);
+      h_HypInvariantMass_CutLorentzVect.emplace_back(new TH1F("h_HypInvariantMass_CutLorentzVect", "h_HypInvariantMass_CutLorentzVect", 2000, 2, 4));
+      HistReg.emplace_back(&h_HypInvariantMass_CutLorentzVect.store);
+
       h_N_Si_MotherTracks.emplace_back(new TH1F("h_N_Si_MotherTracks", "h_N_Si_MotherTracks", 10, 0, 10));
       HistReg.emplace_back(&h_N_Si_MotherTracks.store);
 

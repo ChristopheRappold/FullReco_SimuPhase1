@@ -61,9 +61,15 @@ private:
 
   void ThetaDist_TrackPrimVtx(KFParticle& Track, TVector3& PrimVtxRecons, double& theta, double& distance);
 
+  void KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<double,6> Cov_PrimVtx, KFParticleSIMD& temp_PrimVtx);
+
   void MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
-                          TVector3& PrimVtxRecons, std::array<double,6> Cov_PrimVtx, std::vector<KFParticle>& MotherTracks,
+                          const KFParticleSIMD* pointer_PrimVtx, std::vector<KFParticle>& MotherTracks,
                           std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks);
+
+  void MotherSelector(std::vector<KFParticle>& MotherTracks_All, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks_All,
+                      std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks, TVector3& PrimVtxRecons,
+                      std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks);
 
   void MotherTrack_SiHit(TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, double& Z_plane,
                           std::vector<std::vector<double> >& Hits_Si, TVector3& Mother_Sihit);
@@ -84,7 +90,7 @@ private:
   double widthStrip_Si1 = 0.03; // in cm
 
   double Z_plane_Si2    = 30.;  // in cm
-  double widthStrip_Si2 = 0.03; // in cm
+  //double widthStrip_Si2 = 0.03; // in cm
 
   double Dist_to_Silicons = 0.5;
 
@@ -115,28 +121,69 @@ private:
   int pi_charge = TDatabasePDG::Instance()->GetParticle(pi_pdg)->Charge()/3.;
   double pi_mass = TDatabasePDG::Instance()->GetParticle(pi_pdg)->Mass();
 
+  double c_light_speed = 299792458.; //in m/s
+  double c_light_speed_cmps = c_light_speed * 1.e-10; //in cm/ps
+
+
+  //Cut conditions on real pions
   int No_cutconditions = 0;
   int Yes_cutconditions = 1;
 
-  double MinDist_FragmentTracksPrimVtx = 0.;
-  double MinDist_PionTracksPrimVtx = 0.05;
 
-  double Max_DaughtersTracks_closedist = 0.5;
-  double Max_Dist_MotherTrackPrimVtx = 20.;
-  double Max_Theta_MotherTrackPrimVtx = 30.;
+  //Cut conditions on reconstructed fragments
+  int ifCut_MaxChi2ndf_FragmentTracks = 1;
+  double MaxChi2ndf_FragmentTracks = 3.; //Change !
+
+  int ifCut_MinDist_FragmentTracksPrimVtx = 0;
+  double MinDist_FragmentTracksPrimVtx = 0.; //Change !
+
+
+  //Cut conditions on reconstructed pions
+  int ifCut_MaxChi2ndf_PionTracks = 1;
+  double MaxChi2ndf_PionTracks = 3.; //Change !
+
+  int ifCut_MinDist_PionTracksPrimVtx = 0;
+  double MinDist_PionTracksPrimVtx = 0.05; //Change !
+
+
+  //Cut conditions on reconstructed hypernuclei
+  int ifSet_ProductionVertex = 1;
+  int ifSet_MassConstraint = 0;
 
   int KFPart_fConstructMethod = 2;
   double KFPart_fMassHypo = H3L_mass;
 
+  int ifCut_MaxClosedist_DaughterTracks = 0; 
+  double MaxClosedist_DaughterTracks = 10.; //Change !
+
+  int ifCut_MaxAngle_MotherFragment = 0;
+  double MaxAngle_MotherFragment = 90.; //In degrees (º) Change !
+
+  int ifCut_MaxAngle_MotherPion = 0;
+  double MaxAngle_MotherPion = 90.; //In degrees (º) Change !
+
+  int ifCut_MaxChi2ndf = 0;
+  double MaxChi2ndf = 7.; //Change !
+
+  int ifCut_MaxDist_MotherTrackPrimVtx = 0;
+  double MaxDist_MotherTrackPrimVtx = 10.; //Change !
+
+  int ifCut_MaxAngle_MotherTrackPrimVtx = 0;
+  double MaxAngle_MotherTrackPrimVtx = 60.; //Change !
+
+  int ifCut_MaxPosZ_DecayVertex = 0;
+  double MaxPosZ_DecayVertex = 80.;
+
+  int ifCut_MinPosZ_DecayVertex = 0;
+  double MinPosZ_DecayVertex = 10.;
+
+  int ifCut_ArmenterosPodolanski = 0;
+
   double Max_dist_Mother_SiHit = 0.5;
   double Min_EnergyDeposition_Si = 0.08;
 
-  TRandom3* rand;
 
-  std::vector<KFParticle> KFPart_Pions;
-  std::vector<KFParticle> KFPart_Fragments;
-  std::vector<KFParticle> KFPart_Daughters;
-  std::vector<KFParticle> KFPart_Mother;
+  //TRandom3* rand;
 
   struct LocalHists
   {
@@ -175,15 +222,37 @@ private:
     TH1F* h_DecayVertexDistanceY_centroid;
     TH1F* h_DecayVertexDistanceZ_centroid;
 
+    TH1F* h_DecayVertexDistance_KFPart;
+    TH1F* h_DecayVertexDistanceX_KFPart;
+    TH1F* h_DecayVertexDistanceY_KFPart;
+    TH1F* h_DecayVertexDistanceZ_KFPart;
+
+    TH1F* h_DecayVertexDistance_KFPart_PrimVtx;
+    TH1F* h_DecayVertexDistanceX_KFPart_PrimVtx;
+    TH1F* h_DecayVertexDistanceY_KFPart_PrimVtx;
+    TH1F* h_DecayVertexDistanceZ_KFPart_PrimVtx;
+
     TH1F* h_DecayVertexcutDistance;
     TH1F* h_DecayVertexcutDistanceX;
     TH1F* h_DecayVertexcutDistanceY;
     TH1F* h_DecayVertexcutDistanceZ;
 
+    TH1F* h_DecayVertexcutDistance_KFPart;
+    TH1F* h_DecayVertexcutDistanceX_KFPart;
+    TH1F* h_DecayVertexcutDistanceY_KFPart;
+    TH1F* h_DecayVertexcutDistanceZ_KFPart;
+
+    TH1F* h_DecayVertexcutDistance_KFPart_PrimVtx;
+    TH1F* h_DecayVertexcutDistanceX_KFPart_PrimVtx;
+    TH1F* h_DecayVertexcutDistanceY_KFPart_PrimVtx;
+    TH1F* h_DecayVertexcutDistanceZ_KFPart_PrimVtx;
+
 
     TH1F* h_DecayVertexPosZ_real;
     TH1F* h_DecayVertexPosZ_vfunction;
     TH1F* h_DecayVertexPosZ_centroid;
+    TH1F* h_DecayVertexPosZ_KFPart;
+    TH1F* h_DecayVertexPosZ_KFPart_PrimVtx;
     TH1F* h_DecayVertexPosZ_AllVfunc;
     TH1F* h_DecayVertexPosZ_AllCentroid;
     TH1F* h_DecayVertexPosZ_AllKFPart;
@@ -192,7 +261,20 @@ private:
     TH2F* h_N_MotherTracks;
     TH2F* h_Dist_MotherTrackPrimVtx;
     TH2F* h_Theta_MotherTrackPrimVtx;
+    
     TH1F* h_HypInvariantMass;
+    TH1F* h_HypInvariantMassCheck;
+    TH1F* h_HypErrorInvariantMass;
+    TH1F* h_HypLifeTime_PrimVtx;
+    TH1F* h_HypErrorLifeTime_PrimVtx;
+    TH1F* h_HypcutLifeTime_PrimVtx;
+    TH2F* h_Hyp_ArmenterosPodolanski;
+    TH2F* h_Hyp_CutArmenterosPodolanski;
+
+    TH1F* h_HypInvariantMass_LorentzVect;
+    TH1F* h_HypInvariantMass_CutLorentzVect;
+
+    
     TH1F* h_N_Si_MotherTracks;
 
 
@@ -216,99 +298,5 @@ private:
 
   LocalHists LocalHisto;
 };
-
-class OutputContainer
-{
-  
- public:
-  
-  OutputContainer() = default;
-  virtual ~OutputContainer() = default;  
-  
-  //  candidate parameters setters for two daugthers
-  void SetChi2PrimPos(float value) {chi2_prim_pos_ = value;};
-  void SetChi2PrimNeg(float value) {chi2_prim_neg_ = value;};
-  void SetDistance(float value) {distance_ = value;};
-  void SetCosineDaughterPos(float value) {cosine_daughter_pos_ = value;};
-  void SetCosineDaughterNeg(float value) {cosine_daughter_neg_ = value;};
-  void SetChi2Geo(float value) {chi2_geo_ = value;};
-  void SetL(float value) {l_ = value;};
-  void SetLdL(float value) {ldl_ = value;};
-  void SetIsFromPV(int value) {is_from_pv_ = value;};
-  void SetCosineTopo(float value) {cosine_topo_ = value;};
-  void SetSigmaMassRatio(float value) {sigma_mass_ratio_ = value;};
-  void SetChi2Topo(float value) {chi2_topo_ = value;};
-  void SetNHitsPos(int value) {nhits_pos_ = value;};
-  void SetNHitsNeg(int value) {nhits_neg_ = value;};
-
-  //  candidate parameters setters for third daugther
-  void SetChi2PrimThird(float value) {chi2_prim_third_ = value;};
-  void SetDistanceThird(float value) {distance_third_ = value;};
-  void SetCosineDaughterThird(float value) {cosine_daughter_third_ = value;};
-  void SetChi2GeoThree(float value) {chi2_geo_three_ = value;};
-  void SetCosineTopoThree(float value) {cosine_topo_three_ = value;};
-  void SetChi2TopoThree(float value) {chi2_topo_three_ = value;};
-  void SetNHitsThird(int value) {nhits_third_ = value;};
-  
-  void SetParticle(const KFParticle& particle) {particle_ = particle;};
-  
-  //  candidate parameters getters for two daugthers
-  float GetChi2PrimPos() const {return chi2_prim_pos_;};
-  float GetChi2PrimNeg() const {return chi2_prim_neg_;};
-  float GetDistance() const {return distance_;};
-  float GetCosineDaughterPos() const {return cosine_daughter_pos_;};
-  float GetCosineDaughterNeg() const {return cosine_daughter_neg_;};
-  float GetChi2Geo() const {return chi2_geo_;};
-  float GetL() const {return l_;};
-  float GetLdL() const {return ldl_;};
-  int   GetIsFromPV() const {return is_from_pv_;};
-  float GetCosineTopo() const {return cosine_topo_;};
-  float GetSigmaMassRatio() const {return sigma_mass_ratio_;};
-  float GetChi2Topo() const {return chi2_topo_;};
-  int   GetNHitsPos() const {return nhits_pos_;};
-  int   GetNHitsNeg() const {return nhits_neg_;};
-
-  //  candidate parameters getters for third daugther
-  float GetChi2PrimThird() const {return chi2_prim_third_;};
-  float GetDistanceThird() const {return distance_third_;};
-  float GetCosineDaughterThird() const {return cosine_daughter_third_;};
-  float GetChi2GeoThree() const {return chi2_geo_three_;};
-  float GetCosineTopoThree() const {return cosine_topo_three_;};
-  float GetChi2TopoThree() const {return chi2_topo_three_;};
-  int   GetNHitsThird() const {return nhits_third_;};
-
-  const KFParticle& GetParticle() const {return particle_;};
-
- protected:
-   
-  // candidate selection parameters (to be cut) for two daughters
-  float chi2_prim_pos_ {-1.};       ///< \f$\chi^2\f$ of the positive track to the primary vertex (PV)
-  float chi2_prim_neg_ {-1.};       ///< \f$\chi^2\f$ of the negative track to the PV
-  float distance_ {-1.};            ///< Distance between daughter tracks in their closest approach
-  float cosine_daughter_pos_ {-1.}; ///< Cosine of the angle between positive daughter's and mother's momenta
-  float cosine_daughter_neg_ {-1.}; ///< Cosine of the angle between negative daughter's and mother's momenta
-  float chi2_geo_ {-1.};            ///< \f$\chi^2\f$ of daughters' tracks in their closest approach
-  float l_ {-1.};                   ///< Lenght of interpolated track from secondary to primary vertex
-  float ldl_ {-1.};                 ///< Distance between primary and secondary vertices divided by error 
-  int   is_from_pv_ {-1};           ///< Flag variable whether mother particle comes from the PV (1-yes, 0-no)
-  float cosine_topo_{-1.};          ///< Cosine of the angle between reconstructed mother's momentum and mother's radius vector beginning in the PV
-  float sigma_mass_ratio_ {-1.};    ///< Difference between invariant and real mother's mass divided by the error (not used now)
-  float chi2_topo_ {-1.};           ///< \f$\chi^2\f$ of the mother's track to the PV
-  int   nhits_pos_{-1};
-  int   nhits_neg_{-1};
-
-  // candidate selection parameters (to be cut) for third daughter
-  float chi2_prim_third_ {-1.};       ///< \f$\chi^2\f$ of the third track to the PV
-  float distance_third_ {-1.};        ///< Distance between third daughter track and SV in their closest approach
-  float cosine_daughter_third_ {-1.}; ///< Cosine of the angle between third daughter's and mother's momenta
-  float chi2_geo_three_ {-1.};        ///< \f$\chi^2\f$ of all three daughters' tracks in their closest approach
-  float cosine_topo_three_{-1.};      ///< Cosine of the angle between reconstructed mother's momentum of three particles and mother's radius vector beginning in the PV
-  float chi2_topo_three_ {-1.};       ///< \f$\chi^2\f$ of the mother's track of three particles to the PV
-  int   nhits_third_{-1};
-
-  KFParticle particle_;
-  
-};
-
 
 #endif
