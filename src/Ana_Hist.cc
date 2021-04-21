@@ -590,19 +590,19 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
 
       h_N_MotherTracks.emplace_back(new TH2F("h_N_MotherTracks", "h_N_MotherTracks", 10, 0, 10, 2000, 2, 4));
       HistReg.emplace_back(&h_N_MotherTracks.store);
-      h_Dist_DaughterTracks.emplace_back(new TH2F("h_Dist_DaughterTracks", "h_Dist_DaughterTracks", 1000, 0, 10, 2000, 2, 4));
+      h_Dist_DaughterTracks.emplace_back(new TH2F("h_Dist_DaughterTracks", "h_Dist_DaughterTracks", 1000, 0, 2, 2000, 2, 4));
       HistReg.emplace_back(&h_Dist_DaughterTracks.store);
-      h_Angle_MotherFragment.emplace_back(new TH2F("h_Angle_MotherFragment", "h_Angle_MotherFragment", 2000, 0, 30, 2000, 2, 4));
+      h_Angle_MotherFragment.emplace_back(new TH2F("h_Angle_MotherFragment", "h_Angle_MotherFragment", 1000, 0, 5, 2000, 2, 4));
       HistReg.emplace_back(&h_Angle_MotherFragment.store);
-      h_Angle_MotherPion.emplace_back(new TH2F("h_Angle_MotherPion", "h_Angle_MotherPion", 2000, 0, 60, 2000, 2, 4));
+      h_Angle_MotherPion.emplace_back(new TH2F("h_Angle_MotherPion", "h_Angle_MotherPion", 1000, 0, 30, 2000, 2, 4));
       HistReg.emplace_back(&h_Angle_MotherPion.store);
-      h_Chi2ndf_MotherTracks.emplace_back(new TH2F("h_Chi2ndf_MotherTracks", "h_Chi2ndf_MotherTracks", 2000, 0, 20, 2000, 2, 4));
+      h_Chi2ndf_MotherTracks.emplace_back(new TH2F("h_Chi2ndf_MotherTracks", "h_Chi2ndf_MotherTracks", 2000, 0, 40, 2000, 2, 4));
       HistReg.emplace_back(&h_Chi2ndf_MotherTracks.store);
-      h_Dist_MotherTrackPrimVtx.emplace_back(new TH2F("h_Dist_MotherTrackPrimVtx", "h_Dist_MotherTrackPrimVtx", 2000, 0, 1, 2000, 2, 4));
+      h_Dist_MotherTrackPrimVtx.emplace_back(new TH2F("h_Dist_MotherTrackPrimVtx", "h_Dist_MotherTrackPrimVtx", 1000, 0, 0.2, 2000, 2, 4));
       HistReg.emplace_back(&h_Dist_MotherTrackPrimVtx.store);
-      h_Theta_MotherTrackPrimVtx.emplace_back(new TH2F("h_Theta_MotherTrackPrimVtx", "h_Theta_MotherTrackPrimVtx", 2000, 0, 10, 2000, 2, 4));
+      h_Theta_MotherTrackPrimVtx.emplace_back(new TH2F("h_Theta_MotherTrackPrimVtx", "h_Theta_MotherTrackPrimVtx", 1000, 0, 2, 2000, 2, 4));
       HistReg.emplace_back(&h_Theta_MotherTrackPrimVtx.store);
-      h_DecayVertexPosZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayVertexPosZ_KFPart_PrimVtx", "h_DecayVertexPosZ_KFPart_PrimVtx", 1000, 0, 100, 2000, 2, 4));
+      h_DecayVertexPosZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayVertexPosZ_KFPart_PrimVtx", "h_DecayVertexPosZ_KFPart_PrimVtx", 1000, 20, 60, 2000, 2, 4));
       HistReg.emplace_back(&h_DecayVertexPosZ_KFPart_PrimVtx.store);
       h_Hyp_ArmenterosPodolanski.emplace_back(new TH2F("h_Hyp_ArmenterosPodolanski", "h_Hyp_ArmenterosPodolanski", 1000, 0, 1, 1000, 0, 1));
       HistReg.emplace_back(&h_Hyp_ArmenterosPodolanski.store);
