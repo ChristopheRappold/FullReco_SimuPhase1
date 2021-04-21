@@ -147,8 +147,8 @@ private:
 
 
   //Cut conditions on reconstructed hypernuclei
-  int ifSet_ProductionVertex = 1;
-  int ifSet_MassConstraint = 0;
+  int ifSet_ProductionVertex;
+  int ifSet_MassConstraint;
 
   int KFPart_fConstructMethod = 2;
   double KFPart_fMassHypo = H3L_mass;
@@ -232,15 +232,22 @@ private:
     TH1F* h_DecayVertexDistanceY_KFPart_PrimVtx;
     TH1F* h_DecayVertexDistanceZ_KFPart_PrimVtx;
 
+    TH1F* h_DecayVertexDistance_KFPart_PrimVtx_Mass;
+    TH1F* h_DecayVertexDistanceX_KFPart_PrimVtx_Mass;
+    TH1F* h_DecayVertexDistanceY_KFPart_PrimVtx_Mass;
+    TH1F* h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass;
+
     TH1F* h_DecayVertexcutDistance;
     TH1F* h_DecayVertexcutDistanceX;
     TH1F* h_DecayVertexcutDistanceY;
     TH1F* h_DecayVertexcutDistanceZ;
 
+/*
     TH1F* h_DecayVertexcutDistance_KFPart;
     TH1F* h_DecayVertexcutDistanceX_KFPart;
     TH1F* h_DecayVertexcutDistanceY_KFPart;
     TH1F* h_DecayVertexcutDistanceZ_KFPart;
+*/
 
     TH1F* h_DecayVertexcutDistance_KFPart_PrimVtx;
     TH1F* h_DecayVertexcutDistanceX_KFPart_PrimVtx;
@@ -252,29 +259,35 @@ private:
     TH1F* h_DecayVertexPosZ_vfunction;
     TH1F* h_DecayVertexPosZ_centroid;
     TH1F* h_DecayVertexPosZ_KFPart;
-    TH1F* h_DecayVertexPosZ_KFPart_PrimVtx;
     TH1F* h_DecayVertexPosZ_AllVfunc;
     TH1F* h_DecayVertexPosZ_AllCentroid;
     TH1F* h_DecayVertexPosZ_AllKFPart;
 
 
     TH2F* h_N_MotherTracks;
+    TH2F* h_Dist_DaughterTracks;
+    TH2F* h_Angle_MotherFragment;
+    TH2F* h_Angle_MotherPion;
+    TH2F* h_Chi2ndf_MotherTracks;
     TH2F* h_Dist_MotherTrackPrimVtx;
     TH2F* h_Theta_MotherTrackPrimVtx;
-    
+    TH2F* h_DecayVertexPosZ_KFPart_PrimVtx;
+    TH2F* h_Hyp_ArmenterosPodolanski;
+    TH2F* h_Hyp_CutArmenterosPodolanski;
+
+
     TH1F* h_HypInvariantMass;
     TH1F* h_HypInvariantMassCheck;
     TH1F* h_HypErrorInvariantMass;
     TH1F* h_HypLifeTime_PrimVtx;
     TH1F* h_HypErrorLifeTime_PrimVtx;
     TH1F* h_HypcutLifeTime_PrimVtx;
-    TH2F* h_Hyp_ArmenterosPodolanski;
-    TH2F* h_Hyp_CutArmenterosPodolanski;
+
 
     TH1F* h_HypInvariantMass_LorentzVect;
     TH1F* h_HypInvariantMass_CutLorentzVect;
 
-    
+/*
     TH1F* h_N_Si_MotherTracks;
 
 
@@ -292,7 +305,7 @@ private:
     TH1F* h_DecayVertexDistanceX_AllKFPart;
     TH1F* h_DecayVertexDistanceY_AllKFPart;
     TH1F* h_DecayVertexDistanceZ_AllKFPart;
-
+*/
     TH1F* h_DecayVtxstats;
   };
 

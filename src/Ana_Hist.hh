@@ -260,15 +260,22 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexDistanceY_KFPart_PrimVtx ;
   Hist<TH1F> h_DecayVertexDistanceZ_KFPart_PrimVtx ;
 
+  Hist<TH1F> h_DecayVertexDistance_KFPart_PrimVtx_Mass ;
+  Hist<TH1F> h_DecayVertexDistanceX_KFPart_PrimVtx_Mass ;
+  Hist<TH1F> h_DecayVertexDistanceY_KFPart_PrimVtx_Mass ;
+  Hist<TH1F> h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass ;
+
   Hist<TH1F> h_DecayVertexcutDistance ;
   Hist<TH1F> h_DecayVertexcutDistanceX ;
   Hist<TH1F> h_DecayVertexcutDistanceY ;
   Hist<TH1F> h_DecayVertexcutDistanceZ ;
 
+/*
   Hist<TH1F> h_DecayVertexcutDistance_KFPart ;
   Hist<TH1F> h_DecayVertexcutDistanceX_KFPart ;
   Hist<TH1F> h_DecayVertexcutDistanceY_KFPart ;
   Hist<TH1F> h_DecayVertexcutDistanceZ_KFPart ;
+*/
 
   Hist<TH1F> h_DecayVertexcutDistance_KFPart_PrimVtx ;
   Hist<TH1F> h_DecayVertexcutDistanceX_KFPart_PrimVtx ;
@@ -280,15 +287,21 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexPosZ_vfunction ;
   Hist<TH1F> h_DecayVertexPosZ_centroid ;
   Hist<TH1F> h_DecayVertexPosZ_KFPart ;
-  Hist<TH1F> h_DecayVertexPosZ_KFPart_PrimVtx ;
   Hist<TH1F> h_DecayVertexPosZ_AllVfunc ;
   Hist<TH1F> h_DecayVertexPosZ_AllCentroid ;
   Hist<TH1F> h_DecayVertexPosZ_AllKFPart ;
 
 
   Hist<TH2F> h_N_MotherTracks ;
+  Hist<TH2F> h_Dist_DaughterTracks ;
+  Hist<TH2F> h_Angle_MotherFragment ;
+  Hist<TH2F> h_Angle_MotherPion ;
+  Hist<TH2F> h_Chi2ndf_MotherTracks ;
   Hist<TH2F> h_Dist_MotherTrackPrimVtx ;
   Hist<TH2F> h_Theta_MotherTrackPrimVtx ;
+  Hist<TH2F> h_DecayVertexPosZ_KFPart_PrimVtx ;
+  Hist<TH2F> h_Hyp_ArmenterosPodolanski ;
+  Hist<TH2F> h_Hyp_CutArmenterosPodolanski ;
   
   Hist<TH1F> h_HypInvariantMass ;
   Hist<TH1F> h_HypInvariantMassCheck ;
@@ -296,12 +309,12 @@ class Ana_Hist
   Hist<TH1F> h_HypLifeTime_PrimVtx ;
   Hist<TH1F> h_HypErrorLifeTime_PrimVtx ;
   Hist<TH1F> h_HypcutLifeTime_PrimVtx ;
-  Hist<TH2F> h_Hyp_ArmenterosPodolanski ;
-  Hist<TH2F> h_Hyp_CutArmenterosPodolanski ;
+
 
   Hist<TH1F> h_HypInvariantMass_LorentzVect ;
   Hist<TH1F> h_HypInvariantMass_CutLorentzVect ;
 
+/*
   Hist<TH1F> h_N_Si_MotherTracks ;
 
 
@@ -319,7 +332,7 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexDistanceX_AllKFPart ;
   Hist<TH1F> h_DecayVertexDistanceY_AllKFPart ;
   Hist<TH1F> h_DecayVertexDistanceZ_AllKFPart ;
-
+*/
   Hist<TH1F> h_DecayVtxstats ;
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
