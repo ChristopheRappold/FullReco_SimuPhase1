@@ -36,6 +36,8 @@ private:
 
   int FinderDecayVertex(FullRecoEvent& RecoEvent);
 
+  void StudyCaseSelector(std::string StudyCase, int& Fragment_pdg);
+
   void RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                          int& pdgParticle, int& cutConditions,
                          std::vector<KFParticle>& RealTracks);
@@ -109,17 +111,16 @@ private:
 
   PDG_fromName pid_fromName;
 
-  int H3L_pdg = pid_fromName("H3L");
-  int H3L_charge = TDatabasePDG::Instance()->GetParticle(H3L_pdg)->Charge()/3.;
-  double H3L_mass = TDatabasePDG::Instance()->GetParticle(H3L_pdg)->Mass();
-
+  int Fragment_pdg;
   int He3_pdg = pid_fromName("He3");
-  int He3_charge = TDatabasePDG::Instance()->GetParticle(He3_pdg)->Charge()/3.;
-  double He3_mass = TDatabasePDG::Instance()->GetParticle(He3_pdg)->Mass();
-
+  int He4_pdg = pid_fromName("alpha");
+  int deuteron_pdg = pid_fromName("deuteron");
+  int proton_pdg = pid_fromName("proton");
   int pi_pdg = pid_fromName("pi-");
-  int pi_charge = TDatabasePDG::Instance()->GetParticle(pi_pdg)->Charge()/3.;
-  double pi_mass = TDatabasePDG::Instance()->GetParticle(pi_pdg)->Mass();
+
+  int Hyp_pdg;
+  int Hyp_charge;
+  double Hyp_mass;
 
   double c_light_speed = 299792458.; //in m/s
   double c_light_speed_cmps = c_light_speed * 1.e-10; //in cm/ps
@@ -151,7 +152,6 @@ private:
   int ifSet_MassConstraint;
 
   int KFPart_fConstructMethod = 2;
-  double KFPart_fMassHypo = H3L_mass;
 
   int ifCut_MaxClosedist_DaughterTracks = 0; 
   double MaxClosedist_DaughterTracks = 10.; //Change !
@@ -277,15 +277,24 @@ private:
 
 
     TH1F* h_HypInvariantMass;
-    TH1F* h_HypInvariantMassCheck;
     TH1F* h_HypErrorInvariantMass;
+
+    TH1F* h_Hyp_RealLifeTime;
     TH1F* h_HypLifeTime_PrimVtx;
     TH1F* h_HypErrorLifeTime_PrimVtx;
     TH1F* h_HypcutLifeTime_PrimVtx;
 
+    TH2F* h_HypInvariantMassCheck;
+    TH2F* h_HypInvariantErrorMassCheck;
 
     TH1F* h_HypInvariantMass_LorentzVect;
     TH1F* h_HypInvariantMass_CutLorentzVect;
+
+    TH1F* h_EffPosZ_real;
+    TH1F* h_EffPosZ_preKF;
+    TH1F* h_EffPosZ_postKF;
+    TH1F* h_EffPosZ_preKFPart;
+    TH1F* h_EffPosZ_postKFPart;
 
 /*
     TH1F* h_N_Si_MotherTracks;

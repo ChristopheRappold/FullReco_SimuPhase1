@@ -580,13 +580,15 @@ public:
   std::vector<std::vector<double> > Hits_Si2{};
 
   std::array<double,3> InteractionPoint;
-  std::array<double,6> CovMatrix_IP; //lower triangle
-
   std::array<double,3> DecayVertex;
-  std::array<double,6> CovMatrix_SV; //lower triangle
+  double Hyp_LifeTime;
 
   TVector3 PrimVtxRecons;
+  std::array<double,6> CovMatrix_IP; //lower triangle
+
   TVector3 DecayVtxRecons;
+  std::array<double,6> CovMatrix_SV; //lower triangle
+
   
   explicit FullRecoEvent(unsigned int idTh = 1);
   ~FullRecoEvent();

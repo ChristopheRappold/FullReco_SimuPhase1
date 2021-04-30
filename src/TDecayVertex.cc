@@ -188,14 +188,24 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_Hyp_CutArmenterosPodolanski = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_CutArmenterosPodolanski);
   
   LocalHisto.h_HypInvariantMass = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass);
-  LocalHisto.h_HypInvariantMassCheck = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMassCheck);
   LocalHisto.h_HypErrorInvariantMass = AnaHisto->CloneAndRegister(AnaHisto->h_HypErrorInvariantMass);
+
+  LocalHisto.h_Hyp_RealLifeTime = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_RealLifeTime);
   LocalHisto.h_HypLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypLifeTime_PrimVtx);
   LocalHisto.h_HypErrorLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypErrorLifeTime_PrimVtx);
   LocalHisto.h_HypcutLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypcutLifeTime_PrimVtx);
 
+  LocalHisto.h_HypInvariantMassCheck = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMassCheck);
+  LocalHisto.h_HypInvariantErrorMassCheck = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantErrorMassCheck);
+
   LocalHisto.h_HypInvariantMass_LorentzVect = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass_LorentzVect);
   LocalHisto.h_HypInvariantMass_CutLorentzVect = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass_CutLorentzVect);
+
+  LocalHisto.h_EffPosZ_real = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_real);
+  LocalHisto.h_EffPosZ_preKF = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKF);
+  LocalHisto.h_EffPosZ_postKF = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_postKF);
+  LocalHisto.h_EffPosZ_preKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKFPart);
+  LocalHisto.h_EffPosZ_postKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_postKFPart);
 
 /*
   LocalHisto.h_N_Si_MotherTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_Si_MotherTracks);
@@ -226,10 +236,19 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   double DecayVertex_real_Z = RecoEvent.DecayVertex[2];
 
   LocalHisto.h_DecayVertexPosZ_real->Fill(DecayVertex_real_Z, 1.);
+  LocalHisto.h_EffPosZ_real->Fill(DecayVertex_real_Z, 1.);
+  LocalHisto.h_Hyp_RealLifeTime->Fill(RecoEvent.Hyp_LifeTime, 1.);
+
+  StudyCaseSelector(att.StudyCase, Fragment_pdg);
+
+  //Primary vertex KFParticle initialization
+  KFParticleSIMD KFPart_PrimVtx;
+  KFPart_PrimaryVertex(RecoEvent.PrimVtxRecons, RecoEvent.CovMatrix_IP, KFPart_PrimVtx);
+  const KFParticleSIMD* pointer_PrimVtx = &KFPart_PrimVtx;
 
   //Fragment tracks
   std::vector<KFParticle> FragmentTracks_All {};
-  RealTracksFinder(RecoEvent.TrackDAFSim, He3_pdg, No_cutconditions, FragmentTracks_All);
+  RealTracksFinder(RecoEvent.TrackDAFSim, Fragment_pdg, No_cutconditions, FragmentTracks_All);
   if(FragmentTracks_All.size() == 0)
     return -1;
 
@@ -389,6 +408,47 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexcutDistanceY->Fill(cutdistanceY, 1.);
   LocalHisto.h_DecayVertexcutDistanceZ->Fill(cutdistanceZ, 1.);
 
+
+  std::vector<KFParticle> CutMotherTracks_PrimVtx_All;
+  std::vector<std::tuple<size_t, size_t>> RefCutDaughtersTracks_PrimVtx_All;
+  MotherTracksRecons(FragmentTracks, CutPionTracks, pointer_PrimVtx, CutMotherTracks_PrimVtx_All, RefCutDaughtersTracks_PrimVtx_All);
+
+  std::vector<KFParticle> CutMotherTracks_PrimVtx;
+  std::vector<std::tuple<size_t, size_t>> RefCutDaughtersTracks_PrimVtx;
+  MotherSelector(CutMotherTracks_PrimVtx_All, RefCutDaughtersTracks_PrimVtx_All, FragmentTracks, CutPionTracks, RecoEvent.PrimVtxRecons,
+                 CutMotherTracks_PrimVtx, RefCutDaughtersTracks_PrimVtx);
+
+  for(size_t i = 0; i < CutMotherTracks_PrimVtx.size(); ++i)
+    {
+      double cutdistance_KFPart_PrimVtx  = sqrt(pow((DecayVertex_real_X - CutMotherTracks_PrimVtx[i].GetX()), 2.) +
+                              pow((DecayVertex_real_Y - CutMotherTracks_PrimVtx[i].GetY()), 2.) +
+                              pow((DecayVertex_real_Z - CutMotherTracks_PrimVtx[i].GetZ()), 2.));
+      double cutdistanceX_KFPart_PrimVtx = DecayVertex_real_X - CutMotherTracks_PrimVtx[i].GetX();
+      double cutdistanceY_KFPart_PrimVtx = DecayVertex_real_Y - CutMotherTracks_PrimVtx[i].GetY();
+      double cutdistanceZ_KFPart_PrimVtx = DecayVertex_real_Z - CutMotherTracks_PrimVtx[i].GetZ();
+
+      LocalHisto.h_DecayVertexcutDistance_KFPart_PrimVtx->Fill(cutdistance_KFPart_PrimVtx, 1.);
+      LocalHisto.h_DecayVertexcutDistanceX_KFPart_PrimVtx->Fill(cutdistanceX_KFPart_PrimVtx, 1.);
+      LocalHisto.h_DecayVertexcutDistanceY_KFPart_PrimVtx->Fill(cutdistanceY_KFPart_PrimVtx, 1.);
+      LocalHisto.h_DecayVertexcutDistanceZ_KFPart_PrimVtx->Fill(cutdistanceZ_KFPart_PrimVtx, 1.);
+
+      LocalHisto.h_EffPosZ_preKF->Fill(CutMotherTracks_PrimVtx[i].GetZ(), 1.);
+
+      double cutTimeLife_PrimVtx = CutMotherTracks_PrimVtx[i].GetLifeTime() / c_light_speed_cmps; //in ps
+      LocalHisto.h_HypcutLifeTime_PrimVtx->Fill(cutTimeLife_PrimVtx, 1.);
+
+      size_t temp_id_fragment = get<0>(RefCutDaughtersTracks_PrimVtx[i]);
+      size_t temp_id_pion = get<1>(RefCutDaughtersTracks_PrimVtx[i]);
+
+      float Vertex[3] = {CutMotherTracks_PrimVtx[i].GetX(), CutMotherTracks_PrimVtx[i].GetY(), CutMotherTracks_PrimVtx[i].GetZ()};
+      FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
+      CutPionTracks[temp_id_pion].TransportToPoint(Vertex);
+
+      float armenterosQtAlfa[2] = {0.};
+      CutMotherTracks_PrimVtx[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], CutPionTracks[temp_id_pion], armenterosQtAlfa);
+      LocalHisto.h_Hyp_CutArmenterosPodolanski->Fill(armenterosQtAlfa[1], armenterosQtAlfa[0], 1.);
+    }
+
 #endif
 
   //Pion tracks
@@ -512,10 +572,6 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 #endif
 
-  //Primary vertex KFParticle initialization
-  KFParticleSIMD KFPart_PrimVtx;
-  KFPart_PrimaryVertex(RecoEvent.PrimVtxRecons, RecoEvent.CovMatrix_IP, KFPart_PrimVtx);
-  const KFParticleSIMD* pointer_PrimVtx = &KFPart_PrimVtx;
 
   //Hypernucleus reconstruction
   std::vector<KFParticle> MotherTracks_All;
@@ -622,14 +678,21 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Dist_MotherTrackPrimVtx->Fill(dist_MotherTrackPrimVtx, MotherTracks_PrimVtx[i].GetMass(), 1.);
       LocalHisto.h_Theta_MotherTrackPrimVtx->Fill(theta_MotherTrackPrimVtx, MotherTracks_PrimVtx[i].GetMass(), 1.);
 
-
+      LocalHisto.h_EffPosZ_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ(), 1.);
       LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx->Fill(MotherTracks_PrimVtx[i].GetZ(), MotherTracks_PrimVtx[i].GetMass(), 1.);
 
       LocalHisto.h_N_MotherTracks->Fill(MotherTracks_PrimVtx.size(), MotherTracks_PrimVtx[i].GetMass(), 1.);
 
       LocalHisto.h_HypInvariantMass->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
-      LocalHisto.h_HypInvariantMassCheck->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
       LocalHisto.h_HypErrorInvariantMass->Fill(MotherTracks_PrimVtx[i].GetErrMass(), 1.);
+
+      float m_getmass;
+      float error_getmass;
+      int status_getmass = MotherTracks_PrimVtx[i].GetMass(m_getmass, error_getmass);
+
+      LocalHisto.h_HypInvariantMassCheck->Fill(m_getmass, status_getmass, 1.);
+      LocalHisto.h_HypInvariantErrorMassCheck->Fill(error_getmass, status_getmass, 1.);
+
 
       double TimeLife_PrimVtx = MotherTracks_PrimVtx[i].GetLifeTime() / c_light_speed_cmps; //in ps
       LocalHisto.h_HypLifeTime_PrimVtx->Fill(TimeLife_PrimVtx, 1.);
@@ -637,9 +700,12 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       double ErrorTimeLife_PrimVtx = MotherTracks_PrimVtx[i].GetErrLifeTime() / c_light_speed_cmps; //in ps
       LocalHisto.h_HypErrorLifeTime_PrimVtx->Fill(ErrorTimeLife_PrimVtx, 1.);
 
-      float armenterosQtAlfa[2] = {0.};
+      float Vertex[3] = {MotherTracks_PrimVtx[i].GetX(), MotherTracks_PrimVtx[i].GetY(), MotherTracks_PrimVtx[i].GetZ()};
+      FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
+      PionTracks[temp_id_pion].TransportToPoint(Vertex);
 
-      MotherTracks_PrimVtx[i].GetArmenterosPodolanski(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
+      float armenterosQtAlfa[2] = {0.};
+      MotherTracks_PrimVtx[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
       LocalHisto.h_Hyp_ArmenterosPodolanski->Fill(armenterosQtAlfa[1], armenterosQtAlfa[0], 1.);
     }
   
@@ -692,48 +758,17 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       size_t temp_id_fragment = get<0>(RefDaughtersTracks_PrimVtx[i]);
       size_t temp_id_pion = get<1>(RefDaughtersTracks_PrimVtx[i]);
 
-      float armenterosQtAlfa[2] = {0.};
+      float Vertex[3] = {MotherTracks_PrimVtx[i].GetX(), MotherTracks_PrimVtx[i].GetY(), MotherTracks_PrimVtx[i].GetZ()};
+      FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
+      PionTracks[temp_id_pion].TransportToPoint(Vertex);
 
-      MotherTracks_PrimVtx[i].GetArmenterosPodolanski(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
+      float armenterosQtAlfa[2] = {0.};
+      MotherTracks_PrimVtx[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
       LocalHisto.h_Hyp_ArmenterosPodolanski->Fill(armenterosQtAlfa[1], armenterosQtAlfa[0], 1.);
 */
     }
 
 
-
-  std::vector<KFParticle> CutMotherTracks_PrimVtx_All;
-  std::vector<std::tuple<size_t, size_t>> RefCutDaughtersTracks_PrimVtx_All;
-  MotherTracksRecons(FragmentTracks, CutPionTracks, pointer_PrimVtx, CutMotherTracks_PrimVtx_All, RefCutDaughtersTracks_PrimVtx_All);
-
-  std::vector<KFParticle> CutMotherTracks_PrimVtx;
-  std::vector<std::tuple<size_t, size_t>> RefCutDaughtersTracks_PrimVtx;
-  MotherSelector(CutMotherTracks_PrimVtx_All, RefCutDaughtersTracks_PrimVtx_All, FragmentTracks, CutPionTracks, RecoEvent.PrimVtxRecons,
-                 CutMotherTracks_PrimVtx, RefCutDaughtersTracks_PrimVtx);
-
-  for(size_t i = 0; i < CutMotherTracks_PrimVtx.size(); ++i)
-    {
-      double cutdistance_KFPart_PrimVtx  = sqrt(pow((DecayVertex_real_X - CutMotherTracks_PrimVtx[i].GetX()), 2.) +
-                              pow((DecayVertex_real_Y - CutMotherTracks_PrimVtx[i].GetY()), 2.) +
-                              pow((DecayVertex_real_Z - CutMotherTracks_PrimVtx[i].GetZ()), 2.));
-      double cutdistanceX_KFPart_PrimVtx = DecayVertex_real_X - CutMotherTracks_PrimVtx[i].GetX();
-      double cutdistanceY_KFPart_PrimVtx = DecayVertex_real_Y - CutMotherTracks_PrimVtx[i].GetY();
-      double cutdistanceZ_KFPart_PrimVtx = DecayVertex_real_Z - CutMotherTracks_PrimVtx[i].GetZ();
-
-      LocalHisto.h_DecayVertexcutDistance_KFPart_PrimVtx->Fill(cutdistance_KFPart_PrimVtx, 1.);
-      LocalHisto.h_DecayVertexcutDistanceX_KFPart_PrimVtx->Fill(cutdistanceX_KFPart_PrimVtx, 1.);
-      LocalHisto.h_DecayVertexcutDistanceY_KFPart_PrimVtx->Fill(cutdistanceY_KFPart_PrimVtx, 1.);
-      LocalHisto.h_DecayVertexcutDistanceZ_KFPart_PrimVtx->Fill(cutdistanceZ_KFPart_PrimVtx, 1.);
-
-      double cutTimeLife_PrimVtx = CutMotherTracks_PrimVtx[i].GetLifeTime() / c_light_speed_cmps; //in ps
-      LocalHisto.h_HypcutLifeTime_PrimVtx->Fill(cutTimeLife_PrimVtx, 1.);
-
-      size_t temp_id_fragment = get<0>(RefCutDaughtersTracks_PrimVtx[i]);
-      size_t temp_id_pion = get<1>(RefCutDaughtersTracks_PrimVtx[i]);
-
-      float armenterosQtAlfa[2] = {0.};
-      CutMotherTracks_PrimVtx[i].GetArmenterosPodolanski(FragmentTracks[temp_id_fragment], CutPionTracks[temp_id_pion], armenterosQtAlfa);
-      LocalHisto.h_Hyp_CutArmenterosPodolanski->Fill(armenterosQtAlfa[1], armenterosQtAlfa[0], 1.);
-    }
 
 /*
   if(MotherTracks_PrimVtx.size() == 0)
@@ -804,7 +839,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       KFParticle KFPart_Parent [] = {Si_MotherTrack};
       KFParticle *pointer_Parent;
       pointer_Parent = &KFPart_Parent;
-      double KFPart_mass = 0.; //H3L_mass; for mass hypothesis
+      double KFPart_mass = 0.; //Hyp_mass; for mass hypothesis
 
       KFPart_SecondaryVertex.Construct(&pointer_Daughters, KFPart_n_daughters, &pointer_Parent, KFPart_mass);
 
@@ -831,6 +866,34 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 }
 
 
+
+void TDecayVertex::StudyCaseSelector(std::string StudyCase, int& Fragment_pdg)
+{
+  if(StudyCase.compare("H3L") == 0)
+    {
+      Fragment_pdg = He3_pdg;
+    }
+  else if(StudyCase.compare("H4L") == 0)
+    {
+      Fragment_pdg = He4_pdg;
+    }
+  else if(StudyCase.compare("nnL") == 0)
+    {
+      Fragment_pdg = deuteron_pdg;
+    }
+  else if(StudyCase.compare("lambda") == 0)
+    {
+      Fragment_pdg = proton_pdg;
+    }
+  else if(StudyCase.compare("background") == 0)
+    {
+
+    }
+
+  Hyp_pdg = pid_fromName(StudyCase);
+  Hyp_charge = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Charge()/3.;
+  Hyp_mass = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Mass();
+}
 
 
 void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
@@ -879,19 +942,8 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
                                  0.,    0.,    0.,    0., 1.e-8,
                                  0.,    0.,    0.,    0.,    0., 1.e-8}; //Change!
 
-          int temp_charge = -50;
-          double temp_mass = -1.;
-
-          if(itr->second[iDetFirst][0].pdg == pi_pdg)
-            {
-              temp_charge = pi_charge;
-              temp_mass = pi_mass;
-            }
-          else if(itr->second[iDetFirst][0].pdg == He3_pdg)
-            {
-              temp_charge = He3_charge;
-              temp_mass = He3_mass;
-            }
+          int temp_charge = TDatabasePDG::Instance()->GetParticle(pdgParticle)->Charge()/3.;
+          double temp_mass = TDatabasePDG::Instance()->GetParticle(pdgParticle)->Mass();
 
           KFParticle temp_particle;
           temp_particle.Create(temp_fP, temp_fC, temp_charge, temp_mass);
@@ -948,7 +1000,7 @@ void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_resu
   std::unordered_map<int, ResSolDAF>::iterator itr;
   for(itr = DAF_results.begin(); itr != DAF_results.end(); ++itr)
     {
-      if((itr->second.charge == -1) && (itr->second.Ncentral >= 6))
+      if((itr->second.charge == -1) && (itr->second.Ncentral > att.KF_NbCentralCut))
         {
           LocalHisto.h_Chi2ndf_pions->Fill(itr->second.chi2 / itr->second.ndf, 1.);
 
@@ -962,8 +1014,8 @@ void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_resu
                               itr->second.cov_matrix[4][0], itr->second.cov_matrix[4][1], itr->second.cov_matrix[4][2], itr->second.cov_matrix[4][3], itr->second.cov_matrix[4][4],
                               itr->second.cov_matrix[5][0], itr->second.cov_matrix[5][1], itr->second.cov_matrix[5][2], itr->second.cov_matrix[5][3], itr->second.cov_matrix[5][4], itr->second.cov_matrix[5][5]};
 
-          int temp_charge = pi_charge; //Change!
-          double temp_mass = pi_mass; //Change!
+          int temp_charge = TDatabasePDG::Instance()->GetParticle(pi_pdg)->Charge()/3.;
+          double temp_mass = TDatabasePDG::Instance()->GetParticle(pi_pdg)->Mass();
 
           KFParticle temp_particle;
 
@@ -1247,7 +1299,7 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
             mother.SetProductionVertex(*pointer_PrimVtx);
 
           if( ifSet_MassConstraint == 1)
-            mother.SetMassConstraint(KFPart_fMassHypo);
+            mother.SetMassConstraint(Hyp_mass);
 
           mother.TransportToDecayVertex();
 
@@ -1327,7 +1379,7 @@ void TDecayVertex::MotherSelector(std::vector<KFParticle>& MotherTracks_All, std
       if( (ifCut_MinPosZ_DecayVertex == 1) && (PosZ_DecayVertex < MinPosZ_DecayVertex) )
         continue;
 
-      MotherTracks_All[i].GetArmenterosPodolanski(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
+      MotherTracks_All[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
       if ( ifCut_ArmenterosPodolanski ) //Change !
         continue;
 
@@ -1399,7 +1451,7 @@ void TDecayVertex::MotherTrackSiliconHits(TVector3& PrimVtxRecons, TVector3& Dec
                           0.,     0.,     0.,    0., 1.e-6,
                           0.,     0.,     0.,    0.,    0., 1.e-6}; //Change momentum values!
 
-  int temp_charge = H3L_charge; //Change!
+  int temp_charge = Hyp_charge; //Change!
   const double temp_mass = Mother.GetMass(); //Change!
 
   Si_MotherTrack.Create(temp_fP, temp_fC, temp_charge, temp_mass);

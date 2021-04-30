@@ -304,15 +304,25 @@ class Ana_Hist
   Hist<TH2F> h_Hyp_CutArmenterosPodolanski ;
   
   Hist<TH1F> h_HypInvariantMass ;
-  Hist<TH1F> h_HypInvariantMassCheck ;
   Hist<TH1F> h_HypErrorInvariantMass ;
+
+  Hist<TH1F> h_Hyp_RealLifeTime ;
   Hist<TH1F> h_HypLifeTime_PrimVtx ;
   Hist<TH1F> h_HypErrorLifeTime_PrimVtx ;
   Hist<TH1F> h_HypcutLifeTime_PrimVtx ;
 
+  Hist<TH2F> h_HypInvariantMassCheck ;
+  Hist<TH2F> h_HypInvariantErrorMassCheck ;
 
   Hist<TH1F> h_HypInvariantMass_LorentzVect ;
   Hist<TH1F> h_HypInvariantMass_CutLorentzVect ;
+
+  Hist<TH1F> h_EffPosZ_real ;
+  Hist<TH1F> h_EffPosZ_preKF ;
+  Hist<TH1F> h_EffPosZ_postKF ;
+  Hist<TH1F> h_EffPosZ_preKFPart ;
+  Hist<TH1F> h_EffPosZ_postKFPart ;
+  
 
 /*
   Hist<TH1F> h_N_Si_MotherTracks ;

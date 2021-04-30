@@ -611,10 +611,12 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
 
       h_HypInvariantMass.emplace_back(new TH1F("h_HypInvariantMass", "h_HypInvariantMass", 2000, 2, 4));
       HistReg.emplace_back(&h_HypInvariantMass.store);
-      h_HypInvariantMassCheck.emplace_back(new TH1F("h_HypInvariantMassCheck", "h_HypInvariantMassCheck", 8000, -4, 4));
-      HistReg.emplace_back(&h_HypInvariantMassCheck.store);
       h_HypErrorInvariantMass.emplace_back(new TH1F("h_HypErrorInvariantMass", "h_HypErrorInvariantMass", 1000, 0, 0.5));
       HistReg.emplace_back(&h_HypErrorInvariantMass.store);
+      
+
+      h_Hyp_RealLifeTime.emplace_back(new TH1F("h_Hyp_RealLifeTime", "h_Hyp_RealLifeTime", 1000, 0, 1000));
+      HistReg.emplace_back(&h_Hyp_RealLifeTime.store);
       h_HypLifeTime_PrimVtx.emplace_back(new TH1F("h_HypLifeTime_PrimVtx", "h_HypLifeTime_PrimVtx", 1000, 0, 1000));
       HistReg.emplace_back(&h_HypLifeTime_PrimVtx.store);
       h_HypErrorLifeTime_PrimVtx.emplace_back(new TH1F("h_HypErrorLifeTime_PrimVtx", "h_HypErrorLifeTime_PrimVtx", 2000, 0, 200));
@@ -623,11 +625,28 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_HypcutLifeTime_PrimVtx.store);
 
 
+      h_HypInvariantMassCheck.emplace_back(new TH2F("h_HypInvariantMassCheck", "h_HypInvariantMassCheck", 1000, -10, 10, 2, 0, 2));
+      HistReg.emplace_back(&h_HypInvariantMassCheck.store);
+      h_HypInvariantErrorMassCheck.emplace_back(new TH2F("h_HypInvariantErrorMassCheck", "h_HypInvariantErrorMassCheck", 1500, -300, 1200, 2, 0, 2));
+      HistReg.emplace_back(&h_HypInvariantErrorMassCheck.store);
+
+
       h_HypInvariantMass_LorentzVect.emplace_back(new TH1F("h_HypInvariantMass_LorentzVect", "h_HypInvariantMass_LorentzVect", 2000, 2, 4));
       HistReg.emplace_back(&h_HypInvariantMass_LorentzVect.store);
       h_HypInvariantMass_CutLorentzVect.emplace_back(new TH1F("h_HypInvariantMass_CutLorentzVect", "h_HypInvariantMass_CutLorentzVect", 2000, 2, 4));
       HistReg.emplace_back(&h_HypInvariantMass_CutLorentzVect.store);
 
+
+      h_EffPosZ_real.emplace_back(new TH1F("h_EffPosZ_real", "h_EffPosZ_real", 30, 20, 60));
+      HistReg.emplace_back(&h_EffPosZ_real.store);
+      h_EffPosZ_preKF.emplace_back(new TH1F("h_EffPosZ_preKF", "h_EffPosZ_preKF", 30, 20, 60));
+      HistReg.emplace_back(&h_EffPosZ_preKF.store);
+      h_EffPosZ_postKF.emplace_back(new TH1F("h_EffPosZ_postKF", "h_EffPosZ_postKF", 30, 20, 60));
+      HistReg.emplace_back(&h_EffPosZ_postKF.store);
+      h_EffPosZ_preKFPart.emplace_back(new TH1F("h_EffPosZ_preKFPart", "h_EffPosZ_preKFPart", 30, 20, 60));
+      HistReg.emplace_back(&h_EffPosZ_preKFPart.store);
+      h_EffPosZ_postKFPart.emplace_back(new TH1F("h_EffPosZ_postKFPart", "h_EffPosZ_postKFPart", 30, 20, 60));
+      HistReg.emplace_back(&h_EffPosZ_postKFPart.store);
 /*
       h_N_Si_MotherTracks.emplace_back(new TH1F("h_N_Si_MotherTracks", "h_N_Si_MotherTracks", 10, 0, 10));
       HistReg.emplace_back(&h_N_Si_MotherTracks.store);

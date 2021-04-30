@@ -205,6 +205,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   RecoEvent.DecayVertex[1] = event.DecayVertex_Y;
   RecoEvent.DecayVertex[2] = event.DecayVertex_Z;
 
+  RecoEvent.Hyp_LifeTime = event.DecayTime * 1000.;
+
   for(size_t index = 0; index < event.BeamTrackID.size(); ++index)
   {
     TMcParticle* OutParticle = dynamic_cast<TMcParticle*>(OutTree->fMC_Particle->ConstructedAt(OutTree->fMC_Particle->GetEntries()));

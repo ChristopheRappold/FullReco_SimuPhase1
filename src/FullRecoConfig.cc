@@ -222,7 +222,7 @@ double FullRecoConfig::GetDimension(const std::string& dimension)
     return 1.e3;
   // Angle
   if(dimension == "degree")
-    return 3.14159265358979323846264L / 180.;
+    return M_PI / 180.;
   if(dimension == "rad")
     return 1.;
   //
