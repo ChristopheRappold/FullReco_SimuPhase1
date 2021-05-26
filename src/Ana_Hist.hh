@@ -300,6 +300,8 @@ class Ana_Hist
   Hist<TH2F> h_Dist_MotherTrackPrimVtx ;
   Hist<TH2F> h_Theta_MotherTrackPrimVtx ;
   Hist<TH2F> h_DecayVertexPosZ_KFPart_PrimVtx ;
+  Hist<TH2F> h_DecayFragmentMomZ_KFPart_PrimVtx ;
+  Hist<TH2F> h_DecayPionMomZ_KFPart_PrimVtx ;
   Hist<TH2F> h_Hyp_ArmenterosPodolanski ;
   Hist<TH2F> h_Hyp_CutArmenterosPodolanski ;
   

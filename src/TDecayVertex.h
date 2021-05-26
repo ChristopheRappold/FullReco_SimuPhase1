@@ -36,7 +36,7 @@ private:
 
   int FinderDecayVertex(FullRecoEvent& RecoEvent);
 
-  void StudyCaseSelector(std::string StudyCase, int& Fragment_pdg);
+  void StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg);
 
   void RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                          int& pdgParticle, int& cutConditions,
@@ -112,11 +112,15 @@ private:
   PDG_fromName pid_fromName;
 
   int Fragment_pdg;
+
   int He3_pdg = pid_fromName("He3");
   int He4_pdg = pid_fromName("alpha");
   int deuteron_pdg = pid_fromName("deuteron");
   int proton_pdg = pid_fromName("proton");
   int pi_pdg = pid_fromName("pi-");
+
+  int H3L_pdg = 20001;
+  int H4L_pdg = 20002;
 
   int Hyp_pdg;
   int Hyp_charge;
@@ -138,6 +142,9 @@ private:
   int ifCut_MinDist_FragmentTracksPrimVtx = 0;
   double MinDist_FragmentTracksPrimVtx = 0.; //Change !
 
+  int ifCut_MinMomZ_FragmentTracks = 0;
+  double MinMomZ_FragmentTracks = 0.; //Change !
+
 
   //Cut conditions on reconstructed pions
   int ifCut_MaxChi2ndf_PionTracks = 1;
@@ -145,6 +152,9 @@ private:
 
   int ifCut_MinDist_PionTracksPrimVtx = 0;
   double MinDist_PionTracksPrimVtx = 0.05; //Change !
+
+  int ifCut_MinMomZ_PionTracks = 0;
+  double MinMomZ_PionTracks = 0.; //Change !
 
 
   //Cut conditions on reconstructed hypernuclei
@@ -272,6 +282,8 @@ private:
     TH2F* h_Dist_MotherTrackPrimVtx;
     TH2F* h_Theta_MotherTrackPrimVtx;
     TH2F* h_DecayVertexPosZ_KFPart_PrimVtx;
+    TH2F* h_DecayFragmentMomZ_KFPart_PrimVtx;
+    TH2F* h_DecayPionMomZ_KFPart_PrimVtx;
     TH2F* h_Hyp_ArmenterosPodolanski;
     TH2F* h_Hyp_CutArmenterosPodolanski;
 

@@ -459,21 +459,21 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       
       h_Pt_fragments.emplace_back(new TH1F("h_Pt_fragments", "h_Pt_fragments", 1000, 0, 1));
       HistReg.emplace_back(&h_Pt_fragments.store);
-      h_Pz_fragments.emplace_back(new TH1F("h_Pz_fragments", "h_Pz_fragments", 1500, 0, 15));
+      h_Pz_fragments.emplace_back(new TH1F("h_Pz_fragments", "h_Pz_fragments", 2000, -5, 15));
       HistReg.emplace_back(&h_Pz_fragments.store);
       h_Dist_FragmentTrackPrimVtx.emplace_back(new TH1F("h_Dist_FragmentTrackPrimVtx", "h_Dist_FragmentTrackPrimVtx", 10000, 0, 10));
       HistReg.emplace_back(&h_Dist_FragmentTrackPrimVtx.store);
 
       h_Pt_pions.emplace_back(new TH1F("h_Pt_pions", "h_Pt_pions", 1000, 0, 1));
       HistReg.emplace_back(&h_Pt_pions.store);
-      h_Pz_pions.emplace_back(new TH1F("h_Pz_pions", "h_Pz_pions", 1000, -3, 5));
+      h_Pz_pions.emplace_back(new TH1F("h_Pz_pions", "h_Pz_pions", 1000, -5, 5));
       HistReg.emplace_back(&h_Pz_pions.store);
       h_Chi2ndf_pions.emplace_back(new TH1F("h_Chi2ndf_pions", "h_Chi2ndf_pions", 1000, 0, 10));
       HistReg.emplace_back(&h_Chi2ndf_pions.store);
 
       h_Pt_cutpions.emplace_back(new TH1F("h_Pt_cutpions", "h_Pt_cutpions", 1000, 0, 1));
       HistReg.emplace_back(&h_Pt_cutpions.store);
-      h_Pz_cutpions.emplace_back(new TH1F("h_Pz_cutpions", "h_Pz_cutpions", 1000, -3, 5));
+      h_Pz_cutpions.emplace_back(new TH1F("h_Pz_cutpions", "h_Pz_cutpions", 1000, -5, 5));
       HistReg.emplace_back(&h_Pz_cutpions.store);
 
       h_Nrealpions.emplace_back(new TH1F("h_Nrealpions", "h_Nrealpions", 10, 0, 10));
@@ -604,6 +604,10 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_Theta_MotherTrackPrimVtx.store);
       h_DecayVertexPosZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayVertexPosZ_KFPart_PrimVtx", "h_DecayVertexPosZ_KFPart_PrimVtx", 1000, 20, 60, 3000, 2, 5));
       HistReg.emplace_back(&h_DecayVertexPosZ_KFPart_PrimVtx.store);
+      h_DecayFragmentMomZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayFragmentMomZ_KFPart_PrimVtx", "h_DecayFragmentMomZ_KFPart_PrimVtx", 2000, -5, 15, 3000, 2, 5));
+      HistReg.emplace_back(&h_DecayFragmentMomZ_KFPart_PrimVtx.store);
+      h_DecayPionMomZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayPionMomZ_KFPart_PrimVtx", "h_DecayPionMomZ_KFPart_PrimVtx", 1000, -5, 5, 3000, 2, 5));
+      HistReg.emplace_back(&h_DecayPionMomZ_KFPart_PrimVtx.store);
       h_Hyp_ArmenterosPodolanski.emplace_back(new TH2F("h_Hyp_ArmenterosPodolanski", "h_Hyp_ArmenterosPodolanski", 1000, 0, 1, 1000, 0, 1));
       HistReg.emplace_back(&h_Hyp_ArmenterosPodolanski.store);
       h_Hyp_CutArmenterosPodolanski.emplace_back(new TH2F("h_Hyp_CutArmenterosPodolanski", "h_Hyp_CutArmenterosPodolanski", 1000, 0, 1, 1000, 0, 1));

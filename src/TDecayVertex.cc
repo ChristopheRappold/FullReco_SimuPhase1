@@ -20,11 +20,7 @@ using namespace std;
 using namespace G4Sol;
 
 TDecayVertex::TDecayVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface("DecayVertexReco"), att(attribut)
-{
-  //rand = new TRandom3(); CHANGE
-  //PDG_fromName pid_fromName ; //Is it necessary ?
-}
+    : TDataProcessInterface("DecayVertexReco"), att(attribut) {}
 
 TDecayVertex::~TDecayVertex() {}
 
@@ -184,6 +180,8 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_Dist_MotherTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_MotherTrackPrimVtx);
   LocalHisto.h_Theta_MotherTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Theta_MotherTrackPrimVtx);
   LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayFragmentMomZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayFragmentMomZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayPionMomZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPionMomZ_KFPart_PrimVtx);
   LocalHisto.h_Hyp_ArmenterosPodolanski = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_ArmenterosPodolanski);
   LocalHisto.h_Hyp_CutArmenterosPodolanski = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_CutArmenterosPodolanski);
   
@@ -239,7 +237,10 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_EffPosZ_real->Fill(DecayVertex_real_Z, 1.);
   LocalHisto.h_Hyp_RealLifeTime->Fill(RecoEvent.Hyp_LifeTime, 1.);
 
-  StudyCaseSelector(att.StudyCase, Fragment_pdg);
+  StudyCaseSelector(att.StudyCase, Hyp_pdg, Fragment_pdg);
+  Hyp_charge = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Charge()/3.;
+  Hyp_mass = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Mass();
+
 
   //Primary vertex KFParticle initialization
   KFParticleSIMD KFPart_PrimVtx;
@@ -411,6 +412,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   std::vector<KFParticle> CutMotherTracks_PrimVtx_All;
   std::vector<std::tuple<size_t, size_t>> RefCutDaughtersTracks_PrimVtx_All;
+  ifSet_ProductionVertex = 1;
+  ifSet_MassConstraint = 0;
   MotherTracksRecons(FragmentTracks, CutPionTracks, pointer_PrimVtx, CutMotherTracks_PrimVtx_All, RefCutDaughtersTracks_PrimVtx_All);
 
   std::vector<KFParticle> CutMotherTracks_PrimVtx;
@@ -681,6 +684,9 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_EffPosZ_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ(), 1.);
       LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx->Fill(MotherTracks_PrimVtx[i].GetZ(), MotherTracks_PrimVtx[i].GetMass(), 1.);
 
+      LocalHisto.h_DecayFragmentMomZ_KFPart_PrimVtx->Fill(FragmentTracks[temp_id_fragment].GetPz(), MotherTracks_PrimVtx[i].GetMass(), 1.);
+      LocalHisto.h_DecayPionMomZ_KFPart_PrimVtx->Fill(PionTracks[temp_id_pion].GetPz(), MotherTracks_PrimVtx[i].GetMass(), 1.);
+
       LocalHisto.h_N_MotherTracks->Fill(MotherTracks_PrimVtx.size(), MotherTracks_PrimVtx[i].GetMass(), 1.);
 
       LocalHisto.h_HypInvariantMass->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
@@ -867,14 +873,16 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
 
-void TDecayVertex::StudyCaseSelector(std::string StudyCase, int& Fragment_pdg)
+void TDecayVertex::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg)
 {
   if(StudyCase.compare("H3L") == 0)
     {
+      Hyp_pdg = H3L_pdg;
       Fragment_pdg = He3_pdg;
     }
   else if(StudyCase.compare("H4L") == 0)
     {
+      Hyp_pdg = H4L_pdg;
       Fragment_pdg = He4_pdg;
     }
   else if(StudyCase.compare("nnL") == 0)
@@ -889,10 +897,6 @@ void TDecayVertex::StudyCaseSelector(std::string StudyCase, int& Fragment_pdg)
     {
 
     }
-
-  Hyp_pdg = pid_fromName(StudyCase);
-  Hyp_charge = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Charge()/3.;
-  Hyp_mass = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Mass();
 }
 
 
@@ -988,6 +992,9 @@ void TDecayVertex::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All,
       if( (ifCut_MinDist_FragmentTracksPrimVtx == 1) && (temp_dist < MinDist_FragmentTracksPrimVtx) )
         continue;
 
+      if( (ifCut_MinMomZ_FragmentTracks == 1) && (FragmentTracks_All[i].GetPz() < MinMomZ_FragmentTracks) )
+        continue;
+
       FragmentTracks.emplace_back(FragmentTracks_All[i]);
     }
 }
@@ -1053,6 +1060,9 @@ void TDecayVertex::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector
 
       ThetaDist_TrackPrimVtx(PionTracks_All[i], PrimVtxRecons, temp_theta, temp_dist);
       if( (ifCut_MinDist_PionTracksPrimVtx == 1) && (temp_dist < MinDist_PionTracksPrimVtx) )
+        continue;
+
+      if( (ifCut_MinMomZ_PionTracks == 1) && (PionTracks_All[i].GetPz() < MinMomZ_PionTracks) )
         continue;
 
       PionTracks.emplace_back(PionTracks_All[i]);
