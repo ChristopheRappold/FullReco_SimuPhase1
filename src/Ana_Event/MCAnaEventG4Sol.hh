@@ -9,6 +9,7 @@
 #include "TMcHit.hh"
 #include "TMcParticle.hh"
 #include "THyphiTrack_v4.hh"
+#include "THypernucleus.hh"
 
 // class TMcHit;
 // class TMcParticle;
@@ -62,6 +63,9 @@ public :
   Int_t Ntrack;
   TClonesArray* fTrack; //->
 
+  Int_t Nhyp;
+  TClonesArray* fHyp; //->
+
   static TClonesArray* gMC_Particle; //!
   
   static TClonesArray* gInSi; //!
@@ -78,8 +82,9 @@ public :
   static TClonesArray* gPSCE; //!
 
   static TClonesArray* gfTrack; //! 
+  static TClonesArray* gfHyp; //!
   
-  ClassDef(MCAnaEventG4Sol,4)
+  ClassDef(MCAnaEventG4Sol,5)
 };
 
 #endif

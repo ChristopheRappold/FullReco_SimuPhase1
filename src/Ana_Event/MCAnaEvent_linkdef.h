@@ -7,5 +7,6 @@
 #pragma link C++ class TMcHit+;
 #pragma link C++ class TMcParticle+;
 #pragma link C++ class THyphiTrack+;
+#pragma link c++ class THypernucleus+;
 
 #endif

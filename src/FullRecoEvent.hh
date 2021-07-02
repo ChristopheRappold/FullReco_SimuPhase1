@@ -516,6 +516,39 @@ struct OutHit
   std::array<double, 4> MCparticle;
 };
 
+struct Hyp
+{
+  Int_t Pattern; /// 1 = Simulation / 2 = KFParticle_real / 3 = KFParticle_cut / 4 = KFParticle / 5 = KFParticle_Mass / 6 = LorentzVector
+  
+  //Mother:
+  Int_t N_Mother;
+  Double32_t Chi2ndf;
+  TLorentzVector MomE;
+  TVector3 PrimVtx;
+  TVector3 DecayVtx;
+  TVector3 Dist_RealReconsVtx;
+  Double32_t Dist_MotherPrimVtx;
+  Double32_t Angle_MotherPrimVtx;
+  Double32_t InvMass;
+  Double32_t ErrInvMass;
+  Int_t ErrGetMass;
+  Double32_t LifeTime;
+  Double32_t ErrLifeTime;
+  Int_t ErrGetLifeTime;
+
+  //Daughters:
+  TLorentzVector MomE_Fragment;
+  Double32_t Angle_MotherFragment;
+  TLorentzVector MomE_Pion;
+  Double32_t Chi2ndf_Pion;
+  Double32_t Angle_MotherPion;
+  Int_t N_Pion;
+  Int_t Pion_IsFromHyp; // 0-> No; 1-> Yes
+  Double32_t Dist_Daughters;
+  Double32_t ArmPod_Qt;
+  Double32_t ArmPod_Alfa;
+};
+
 // struct OutTrack
 // {
 //   std::string type;
@@ -579,6 +612,7 @@ public:
   std::vector<std::vector<double> > Hits_Si1{};
   std::vector<std::vector<double> > Hits_Si2{};
 
+  TLorentzVector Mother_MomE;
   std::array<double,3> InteractionPoint;
   std::array<double,3> DecayVertex;
   double Hyp_LifeTime;
@@ -588,6 +622,8 @@ public:
 
   TVector3 DecayVtxRecons;
   std::array<double,6> CovMatrix_SV; //lower triangle
+
+  std::vector<Hyp> Hyp_Vect;
 
   
   explicit FullRecoEvent(unsigned int idTh = 1);

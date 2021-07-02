@@ -197,6 +197,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   std::string nameMother(event.MotherName);
   int id_mother = event.MotherTrackID;
 
+  double Mother_totalMomentum = sqrt(pow(event.MotherMomentumAtDecay_X,2.) + pow(event.MotherMomentumAtDecay_Y,2.) + pow(event.MotherMomentumAtDecay_Z,2.));
+  double Mother_Energy = pow(event.MotherMass,2.) + pow(Mother_totalMomentum,2.);
+
+  RecoEvent.Mother_MomE.SetPxPyPzE(event.MotherMomentumAtDecay_X, event.MotherMomentumAtDecay_Y, event.MotherMomentumAtDecay_Z, Mother_Energy);
+
+  double gamma_factor = sqrt(1. + pow(Mother_totalMomentum / event.MotherMass,2.));
+  RecoEvent.Hyp_LifeTime = event.DecayTime * 1000. / gamma_factor; //in ps in the CM frame
+
   RecoEvent.InteractionPoint[0] = event.InteractionPoint_X;
   RecoEvent.InteractionPoint[1] = event.InteractionPoint_Y;
   RecoEvent.InteractionPoint[2] = event.InteractionPoint_Z;
@@ -205,7 +213,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   RecoEvent.DecayVertex[1] = event.DecayVertex_Y;
   RecoEvent.DecayVertex[2] = event.DecayVertex_Z;
 
-  RecoEvent.Hyp_LifeTime = event.DecayTime * 1000.;
+
 
   for(size_t index = 0; index < event.BeamTrackID.size(); ++index)
   {

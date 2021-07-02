@@ -92,7 +92,7 @@ MCEventH = MCAnaEvent.hh
 MCEventH_Com = TMcHit.hh TMcParticle.hh THyphiTrack_v3.hh
 
 MCEventG4SolH = MCAnaEventG4Sol.hh
-MCEventG4SolH_Com = TMcHit.hh TMcParticle.hh THyphiTrack_v4.hh
+MCEventG4SolH_Com = TMcHit.hh TMcParticle.hh THyphiTrack_v4.hh THypernucleus.hh
 
 
 EventSrc_v14 = $(patsubst %.hh,%.cc,$(EventH_v14))
