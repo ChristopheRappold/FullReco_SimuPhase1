@@ -50,6 +50,7 @@ void FullRecoEvent::Clear(int toclean)
   Hits_Si1.clear();
   Hits_Si2.clear();
   
+  Mother_MomE.SetXYZM(0.,0.,0.,0.);
   InteractionPoint.fill(0.);
   DecayVertex.fill(0.);
   Hyp_LifeTime = -1.;
@@ -59,4 +60,6 @@ void FullRecoEvent::Clear(int toclean)
 
   DecayVtxRecons.SetXYZ(0., 0., 0.);
   CovMatrix_SV.fill(0.);
+
+  Hyp_Vect.clear();
 }
