@@ -51,6 +51,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   Task_BayesFinder = false;
   Task_RiemannFinder = false;
   Task_FinderCM = false;
+  Task_FindingPerf = false;
   Task_CheckRZ = true;
   Task_KalmanDAF = true;
   Task_DecayVtx = false;
@@ -96,6 +97,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
   if(Config.IsAvailable("Task_RiemannFinder"))
     Task_RiemannFinder = Config.Get<bool>("Task_RiemannFinder");
+  if(Config.IsAvailable("Task_FindingPerf"))
+    Task_FindingPerf = Config.Get<bool>("Task_FindingPerf");
   if(Config.IsAvailable("Task_FinderCM"))
     Task_FinderCM = Config.Get<bool>("Task_FinderCM");
   if(Config.IsAvailable("Task_CheckRZ"))

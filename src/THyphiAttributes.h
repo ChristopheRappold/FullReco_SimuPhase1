@@ -86,6 +86,7 @@ class THyphiAttributes
   bool Task_BayesFinder;
   bool Task_RiemannFinder;
   bool Task_FinderCM;
+  bool Task_FindingPerf;
   bool Task_CheckRZ;
   bool Task_KalmanDAF;
   bool Task_DecayVtx;

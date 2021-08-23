@@ -29,6 +29,7 @@ enum StateHist : int
   VERTEX,
   DCPROJ,
   FINDING,
+  RIEMANN,
   HOUGH,
   SIMU,
   PRIMVTX,
@@ -142,6 +143,16 @@ class Ana_Hist
   Hist<TH1F> h_ResMiniFiber[6];
   Hist<TH1F> h_ResMDC[17][3];
   Hist<TH1F> h_ResPSCE[2];
+
+  // Riemann Finder
+
+  Hist<TH2F> h_RiemannChi2;
+  Hist<TH2F> h_RiemannResidus;
+
+  // PerfFinder
+
+  Hist<TH2F> h_PerfFinder;
+  Hist<TH2F> h_PerfFinderLevenshtein;
 
   //Primary Vertex
   Hist<TH1F> h_HitMultiplicity_Si1;
@@ -284,7 +295,7 @@ class Ana_Hist
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Hough = true, bool Simu = false, bool PrimVtx = true, bool DecayVtx = true);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool PrimVtx = true, bool DecayVtx = true);
   ~Ana_Hist();
 
   int Write(TFile*);

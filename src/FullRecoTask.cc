@@ -4,6 +4,7 @@
 
 #include "TBayesFinder.h"
 //#include "TFinderCM.h"
+#include "TFindingPerf.h"
 #include "TKalmanFilter_DAF.h"
 #include "CheckField.h"
 #include "TCheckRZ.h"
@@ -11,6 +12,7 @@
 #include "TPrimaryVertex.h"
 #include "TDecayVertex.h"
 #include "TRiemannFinder.h"
+#include "TFindingPerf.h"
 //#include "TKalmanFilter_FRS.h"
 
 
@@ -50,6 +52,8 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
     list_processMC.emplace_back(new TRiemannFinder(Attributes));
   //if(Attributes.Task_FinderCM)
   //  list_processMC.emplace_back(new TFinderCM(Attributes));
+  if(Attributes.Task_FindingPerf)
+    list_processMC.emplace_back(new TFindingPerf(Attributes));
   if(Attributes.Task_CheckRZ)
     list_processMC.emplace_back(new TCheckRZ(Attributes));
   if(Attributes.Task_KalmanDAF)
