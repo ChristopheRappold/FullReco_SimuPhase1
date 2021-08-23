@@ -11,7 +11,9 @@
 #pragma link C++ class HypFieldMapFullData+;
 #pragma link C++ class FrsSksHypFieldMapFull+;
 #pragma link C++ class FrsSksHypFieldMapFullData+;
-#pragma link C++ class FrsSolenoidHypField++;
+#pragma link C++ class FrsSolenoidHypField+;
+#pragma link C++ class WasaSolenoidFieldMap+;
 #pragma link C++ class EveAladinField+;
 #pragma link C++ class EveSksField+;
+#pragma link C++ class EveWasaField+;
 #endif

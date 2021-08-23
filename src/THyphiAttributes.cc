@@ -281,6 +281,12 @@ int THyphiAttributes::Init_Para()
   auto WasaS = InputPar.simParameters->find("Wasa_Side");
   Wasa_Side = WasaS->second;
 
+  auto WasaMap = InputPar.simParameters->find("Field_CDS_FieldMap");
+  Wasa_FieldMap = WasaMap != InputPar.simParameters->end() ? true : false;
+  if(Wasa_FieldMap)
+    Wasa_FieldMapName = "./field/MagField_default.dat";
+
+  
   TObjArray* L_vol = gGeoManager->GetListOfVolumes();
   int n_volume = L_vol->GetEntries();
   for(int n_v = 0; n_v < n_volume; ++n_v)

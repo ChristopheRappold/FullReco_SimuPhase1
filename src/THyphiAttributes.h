@@ -73,6 +73,8 @@ class THyphiAttributes
   double Field_Strength;
 
   int Wasa_Side;
+  bool Wasa_FieldMap;
+  std::string Wasa_FieldMapName;
 
   std::vector<std::string> name_GeoVolumes;
 
