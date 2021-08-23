@@ -3,6 +3,7 @@
 #include <fstream>
 //#include <iostream>
 
+#include "FairBase/WasaSolenoidFieldMap.h"
 #include "TMath.h"
 //#define FIELD_DEBUG
 #include "FieldManager.h"
@@ -190,7 +191,13 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
 
   _logger->info( " *** > Loading Fieldmap ");
 
-  Field = new FrsSolenoidHypField();
+  if(Wasa_FieldMap)
+    {
+      double signD = Wasa_Side ? 1.0 : -1.0;
+      Field = new WasaSolenoidFieldMap("WasaFieldMap","WasaFieldMap",Wasa_FieldMapName, Field_Strength, signDir);
+    }
+  else
+    Field = new FrsSolenoidHypField();
 
   bool isWasa = false;
   for(const auto& nameGeo : name_GeoVolumes)
@@ -204,10 +211,23 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   if(isWasa == false)
     dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("CDS_logR_0");
   else
-    dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("INNER_1");
+    {
+      if(Wasa_FieldMap)
+	dynamic_cast<WasaSolenoidFieldMap*>(Field)->SetPositionFromGeoManager("MFLD_1");
+      else
+	dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("INNER_1");
+    }
 
-  dynamic_cast<FrsSolenoidHypField*>(Field)->SetField(0.,0.,Field_Strength);
-  dynamic_cast<FrsSolenoidHypField*>(Field)->Print();
+  if(Wasa_FieldMap)
+    {
+      dynamic_cast<WasaSolenoidFieldMap*>(Field)->Init();
+      dynamic_cast<WasaSolenoidFieldMap*>(Field)->Print();
+    }
+  else
+    {
+      dynamic_cast<FrsSolenoidHypField*>(Field)->SetField(0.,0.,Field_Strength);
+      dynamic_cast<FrsSolenoidHypField*>(Field)->Print();
+    }
   // std::cout<< " IsInside : (0,0,70)"<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,70.)<< " (0,0,125.50) "<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,125.5)<<"\n";
   // std::cout<< " IsInside : (0,0,40)"<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,40.)<< " (0,0,155.50) "<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,155.5)<<"\n";
 

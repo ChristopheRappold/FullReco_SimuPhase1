@@ -14,6 +14,7 @@
 #include "FairBase/HypFieldMapFull.h"
 
 #include "FairBase/FrsSolenoidHypField.h"
+#include "FairBase/WasaSolenoidFieldMap.h"
 
 #include "spdlog/logger.h"
 
