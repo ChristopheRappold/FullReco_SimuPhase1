@@ -50,7 +50,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   Task_PrimaryVtx = false;
   Task_FlatMCOutputML = false;
   Task_BayesFinder = false;
+  Task_RiemannFinder = false;
   Task_FinderCM = false;
+  Task_FindingPerf = false;
   Task_CheckRZ = true;
   Task_KalmanDAF = true;
   Task_DecayVtx = false;
@@ -68,6 +70,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
 
   KF_NbCentralCut = 1;
   KF_NbMiniFiberCut = 4;
+
+  RF_OutputEvents = false;
 
   if(Config.IsAvailable("G4_simu"))
     G4_simu = true;
@@ -92,6 +96,10 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");;
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
+  if(Config.IsAvailable("Task_RiemannFinder"))
+    Task_RiemannFinder = Config.Get<bool>("Task_RiemannFinder");
+  if(Config.IsAvailable("Task_FindingPerf"))
+    Task_FindingPerf = Config.Get<bool>("Task_FindingPerf");
   if(Config.IsAvailable("Task_FinderCM"))
     Task_FinderCM = Config.Get<bool>("Task_FinderCM");
   if(Config.IsAvailable("Task_CheckRZ"))
@@ -139,6 +147,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   temp_file_base_name += MLSuffix;
   temp_file_base_name += ".root";
   FlatML_namefile = temp_file_base_name;
+
+  if(Config.IsAvailable("RF_OutputEvents"))
+    RF_OutputEvents = Config.Get<bool>("RF_OutputEvents");
 
   DataML_Out = Config.IsAvailable("DataML_Out") ? Config.Get<std::string>("DataML_Out") : "NoneInConfig";
 

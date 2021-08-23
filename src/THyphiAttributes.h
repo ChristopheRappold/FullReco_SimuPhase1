@@ -87,7 +87,9 @@ class THyphiAttributes
   bool Task_PrimaryVtx;
   bool Task_FlatMCOutputML;
   bool Task_BayesFinder;
+  bool Task_RiemannFinder;
   bool Task_FinderCM;
+  bool Task_FindingPerf;
   bool Task_CheckRZ;
   bool Task_KalmanDAF;
   bool Task_DecayVtx;
@@ -108,6 +110,8 @@ class THyphiAttributes
 
   std::string FlatML_namefile;
   std::string DataML_Out;
+
+  bool RF_OutputEvents;
 
   FairField* Field;
 
