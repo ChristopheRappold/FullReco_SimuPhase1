@@ -66,7 +66,7 @@ class TRiemannFinder final :  public TDataProcessInterface
   ReturnRes::InfoM SoftExit(int) override;
   void SelectHists() final;
 
-  void BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree, std::vector<RPhiHit>& TempHits);
+  int BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree, std::vector<RPhiHit>& TempHits);
   void BuildTrackCand(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree, const std::vector<RPhiHit>& TempHits, std::vector<RTrack>& newTracksCand);
   void AddStereoWire(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand);
   void AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand);
@@ -145,10 +145,10 @@ class TRiemannFinder final :  public TDataProcessInterface
 
   struct LocalHists
   {
-    TH2F* h_Chi2;
-    TH2F* h_residus;
-    TH2F* h_Stats;
-    TH2F* h_mom;
+    TH2F* h_RiemannChi2;
+    TH2F* h_RiemannResidus;
+    //TH2F* h_Stats;
+    //TH2F* h_mom;
 
   };
   LocalHists LocalHisto;

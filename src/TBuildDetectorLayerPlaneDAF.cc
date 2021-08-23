@@ -284,6 +284,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   OutTree->Nmc = OutTree->fMC_Particle->GetEntries();
 
   RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
+  RecoEvent.ListHitsToTracks.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.OldListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.Si_HitsEnergyLayer.resize(4);
   
@@ -551,8 +552,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             std::cout << "HitPosX : " << hit.HitPosX << std::endl;
             std::cout << "HitPosY : " << hit.HitPosY << std::endl;
             std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
-            gGeoManager->GetVolume("PSB")->GetNode(LayerID)->Print();
-            gGeoManager->GetVolume("PSB")->GetNode(LayerID)->GetMatrix()->Print();
+            gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->Print();
+            gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->GetMatrix()->Print();
             gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
             gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
             gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
@@ -565,6 +566,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             TGeoHMatrix H1(*g1), H1_1(*g1_1), H2(*g2), H3(*g3);
             TGeoHMatrix H = H1_1 * H1;
             H = H2 * H;
+
             H = H3 * H;
 #ifdef DEBUG_BUILD2
             H.Print();
@@ -572,9 +574,12 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
             double *shift =  H.GetTranslation();
 	    double *local_rot = H.GetRotationMatrix();
-	    TVector3 vInit (22.,0.,0.);
-	    TVector3 v (vInit[0]*local_rot[0], vInit[1]*local_rot[3], vInit[2]*local_rot[6]);
+
+	    TVector3 v (local_rot[0], local_rot[3], local_rot[6]);
+	    // v is at the left border of the bar -> rotate 3.75 degree to be at the center of the bar
+	    v.RotateZ(-3.75*TMath::DegToRad());
 	    v = v.Unit();
+
 	    TVector3 u (v.Y(), -v.X(),0.);
 	    TVector3 o(shift[0], shift[1], shift[2]);
             genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
@@ -931,6 +936,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           }
 
           RecoEvent.ListHits[TypeDet].emplace_back(measurement.release());
+	  RecoEvent.ListHitsToTracks[TypeDet].emplace_back(TrackID);
           int indexHit = RecoEvent.ListHits[TypeDet].size() - 1;
 
           tempTrack->second[TypeDet] = indexHit;

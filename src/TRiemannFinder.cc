@@ -11,7 +11,7 @@
 #include <sstream>
 #include <tuple>
 
-#define DEBUG_RIEMANNFINDER
+//#define DEBUG_RIEMANNFINDER
 
 using namespace std;
 using namespace G4Sol;
@@ -28,6 +28,7 @@ TRiemannFinder::TRiemannFinder(const THyphiAttributes& attribut) : TDataProcessI
 
   if(OutputEvents)
     {
+      att._logger->info("RF: OutputEvent set on !");
       f_finder = new TFile(namefileFinder, "RECREATE");
       t_finder = new TTree("RiemannFinder", "Finder output tracks");
 
@@ -105,17 +106,26 @@ int TRiemannFinder::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
       int charge = trackC.toRefit ? trackC.helix.q : trackC.q;
       RecoEvent.TracksFound.emplace_back(trackC.sortedHits,trackC.toRefit,charge, trackC.helix.Par,
 	  trackC.helix.Cov, trackC.helix.chi2_circle,trackC.helix.chi2_line);
-
     }
+
+  for(auto [id_det,id_hit,id_track] : TempHitToAllHits)
+    RecoEvent.IdHitsToMeasurement.emplace_back(id_det,id_hit,id_track);
 
   return res;
 }
 
 ReturnRes::InfoM TRiemannFinder::SoftExit(int result_full) { return ReturnRes::Fine; }
 
-void TRiemannFinder::SelectHists() {}
+void TRiemannFinder::SelectHists()
+{
+  LocalHisto.h_RiemannChi2         = AnaHisto->CloneAndRegister(AnaHisto->h_RiemannChi2);
+  LocalHisto.h_RiemannResidus = AnaHisto->CloneAndRegister(AnaHisto->h_RiemannResidus);
 
-void TRiemannFinder::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree,
+
+
+}
+
+int TRiemannFinder::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree,
                                  std::vector<RPhiHit>& TempHits)
 {
   int ntrack          = -1;
@@ -205,6 +215,7 @@ void TRiemannFinder::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKD
                   meanY = midPos.Y();
                   redo_layer.insert(id_det);
                   redo_layerToTrackID[id_det][id_hit] = id_track;
+		  att._logger->debug("Set to redo : det {} hit {} track {} ",G4Sol::nameLiteralDet.begin()[id_det],id_hit,id_track);
                   continue;
                 }
 
@@ -239,7 +250,7 @@ void TRiemannFinder::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKD
               TempHits.emplace_back(RPhiHit(TMath::Sqrt(Xp * Xp + Yp * Yp),
                                             (TMath::ATan2(Yp, Xp) + TMath::Pi()) * TMath::RadToDeg(), Zp, nCount));
               ++nCount;
-              TempHitToAllHits.emplace_back(std::make_tuple(id_det, id_hit, id_track));
+              TempHitToAllHits.push_back(std::make_tuple(id_det, id_hit, id_track));
               TempHitXYZ.emplace_back(TVector3(meanX, meanY, 0.));
 
 	      if(OutputEvents)
@@ -327,7 +338,7 @@ void TRiemannFinder::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKD
               TempHits.emplace_back(RPhiHit(TMath::Sqrt(Xp * Xp + Yp * Yp),
                                             (TMath::ATan2(Yp, Xp) + TMath::Pi()) * TMath::RadToDeg(), Zp, nCount));
               ++nCount;
-              TempHitToAllHits.emplace_back(std::make_tuple(id_det, id_hit, id_track));
+              TempHitToAllHits.push_back(std::make_tuple(id_det, id_hit, id_track));
               TempHitXYZ.emplace_back(TVector3(meanX, meanY, currentLabPos.Z()));
             }
 
@@ -379,12 +390,17 @@ void TRiemannFinder::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKD
   for(size_t i_h = 0; i_h < TempHits.size(); ++i_h)
     att._logger->debug(
         "RPhi hit# {} : {}, {}, {}, {} | LayerID {} hit {} track {}", i_h, TempHits[i_h][0], TempHits[i_h][1],
-        TempHits[i_h][2], TempHits[i_h].getId(), std::get<0>(TempHitToAllHits[TempHits[i_h].getId()]) - G4Sol::MG01,
+        TempHits[i_h][2], TempHits[i_h].getId(), G4Sol::nameLiteralDet.begin()[ std::get<0>(TempHitToAllHits[TempHits[i_h].getId()])],
         std::get<1>(TempHitToAllHits[TempHits[i_h].getId()]), std::get<2>(TempHitToAllHits[TempHits[i_h].getId()]));
 
   att._logger->debug("KDPoint done ");
 #endif
 
+  if(TempHits.size() == 0)
+    {
+      att._logger->warn("W> RF: KDtree build from size 0 tempHits vector !");
+      return -1;
+    }
   KDtree.build(TempHits);
   // att._logger->debug("KDTree build done: {}", KDtree.size());
   // auto TreeIds = KDtree.getTheIds();
@@ -393,6 +409,7 @@ void TRiemannFinder::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKD
   // for(size_t id_ids = 0; id_ids< TreeIds.size(); ++id_ids)
   //   ss_tree<<" #"<<id_ids<<": "<<TreeIds[id_ids];
   // att._logger->debug(ss_tree.str());
+  return 0;
 }
 
 void TRiemannFinder::BuildTrackCand(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree,
@@ -812,13 +829,16 @@ void TRiemannFinder::AddStereoWire(const FullRecoEvent& RecoEvent, std::vector<R
 
 #ifdef DEBUG_RIEMANNFINDER
   att._logger->debug("redo layer step : {}", redo_layer.size());
+  for(auto [c_det, c_hT] : redo_layerToTrackID)
+    for(auto [c_hit, c_track] : c_hT)
+      att._logger->debug("To redo det {} hit {} track {}", G4Sol::nameLiteralDet.begin()[c_det],c_hit,c_track);
 #endif
 
   for(auto layerRedo : redo_layer)
     {
 #ifdef DEBUG_RIEMANNFINDER
       att._logger->debug("#############");
-      att._logger->debug("Redo Layer {}", layerRedo - G4Sol::MG01);
+      att._logger->debug("Redo Layer {} / {}", layerRedo - G4Sol::MG01,  G4Sol::nameLiteralDet.begin()[layerRedo]);
 #endif
       for(size_t id_hit = 0; id_hit < RecoEvent.ListHits[layerRedo].size(); ++id_hit)
         {
@@ -945,7 +965,7 @@ void TRiemannFinder::AddStereoWire(const FullRecoEvent& RecoEvent, std::vector<R
               // 	      TVector3 comPos (0.,0.,posZwire);
               // 	      f_propagWire(wire_side1,wire_side2,comPos);
 
-              // 	      TempHitToAllHits.emplace_back(std::make_tuple(layerRedo,id_hit));
+              // 	      TempHitToAllHits.push_back(std::make_tuple(layerRedo,id_hit));
               // 	      TempHitXYZ.emplace_back(comPos);
 
               // 	      size_t newId = TempHitToAllHits.size()-1;
@@ -1009,7 +1029,12 @@ void TRiemannFinder::AddStereoWire(const FullRecoEvent& RecoEvent, std::vector<R
               att._logger->debug("Check : dist on wire {} | WireL {} | Prep dist {}", comPosW1.Dot(DirWire), WireLength,
                                  PerpComWire.Mag());
 #endif
-              TempHitToAllHits.emplace_back(std::make_tuple(layerRedo, id_hit, redo_layerToTrackID[layerRedo][id_hit]));
+	      int id_track_redo = -1;
+	      if(const auto& redo_det = redo_layerToTrackID.find(layerRedo); redo_det != redo_layerToTrackID.end())
+		if(const auto& redo_hit = redo_det->second.find(id_hit); redo_hit != redo_det->second.end())
+		  id_track_redo = redo_hit->second;
+
+              TempHitToAllHits.push_back(std::make_tuple(layerRedo, id_hit, id_track_redo));
               TempHitXYZ.emplace_back(comPos);
               TempCovXYZ.push_back({R_sizeL * 0.5, 0., 0., 0., R_sizeL * 0.5, 0., 0., 0., 1.});
 
@@ -1032,12 +1057,17 @@ void TRiemannFinder::AddStereoWire(const FullRecoEvent& RecoEvent, std::vector<R
 
 void TRiemannFinder::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
 {
-  for(auto trackC : newTracksCand)
+#ifdef DEBUG_RIEMANNFINDER
+  att._logger->debug("Add Endcap : {}", TempHitPSBE.size());
+#endif
+
+  for(auto& trackC : newTracksCand)
     {
       bool hasPSCE = false;
       for(auto hitT : trackC.hits)
         if(auto [id_det1, id_hit1, id_track1] = TempHitToAllHits[hitT]; id_det1 == G4Sol::PSCE)
           hasPSCE = true;
+      att._logger->debug(" -- new TrackC : hasPSCE ? {}",hasPSCE);
 
       if(hasPSCE)
         continue;
@@ -1045,6 +1075,7 @@ void TRiemannFinder::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrac
       for(size_t id_LastWall = 0; id_LastWall < TempHitPSBE.size(); ++id_LastWall)
         {
           auto [id_det, id_hit, id_track] = TempHitPSBE[id_LastWall];
+
 
           genfit::PlanarMeasurement* currentHit =
               dynamic_cast<genfit::PlanarMeasurement*>(RecoEvent.ListHits[id_det][id_hit].get());
@@ -1056,8 +1087,12 @@ void TRiemannFinder::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrac
           auto v        = currentPlane->getV();
           double PhiBar = v.Phi();
 
-          double minPhiBar = PhiBar - 3.5 * TMath::DegToRad();
-          double maxPhiBar = PhiBar + 3.5 * TMath::DegToRad();
+          double minPhiBar = PhiBar - 3.75 * TMath::DegToRad();
+	  minPhiBar *= 0.995;
+          double maxPhiBar = PhiBar + 3.75 * TMath::DegToRad();
+	  maxPhiBar *= 1.005;
+	  //v.Print();
+	  att._logger->debug(" PSBE : {} {} id [{} {}]| idT {} | Bar minPhi {} maxPhi {} | Track minPhi {} maxPhi {}",id_det, id_hit,currentHit->getDetId(),currentHit->getHitId(), id_track,minPhiBar,maxPhiBar,trackC.minPhi,trackC.maxPhi);
 
           if(trackC.minPhi > maxPhiBar || trackC.maxPhi < minPhiBar)
             continue;
@@ -1065,87 +1100,208 @@ void TRiemannFinder::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrac
           auto O = currentPlane->getO();
 
           // cross point in PSBE
-          auto f_extractPSBE = [](const auto& trackC, const auto& v, const auto& O,
-                                  TMatrixD& Cov) -> tuple<double, double, double, double> {
-            const std::array<double, 2> dPhis = {-3.5 * TMath::DegToRad(), 3.5 * TMath::DegToRad()};
+          // auto f_extractPSBE = [](const auto& trackC, const auto& v, const auto& O,
+          //                         TMatrixD& Cov) -> tuple<double, double, double, double> {
+          //   const std::array<double, 2> dPhis = {-3.75 * TMath::DegToRad(), 3.75 * TMath::DegToRad()};
 
-            std::array<std::array<double, 4>, 2> MeanXY;
-            for(size_t iPhi = 0; iPhi < dPhis.size(); ++iPhi)
+          //   std::array<std::array<double, 4>, 2> MeanXY;
+          //   for(size_t iPhi = 0; iPhi < dPhis.size(); ++iPhi)
+          //     {
+          //       double a     = v.Y() / v.X() + TMath::Tan(dPhis[iPhi]);
+          //       double b     = O.Y() - a * O.X();
+          //       double Xhit1 = ((b - trackC.y0) * a - trackC.x0 -
+          //                       TMath::Sqrt(TMath::Sq((b - trackC.y0) * a - trackC.x0) -
+          //                                   (1. + a * a) * (TMath::Sq(trackC.x0) + TMath::Sq(b - trackC.y0) -
+          //                                                   TMath::Sq(trackC.r0)))) /
+          //                      (1. + a * a);
+          //       double Xhit2 = ((b - trackC.y0) * a - trackC.x0 +
+          //                       TMath::Sqrt(TMath::Sq((b - trackC.y0) * a - trackC.x0) -
+          //                                   (1. + a * a) * (TMath::Sq(trackC.x0) + TMath::Sq(b - trackC.y0) -
+          //                                                   TMath::Sq(trackC.r0)))) /
+          //                      (1. + a * a);
+
+          //       double Yhit1 = a * Xhit1 + b;
+          //       double Yhit2 = a * Xhit2 + b;
+          //       MeanXY[iPhi] = {Xhit1, Yhit1, Xhit2, Yhit2};
+          //     }
+
+          //   double meanX1 = 0.5 * (MeanXY[0][0] + MeanXY[1][0]);
+          //   double meanY1 = 0.5 * (MeanXY[0][1] + MeanXY[1][1]);
+          //   double meanX2 = 0.5 * (MeanXY[0][2] + MeanXY[1][2]);
+          //   double meanY2 = 0.5 * (MeanXY[0][3] + MeanXY[1][3]);
+
+          //   Cov.ResizeTo(4, 4);
+          //   Cov.Zero();
+          //   Cov(0, 0) = 0.5 * (TMath::Sq(MeanXY[0][0] - meanX1) + TMath::Sq(MeanXY[1][0] - meanX1));
+          //   Cov(1, 0) = 0.5 * ((MeanXY[0][0] - meanX1) * (MeanXY[0][1] - meanY1) +
+          //                      (MeanXY[1][0] - meanX1) * (MeanXY[1][1] - meanY1));
+          //   Cov(0, 1) = Cov(0, 1);
+          //   Cov(1, 1) = 0.5 * (TMath::Sq(MeanXY[0][1] - meanY1) + TMath::Sq(MeanXY[1][1] - meanY1));
+
+          //   Cov(2, 2) = 0.5 * (TMath::Sq(MeanXY[0][2] - meanX2) + TMath::Sq(MeanXY[1][2] - meanX2));
+          //   Cov(2, 3) = 0.5 * ((MeanXY[0][2] - meanX2) * (MeanXY[0][3] - meanY2) +
+          //                      (MeanXY[1][2] - meanX2) * (MeanXY[1][3] - meanY2));
+          //   Cov(3, 2) = Cov(2, 3);
+          //   Cov(3, 3) = 0.5 * (TMath::Sq(MeanXY[0][3] - meanY2) + TMath::Sq(MeanXY[1][3] - meanY2));
+
+          //   return make_tuple(meanX1, meanY1, meanX2, meanY2);
+          // };
+
+
+	            // cross point in PSBE
+          auto f_extractPSBE2 = [](const auto& trackC, const auto& v, const auto& O,
+				   TMatrixD& Cov) -> tuple<int, double, double, double, double> {
+            const std::array<double, 2> dPhis = {-3.75 * TMath::DegToRad(), 3.75 * TMath::DegToRad()};
+
+	    const double r0 = TMath::Hypot(trackC.x0,trackC.y0);
+	    const double phi0 = TMath::ATan2(trackC.y0,trackC.x0);
+
+	    std::array<std::tuple<int,std::array<double, 4>>, 2> MeanXY;
+
+	    for(size_t iPhi = 0; iPhi < dPhis.size(); ++iPhi)
               {
-                double a     = v.Y() / v.X() + TMath::Tan(dPhis[iPhi]);
-                double b     = O.Y() - a * O.X();
-                double Xhit1 = ((b - trackC.y0) * a - trackC.x0 -
-                                TMath::Sqrt(TMath::Sq((b - trackC.y0) * a - trackC.x0) -
-                                            (1. + a * a) * (TMath::Sq(trackC.x0) + TMath::Sq(b - trackC.y0) -
-                                                            TMath::Sq(trackC.r0)))) /
-                               (1. + a * a);
-                double Xhit2 = ((b - trackC.y0) * a - trackC.x0 +
-                                TMath::Sqrt(TMath::Sq((b - trackC.y0) * a - trackC.x0) -
-                                            (1. + a * a) * (TMath::Sq(trackC.x0) + TMath::Sq(b - trackC.y0) -
-                                                            TMath::Sq(trackC.r0)))) /
-                               (1. + a * a);
+		double tempPhi = v.Phi() + dPhis[iPhi];
+		// r^2 - 2 r r0 cos(phi-phi0) + r0^2 - R^2 = 0
+		double delta = (TMath::Sq(r0*TMath::Cos(tempPhi-phi0)) - (TMath::Sq(r0)-TMath::Sq(trackC.r0)));
 
-                double Yhit1 = a * Xhit1 + b;
-                double Yhit2 = a * Xhit2 + b;
-                MeanXY[iPhi] = {Xhit1, Yhit1, Xhit2, Yhit2};
+		double r1 = r0*TMath::Cos(tempPhi-phi0) - TMath::Sqrt(delta);
+		double r2 = r0*TMath::Cos(tempPhi-phi0) + TMath::Sqrt(delta);
+
+		if(r2 < 6. && r1 > 22.)
+		  MeanXY[iPhi] = {-1.,{-999.,-999.,-999.,-999.}};
+		else
+		  {
+		    bool whichR[2] = {false,false};
+		    if(r1 >= 6. && r1 <= 22.)
+		      whichR[0] = true;
+		    if(r2 >= 6. && r2 <= 22.)
+		      whichR[1] = true;
+
+		    if(whichR[0] && whichR[1])
+		      {
+			double Xhit1 = r1*TMath::Cos(tempPhi);
+			double Yhit1 = r1*TMath::Sin(tempPhi);
+
+			double Xhit2 = r2*TMath::Cos(tempPhi);
+			double Yhit2 = r2*TMath::Sin(tempPhi);
+
+			MeanXY[iPhi] = {2,{Xhit1, Yhit1, Xhit2, Yhit2}};
+		      }
+		    if(whichR[0])
+		      {
+			double Xhit1 = r1*TMath::Cos(tempPhi);
+			double Yhit1 = r1*TMath::Sin(tempPhi);
+
+			MeanXY[iPhi] = {0,{Xhit1, Yhit1, -999., -999.}};
+		      }
+		    if(whichR[1])
+		      {
+			double Xhit2 = r2*TMath::Cos(tempPhi);
+			double Yhit2 = r2*TMath::Sin(tempPhi);
+
+			MeanXY[iPhi] = {1,{-999., -999.,Xhit2, Yhit2}};
+		      }
+		  }
               }
 
-            double meanX1 = 0.5 * (MeanXY[0][0] + MeanXY[1][0]);
-            double meanY1 = 0.5 * (MeanXY[0][1] + MeanXY[1][1]);
-            double meanX2 = 0.5 * (MeanXY[0][2] + MeanXY[1][2]);
-            double meanY2 = 0.5 * (MeanXY[0][3] + MeanXY[1][3]);
+	    int correct = 0;
+	    for(const auto& meanXY : MeanXY)
+	      if(std::get<0>(meanXY) == 0)
+		correct += 1;
+	      else if(std::get<0>(meanXY) == 1)
+		correct += 10;
+	      else if(std::get<0>(meanXY) == 2)
+		correct += 22;
+
+	    if(correct == 0)
+	      return std::make_tuple(-1,0.,0.,0.,0.);
+
+            double meanX1 = 0.5 * (std::get<1>(MeanXY[0])[0] + std::get<1>(MeanXY[1])[0]);
+            double meanY1 = 0.5 * (std::get<1>(MeanXY[0])[1] + std::get<1>(MeanXY[1])[1]);
+            double meanX2 = 0.5 * (std::get<1>(MeanXY[0])[2] + std::get<1>(MeanXY[1])[2]);
+            double meanY2 = 0.5 * (std::get<1>(MeanXY[0])[3] + std::get<1>(MeanXY[1])[3]);
 
             Cov.ResizeTo(4, 4);
             Cov.Zero();
-            Cov(0, 0) = 0.5 * (TMath::Sq(MeanXY[0][0] - meanX1) + TMath::Sq(MeanXY[1][0] - meanX1));
-            Cov(1, 0) = 0.5 * ((MeanXY[0][0] - meanX1) * (MeanXY[0][1] - meanY1) +
-                               (MeanXY[1][0] - meanX1) * (MeanXY[1][1] - meanY1));
+            Cov(0, 0) = 0.5 * (TMath::Sq(std::get<1>(MeanXY[0])[0] - meanX1) + TMath::Sq(std::get<1>(MeanXY[1])[0] - meanX1));
+            Cov(1, 0) = 0.5 * ((std::get<1>(MeanXY[0])[0] - meanX1) * (std::get<1>(MeanXY[0])[1] - meanY1) +
+                               (std::get<1>(MeanXY[1])[0] - meanX1) * (std::get<1>(MeanXY[1])[1] - meanY1));
             Cov(0, 1) = Cov(0, 1);
-            Cov(1, 1) = 0.5 * (TMath::Sq(MeanXY[0][1] - meanY1) + TMath::Sq(MeanXY[1][1] - meanY1));
+            Cov(1, 1) = 0.5 * (TMath::Sq(std::get<1>(MeanXY[0])[1] - meanY1) + TMath::Sq(std::get<1>(MeanXY[1])[1] - meanY1));
 
-            Cov(2, 2) = 0.5 * (TMath::Sq(MeanXY[0][2] - meanX2) + TMath::Sq(MeanXY[1][2] - meanX2));
-            Cov(2, 3) = 0.5 * ((MeanXY[0][2] - meanX2) * (MeanXY[0][3] - meanY2) +
-                               (MeanXY[1][2] - meanX2) * (MeanXY[1][3] - meanY2));
+            Cov(2, 2) = 0.5 * (TMath::Sq(std::get<1>(MeanXY[0])[2] - meanX2) + TMath::Sq(std::get<1>(MeanXY[1])[2] - meanX2));
+            Cov(2, 3) = 0.5 * ((std::get<1>(MeanXY[0])[2] - meanX2) * (std::get<1>(MeanXY[0])[3] - meanY2) +
+                               (std::get<1>(MeanXY[1])[2] - meanX2) * (std::get<1>(MeanXY[1])[3] - meanY2));
             Cov(3, 2) = Cov(2, 3);
-            Cov(3, 3) = 0.5 * (TMath::Sq(MeanXY[0][3] - meanY2) + TMath::Sq(MeanXY[1][3] - meanY2));
+            Cov(3, 3) = 0.5 * (TMath::Sq(std::get<1>(MeanXY[0])[3] - meanY2) + TMath::Sq(std::get<1>(MeanXY[1])[3] - meanY2));
 
-            return make_tuple(meanX1, meanY1, meanX2, meanY2);
+            return make_tuple(correct, meanX1, meanY1, meanX2, meanY2);
           };
+
+
+
           TMatrixD HitCovXYZ(4, 4);
-          auto [Xhit1, Yhit1, Xhit2, Yhit2] = f_extractPSBE(trackC, v, O, HitCovXYZ);
+          auto [control, Xhit1, Yhit1, Xhit2, Yhit2] = f_extractPSBE2(trackC, v, O, HitCovXYZ);
 
-          double R1   = TMath::Hypot(Xhit1, Yhit1);
-          double Phi1 = TMath::ATan2(Yhit1, Xhit1);
-          double R2   = TMath::Hypot(Xhit2, Yhit2);
-          double Phi2 = TMath::ATan2(Yhit2, Xhit2);
+          // double R1   = TMath::Hypot(Xhit1, Yhit1);
+          // double Phi1 = TMath::ATan2(Yhit1, Xhit1);
+          // double R2   = TMath::Hypot(Xhit2, Yhit2);
+          // double Phi2 = TMath::ATan2(Yhit2, Xhit2);
 
-          auto InPSWall = [&minPhiBar, &maxPhiBar](double R, double Phi) -> bool {
-            if(R < 6. || R > 22.)
-              return false;
+          // auto InPSWall = [&minPhiBar, &maxPhiBar](double R, double Phi) -> bool {
+	  //   if(R < 6. || R > 22.)
+          //     return false;
 
-            if(Phi > maxPhiBar || Phi < minPhiBar)
-              return false;
+          //   if(Phi > maxPhiBar || Phi < minPhiBar)
+          //     return false;
 
-            return true;
-          };
+          //   return true;
+          // };
 
-          bool isHit1 = InPSWall(R1, Phi1);
-          bool isHit2 = InPSWall(R2, Phi2);
+          auto InPSWall = [](int control) -> std::tuple<bool,bool,bool> {
+	    switch(control)
+	      {
+	      case 1 : return {false,false,false};
+	      case 2 : return {true, false,false};
+	      case 11: return {false,false,true };
+	      case 20: return {false,true ,false};
+	      case 23: return {true ,false,true };
+	      case 32: return {false,true ,true };
+	      case 44: return {true ,true ,true };
+	      default: return {false,false,false};
+	      }
+	  };
+	  // bool isHit1 = InPSWall(R1, Phi1);
+          // bool isHit2 = InPSWall(R2, Phi2);
 
-          if((isHit1 == false && isHit2 == false) || (isHit1 == true && isHit2 == true))
+	  auto [isHit1, isHit2, statusHit] = InPSWall(control);
+
+	  //if(statusHit)
+	  att._logger->debug("W> CheckPSBE status Hit ! strange hit : {} {} {} = {}",isHit1,isHit2,statusHit,control);
+
+	  if((isHit1 == false && isHit2 == false) || (isHit1 == true && isHit2 == true))
             {
-              att._logger->debug("E> CheckPSBE failed ! {} {} / {} {} =! r 6. 22. phi {} {}", R1, Phi1, R2, Phi2,
-                                 minPhiBar, maxPhiBar);
-              continue;
+              //att._logger->debug("E> CheckPSBE failed ! {} {} / {} {} =! r 6. 22. phi {} {}", R1, Phi1, R2, Phi2,
+	      //minPhiBar, maxPhiBar);
+
+	      double R1   = TMath::Hypot(Xhit1, Yhit1);
+	      double Phi1 = TMath::ATan2(Yhit1, Xhit1);
+	      double R2   = TMath::Hypot(Xhit2, Yhit2);
+	      double Phi2 = TMath::ATan2(Yhit2, Xhit2);
+
+	      att._logger->debug("E> CheckPSBE failed ! {} {} / {} {} =! r 6. 22. phi {} {}", R1, Phi1, R2, Phi2,
+				 minPhiBar, maxPhiBar);
+	      continue;
             }
+
           if(isHit1)
             {
               TempHitXYZ.emplace_back(Xhit1, Yhit1, O.Z());
               TempCovXYZ.push_back(
                   {HitCovXYZ(0, 0), HitCovXYZ(1, 0), 0., HitCovXYZ(0, 1), HitCovXYZ(1, 1), 0., 0., 0., 0.4 / 12.});
 
-	      //const auto& it_temp = TempCovXYZ.back();
-	      //att._logger->debug("EndCap :TempCov {} [ {} {} {}, {} {} {}, {} {} {}] ",TempHitToAllHits.size() - 1, it_temp[0],it_temp[1],it_temp[2],it_temp[3],it_temp[4],it_temp[5],it_temp[6],it_temp[7],it_temp[8]);
+	      const auto& it_temp = TempCovXYZ.back();
+	      att._logger->debug("EndCap :TempCov {} [ {} {} {}, {} {} {}, {} {} {}] ",TempHitToAllHits.size() - 1, it_temp[0],it_temp[1],it_temp[2],it_temp[3],it_temp[4],it_temp[5],it_temp[6],it_temp[7],it_temp[8]);
 
             }
           if(isHit2)
@@ -1154,19 +1310,27 @@ void TRiemannFinder::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrac
               TempCovXYZ.push_back(
                   {HitCovXYZ(2, 2), HitCovXYZ(2, 3), 0., HitCovXYZ(3, 2), HitCovXYZ(3, 3), 0., 0., 0., 0.4 / 12.});
 
-	      //const auto& it_temp = TempCovXYZ.back();
-	      //att._logger->debug("EndCap: TempCov {} [ {} {} {}, {} {} {}, {} {} {}] ",TempHitToAllHits.size() - 1, it_temp[0],it_temp[1],it_temp[2],it_temp[3],it_temp[4],it_temp[5],it_temp[6],it_temp[7],it_temp[8]);
+	      const auto& it_temp = TempCovXYZ.back();
+	      att._logger->debug("EndCap: TempCov {} [ {} {} {}, {} {} {}, {} {} {}] ",TempHitToAllHits.size() - 1, it_temp[0],it_temp[1],it_temp[2],it_temp[3],it_temp[4],it_temp[5],it_temp[6],it_temp[7],it_temp[8]);
 
             }
-          TempHitToAllHits.emplace_back(TempHitPSBE[id_LastWall]);
+          TempHitToAllHits.push_back(TempHitPSBE[id_LastWall]);
           trackC.hits.insert(TempHitToAllHits.size() - 1);
+	  att._logger->debug("EndCap: added Hit : {} / {} {} {}",TempHitToAllHits.size() - 1,std::get<0>(TempHitPSBE[id_LastWall]),std::get<1>(TempHitPSBE[id_LastWall]),std::get<2>(TempHitPSBE[id_LastWall]));
+	  if(isHit1 && isHit2)
+	    {
+	      TempHitToAllHits.push_back(TempHitPSBE[id_LastWall]);
+	      trackC.hits.insert(TempHitToAllHits.size() - 1);
+	      att._logger->debug("EndCap: added second Hit : {} / {} {} {}",TempHitToAllHits.size() - 1,std::get<0>(TempHitPSBE[id_LastWall]),std::get<1>(TempHitPSBE[id_LastWall]),std::get<2>(TempHitPSBE[id_LastWall]));
+	    }
         }
     }
 }
 
 void TRiemannFinder::AddOtherMDC(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
 {
-  for(int id_det = G4Sol::MG01; id_det < G4Sol::MG17; ++id_det)
+  att._logger->debug("AddOtherMDC :");
+  for(int id_det = G4Sol::MG01; id_det <= G4Sol::MG17; ++id_det)
     {
       std::unordered_map<int, int> doneMDC;
       std::unordered_map<int, int> reverseIdMDC;
@@ -1225,17 +1389,17 @@ void TRiemannFinder::AddOtherMDC(const FullRecoEvent& RecoEvent, std::vector<RTr
           if(auto [Neig, id_hit] = NeigToCheck; Neig != -1)
             {
               int idT     = doneMDC[id_hit];
-              auto trackC = newTracksCand[idT];
+              auto& trackC = newTracksCand[idT];
 
               double R_size = dl_max(id_det - G4Sol::MG01) * 0.5;
 
-              TempHitToAllHits.emplace_back(std::make_tuple(id_det, id_hit, 0));
+              TempHitToAllHits.push_back(std::make_tuple(id_det, id_hitMDC, -2));
               TempHitXYZ.emplace_back(TVector3(meanX, meanY, 0.));
               TempCovXYZ.push_back({R_size * 0.5, 0., 0., 0., R_size * 0.5, 0., 0., 0., 1.});
 
 	      //const auto& it_temp = TempCovXYZ.back();
 	      //att._logger->debug("OtherMDC: TempCov {} [ {} {} {}, {} {} {}, {} {} {}] ",TempHitToAllHits.size() - 1, it_temp[0],it_temp[1],it_temp[2],it_temp[3],it_temp[4],it_temp[5],it_temp[6],it_temp[7],it_temp[8]);
-
+	      att._logger->debug("OtherMDC [{}]: {} {} {}",TempHitToAllHits.size() - 1, G4Sol::nameLiteralDet.begin()[id_det], id_hitMDC, -2);
               trackC.hits.insert(TempHitToAllHits.size() - 1);
             }
         }
@@ -1326,7 +1490,7 @@ void TRiemannFinder::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RT
       if(auto [Neig, id_hit] = NeigToCheck; Neig != -1)
         {
           int idT     = donePSCE[id_hit];
-          auto trackC = newTracksCand[idT];
+          auto& trackC = newTracksCand[idT];
 
           genfit::PlanarMeasurement* trackHit =
               dynamic_cast<genfit::PlanarMeasurement*>(RecoEvent.ListHits[G4Sol::PSCE][id_hit].get());
@@ -1335,7 +1499,7 @@ void TRiemannFinder::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RT
           double diffZ = (trackHitCoord(1) - HitCoord(1)) / TMath::Sqrt(2. * HitCov(1, 1));
           if(TMath::Abs(diffZ) < 2.)
             {
-              TempHitToAllHits.emplace_back(std::make_tuple(G4Sol::PSCE, id_hit, 0.));
+              TempHitToAllHits.push_back(std::make_tuple(G4Sol::PSCE, id_hitPSCE, -3));
               TempHitXYZ.emplace_back(TVector3(meanX, meanY, currentLabPos.Z()));
               TempCovXYZ.push_back({HitCovXYZ(0, 0), HitCovXYZ(1, 0), HitCovXYZ(2, 0), HitCovXYZ(0, 1), HitCovXYZ(1, 1),
                                     HitCovXYZ(2, 1), HitCovXYZ(0, 2), HitCovXYZ(1, 2), HitCovXYZ(2, 2)});
@@ -1350,8 +1514,8 @@ void TRiemannFinder::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RT
         {
           int idT1     = donePSCE[it_neighborN->second];
           int idT2     = donePSCE[it_neighborP->second];
-          auto trackC1 = newTracksCand[idT1];
-          auto trackC2 = newTracksCand[idT2];
+          auto& trackC1 = newTracksCand[idT1];
+          auto& trackC2 = newTracksCand[idT2];
 
           genfit::PlanarMeasurement* trackHit1 =
               dynamic_cast<genfit::PlanarMeasurement*>(RecoEvent.ListHits[G4Sol::PSCE][it_neighborN->second].get());
@@ -1364,7 +1528,7 @@ void TRiemannFinder::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RT
           double diffZ2 = (trackHitCoord2(1) - HitCoord(1)) / TMath::Sqrt(2. * HitCov(1, 1));
           if(TMath::Abs(diffZ1) < 2. && TMath::Abs(diffZ2) > 2.)
             {
-              TempHitToAllHits.emplace_back(std::make_tuple(G4Sol::PSCE, it_neighborN->second, 0.));
+              TempHitToAllHits.push_back(std::make_tuple(G4Sol::PSCE, id_hitPSCE, -4));
               TempHitXYZ.emplace_back(TVector3(meanX, meanY, currentLabPos.Z()));
               TempCovXYZ.push_back({HitCovXYZ(0, 0), HitCovXYZ(1, 0), HitCovXYZ(2, 0), HitCovXYZ(0, 1), HitCovXYZ(1, 1),
                                     HitCovXYZ(2, 1), HitCovXYZ(0, 2), HitCovXYZ(1, 2), HitCovXYZ(2, 2)});
@@ -1376,7 +1540,7 @@ void TRiemannFinder::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RT
             }
           else if(TMath::Abs(diffZ1) > 2. && TMath::Abs(diffZ2) < 2.)
             {
-              TempHitToAllHits.emplace_back(std::make_tuple(G4Sol::PSCE, it_neighborP->second, 0.));
+              TempHitToAllHits.push_back(std::make_tuple(G4Sol::PSCE, id_hitPSCE, -5));
               TempHitXYZ.emplace_back(TVector3(meanX, meanY, currentLabPos.Z()));
               TempCovXYZ.push_back({HitCovXYZ(0, 0), HitCovXYZ(1, 0), HitCovXYZ(2, 0), HitCovXYZ(0, 1), HitCovXYZ(1, 1),
                                     HitCovXYZ(2, 1), HitCovXYZ(0, 2), HitCovXYZ(1, 2), HitCovXYZ(2, 2)});
@@ -1388,7 +1552,7 @@ void TRiemannFinder::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RT
             }
           else if(TMath::Abs(diffZ1) < 2. && TMath::Abs(diffZ2) < 2.)
             {
-              TempHitToAllHits.emplace_back(std::make_tuple(G4Sol::PSCE, it_neighborN->second, 0.));
+              TempHitToAllHits.push_back(std::make_tuple(G4Sol::PSCE, id_hitPSCE, -6));
               TempHitXYZ.emplace_back(TVector3(meanX, meanY, currentLabPos.Z()));
               TempCovXYZ.push_back({HitCovXYZ(0, 0), HitCovXYZ(1, 0), HitCovXYZ(2, 0), HitCovXYZ(0, 1), HitCovXYZ(1, 1),
                                     HitCovXYZ(2, 1), HitCovXYZ(0, 2), HitCovXYZ(1, 2), HitCovXYZ(2, 2)});
@@ -1398,7 +1562,7 @@ void TRiemannFinder::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RT
 
               trackC1.hits.insert(TempHitToAllHits.size() - 1);
 
-              TempHitToAllHits.emplace_back(std::make_tuple(G4Sol::PSCE, it_neighborP->second, 0.));
+              TempHitToAllHits.push_back(std::make_tuple(G4Sol::PSCE, id_hitPSCE, -6));
               TempHitXYZ.emplace_back(TVector3(meanX, meanY, currentLabPos.Z()));
               TempCovXYZ.push_back({HitCovXYZ(0, 0), HitCovXYZ(1, 0), HitCovXYZ(2, 0), HitCovXYZ(0, 1), HitCovXYZ(1, 1),
                                     HitCovXYZ(2, 1), HitCovXYZ(0, 2), HitCovXYZ(1, 2), HitCovXYZ(2, 2)});
@@ -1428,20 +1592,21 @@ void TRiemannFinder::SortAndPosZ(std::vector<RTrack>& newTracksCand)
             hitWithZ.emplace_back(hitT);
         }
 
-#ifdef DEBUG_RIEMANNFINDER
-      std::stringstream ssT;
-      int iddet = 0;
+      //#ifdef DEBUG_RIEMANNFINDER
+      //std::stringstream ssT;
+      //int iddet = 0;
       for( auto hitIds : tempSort)
         {
-	  ssT<<" id "<<iddet++<<" [";
+	  //ssT<<" id "<<iddet++<<" [";
 	  for(auto hitId : hitIds)
 	    {
 	      trackC.sortedHits.emplace_back(hitId);
-	      auto [id_det1, id_hit1, id_track1] = TempHitToAllHits[hitId];
-	      ssT<<hitId<<" ("<<id_det1<<" "<<id_hit1<<" "<<TempHitXYZ[hitId].Z()<<") ";
+	      //auto [id_det1, id_hit1, id_track1] = TempHitToAllHits[hitId];
+	      //ssT<<hitId<<" ("<<id_det1<<" "<<id_hit1<<" "<<TempHitXYZ[hitId].Z()<<") ";
 	    }
-	  ssT<<" ]";
+	  //ssT<<" ]";
 	}
+#ifdef DEBUG_RIEMANNFINDER
       att._logger->debug(ssT.str());
       att._logger->debug("HitsWithZ {}",hitWithZ.size());
 #endif
@@ -1563,24 +1728,58 @@ int TRiemannFinder::FinderTrack(FullRecoEvent& RecoEvent, std::vector<RTrack>& n
   TempCovXYZ.clear();
   TempHitPSBE.clear();
 
-  BuildKDTree(RecoEvent, KDtree, TempHits);
+  int retB = BuildKDTree(RecoEvent, KDtree, TempHits);
+  if(retB != 0)
+    return -1;
 
 #ifdef DEBUG_RIEMANNFINDER
   for(size_t i_h = 0; i_h < TempHits.size(); ++i_h)
     att._logger->debug(
         "RPhi hit# {} : {}, {}, {}, {} | LayerID {} hit {} track {}", i_h, TempHits[i_h][0], TempHits[i_h][1],
-        TempHits[i_h][2], TempHits[i_h].getId(), std::get<0>(TempHitToAllHits[TempHits[i_h].getId()]) - G4Sol::MG01,
+        TempHits[i_h][2], TempHits[i_h].getId(),  G4Sol::nameLiteralDet.begin()[std::get<0>(TempHitToAllHits[TempHits[i_h].getId()])],
         std::get<1>(TempHitToAllHits[TempHits[i_h].getId()]), std::get<2>(TempHitToAllHits[TempHits[i_h].getId()]));
 #endif
 
   BuildTrackCand(RecoEvent, KDtree, TempHits, newTracksCand);
 
+  // for(int i=0; const auto& hit_tuple : TempHitToAllHits)
+  //   {
+  //     auto [id_det, id_hit, id_track] = hit_tuple;
+  //     att._logger->debug("Build : TempHitToAllHits [{}] : det {} (from MDC1 {}), hit {}, track {}",i++, G4Sol::nameLiteralDet.begin()[id_det], id_det-G4Sol::MG01,id_hit,id_track);
+  //   }
+
   AddStereoWire(RecoEvent, newTracksCand);
+  // for(int i=0; const auto& hit_tuple : TempHitToAllHits)
+  //   {
+  //     auto [id_det, id_hit, id_track] = hit_tuple;
+  //     att._logger->debug("Stereo: TempHitToAllHits [{}] : det {} (from MDC1 {}), hit {}, track {}",i++, G4Sol::nameLiteralDet.begin()[id_det], id_det-G4Sol::MG01,id_hit,id_track);
+  //   }
   AddEndCap(RecoEvent, newTracksCand);
+  // for(int i=0; const auto& hit_tuple : TempHitToAllHits)
+  //   {
+  //     auto [id_det, id_hit, id_track] = hit_tuple;
+  //     att._logger->debug("AddEndCap : TempHitToAllHits [{}] : det {} (from MDC1 {}), hit {}, track {}",i++, G4Sol::nameLiteralDet.begin()[id_det], id_det-G4Sol::MG01,id_hit,id_track);
+  //   }
+  
   AddOtherMDC(RecoEvent, newTracksCand);
+  // for(int i=0; const auto& hit_tuple : TempHitToAllHits)
+  //   {
+  //     auto [id_det, id_hit, id_track] = hit_tuple;
+  //     att._logger->debug("AddOtherMDC: TempHitToAllHits [{}] : det {} (from MDC1 {}), hit {}, track {}",i++, G4Sol::nameLiteralDet.begin()[id_det], id_det-G4Sol::MG01,id_hit,id_track);
+  //   }
   AddOtherPSCE(RecoEvent, newTracksCand);
+  // for(int i=0; const auto& hit_tuple : TempHitToAllHits)
+  //   {
+  //     auto [id_det, id_hit, id_track] = hit_tuple;
+  //     att._logger->debug("AddOtherPSCE: TempHitToAllHits [{}] : det {} (from MDC1 {}), hit {}, track {}",i++, G4Sol::nameLiteralDet.begin()[id_det], id_det-G4Sol::MG01,id_hit,id_track);
+  //   }
 
   SortAndPosZ(newTracksCand);
+  // for(int i=0; const auto& hit_tuple : TempHitToAllHits)
+  //   {
+  //     auto [id_det, id_hit, id_track] = hit_tuple;
+  //     att._logger->debug("Sorter : TempHitToAllHits [{}] : det {} (from MDC1 {}), hit {}, track {}",i++, G4Sol::nameLiteralDet.begin()[id_det], id_det-G4Sol::MG01,id_hit,id_track);
+  //   }
 
   // att._logger->debug("Check TempCov After Sorting: {}",TempCovXYZ.size());
   // for(int iC=0; auto trackC : newTracksCand)
@@ -1599,6 +1798,8 @@ int TRiemannFinder::FinderTrack(FullRecoEvent& RecoEvent, std::vector<RTrack>& n
 
   FitterRiemann(newTracksCand);
 
+  att._logger->debug("Fill histos ");
+
   int idTrack = 0;
   for(auto trackC : newTracksCand)
     {
@@ -1608,28 +1809,50 @@ int TRiemannFinder::FinderTrack(FullRecoEvent& RecoEvent, std::vector<RTrack>& n
       std::stringstream ssT2;
 #endif
 
+      LocalHisto.h_RiemannChi2->Fill("chi2_pre",trackC.chi2,1.);
+      if(trackC.toRefit)
+	{
+	  LocalHisto.h_RiemannChi2->Fill("chi2_helix",trackC.helix.chi2_circle,1.);
+	  LocalHisto.h_RiemannChi2->Fill("chi2_line",trackC.helix.chi2_line,1.);
+	}
+
+      for(const auto& SimListHit : RecoEvent.TrackDAFSim)
+	att._logger->debug("SimHit : idT {} : det {}", SimListHit.first,SimListHit.second.size());
+
+      for(int i=0; const auto& hit_tuple : TempHitToAllHits)
+	{
+	  auto [id_det, id_hit, id_track] = hit_tuple;
+	  att._logger->debug("TempHitToAllHits [{}] : det {} (from MDC1 {} / {}), hit {}, track {}",i++, G4Sol::nameLiteralDet.begin()[id_det], id_det-G4Sol::MG01,id_det,id_hit,id_track);
+	}
+      int previousIdT = -1;
       for(auto itR_hitT = trackC.hits.begin(), it_end = trackC.hits.end(); itR_hitT != it_end; ++itR_hitT)
         {
           auto it_hitT = *itR_hitT;
           auto vecXYZ  = TempHitXYZ[it_hitT];
 
           auto [id_det1, id_hit1, id_track1] = TempHitToAllHits[it_hitT];
-
+	  att._logger->debug("loop ids {} det {} hit {} track {}",it_hitT, G4Sol::nameLiteralDet.begin()[id_det1],id_hit1,id_track1);
 #ifdef DEBUG_RIEMANNFINDER
-          ssT1 << " " << id_det1 - G4Sol::MG01 << " [" << id_hit1 << ", " << id_track1 << "]";
+	  ssT1 << " " << id_det1 - G4Sol::MG01 << " [" << id_hit1 << ", " << id_track1 << "]";
 #endif
-	  auto SimListHit = RecoEvent.TrackDAFSim[id_track1];
+	  if(id_track1 < 0)
+	    {
+	      if(previousIdT < 0)
+		continue;
+	      id_track1 = previousIdT;
+	    }
+	  const auto& SimListHit = RecoEvent.TrackDAFSim[id_track1];
 	  int sizeSimHit = SimListHit[id_det1].size();
-	  TString tempNameBin (id_det1-G4Sol::MG01);
+	  TString tempNameBin (G4Sol::nameLiteralDet.begin()[id_det1]);
 	  TString tempNameBinX = tempNameBin+"_X";
 	  TString tempNameBinY = tempNameBin+"_Y";
 	  TString tempNameBinZ = tempNameBin+"_Z";
 	  if(sizeSimHit == 1)
 	    {
 	      auto SimHit = SimListHit[id_det1][0];
-	      LocalHisto.h_residus->Fill(tempNameBinX, vecXYZ.X() - SimHit.hitX,1.);
-	      LocalHisto.h_residus->Fill(tempNameBinX, vecXYZ.Y() - SimHit.hitY,1.);
-	      LocalHisto.h_residus->Fill(tempNameBinX, vecXYZ.Z() - SimHit.hitZ,1.);
+	      LocalHisto.h_RiemannResidus->Fill(tempNameBinX, vecXYZ.X() - SimHit.hitX,1.);
+	      LocalHisto.h_RiemannResidus->Fill(tempNameBinY, vecXYZ.Y() - SimHit.hitY,1.);
+	      LocalHisto.h_RiemannResidus->Fill(tempNameBinZ, vecXYZ.Z() - SimHit.hitZ,1.);
 	    }
 	  else
 	    {
@@ -1644,14 +1867,16 @@ int TRiemannFinder::FinderTrack(FullRecoEvent& RecoEvent, std::vector<RTrack>& n
 		  if(double tempRe = vecXYZ.Z()-SimHit.hitZ; TMath::Abs(minResidu[2])>TMath::Abs(tempRe))
 		    minResidu[2] = tempRe;
 		}
-	      LocalHisto.h_residus->Fill(tempNameBinX, minResidu[0],1.);
-	      LocalHisto.h_residus->Fill(tempNameBinX, minResidu[1],1.);
-	      LocalHisto.h_residus->Fill(tempNameBinX, minResidu[2],1.);
+	      LocalHisto.h_RiemannResidus->Fill(tempNameBinX, minResidu[0],1.);
+	      LocalHisto.h_RiemannResidus->Fill(tempNameBinY, minResidu[1],1.);
+	      LocalHisto.h_RiemannResidus->Fill(tempNameBinZ, minResidu[2],1.);
 
 	    }
 	  if(OutputEvents)
 	    h_XYReco->Fill(vecXYZ.X(), vecXYZ.Y(), idTrack + 1);
-        }
+
+	  previousIdT = id_track1;
+	}
 
       for(auto itR_hitT = trackC.sortedHits.begin(), it_end = trackC.sortedHits.end(); itR_hitT != it_end; ++itR_hitT)
         {
