@@ -25,8 +25,12 @@ THypernucleus::THypernucleus()
 
 
   //Daughters:
+  Id_Fragment=-1;
   MomE_Fragment.SetXYZT(0.,0.,0.,0.);
   Angle_MotherFragment=-1.;
+  Fragment_IsFromHyp=-1;
+
+  Id_Pion=-1;
   MomE_Pion.SetXYZT(0.,0.,0.,0.);
   Chi2ndf_Pion=-1.;
   Angle_MotherPion=-1.;
@@ -58,8 +62,12 @@ THypernucleus::THypernucleus(const THypernucleus& H)
   ErrGetLifeTime=H.ErrGetLifeTime;
 
   //Daughters:
+  Id_Fragment=H.Id_Fragment;
   MomE_Fragment=H.MomE_Fragment;
   Angle_MotherFragment=H.Angle_MotherFragment;
+  Fragment_IsFromHyp=H.Fragment_IsFromHyp;
+
+  Id_Pion=H.Id_Pion;
   MomE_Pion=H.MomE_Pion;
   Chi2ndf_Pion=H.Chi2ndf_Pion;
   Angle_MotherPion=H.Angle_MotherPion;
@@ -102,8 +110,11 @@ void THypernucleus::Clear(Option_t *option)
   ErrGetLifeTime=-1;
 
   //Daughters:
+  Id_Fragment=-1;
   MomE_Fragment.SetXYZT(0.,0.,0.,0.);
   Angle_MotherFragment=-1.;
+  Fragment_IsFromHyp=-1;
+  Id_Pion=-1;
   MomE_Pion.SetXYZT(0.,0.,0.,0.);
   Chi2ndf_Pion=-1.;
   Angle_MotherPion=-1.;

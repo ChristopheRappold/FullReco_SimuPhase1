@@ -330,7 +330,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
 
       h_HitMultiplicity_Si1.emplace_back(new TH1F("h_HitMultiplicity_Si1","h_HitMultiplicity_Si1", 20, 0, 20));
       HistReg.emplace_back(&h_HitMultiplicity_Si1.store);
-      h_HitMultiplicityRecons_Si1.emplace_back(new TH1F("h_HitMultiplicityRecons_Si1","h_HitMultiplicityRecons_Si1", 30, 0, 30));
+      h_HitMultiplicityRecons_Si1.emplace_back(new TH1F("h_HitMultiplicityRecons_Si1","h_HitMultiplicityRecons_Si1", 40, 0, 40));
       HistReg.emplace_back(&h_HitMultiplicityRecons_Si1.store);
       h_HitMultiplicityDiff_Si1.emplace_back(new TH1F("h_HitMultiplicityDiff_Si1","h_HitMultiplicityDiff_Si1", 50, -5, 45));
       HistReg.emplace_back(&h_HitMultiplicityDiff_Si1.store);
@@ -348,12 +348,13 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
        HistReg.emplace_back(&h_nEventsGoodreconsGhost_Si1.store);
        h_nEventsRealGoodrecons_Si1.emplace_back(new TH2F("h_nEventsRealGoodrecons_Si1", "h_nEventsRealGoodrecons_Si1", 20, 0, 20, 20, 0, 20));
        HistReg.emplace_back(&h_nEventsRealGoodrecons_Si1.store);
-
+       h_nEventsRealRejectCuadrant_Si1.emplace_back(new TH2F("h_nEventsRealRejectCuadrant_Si1", "h_nEventsRealRejectCuadrant_Si1", 20, 0, 20, 300, 0, 300));
+       HistReg.emplace_back(&h_nEventsRealRejectCuadrant_Si1.store);
 
 
        h_HitMultiplicity_Si2.emplace_back(new TH1F("h_HitMultiplicity_Si2","h_HitMultiplicity_Si2", 20, 0, 20));
        HistReg.emplace_back(&h_HitMultiplicity_Si2.store);
-       h_HitMultiplicityRecons_Si2.emplace_back(new TH1F("h_HitMultiplicityRecons_Si2","h_HitMultiplicityRecons_Si2", 30, 0, 30));
+       h_HitMultiplicityRecons_Si2.emplace_back(new TH1F("h_HitMultiplicityRecons_Si2","h_HitMultiplicityRecons_Si2", 40, 0, 40));
        HistReg.emplace_back(&h_HitMultiplicityRecons_Si2.store);
        h_HitMultiplicityDiff_Si2.emplace_back(new TH1F("h_HitMultiplicityDiff_Si2","h_HitMultiplicityDiff_Si2", 50, -5, 45));
        HistReg.emplace_back(&h_HitMultiplicityDiff_Si2.store);
@@ -371,18 +372,19 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
        HistReg.emplace_back(&h_nEventsGoodreconsGhost_Si2.store);
        h_nEventsRealGoodrecons_Si2.emplace_back(new TH2F("h_nEventsRealGoodrecons_Si2","h_nEventsRealGoodrecons_Si2", 20, 0, 20, 20, 0, 20));
        HistReg.emplace_back(&h_nEventsRealGoodrecons_Si2.store);
+       h_nEventsRealRejectCuadrant_Si2.emplace_back(new TH2F("h_nEventsRealRejectCuadrant_Si2", "h_nEventsRealRejectCuadrant_Si2", 20, 0, 20, 300, 0, 300));
+       HistReg.emplace_back(&h_nEventsRealRejectCuadrant_Si2.store);
 
-
-       h_EnergyStripEnergyTotalReal.emplace_back(new TH2F("h_EnergyStripEnergyTotalReal", "h_EnergyStripEnergyTotalReal", 400, 0, 0.8, 2000, 0, 4));
+       h_EnergyStripEnergyTotalReal.emplace_back(new TH2F("h_EnergyStripEnergyTotalReal", "h_EnergyStripEnergyTotalReal", 800, 0, 1.6, 2000, 0, 4));
        HistReg.emplace_back(&h_EnergyStripEnergyTotalReal.store);
-       h_EnergyStripEnergyTotal.emplace_back(new TH2F("h_EnergyStripEnergyTotal", "h_EnergyStripEnergyTotal", 400, 0, 0.8, 2000, 0, 4));
+       h_EnergyStripEnergyTotal.emplace_back(new TH2F("h_EnergyStripEnergyTotal", "h_EnergyStripEnergyTotal", 800, 0, 1.6, 2000, 0, 4));
        HistReg.emplace_back(&h_EnergyStripEnergyTotal.store);
        h_EnergyDiffSilicons.emplace_back(new TH2F("h_EnergyDiffSilicons","h_EnergyDiffSilicons", 10000, -1, 1, 3, 0, 3));
        HistReg.emplace_back(&h_EnergyDiffSilicons.store);
 
-       h_EnergyDepositionMother.emplace_back(new TH2F("h_EnergyDepositionMother","h_EnergyDepositionMother", 1000, 0, 1, 5, 0, 5));
+       h_EnergyDepositionMother.emplace_back(new TH2F("h_EnergyDepositionMother","h_EnergyDepositionMother", 1000, 0, 2, 5, 0, 5));
        HistReg.emplace_back(&h_EnergyDepositionMother.store);
-       h_EnergyDepositionDaughters.emplace_back(new TH2F("h_EnergyDepositionDaughters","h_EnergyDepositionDaughters", 1500, 0, 1.5, 5, 0, 5));
+       h_EnergyDepositionDaughters.emplace_back(new TH2F("h_EnergyDepositionDaughters","h_EnergyDepositionDaughters", 1500, 0, 3, 5, 0, 5));
        HistReg.emplace_back(&h_EnergyDepositionDaughters.store);
 
         
@@ -588,32 +590,32 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       h_DecayVertexPosZ_AllKFPart.emplace_back(new TH1F("h_DecayVertexPosZ_AllKFPart", "h_DecayVertexPosZ_AllKFPart", 300, 20, 50));
       HistReg.emplace_back(&h_DecayVertexPosZ_AllKFPart.store);
 
-      h_N_MotherTracks.emplace_back(new TH2F("h_N_MotherTracks", "h_N_MotherTracks", 10, 0, 10, 3000, 2, 5));
+      h_N_MotherTracks.emplace_back(new TH2F("h_N_MotherTracks", "h_N_MotherTracks", 10, 0, 10, 5000, 0, 5));
       HistReg.emplace_back(&h_N_MotherTracks.store);
-      h_Dist_DaughterTracks.emplace_back(new TH2F("h_Dist_DaughterTracks", "h_Dist_DaughterTracks", 1000, 0, 2, 3000, 2, 5));
+      h_Dist_DaughterTracks.emplace_back(new TH2F("h_Dist_DaughterTracks", "h_Dist_DaughterTracks", 1000, 0, 2, 5000, 0, 5));
       HistReg.emplace_back(&h_Dist_DaughterTracks.store);
-      h_Angle_MotherFragment.emplace_back(new TH2F("h_Angle_MotherFragment", "h_Angle_MotherFragment", 1000, 0, 5, 3000, 2, 5));
+      h_Angle_MotherFragment.emplace_back(new TH2F("h_Angle_MotherFragment", "h_Angle_MotherFragment", 1000, 0, 5, 5000, 0, 5));
       HistReg.emplace_back(&h_Angle_MotherFragment.store);
-      h_Angle_MotherPion.emplace_back(new TH2F("h_Angle_MotherPion", "h_Angle_MotherPion", 1000, 0, 30, 3000, 2, 5));
+      h_Angle_MotherPion.emplace_back(new TH2F("h_Angle_MotherPion", "h_Angle_MotherPion", 1000, 0, 30, 5000, 0, 5));
       HistReg.emplace_back(&h_Angle_MotherPion.store);
-      h_Chi2ndf_MotherTracks.emplace_back(new TH2F("h_Chi2ndf_MotherTracks", "h_Chi2ndf_MotherTracks", 2000, 0, 40, 3000, 2, 5));
+      h_Chi2ndf_MotherTracks.emplace_back(new TH2F("h_Chi2ndf_MotherTracks", "h_Chi2ndf_MotherTracks", 2000, 0, 40, 5000, 0, 5));
       HistReg.emplace_back(&h_Chi2ndf_MotherTracks.store);
-      h_Dist_MotherTrackPrimVtx.emplace_back(new TH2F("h_Dist_MotherTrackPrimVtx", "h_Dist_MotherTrackPrimVtx", 1000, 0, 0.2, 3000, 2, 5));
+      h_Dist_MotherTrackPrimVtx.emplace_back(new TH2F("h_Dist_MotherTrackPrimVtx", "h_Dist_MotherTrackPrimVtx", 1000, 0, 0.2, 5000, 0, 5));
       HistReg.emplace_back(&h_Dist_MotherTrackPrimVtx.store);
-      h_Theta_MotherTrackPrimVtx.emplace_back(new TH2F("h_Theta_MotherTrackPrimVtx", "h_Theta_MotherTrackPrimVtx", 1000, 0, 2, 3000, 2, 5));
+      h_Theta_MotherTrackPrimVtx.emplace_back(new TH2F("h_Theta_MotherTrackPrimVtx", "h_Theta_MotherTrackPrimVtx", 1000, 0, 2, 5000, 0, 5));
       HistReg.emplace_back(&h_Theta_MotherTrackPrimVtx.store);
-      h_DecayVertexPosZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayVertexPosZ_KFPart_PrimVtx", "h_DecayVertexPosZ_KFPart_PrimVtx", 1000, 20, 60, 3000, 2, 5));
+      h_DecayVertexPosZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayVertexPosZ_KFPart_PrimVtx", "h_DecayVertexPosZ_KFPart_PrimVtx", 1000, 20, 60, 5000, 0, 5));
       HistReg.emplace_back(&h_DecayVertexPosZ_KFPart_PrimVtx.store);
-      h_DecayFragmentMomZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayFragmentMomZ_KFPart_PrimVtx", "h_DecayFragmentMomZ_KFPart_PrimVtx", 2000, -5, 15, 3000, 2, 5));
+      h_DecayFragmentMomZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayFragmentMomZ_KFPart_PrimVtx", "h_DecayFragmentMomZ_KFPart_PrimVtx", 2000, -5, 15, 5000, 0, 5));
       HistReg.emplace_back(&h_DecayFragmentMomZ_KFPart_PrimVtx.store);
-      h_DecayPionMomZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayPionMomZ_KFPart_PrimVtx", "h_DecayPionMomZ_KFPart_PrimVtx", 1000, -5, 5, 3000, 2, 5));
+      h_DecayPionMomZ_KFPart_PrimVtx.emplace_back(new TH2F("h_DecayPionMomZ_KFPart_PrimVtx", "h_DecayPionMomZ_KFPart_PrimVtx", 1000, -5, 5, 5000, 0, 5));
       HistReg.emplace_back(&h_DecayPionMomZ_KFPart_PrimVtx.store);
       h_Hyp_ArmenterosPodolanski.emplace_back(new TH2F("h_Hyp_ArmenterosPodolanski", "h_Hyp_ArmenterosPodolanski", 1000, 0, 1, 1000, 0, 1));
       HistReg.emplace_back(&h_Hyp_ArmenterosPodolanski.store);
       h_Hyp_CutArmenterosPodolanski.emplace_back(new TH2F("h_Hyp_CutArmenterosPodolanski", "h_Hyp_CutArmenterosPodolanski", 1000, 0, 1, 1000, 0, 1));
       HistReg.emplace_back(&h_Hyp_CutArmenterosPodolanski.store);
 
-      h_HypInvariantMass.emplace_back(new TH1F("h_HypInvariantMass", "h_HypInvariantMass", 3000, 2, 5));
+      h_HypInvariantMass.emplace_back(new TH1F("h_HypInvariantMass", "h_HypInvariantMass", 5000, 0, 5));
       HistReg.emplace_back(&h_HypInvariantMass.store);
       h_HypErrorInvariantMass.emplace_back(new TH1F("h_HypErrorInvariantMass", "h_HypErrorInvariantMass", 1000, 0, 0.5));
       HistReg.emplace_back(&h_HypErrorInvariantMass.store);
@@ -635,9 +637,9 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_HypInvariantErrorMassCheck.store);
 
 
-      h_HypInvariantMass_LorentzVect.emplace_back(new TH1F("h_HypInvariantMass_LorentzVect", "h_HypInvariantMass_LorentzVect", 3000, 2, 5));
+      h_HypInvariantMass_LorentzVect.emplace_back(new TH1F("h_HypInvariantMass_LorentzVect", "h_HypInvariantMass_LorentzVect", 5000, 0, 5));
       HistReg.emplace_back(&h_HypInvariantMass_LorentzVect.store);
-      h_HypInvariantMass_CutLorentzVect.emplace_back(new TH1F("h_HypInvariantMass_CutLorentzVect", "h_HypInvariantMass_CutLorentzVect", 3000, 2, 5));
+      h_HypInvariantMass_CutLorentzVect.emplace_back(new TH1F("h_HypInvariantMass_CutLorentzVect", "h_HypInvariantMass_CutLorentzVect", 5000, 0, 5));
       HistReg.emplace_back(&h_HypInvariantMass_CutLorentzVect.store);
 
 
@@ -651,6 +653,9 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistReg.emplace_back(&h_EffPosZ_preKFPart.store);
       h_EffPosZ_postKFPart.emplace_back(new TH1F("h_EffPosZ_postKFPart", "h_EffPosZ_postKFPart", 30, 20, 60));
       HistReg.emplace_back(&h_EffPosZ_postKFPart.store);
+
+      h_N_SiHits_ReconsTracks.emplace_back(new TH2F("h_N_SiHits_ReconsTracks", "h_N_SiHits_ReconsTracks", 20, 0, 20, 6, 0, 6));
+      HistReg.emplace_back(&h_N_SiHits_ReconsTracks.store);
 /*
       h_N_Si_MotherTracks.emplace_back(new TH1F("h_N_Si_MotherTracks", "h_N_Si_MotherTracks", 10, 0, 10));
       HistReg.emplace_back(&h_N_Si_MotherTracks.store);

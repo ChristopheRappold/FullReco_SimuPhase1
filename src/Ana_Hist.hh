@@ -155,7 +155,7 @@ class Ana_Hist
   Hist<TH1F> h_nEventsGhost_Si1 ;
   Hist<TH2F> h_nEventsGoodreconsGhost_Si1 ;
   Hist<TH2F> h_nEventsRealGoodrecons_Si1 ;
-  
+  Hist<TH2F> h_nEventsRealRejectCuadrant_Si1 ;
 
 
   Hist<TH1F> h_HitMultiplicity_Si2 ;
@@ -169,6 +169,7 @@ class Ana_Hist
   Hist<TH1F> h_nEventsGhost_Si2 ;
   Hist<TH2F> h_nEventsGoodreconsGhost_Si2 ;
   Hist<TH2F> h_nEventsRealGoodrecons_Si2 ;
+  Hist<TH2F> h_nEventsRealRejectCuadrant_Si2 ;
 
 
 
@@ -325,7 +326,8 @@ class Ana_Hist
   Hist<TH1F> h_EffPosZ_preKFPart ;
   Hist<TH1F> h_EffPosZ_postKFPart ;
   
-
+  Hist<TH2F> h_N_SiHits_ReconsTracks ;
+  
 /*
   Hist<TH1F> h_N_Si_MotherTracks ;
 

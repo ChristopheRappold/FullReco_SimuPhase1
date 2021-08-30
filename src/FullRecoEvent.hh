@@ -51,29 +51,33 @@ enum SolDet : int
   Si1y,
   Si2x,
   Si2y, /*9*/
-  MiniFiberD1_x1, /*10*/
+  Si1x_SD, /*10*/
+  Si1y_SD,
+  Si2x_SD,
+  Si2y_SD, /*13*/
+  MiniFiberD1_x1, /*14*/
   MiniFiberD1_u1,
   MiniFiberD1_v1,
   MiniFiberD1_x2,
   MiniFiberD1_u2,
-  MiniFiberD1_v2, /*15*/
-  FiberD1_x, /*16*/
+  MiniFiberD1_v2, /*19*/
+  FiberD1_x, /*20*/
   FiberD1_u,
   FiberD1_v,
-  FiberD2_x, /*19*/
+  FiberD2_x, /*23*/
   FiberD2_u,
   FiberD2_v,
-  FiberD3_x, /*22*/
+  FiberD3_x, /*26*/
   FiberD3_u,
   FiberD3_v,
-  FiberD4_x, /*25*/
+  FiberD4_x, /*29*/
   FiberD4_u,
   FiberD4_v,
-  FiberD5_x, /*28*/
+  FiberD5_x, /*32*/
   FiberD5_u,
   FiberD5_v,
-  PSFE, /*31*/
-  MG01, /*32*/
+  PSFE, /*35*/
+  MG01, /*36*/
   MG02,
   MG03,
   MG04,
@@ -89,10 +93,10 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17, /*48*/
-  PSCE, /*49*/
-  PSBE, /*50*/
-  CDC_layer0, /*51*/
+  MG17, /*52*/
+  PSCE, /*53*/
+  PSBE, /*54*/
+  CDC_layer0, /*55*/
   CDC_layer1,
   CDC_layer2,
   CDC_layer3,
@@ -106,22 +110,23 @@ enum SolDet : int
   CDC_layer11,
   CDC_layer12,
   CDC_layer13,
-  CDC_layer14, /*65*/
-  CDHBar, /*66*/
-  TrFwd0, /*67*/
+  CDC_layer14, /*69*/
+  CDHBar, /*70*/
+  TrFwd0, /*71*/
   TrFwd1,
-  TrFwd2, /*69*/
-  RPC_l, /*70*/
-  RPC_h, /*71*/
-  FMF2Stop0, /*72*/
+  TrFwd2, /*73*/
+  RPC_l, /*74*/
+  RPC_h, /*75*/
+  FMF2Stop0, /*76*/
   FMF2Stop1,
-  FMF2Stop2, /*74*/
+  FMF2Stop2, /*78*/
   SIZEOF_G4SOLDETTYPE
 };
 
 constexpr auto nameLiteralDet = {
     "InSi0"         ,          "InSi1",          "InSi2",          "InSi3",            "TR1",            "TR2",
     "Si1x"          ,           "Si1y",           "Si2x",           "Si2y",
+    "Si1x_SD"          ,           "Si1y_SD",           "Si2x_SD",           "Si2y_SD",
     "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1", "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
     "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
     "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      "FiberD4_x",      "FiberD4_u",      "FiberD4_v",
@@ -537,8 +542,12 @@ struct Hyp
   Int_t ErrGetLifeTime;
 
   //Daughters:
+  Int_t Id_Fragment;
   TLorentzVector MomE_Fragment;
   Double32_t Angle_MotherFragment;
+  Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
+
+  Int_t Id_Pion;
   TLorentzVector MomE_Pion;
   Double32_t Chi2ndf_Pion;
   Double32_t Angle_MotherPion;
@@ -609,8 +618,15 @@ public:
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
+  
   std::vector<std::vector<double> > Hits_Si1{};
   std::vector<std::vector<double> > Hits_Si2{};
+  
+  std::vector<std::tuple<double, size_t> > HitsX_Si1{};
+  std::vector<std::tuple<double, size_t> > HitsY_Si1{};
+  std::vector<std::tuple<double, size_t> > HitsX_Si2{};
+  std::vector<std::tuple<double, size_t> > HitsY_Si2{};
+
 
   TLorentzVector Mother_MomE;
   std::array<double,3> InteractionPoint;

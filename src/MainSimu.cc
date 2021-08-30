@@ -4,6 +4,8 @@
 #include "FullRecoTask.hh"
 #include "FullRecoTaskMT.hh"
 #include "FullRecoTaskZMQ.hh"
+#include "KFParticle.h"
+
 
 //#include "TApplication.h"
 #include "TChain.h"
@@ -93,6 +95,12 @@ int main(int argc, char** argv)
         }
 
       ConsoleLogger->info("Multi-threading :{}", MT);
+
+      KFParticle test_particle;
+      if(test_particle.IsHomogeneous() == 1)
+        ConsoleLogger->info("KFParticle Magnetic field: Homogeneous");
+      else if(test_particle.IsHomogeneous() == 10)
+        ConsoleLogger->info("KFParticle Magnetic field: NonHomogeneous");
 
       std::string file_base_name = name_out.substr(name_out.find_last_of('/') + 1);
       ConsoleLogger->info("name in : {} / name out : {}", name_in, name_out);

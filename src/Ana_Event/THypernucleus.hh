@@ -32,8 +32,12 @@ public :
   Int_t ErrGetLifeTime;
 
   //Daughters:
+  Int_t Id_Fragment;
   TLorentzVector MomE_Fragment;
   Double32_t Angle_MotherFragment;
+  Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
+  
+  Int_t Id_Pion;
   TLorentzVector MomE_Pion;
   Double32_t Chi2ndf_Pion;
   Double32_t Angle_MotherPion;

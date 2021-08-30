@@ -16,7 +16,8 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
   att._logger->info("TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF");
 
   std::vector<std::string> tempName = {"HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
-    "TR1_log","TR2_log","Si1_Strip_log_x", "Si1_Strip_log_y", "Si2_Strip_log_x", "Si2_Strip_log_y", 
+    "TR1_log","TR2_log","Si1_Strip_log_x", "Si1_Strip_log_y", "Si2_Strip_log_x", "Si2_Strip_log_y",
+    "SD1_Strip_log_u", "SD1_Strip_log_v", "SD2_Strip_log_u", "SD2_Strip_log_v", 
     "MiniFiberD1_Core_log_x1", "MiniFiberD1_Core_log_u1", "MiniFiberD1_Core_log_v1",
     "MiniFiberD1_Core_log_x2", "MiniFiberD1_Core_log_u2", "MiniFiberD1_Core_log_v2",
     "FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v",
@@ -502,6 +503,29 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 		  RecoEvent.Si_HitsEnergyLayer[idSi].insert(std::make_pair(LayerID, hit.Energy));
 
 	    }
+
+    if(IsSilicon_SD(TypeDet))
+      {
+        //void simulHitstoSignals(TTreeReaderArray<TG4Sol_Hit>* DetHits, std::vector<std::tuple<double,size_t>>& HitEnergyLayer)
+        const double EnergyThreshold = 0.001; //MeV
+#ifdef DEBUG_BUILD
+        std::cout<<"Silicon \n";
+        std::string tempName = orderDetName.find(TypeDet)->second;
+        std::cout<<" name : "<<tempName<<"\n";
+        std::cout<<" LayerID :"<<LayerID<<"\n";
+        std::cout<<" Energy :"<<hit.Energy<<"\n";
+#endif
+        if(hit.Energy < EnergyThreshold)
+          continue;
+        
+        int idSi = TypeDet - G4Sol::Si1x_SD;
+        auto it_SiHit = RecoEvent.Si_HitsEnergyLayer[idSi].find(LayerID);
+        if(it_SiHit != RecoEvent.Si_HitsEnergyLayer[idSi].end())
+          it_SiHit->second += hit.Energy;
+        else
+          RecoEvent.Si_HitsEnergyLayer[idSi].insert(std::make_pair(LayerID, hit.Energy));
+      }
+          
           else if(IsPSCE(TypeDet))
           {
 #ifdef DEBUG_BUILD

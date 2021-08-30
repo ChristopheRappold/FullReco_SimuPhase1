@@ -26,7 +26,7 @@ DictObjSuf    = $(DictpSuf).$(ObjSuf)
 OutPutOpt     = -o
 
 #CXX           = g++
-CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DHomogeneousField -DSPDLOG_COMPILED_LIB -DZMQ_BUILD_DRAFT_API # -DNonhomogeneousField # -fsanitize=address -fno-omit-frame-pointer #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DNonhomogeneousField -DSPDLOG_COMPILED_LIB -DZMQ_BUILD_DRAFT_API # -DHomogeneousField # -fsanitize=address -fno-omit-frame-pointer #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 LIBS          = -L./KFParticle/install/lib -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./FairBase -L.
 LDFLAGS       = '-Wl,-rpath,$$ORIGIN/lib'
 SOFLAGS       = -shared

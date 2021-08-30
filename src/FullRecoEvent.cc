@@ -47,9 +47,15 @@ void FullRecoEvent::Clear(int toclean)
   DaughtersTrackDAFInit.clear();
   
   Si_HitsEnergyLayer.clear();
+  
   Hits_Si1.clear();
   Hits_Si2.clear();
   
+  HitsX_Si1.clear();
+  HitsY_Si1.clear();
+  HitsX_Si2.clear();
+  HitsY_Si2.clear();
+
   Mother_MomE.SetXYZM(0.,0.,0.,0.);
   InteractionPoint.fill(0.);
   DecayVertex.fill(0.);
