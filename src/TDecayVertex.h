@@ -42,6 +42,9 @@ private:
                          int& pdgParticle, int& cutConditions,
                          std::vector<KFParticle>& RealTracks);
 
+  void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
+                                std::vector<KFParticle>& FragmentMDCTracks);
+
   void FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks);
 
   void PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
@@ -73,11 +76,25 @@ private:
                       std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks, TVector3& PrimVtxRecons,
                       std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks);
 
-  void MotherTrack_SiHit(TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, double& Z_plane,
-                          std::vector<std::vector<double> >& Hits_Si, TVector3& Mother_Sihit);
+  void SiHitsFinder(KFParticle& Track, std::vector<std::vector<double> >& Hits_Si, std::vector<std::vector<double> >& Track_Sihit);
 
-  void MotherTrackSiliconHits(TVector3& PrimVtxRecons, TVector3& DecayVtxRecons, std::vector<std::vector<double> >& Hits_Si1,
-                               std::vector<std::vector<double> >& Hits_Si2, KFParticle& Mother, KFParticle& Si_MotherTrack);
+  void MotherDaughtersTrack_SiHits(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+                  std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks,
+                  std::vector<std::vector<double> >& Hits_Si1, std::vector<std::vector<double> >& Hits_Si2,
+                  std::vector<std::tuple<int, std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>>>& Fragment_SiHits,
+                  std::vector<std::tuple<int, std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>>>& Pion_SiHits,
+                  std::vector<std::tuple<int, std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>>>& Mother_SiHits);
+
+  void SiHitsFinder2(KFParticle& Track, int idSilicon, int stripDirection, //Strip direction: 1 -> X, 2 -> Y 
+                    std::vector<std::tuple<double, size_t> >& Hits_Si, std::vector<std::vector<double> >& Track_Sihit);
+
+  void MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+                    std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks,
+                    std::vector<std::tuple<double, size_t> >& HitsX_Si1, std::vector<std::tuple<double, size_t> >& HitsY_Si1,
+                    std::vector<std::tuple<double, size_t> >& HitsX_Si2, std::vector<std::tuple<double, size_t> >& HitsY_Si2,
+                    std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>>& Fragment_SiHits,
+                    std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>>& Pion_SiHits,
+                    std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>>& Mother_SiHits);
 
   void AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& AllTracks, TVector3& Old_DecayVertexRecons, TVector3& DecayVertexRecons);
 
@@ -85,16 +102,19 @@ private:
 
 
 
-  double Zo_target = 24.; // in cm
-  double Zo_minifibers = 45;
+  double Zo_target = 24.5; // in cm
+  double Zf_target = 25.5; // in cm
+  double Zo_minifibers = 45; // in cm
 
   double Z_plane_Si1    = 27.;  // in cm
-  double widthStrip_Si1 = 0.03; // in cm
+  //double widthStrip_Si1 = 0.019; // in cm
 
   double Z_plane_Si2    = 30.;  // in cm
-  //double widthStrip_Si2 = 0.03; // in cm
+  //double widthStrip_Si2 = 0.019; // in cm
 
-  double Dist_to_Silicons = 0.5;
+  double Dist_to_Target = 0.5; // in cm
+  double Dist_to_Silicons = 0.5; // in cm
+  double Dist_to_Minifibers = 0.5; // in cm
 
   double k_factor       = 3.; // multiplies the fragment track f function value
 
@@ -108,6 +128,14 @@ private:
   double boxXYZ               = 2.;
   size_t nTimesBoxXYZ         = 5;
 
+  float fieldMDCParameters[10] = {0.f, 0.f, 0.f, // Bx(dz=0), Bx'(dz=0), Bx''(dz)
+                                  0.f, 0.f, 0.f, // By(dz=0), By'(dz=0), By''(dz)
+                                  0.f, 0.f, 0.f, // Bz(dz=0), Bz'(dz=0), Bz''(dz)
+                                  0.f};          // z_0
+
+  //KFParticleFieldRegion fieldMDC(fieldMDCParameters); // Correct field
+  //fieldMDC.SetOneEntry(fieldMDCParameters);
+
 
   PDG_fromName pid_fromName;
 
@@ -116,6 +144,7 @@ private:
   int He3_pdg = pid_fromName("He3");
   int He4_pdg = pid_fromName("alpha");
   int deuteron_pdg = pid_fromName("deuteron");
+  int lambda_pdg = pid_fromName("lambda");
   int proton_pdg = pid_fromName("proton");
   int pi_pdg = pid_fromName("pi-");
 
@@ -135,6 +164,12 @@ private:
   int Yes_cutconditions = 1;
 
 
+  //Methods for reconstructed fragments
+  int recons_from_FRS_MDC = -1; // 1-> FRS, 2-> MDC
+
+  int ref_RealFragment = -1;
+  bool ifOnlyRealFragment = false;
+
   //Cut conditions on reconstructed fragments
   int ifCut_MaxChi2ndf_FragmentTracks = 1;
   double MaxChi2ndf_FragmentTracks = 3.; //Change !
@@ -144,6 +179,10 @@ private:
 
   int ifCut_MinMomZ_FragmentTracks = 0;
   double MinMomZ_FragmentTracks = 0.; //Change !
+
+  int ifCut_MaxTheta_FragmentTracks = 0;
+  double MaxTheta_FragmentTracks = 5; //Change !
+  double MaxTheta_FragmentMDCTracks = 45; //Change !
 
 
   //Cut conditions on reconstructed pions
@@ -189,11 +228,47 @@ private:
 
   int ifCut_ArmenterosPodolanski = 0;
 
-  double Max_dist_Mother_SiHit = 0.5;
-  double Min_EnergyDeposition_Si = 0.08;
+
+  //Cut conditions on silicons hits from reconstructed tracks
+  int ifCut_MaxDist_SiHit = 1;
+  double MaxDist_SiHit = 0.05; //Change !
+
+  int ifCut_MinEnergyDeposition_SiHit = 1;
+  double MinEnergyDeposition_SiHit = 0.1; //Change !
 
 
-  //TRandom3* rand;
+  //Silicon details (copy from TPrimaryVertex.h)
+  double Z_plane_Si1x    = 27.; // in cm
+  double Z_plane_Si1y    = 27.05; // in cm
+  double widthStrip_Si1 = 0.019; // in cm
+  double lenghtSi_Si1   = 9.728; // in cm
+  double thicknessSi_Si1 = 0.03; // in cm
+  bool restrict_actlenght_Si1 = true;
+  double actlenghtX_Si1 = 6.08; // in cm
+  double actlenghtY_Si1 = 6.08; // in cm
+
+  double Z_plane_Si2x    = 30.; // in cm
+  double Z_plane_Si2y    = 30.05; // in cm
+  double widthStrip_Si2 = 0.019; // in cm
+  double lenghtSi_Si2   = 9.728; // in cm
+  double thicknessSi_Si2 = 0.03; // in cm
+  bool restrict_actlenght_Si2 = true;
+  double actlenghtX_Si2 = 6.08; // in cm
+  double actlenghtY_Si2 = 6.08; // in cm
+
+  double sigma_Si1      = widthStrip_Si1 / std::sqrt(12.);
+  double sigma_Si2      = widthStrip_Si2 / std::sqrt(12.);
+
+  float Z_plane;
+  double widthStrip;
+  double lenghtSi;
+  bool restrict_actlenght;
+  double actlenghtX;
+  double actlenghtY;
+  double sigma;
+  int nStrips;
+
+
 
   struct LocalHists
   {
@@ -308,6 +383,7 @@ private:
     TH1F* h_EffPosZ_preKFPart;
     TH1F* h_EffPosZ_postKFPart;
 
+    TH2F* h_N_SiHits_ReconsTracks;
 /*
     TH1F* h_N_Si_MotherTracks;
 
