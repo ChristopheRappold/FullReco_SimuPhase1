@@ -20,7 +20,10 @@ using namespace std;
 using namespace G4Sol;
 
 TDecayVertex::TDecayVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface("DecayVertexReco"), att(attribut) {}
+    : TDataProcessInterface("DecayVertexReco"), att(attribut)
+  {
+    fieldMDC.SetOneEntry(fieldMDCParameters);
+  }
 
 TDecayVertex::~TDecayVertex() {}
 
@@ -1002,6 +1005,12 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       LocalHisto.h_N_MotherTracks->Fill(MotherTracks_PrimVtx.size(), MotherTracks_PrimVtx[i].GetMass(), 1.);
 
+/*
+      std::cout << "Mother mass: " << MotherTracks_PrimVtx[i].GetMass() << "\n";
+      std::cout << "Mother ErrM: " << MotherTracks_PrimVtx[i].GetErrMass() << "\n";
+      std::cout << "Mother Ener: " << MotherTracks_PrimVtx[i].GetE() << "\n";
+      std::cout << "Mother MomP: " << MotherTracks_PrimVtx[i].GetP() << "\n\n";
+*/
       LocalHisto.h_HypInvariantMass->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
       LocalHisto.h_HypErrorInvariantMass->Fill(MotherTracks_PrimVtx[i].GetErrMass(), 1.);
 
@@ -1125,9 +1134,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   if(MotherTracks_PrimVtx.size() == 0)
     return -5;
 
-
+/*
   //Silicon HITS study of reconstructed mother and daughters
- /* 
   std::vector<std::tuple<int, std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>>> Fragment_SiHits;
   std::vector<std::tuple<int, std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>>> Pion_SiHits;
   std::vector<std::tuple<int, std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>>> Mother_SiHits;
@@ -1196,12 +1204,11 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
     }
 */
 
-
   //Silicon SIGNALS study of reconstructed mother and daughters
-
-  std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>> Fragment_SiHits;
-  std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>> Pion_SiHits;
-  std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>> Mother_SiHits;
+/*
+  std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>> Fragment_SiHits {};
+  std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>> Pion_SiHits {};
+  std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>> Mother_SiHits {};
 
   MotherDaughtersTrack_SiHits2(FragmentTracks, PionTracks, MotherTracks_PrimVtx, RefDaughtersTracks_PrimVtx,
                                 RecoEvent.HitsX_Si1, RecoEvent.HitsY_Si1, RecoEvent.HitsX_Si2, RecoEvent.HitsY_Si2,
@@ -1209,7 +1216,6 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   for(size_t i = 0; i < Fragment_SiHits.size(); ++i)
     {
-      std::cout << "Hello 1\n";
       double temp_Nhits_Si1 = (get<1>(Fragment_SiHits[i])[0].size() + get<1>(Fragment_SiHits[i])[1].size()) / 2.;
       double temp_Nhits_Si2 = (get<1>(Fragment_SiHits[i])[2].size() + get<1>(Fragment_SiHits[i])[3].size()) / 2.;
 
@@ -1230,8 +1236,6 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   for(size_t i = 0; i < Pion_SiHits.size(); ++i)
     {
-            std::cout << "Hello 2\n";
-
       double temp_Nhits_Si1 = (get<1>(Pion_SiHits[i])[0].size() + get<1>(Pion_SiHits[i])[1].size()) / 2.;
       double temp_Nhits_Si2 = (get<1>(Pion_SiHits[i])[2].size() + get<1>(Pion_SiHits[i])[3].size()) / 2.;
 
@@ -1252,8 +1256,6 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   for(size_t i = 0; i < Mother_SiHits.size(); ++i)
     {
-            std::cout << "Hello 3\n";
-
       double temp_Nhits_Si1 = (get<1>(Mother_SiHits[i])[0].size() + get<1>(Mother_SiHits[i])[1].size()) / 2.;
       double temp_Nhits_Si2 = (get<1>(Mother_SiHits[i])[2].size() + get<1>(Mother_SiHits[i])[3].size()) / 2.;
 
@@ -1271,8 +1273,9 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_N_SiHits_ReconsTracks->Fill(temp_Nhits_Si1, "Mother_Si1", 1.);
       LocalHisto.h_N_SiHits_ReconsTracks->Fill(temp_Nhits_Si2, "Mother_Si2", 1.);
     }
+*/
 
-      /*
+/*    NOT USEFUL, NOT WORKING
       LocalHisto.h_N_Si_MotherTracks->Fill(0.5, 1.);
 
       KFParticle Si_MotherTrack;
@@ -1464,6 +1467,14 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
           for(int iF = 0; iF < 10; ++iF)
             temp_particle.SetFieldCoeff(fieldMDCParameters[iF], iF);
 
+/*          //CHECK Magnetic Field
+          const float xyz2[3] = {1.f, 3.f, 25.f};
+          float B_fragment[3];
+          temp_particle.GetFieldValue(xyz2, B_fragment);
+          if(abs(B_fragment[2]-fieldMDCParameters[6]) > 0.0001)
+            std::cout << "FragmentFinder FieldZ: " << B_fragment[2] << "\n";
+*/
+
           if(cutConditions == 0)
               RealTracks.emplace_back(temp_particle);
           else if((cutConditions == 1) && (nHits_MDC >= 6) && (nHits_MiniFiber >= 4) && ((nHits_PSCE != 0) || (nHits_PSBE != 0)))
@@ -1597,6 +1608,14 @@ void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_resu
           temp_particle.SetNDF(itr->second.ndf);
           temp_particle.SetChi2(itr->second.chi2);
 
+/*          //CHECK Magnetic Field
+          const float xyz2[3] = {1.f, 3.f, 25.f};
+          float B_pion[3];
+          temp_particle.GetFieldValue(xyz2, B_pion);
+          if(abs(B_pion[2]-fieldMDCParameters[6]) > 0.0001)
+            std::cout << "PionFinder FieldZ: " << B_pion[2] << "\n";
+*/
+
           PionTracks.emplace_back(temp_particle);
         }
     }
@@ -1610,6 +1629,7 @@ void TDecayVertex::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector
   Possible cuts:
   - upper limit to chi2/ndf
   - lower limit to d with IP
+  - lower limit to Pz
 */
   if(PionTracks_All.size() == 0)
     {
@@ -1863,6 +1883,7 @@ void TDecayVertex::KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<doub
   return;
 }
 
+/* //WORKING FINE FOR HOMOGENEUS FIELD
 void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                                       const KFParticleSIMD* pointer_PrimVtx, std::vector<KFParticle>& MotherTracks,
                                       std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks)
@@ -1876,6 +1897,10 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
         {
           KFParticleSIMD particleSIMD1(FragmentTracks[i]);    // the same particle is copied to each SIMD element
           KFParticleSIMD particleSIMD2(PionTracks[j]);
+
+          std::cout << "Fragment Mom: " << FragmentTracks[i].GetP() << "\n";
+          std::cout << "Pion Mom: " << PionTracks[j].GetP() << "\n\n";
+
 
           particleSIMD1.GetDStoParticle( particleSIMD2, ds, dsdr );
           particleSIMD1.TransportToDS(ds[0], dsdr[0]);
@@ -1898,10 +1923,87 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
           KFParticle temp_MotherTrack;
           mother.GetKFParticle(temp_MotherTrack, 0);
 
-/*          
+          MotherTracks.emplace_back(temp_MotherTrack);
+          RefDaughtersTracks.emplace_back(std::make_tuple(i,j));
+        }
+    }
+
+  return;
+}
+*/
+
+void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+                                      const KFParticleSIMD* pointer_PrimVtx, std::vector<KFParticle>& MotherTracks,
+                                      std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks)
+{
+  float_v ds[2] = {0.f, 0.f};
+  float_v dsdr[4][6];
+
+  for(size_t i = 0; i < FragmentTracks.size(); ++i)
+    {
+      for(size_t j = 0; j < PionTracks.size(); ++j)
+        {
+          KFParticleSIMD particleSIMD1(FragmentTracks[i]);    // the same particle is copied to each SIMD element
+          KFParticleSIMD particleSIMD2(PionTracks[j]);
+
+          particleSIMD1.SetField(fieldMDC);
+          particleSIMD2.SetField(fieldMDC);
+
+/*          //CHECK Magnetic Field
+          const float_v xyz[3] = {1.f, 3.f, 25.f};
+          float_v B_fragment[3];
+          float_v B_pion[3];
+
+          particleSIMD1.GetFieldValue(xyz, B_fragment);
+          particleSIMD2.GetFieldValue(xyz, B_pion);
+
+          if(abs(B_fragment[2][0]-fieldMDCParameters[6]) > 0.0001)
+            std::cout << "FragmentSIMD FieldZ: " << B_fragment[2] << "\n";
+          
+          if(abs(B_pion[2][0]-fieldMDCParameters[6]) > 0.0001)
+            std::cout << "PionSIMD FieldZ: " << B_pion[2] << "\n";
+*/
+
+          particleSIMD1.GetDStoParticle( particleSIMD2, ds, dsdr );
+          particleSIMD1.TransportToDS(ds[0], dsdr[0]);
+          particleSIMD2.TransportToDS(ds[1], dsdr[3]);
+
+          const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD1, &particleSIMD2};
+
+          KFParticleSIMD mother;
+          mother.SetConstructMethod(KFPart_fConstructMethod);
+          mother.Construct(vDaughtersPointer, 2);
+          mother.SetField(fieldMDC);
+
+          if( (ifSet_ProductionVertex == 1) && (pointer_PrimVtx != nullptr) )
+            mother.SetProductionVertex(*pointer_PrimVtx);
+
+          if( ifSet_MassConstraint == 1)
+            mother.SetMassConstraint(Hyp_mass);
+
+          mother.TransportToDecayVertex();
+
+/*          //CHECK Magnetic Field
+          float_v B_motherSIMD[3];
+          mother.GetFieldValue(xyz, B_motherSIMD);
+          if(abs(B_motherSIMD[2][0]-fieldMDCParameters[6]) > 0.0001)
+            std::cout << "MotherSIMD FieldZ: " << B_motherSIMD[2] << "\n";
+*/
+
+          KFParticle temp_MotherTrack;
+          mother.GetKFParticle(temp_MotherTrack, 0);
+
           for(int iF = 0; iF < 10; ++iF)
             temp_MotherTrack.SetFieldCoeff(fieldMDCParameters[iF], iF);
+
+/*          // CHECK Magnetic Field
+          const float xyz2[3] = {1.f, 3.f, 25.f};
+          float B_mother[3];
+          temp_MotherTrack.GetFieldValue(xyz2, B_mother);
+          if(abs(B_mother[2]-fieldMDCParameters[6]) > 0.0001)
+            std::cout << "Mother FieldZ: " << B_mother[2] << "\n";
 */
+
           MotherTracks.emplace_back(temp_MotherTrack);
           RefDaughtersTracks.emplace_back(std::make_tuple(i,j));
         }
@@ -2202,11 +2304,14 @@ void TDecayVertex::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& Fragmen
     {
       MotherTracks[i].TransportToDecayVertex();
 
+      std::cout << "HELLO\n";
       size_t temp_id_fragment = get<0>(RefDaughtersTracks[i]);
       size_t temp_id_pion = get<1>(RefDaughtersTracks[i]);
 
       if((MotherTracks[i].GetZ() > Zf_target + Dist_to_Target) && (MotherTracks[i].GetZ() < Z_plane_Si1 - Dist_to_Silicons))
         {
+                std::cout << "HELLO1\n";
+
           SiHitsFinder2(FragmentTracks[temp_id_fragment], 1, 1, HitsX_Si1, temp_TrackHits_Si1X);
           SiHitsFinder2(FragmentTracks[temp_id_fragment], 1, 2, HitsY_Si1, temp_TrackHits_Si1Y);
           SiHitsFinder2(FragmentTracks[temp_id_fragment], 2, 1, HitsX_Si2, temp_TrackHits_Si2X);
@@ -2234,6 +2339,8 @@ void TDecayVertex::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& Fragmen
 
       else if((MotherTracks[i].GetZ() > Z_plane_Si1 + Dist_to_Silicons) && (MotherTracks[i].GetZ() < Z_plane_Si2 - Dist_to_Silicons))
         {
+                std::cout << "HELLO2\n";
+
           SiHitsFinder2(MotherTracks[i], 1, 1, HitsX_Si1, temp_TrackHits_Si1X);
           SiHitsFinder2(MotherTracks[i], 1, 2, HitsY_Si1, temp_TrackHits_Si1Y);
           if((temp_TrackHits_Si1X[0][0] != Empty_Sihit[0][0]) || (temp_TrackHits_Si1Y[0][0] != Empty_Sihit[0][0]))
@@ -2264,19 +2371,32 @@ void TDecayVertex::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& Fragmen
 
       else if((MotherTracks[i].GetZ() > Z_plane_Si2 + Dist_to_Silicons) && (MotherTracks[i].GetZ() < Zo_minifibers - Dist_to_Minifibers))
         {
+                std::cout << "HELLO3\n";
+
           SiHitsFinder2(MotherTracks[i], 1, 1, HitsX_Si1, temp_TrackHits_Si1X);
           SiHitsFinder2(MotherTracks[i], 1, 2, HitsY_Si1, temp_TrackHits_Si1Y);
           SiHitsFinder2(MotherTracks[i], 2, 1, HitsX_Si2, temp_TrackHits_Si2X);
           SiHitsFinder2(MotherTracks[i], 2, 2, HitsY_Si2, temp_TrackHits_Si2Y);
+
+                std::cout << "HELLO4\n";
+
           if((temp_TrackHits_Si1X[0][0] != Empty_Sihit[0][0]) || (temp_TrackHits_Si1Y[0][0] != Empty_Sihit[0][0])
                 || (temp_TrackHits_Si2X[0][0] != Empty_Sihit[0][0]) || (temp_TrackHits_Si2Y[0][0] != Empty_Sihit[0][0]))
             {
+                    std::cout << "HELLO5\n";
+
               std::vector<std::vector<std::vector<double>>> temp_motherhit =
                                                     {temp_TrackHits_Si1X, temp_TrackHits_Si1Y, temp_TrackHits_Si2X, temp_TrackHits_Si2Y};
               Mother_SiHits.emplace_back(std::make_tuple(i, temp_motherhit));
             }
         }
+
+              std::cout << "HELLO6\n";
+
     }
+
+          std::cout << "HELLO9\n";
+
 
   return;
 }

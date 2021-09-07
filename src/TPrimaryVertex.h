@@ -70,15 +70,15 @@ class SiliconHits_SD
 {
   double Z_plane_Si1x    = 27.; // in cm
   double Z_plane_Si1y    = 27.05; // in cm
-  double widthStrip_Si1 = 0.038; //0.019; // in cm
+  double widthStrip_Si1 = 0.019; // in cm
   double lenghtSi_Si1   = 9.728; // in cm
   double thicknessSi_Si1 = 0.032; // in cm
   bool restrict_actlenght_Si1 = true;
-  double actlenghtX_Si1 = 7.296;// 3.648; // in cm
-  double actlenghtY_Si1 = 7.296;// 3.648; // in cm
+  double actlenghtX_Si1 = 3.648; // in cm
+  double actlenghtY_Si1 = 3.648; // in cm
   bool restrict_gapcenter_Si1 = true;
   double gapcenter_Si1 = 0.05; //in cm
-  size_t combineStrips_Si1 = 2; // power of 2
+  size_t combineStrips_Si1 = 1; // power of 2
   bool ifveto_Si1 = false;
   std::vector<int> inactwiresX_Si1 {254, 255, 256, 257, 1278, 1279, 1280, 1281}; 
   std::vector<int> inactwiresY_Si1 {254, 255, 256, 257, 1278, 1279, 1280, 1281};
@@ -288,7 +288,7 @@ private:
   double Z_plane_Si2x    = 30.; // in cm
   double Z_plane_Si2y    = 30.05; // in cm
   double Z_plane_Si2     = (Z_plane_Si2x + Z_plane_Si2y)/2.;  // in cm
-  double widthStrip_Si2  = 0.019; // in cm
+  double widthStrip_Si2  = 0.038; // in cm
   double sigma_Si2       = widthStrip_Si2 / std::sqrt(12.);
   double lenghtSi_Si2    = 9.728;   // in cm
   int nStrips_Si2 = static_cast<int>(lenghtSi_Si2 / widthStrip_Si2);

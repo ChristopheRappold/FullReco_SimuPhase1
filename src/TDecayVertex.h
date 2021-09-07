@@ -9,9 +9,7 @@
 #include "THyphiAttributes.h"
 #include "TRandom3.h"
 #include "KFParticle.h"
-#include "KFParticleBase.h"
 #include "KFParticleSIMD.h"
-#include "KFParticleBaseSIMD.h"
 
 typedef TDataProcess<FullRecoEvent, MCAnaEventG4Sol> TDataProcessInterface;
 
@@ -128,14 +126,13 @@ private:
   double boxXYZ               = 2.;
   size_t nTimesBoxXYZ         = 5;
 
-  float fieldMDCParameters[10] = {0.f, 0.f, 0.f, // Bx(dz=0), Bx'(dz=0), Bx''(dz)
-                                  0.f, 0.f, 0.f, // By(dz=0), By'(dz=0), By''(dz)
-                                  0.f, 0.f, 0.f, // Bz(dz=0), Bz'(dz=0), Bz''(dz)
-                                  0.f};          // z_0
+  const float fieldMDCParameters[10] = {0.f, 0.f, 0.f, // Bx(dz=0), Bx'(dz=0), Bx''(dz)
+                                        0.f, 0.f, 0.f, // By(dz=0), By'(dz=0), By''(dz)
+                                        0.f, 0.f, 0.f, // Bz(dz=0), Bz'(dz=0), Bz''(dz)
+                                        50.f};          // z_0
 
-  //KFParticleFieldRegion fieldMDC(fieldMDCParameters); // Correct field
+  KFParticleFieldRegion fieldMDC; // Correct field
   //fieldMDC.SetOneEntry(fieldMDCParameters);
-
 
   PDG_fromName pid_fromName;
 
