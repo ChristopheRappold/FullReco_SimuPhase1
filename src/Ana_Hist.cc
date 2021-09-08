@@ -22,13 +22,14 @@ Ana_Hist::~Ana_Hist()
 }
 
 /********************************************************************/
-Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hough, bool Simu, bool PrimVtx, bool DecayVtx)
+Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu, bool PrimVtx, bool DecayVtx)
 {
   EnableState.resize(SIZEOF_STATEHIST);
   EnableState[DAF] = Daf;
   EnableState[VERTEX] = Vertex;
   EnableState[DCPROJ] = DCproject;
   EnableState[FINDING] = Finding;
+  EnableState[RIEMANN] = Riemann;
   EnableState[HOUGH] = Hough;
   EnableState[SIMU] = Simu;
   EnableState[PRIMVTX] = PrimVtx;
@@ -322,6 +323,24 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Hou
       HistRegisteredByDir.insert(std::make_pair("Finder", std::make_tuple(HistReg,0)));
 
       geoSolenoid.resize(17, nullptr);
+    }
+  if(EnableState[RIEMANN])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
+
+      h_RiemannChi2.emplace_back(new TH2F("h_RiemannChi2","h_RiemannChi2",5,0,5,120,-10,20));
+      HistReg.emplace_back(&h_RiemannChi2.store);
+
+      h_RiemannResidus.emplace_back(new TH2F("h_RiemannResidus","h_RiemannResidus",100,0,100,100,-10,10));
+      HistReg.emplace_back(&h_RiemannResidus.store);
+
+      h_PerfFinder.emplace_back(new TH2F("h_PerfFinder","h_PerfFinder",20,0,20,20,0,20));
+      HistReg.emplace_back(&h_PerfFinder.store);
+
+      h_PerfFinderLevenshtein.emplace_back(new TH2F("h_PerfFinderLevenshtein","h_PerfFinderLevenshtein",20,0,20,20,0,20));
+      HistReg.emplace_back(&h_PerfFinderLevenshtein.store);
+
+      HistRegisteredByDir.insert(std::make_pair("RiemannFinder", std::make_tuple(HistReg,0)));
     }
 
   if(EnableState[PRIMVTX])

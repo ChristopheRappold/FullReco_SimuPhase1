@@ -295,6 +295,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   OutTree->Nmc = OutTree->fMC_Particle->GetEntries();
 
   RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
+  RecoEvent.ListHitsToTracks.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.OldListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.Si_HitsEnergyLayer.resize(4);
   
@@ -485,7 +486,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 	    {
 	      //void simulHitstoSignals(TTreeReaderArray<TG4Sol_Hit>* DetHits, std::vector<std::tuple<double,size_t>>& HitEnergyLayer)
 	      const double EnergyThreshold = 0.001; //MeV
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
 	      std::cout<<"Silicon \n";
 	      std::string tempName = orderDetName.find(TypeDet)->second;
 	      std::cout<<" name : "<<tempName<<"\n";
@@ -528,7 +529,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           
           else if(IsPSCE(TypeDet))
           {
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "PSC"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -549,7 +550,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             TGeoHMatrix H1(*g1), H2(*g2), H3(*g3);
             TGeoHMatrix H = H2 * H1;
             H = H3 * H;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
 #endif
             TGeoHMatrix Hsf("Hsf"); // PSCE inner surface
@@ -577,7 +578,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           }
           else if(IsPSBE(TypeDet))
 	    {
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "PSBE"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -585,8 +586,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             std::cout << "HitPosX : " << hit.HitPosX << std::endl;
             std::cout << "HitPosY : " << hit.HitPosY << std::endl;
             std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
-            gGeoManager->GetVolume("PSB")->GetNode(LayerID)->Print();
-            gGeoManager->GetVolume("PSB")->GetNode(LayerID)->GetMatrix()->Print();
+            gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->Print();
+            gGeoManager->GetVolume("PSB")->GetNode(LayerID-1)->GetMatrix()->Print();
             gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
             gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
             gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
@@ -599,16 +600,20 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             TGeoHMatrix H1(*g1), H1_1(*g1_1), H2(*g2), H3(*g3);
             TGeoHMatrix H = H1_1 * H1;
             H = H2 * H;
+
             H = H3 * H;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
 #endif
 
             double *shift =  H.GetTranslation();
 	    double *local_rot = H.GetRotationMatrix();
-	    TVector3 vInit (22.,0.,0.);
-	    TVector3 v (vInit[0]*local_rot[0], vInit[1]*local_rot[3], vInit[2]*local_rot[6]);
+
+	    TVector3 v (local_rot[0], local_rot[3], local_rot[6]);
+	    // v is at the left border of the bar -> rotate 3.75 degree to be at the center of the bar
+	    v.RotateZ(-3.75*TMath::DegToRad());
 	    v = v.Unit();
+
 	    TVector3 u (v.Y(), -v.X(),0.);
 	    TVector3 o(shift[0], shift[1], shift[2]);
             genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
@@ -680,7 +685,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               // case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
               default : std::cerr << "something wrong" << std::endl; break;
             }
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "fiber"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -709,7 +714,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             w2.SetDz( 10);
             TGeoHMatrix Hw1 = H * w1;
             TGeoHMatrix Hw2 = H * w2;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
             Hw1.Print();
             Hw2.Print();
@@ -756,7 +761,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
               default : std::cerr << "something wrong" << std::endl; break;
             }
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "fiberM"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -786,7 +791,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             w2.SetDz( 10);
             TGeoHMatrix Hw1 = H * w1;
             TGeoHMatrix Hw2 = H * w2;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
             Hw1.Print();
             Hw2.Print();
@@ -822,7 +827,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             hitCoordsTree(2) = hit.HitPosZ;
           }
           else if(IsWire(TypeDet)){
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             std::cout << "wire"  << std::endl;
             std::string tmpName = orderDetName.find(TypeDet)->second;
             std::cout << "name : " << tmpName << std::endl;
@@ -840,6 +845,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
 #endif
             TGeoMatrix *g1 = gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetVolume()->GetNode(LayerID-1)->GetMatrix(); // ME, MG
+	    TGeoShape* tempShape = gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetVolume()->GetShape();
             TGeoMatrix *g2 = gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetMatrix(); // MD
             TGeoMatrix *g3 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNER
             TGeoMatrix *g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
@@ -850,11 +856,13 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             double *shift =  H.GetTranslation();
             TGeoHMatrix w1("w1");
             TGeoHMatrix w2("w2");
-            w1.SetDz(-10);
-            w2.SetDz( 10);
+	    Double_t minZ,maxZ;
+	    tempShape->GetAxisRange(3,minZ,maxZ);
+            w1.SetDz(minZ);
+            w2.SetDz(maxZ);
             TGeoHMatrix Hw1 = H * w1;
             TGeoHMatrix Hw2 = H * w2;
-#ifdef DEBUG_BUILD
+#ifdef DEBUG_BUILD2
             H.Print();
             Hw1.Print();
             Hw2.Print();
@@ -916,7 +924,16 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
             hitCoords(3) = edge2[0];
             hitCoords(4) = edge2[1];
             hitCoords(5) = edge2[2];
-            hitCoords(6) = temp_dl;
+	    hitCoords(6) = temp_dl;
+	    if(edge1[2]>edge2[2])
+	      {
+		hitCoords(0) = edge2[0];
+		hitCoords(1) = edge2[1];
+		hitCoords(2) = edge2[2];
+		hitCoords(3) = edge1[0];
+		hitCoords(4) = edge1[1];
+		hitCoords(5) = edge1[2];
+	      }
             TMatrixDSym hitCov(7);
             hitCov(6, 6) = resolution_dl * resolution_dl;
             measurement = std::make_unique<genfit::WireMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
@@ -953,6 +970,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
           }
 
           RecoEvent.ListHits[TypeDet].emplace_back(measurement.release());
+	  RecoEvent.ListHitsToTracks[TypeDet].emplace_back(TrackID);
           int indexHit = RecoEvent.ListHits[TypeDet].size() - 1;
 
           tempTrack->second[TypeDet] = indexHit;
@@ -1090,12 +1108,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
     att._logger->debug( "] ");
   }
-  for(const auto& det : RecoEvent.ListHits)
-  {
-    for(const auto& hit : det)
-      if(hit != nullptr)
-        hit->Print();
-  }
+
+  for(size_t i_det = 0 ; i_det < RecoEvent.ListHits.size();++i_det)//const auto& det : RecoEvent.ListHits)
+    {
+      att._logger->debug("RecoListHits det {} size {}",i_det,RecoEvent.ListHits[i_det].size());
+  //   for(const auto& hit : det)
+  //     if(hit != nullptr)
+  //       hit->Print();
+    }
 #endif
   return 0;
 }

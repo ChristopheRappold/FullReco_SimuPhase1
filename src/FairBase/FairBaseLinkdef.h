@@ -11,5 +11,6 @@
 #pragma link C++ class HypConstField+;
 #pragma link C++ class FrsSksHypFieldMapFull+;
 #pragma link C++ class FrsSksHypFieldMapFullData+;
-#pragma link C++ class FrsSolenoidHypField++;
+#pragma link C++ class FrsSolenoidHypField+;
+#pragma link C++ class WasaSolenoidFieldMap+;
 #endif

@@ -490,7 +490,13 @@ struct DecayTrackInfo
   TLorentzVector Hit_MomEnergy = TLorentzVector(0.,0.,0.,0.);
 };
 
-
+struct IdHit
+{
+  int id_det;
+  int id_hit;
+  int id_track;
+  IdHit(int iD,int iH, int iT):id_det(iD),id_hit(iH),id_track(iT) { }
+};
 
 struct OutParticle
 {
@@ -558,6 +564,19 @@ struct Hyp
   Double32_t ArmPod_Alfa;
 };
 
+struct CandTrack
+{
+  std::vector<int> orderedHitIds;
+  bool Rfitted = false;
+  int q = 0;
+  std::vector<double> par = std::vector<double>(5);
+  TMatrixD Cov = TMatrixD(5,5);
+  double chi2_circle = -1.;
+  double chi2_line = -1.;
+
+  CandTrack(const std::vector<int>& Hits, bool R, int Q, const std::vector<double>& P, const TMatrixD& C, double chi2_1, double chi2_2):orderedHitIds(Hits),Rfitted(R),q(Q),par(P),Cov(C),chi2_circle(chi2_1),chi2_line(chi2_2) {};
+};
+
 // struct OutTrack
 // {
 //   std::string type;
@@ -608,12 +627,17 @@ public:
   std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > ListHits;
   std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > OldListHits;
 
+  std::vector<std::vector<int> > ListHitsToTracks;
   // std::vector< std::vector<std::vector<genfit::AbsMeasurement*> > > ListHitsDAF;
   // std::vector< std::vector<std::vector<std::vector<int> > > > ListIdHitsDAFCluster;
   std::unordered_map<int, std::vector<int> > TrackDAF;
   std::unordered_map<int, std::vector<std::vector<SimHit> > > TrackDAFSim;
   std::unordered_map<int, InfoInit> TrackDAFInit;
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
+
+  std::vector<CandTrack> TracksFound;
+  std::vector<IdHit> IdHitsToMeasurement;
+
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 

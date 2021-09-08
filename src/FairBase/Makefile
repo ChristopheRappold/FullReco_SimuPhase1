@@ -81,14 +81,13 @@ DEPEND        = makedepend $(CXXFLAGS)
 
 
 
-Sources = FairField.cxx HypFieldMap.cxx HypFieldMapData.cxx HypFieldMapFull.cxx HypFieldMapFullData.cxx HypConstField.cxx FrsSksHypFieldMapFull.cxx FrsSksHypFieldMapFullData.cxx FrsSolenoidHypField.cxx
-SourcesEve = EveAladinField.cxx EveSksField.cxx
+Sources = FairField.cxx HypFieldMap.cxx HypFieldMapData.cxx HypFieldMapFull.cxx HypFieldMapFullData.cxx HypConstField.cxx FrsSksHypFieldMapFull.cxx FrsSksHypFieldMapFullData.cxx FrsSolenoidHypField.cxx WasaSolenoidFieldMap.cxx MField.cxx
+SourcesEve = EveAladinField.cxx EveSksField.cxx EveWasaField.cxx
 
 Headers = $(patsubst %.cxx,%.h,$(Sources))
 HeadersEve = $(patsubst %.cxx,%.h,$(SourcesEve))
 Objects = $(patsubst %.cxx,%.o,$(Sources))
 ObjectsEve = $(patsubst %.cxx,%.o,$(SourcesEve))
-
 
 DictObj = FairBaseDictionary.$(DictObjSuf)
 DictEveObj = EveFairBaseDictionary.$(DictObjSuf)

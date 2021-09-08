@@ -125,11 +125,11 @@ int main(int argc, char** argv)
 
       TGeoManager::Import(nameGeo.c_str()); // FOR Kalman_DAF
 
-      TDatabasePDG::Instance()->AddParticle("deuteron", "deuteron", 1.875613, kTRUE, 0., 1. * 3., "Ions", 10000);
-      TDatabasePDG::Instance()->AddParticle("triton", "triton", 2.80892 /*2.80925*/, kTRUE, 0., 1. * 3., "Ions", 10001);
-      TDatabasePDG::Instance()->AddParticle("alpha", "alpha", 3.72738 /*3.727417*/, kTRUE, 0., 2. * 3., "Ions", 10002);
-      TDatabasePDG::Instance()->AddParticle("He3", "He3", 2.80839 /*2.80923*/, kTRUE, 0., 2. * 3., "Ions", 10003);
-      TDatabasePDG::Instance()->AddParticle("Li6", "Li6", 5.60152 /*5.6015194*/, kTRUE, 0., 3. * 3., "Ions", 10004);
+      TDatabasePDG::Instance()->AddParticle("deuteron", "deuteron", 1.875477 /*1.875613*/, kTRUE, 0., 1. * 3., "Ions", 10000);
+      TDatabasePDG::Instance()->AddParticle("triton", "triton", 2.807971/*2.80892*/ /*2.80925*/, kTRUE, 0., 1. * 3., "Ions", 10001);
+      TDatabasePDG::Instance()->AddParticle("alpha", "alpha", 3.726954 /*3.72738*/ /*3.727417*/, kTRUE, 0., 2. * 3., "Ions", 10002);
+      TDatabasePDG::Instance()->AddParticle("He3", "He3", 2.80746 /*2.80839*/ /*2.80923*/, kTRUE, 0., 2. * 3., "Ions", 10003);
+      TDatabasePDG::Instance()->AddParticle("Li6", "Li6", 5.601432 /*5.60152*/ /*5.6015194*/, kTRUE, 0., 3. * 3., "Ions", 10004);
       TDatabasePDG::Instance()->AddParticle("H3L", "H3L", 2.99114, kFALSE, 0., 1. * 3., "Ions", 20001);
       TDatabasePDG::Instance()->AddParticle("H4L", "H4L", 3.9225, kFALSE, 0., 1. * 3., "Ions", 20002);
       TDatabasePDG::Instance()->AddParticle("He5L", "He5L", 4.8399, kFALSE, 0., 1. * 3., "Ions", 20003);

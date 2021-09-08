@@ -14,6 +14,7 @@
 #include "FairBase/HypFieldMapFull.h"
 
 #include "FairBase/FrsSolenoidHypField.h"
+#include "FairBase/WasaSolenoidFieldMap.h"
 
 #include "spdlog/logger.h"
 
@@ -73,6 +74,8 @@ class THyphiAttributes
   double Field_Strength;
 
   int Wasa_Side;
+  bool Wasa_FieldMap;
+  std::string Wasa_FieldMapName;
 
   std::vector<std::string> name_GeoVolumes;
 
@@ -84,7 +87,9 @@ class THyphiAttributes
   bool Task_PrimaryVtx;
   bool Task_FlatMCOutputML;
   bool Task_BayesFinder;
+  bool Task_RiemannFinder;
   bool Task_FinderCM;
+  bool Task_FindingPerf;
   bool Task_CheckRZ;
   bool Task_KalmanDAF;
   bool Task_DecayVtx;
@@ -107,6 +112,8 @@ class THyphiAttributes
 
   std::string FlatML_namefile;
   std::string DataML_Out;
+
+  bool RF_OutputEvents;
 
   FairField* Field;
 

@@ -38,14 +38,23 @@ void FullRecoEvent::Clear(int toclean)
   //     	hit = nullptr;
   //     }
   ListHits.clear();
+  OldListHits.clear();
+  ListHitsToTracks.clear();
 
   TrackDAF.clear();
   TrackDAFSim.clear();
   TrackDAFInit.clear();
   TrackInfo.clear();
+
+  TracksFound.clear();
+  IdHitsToMeasurement.clear();
+
   TrackMother.clear();
   DaughtersTrackDAFInit.clear();
-  
+
+  FragmentTracks.clear();
+  PionTracks.clear();
+
   Si_HitsEnergyLayer.clear();
   
   Hits_Si1.clear();

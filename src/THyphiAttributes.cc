@@ -3,6 +3,7 @@
 #include <fstream>
 //#include <iostream>
 
+#include "FairBase/WasaSolenoidFieldMap.h"
 #include "TMath.h"
 //#define FIELD_DEBUG
 #include "FieldManager.h"
@@ -49,7 +50,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   Task_PrimaryVtx = false;
   Task_FlatMCOutputML = false;
   Task_BayesFinder = false;
+  Task_RiemannFinder = false;
   Task_FinderCM = false;
+  Task_FindingPerf = false;
   Task_CheckRZ = true;
   Task_KalmanDAF = true;
   Task_DecayVtx = false;
@@ -67,6 +70,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
 
   KF_NbCentralCut = 1;
   KF_NbMiniFiberCut = 4;
+
+  RF_OutputEvents = false;
 
   if(Config.IsAvailable("G4_simu"))
     G4_simu = true;
@@ -91,6 +96,10 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");;
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
+  if(Config.IsAvailable("Task_RiemannFinder"))
+    Task_RiemannFinder = Config.Get<bool>("Task_RiemannFinder");
+  if(Config.IsAvailable("Task_FindingPerf"))
+    Task_FindingPerf = Config.Get<bool>("Task_FindingPerf");
   if(Config.IsAvailable("Task_FinderCM"))
     Task_FinderCM = Config.Get<bool>("Task_FinderCM");
   if(Config.IsAvailable("Task_CheckRZ"))
@@ -140,6 +149,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   temp_file_base_name += MLSuffix;
   temp_file_base_name += ".root";
   FlatML_namefile = temp_file_base_name;
+
+  if(Config.IsAvailable("RF_OutputEvents"))
+    RF_OutputEvents = Config.Get<bool>("RF_OutputEvents");
 
   DataML_Out = Config.IsAvailable("DataML_Out") ? Config.Get<std::string>("DataML_Out") : "NoneInConfig";
 
@@ -192,7 +204,13 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
 
   _logger->info( " *** > Loading Fieldmap ");
 
-  Field = new FrsSolenoidHypField();
+  if(Wasa_FieldMap)
+    {
+      double signD = Wasa_Side ? 1.0 : -1.0;
+      Field = new WasaSolenoidFieldMap("WasaFieldMap","WasaFieldMap",Wasa_FieldMapName, Field_Strength, signDir);
+    }
+  else
+    Field = new FrsSolenoidHypField();
 
   bool isWasa = false;
   for(const auto& nameGeo : name_GeoVolumes)
@@ -206,10 +224,23 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   if(isWasa == false)
     dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("CDS_logR_0");
   else
-    dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("INNER_1");
+    {
+      if(Wasa_FieldMap)
+	dynamic_cast<WasaSolenoidFieldMap*>(Field)->SetPositionFromGeoManager("MFLD_1");
+      else
+	dynamic_cast<FrsSolenoidHypField*>(Field)->SetPositionFromGeoManager("INNER_1");
+    }
 
-  dynamic_cast<FrsSolenoidHypField*>(Field)->SetField(0.,0.,Field_Strength);
-  dynamic_cast<FrsSolenoidHypField*>(Field)->Print();
+  if(Wasa_FieldMap)
+    {
+      dynamic_cast<WasaSolenoidFieldMap*>(Field)->Init();
+      dynamic_cast<WasaSolenoidFieldMap*>(Field)->Print();
+    }
+  else
+    {
+      dynamic_cast<FrsSolenoidHypField*>(Field)->SetField(0.,0.,Field_Strength);
+      dynamic_cast<FrsSolenoidHypField*>(Field)->Print();
+    }
   // std::cout<< " IsInside : (0,0,70)"<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,70.)<< " (0,0,125.50) "<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,125.5)<<"\n";
   // std::cout<< " IsInside : (0,0,40)"<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,40.)<< " (0,0,155.50) "<<  dynamic_cast<FrsSolenoidHypField*>(Field)->IsInside(0.,0.,155.5)<<"\n";
 
@@ -283,6 +314,12 @@ int THyphiAttributes::Init_Para()
   auto WasaS = InputPar.simParameters->find("Wasa_Side");
   Wasa_Side = WasaS->second;
 
+  auto WasaMap = InputPar.simParameters->find("Field_CDS_FieldMap");
+  Wasa_FieldMap = WasaMap != InputPar.simParameters->end() ? true : false;
+  if(Wasa_FieldMap)
+    Wasa_FieldMapName = "./field/MagField_default.dat";
+
+  
   TObjArray* L_vol = gGeoManager->GetListOfVolumes();
   int n_volume = L_vol->GetEntries();
   for(int n_v = 0; n_v < n_volume; ++n_v)
