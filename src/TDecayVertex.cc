@@ -277,6 +277,19 @@ void TDecayVertex::SelectHists()
 
 int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 {
+
+/*
+  Magnetic field type CHECK
+  KFParticle MF_Check;
+  int MF_IsHomogeneous = MF_Check.IsHomogeneous();
+  if(MF_IsHomogeneous == 1)
+    std::cout << "MF is homogeneous\n";
+  else if(MF_IsHomogeneous == 10)
+    std::cout << "MF is not homogeneous\n";
+  else
+    std::cout << "Error with MF\n";
+*/
+
   TVector3 InteractionPoint_real(RecoEvent.InteractionPoint[0], RecoEvent.InteractionPoint[1], RecoEvent.InteractionPoint[2]);
   TVector3 DecayVertex_real(RecoEvent.DecayVertex[0], RecoEvent.DecayVertex[1], RecoEvent.DecayVertex[2]);
 
@@ -1463,7 +1476,7 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
 
           temp_particle.SetNDF(5); //Change !
           temp_particle.SetChi2(5.); // Change !
-          
+
           for(int iF = 0; iF < 10; ++iF)
             temp_particle.SetFieldCoeff(fieldMDCParameters[iF], iF);
 
@@ -1510,7 +1523,7 @@ void TDecayVertex::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& D
 
           temp_particle.Create(temp_fP, temp_fC, temp_charge, temp_mass);
           temp_particle.SetId(itr->first);
-          
+
           for(int iF = 0; iF < 10; ++iF)
             temp_particle.SetFieldCoeff(fieldMDCParameters[iF], iF);
 
@@ -1601,7 +1614,7 @@ void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_resu
 
           temp_particle.Create(temp_fP, temp_fC, temp_charge, temp_mass);
           temp_particle.SetId(itr->first);
-          
+
           for(int iF = 0; iF < 10; ++iF)
             temp_particle.SetFieldCoeff(fieldMDCParameters[iF], iF);
 
@@ -1732,10 +1745,8 @@ double TDecayVertex::V_function(std::vector<double>& f_vector)
     }
 
   if((sum_f > 1.E-9) && (sum_f2 > 1.E-9))
-    {
       v = k_factor * f_vector[0] + sum_f -
           (k_factor * std::pow(f_vector[0], 2.) + sum_f2) / (k_factor * f_vector[0] + sum_f);
-    }
 
   return v;
 }
@@ -1827,21 +1838,16 @@ void TDecayVertex::TrackstoDecayVertex(std::vector<KFParticle>& FragmentTracks, 
           TVector3 temp_PosXYZ = PosXYZ[i];
           
           for(size_t j = 0; j < FragmentTracks.size(); ++j)
-            {
               temp_f[j] = f_function(FragmentTracks[j], temp_PosXYZ);
-            }
 
           for(size_t j = 0; j < PionTracks.size(); ++j)
-            {
               temp_f[FragmentTracks.size()+j] = f_function(PionTracks[j], temp_PosXYZ);
-            }
 
           Vnew = V_function(temp_f);
 
           if(Vnew > V)
             {
               V = Vnew;
-
               DecayVertexRecons.SetXYZ(temp_PosXYZ.X(), temp_PosXYZ.Y(), temp_PosXYZ.Z());
             }
         }
@@ -1877,8 +1883,7 @@ void TDecayVertex::KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<doub
   float_v fMass_PrimVtx = 0.;
 
   temp_PrimVtx.Create(fP_PrimVtx, fC_PrimVtx, fQ_PrimVtx, fMass_PrimVtx);
-  
-  //temp_PrimVtx.SetField(fieldMDC); // Correct field
+  temp_PrimVtx.SetField(fieldMDC);
 
   return;
 }
@@ -2485,16 +2490,13 @@ void TDecayVertex::AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& All
           TVector3 temp_PosXYZ = PosXYZ[i];
           
           for(size_t j = 0; j < AllTracks.size(); ++j)
-            {
               temp_f[j] = f_function(AllTracks[j], temp_PosXYZ);
-            }
 
           Vnew = V_function(temp_f);
 
           if(Vnew > V)
             {
               V = Vnew;
-
               DecayVertexRecons.SetXYZ(temp_PosXYZ.X(), temp_PosXYZ.Y(), temp_PosXYZ.Z());
             }
         }

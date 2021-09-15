@@ -99,15 +99,45 @@ private:
   void AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& AllTracks, TVector3& DecayVertexRecons);
 
 
+  //Silicon details (copy from TPrimaryVertex.h)
+  double Z_plane_Si1x    = 27.; // in cm
+  double Z_plane_Si1y    = 27.05; // in cm
+  double widthStrip_Si1 = 0.019; // in cm
+  double lenghtSi_Si1   = 9.728; // in cm
+  double thicknessSi_Si1 = 0.03; // in cm
+  bool restrict_actlenght_Si1 = true;
+  double actlenghtX_Si1 = 6.08; // in cm
+  double actlenghtY_Si1 = 6.08; // in cm
+
+  double Z_plane_Si2x    = 30.; // in cm
+  double Z_plane_Si2y    = 30.05; // in cm
+  double widthStrip_Si2 = 0.019; // in cm
+  double lenghtSi_Si2   = 9.728; // in cm
+  double thicknessSi_Si2 = 0.03; // in cm
+  bool restrict_actlenght_Si2 = true;
+  double actlenghtX_Si2 = 6.08; // in cm
+  double actlenghtY_Si2 = 6.08; // in cm
+
+  double sigma_Si1      = widthStrip_Si1 / std::sqrt(12.);
+  double sigma_Si2      = widthStrip_Si2 / std::sqrt(12.);
+
+  float Z_plane;
+  double widthStrip;
+  double lenghtSi;
+  bool restrict_actlenght;
+  double actlenghtX;
+  double actlenghtY;
+  double sigma;
+  int nStrips;
 
   double Zo_target = 24.5; // in cm
   double Zf_target = 25.5; // in cm
   double Zo_minifibers = 45; // in cm
 
-  double Z_plane_Si1    = 27.;  // in cm
+  double Z_plane_Si1    = (Z_plane_Si1x + Z_plane_Si1y)/2.;  // in cm
   //double widthStrip_Si1 = 0.019; // in cm
 
-  double Z_plane_Si2    = 30.;  // in cm
+  double Z_plane_Si2    = (Z_plane_Si2x + Z_plane_Si2y)/2.;  // in cm
   //double widthStrip_Si2 = 0.019; // in cm
 
   double Dist_to_Target = 0.5; // in cm
@@ -126,13 +156,14 @@ private:
   double boxXYZ               = 2.;
   size_t nTimesBoxXYZ         = 5;
 
+
   const float fieldMDCParameters[10] = {0.f, 0.f, 0.f, // Bx(dz=0), Bx'(dz=0), Bx''(dz)
                                         0.f, 0.f, 0.f, // By(dz=0), By'(dz=0), By''(dz)
                                         0.f, 0.f, 0.f, // Bz(dz=0), Bz'(dz=0), Bz''(dz)
-                                        50.f};          // z_0
+                                        0.f};          // z_0
 
   KFParticleFieldRegion fieldMDC; // Correct field
-  //fieldMDC.SetOneEntry(fieldMDCParameters);
+
 
   PDG_fromName pid_fromName;
 
@@ -232,38 +263,6 @@ private:
 
   int ifCut_MinEnergyDeposition_SiHit = 1;
   double MinEnergyDeposition_SiHit = 0.1; //Change !
-
-
-  //Silicon details (copy from TPrimaryVertex.h)
-  double Z_plane_Si1x    = 27.; // in cm
-  double Z_plane_Si1y    = 27.05; // in cm
-  double widthStrip_Si1 = 0.019; // in cm
-  double lenghtSi_Si1   = 9.728; // in cm
-  double thicknessSi_Si1 = 0.03; // in cm
-  bool restrict_actlenght_Si1 = true;
-  double actlenghtX_Si1 = 6.08; // in cm
-  double actlenghtY_Si1 = 6.08; // in cm
-
-  double Z_plane_Si2x    = 30.; // in cm
-  double Z_plane_Si2y    = 30.05; // in cm
-  double widthStrip_Si2 = 0.019; // in cm
-  double lenghtSi_Si2   = 9.728; // in cm
-  double thicknessSi_Si2 = 0.03; // in cm
-  bool restrict_actlenght_Si2 = true;
-  double actlenghtX_Si2 = 6.08; // in cm
-  double actlenghtY_Si2 = 6.08; // in cm
-
-  double sigma_Si1      = widthStrip_Si1 / std::sqrt(12.);
-  double sigma_Si2      = widthStrip_Si2 / std::sqrt(12.);
-
-  float Z_plane;
-  double widthStrip;
-  double lenghtSi;
-  bool restrict_actlenght;
-  double actlenghtX;
-  double actlenghtY;
-  double sigma;
-  int nStrips;
 
 
 

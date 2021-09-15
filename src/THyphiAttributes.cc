@@ -207,7 +207,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   if(Wasa_FieldMap)
     {
       double signD = Wasa_Side ? 1.0 : -1.0;
-      Field = new WasaSolenoidFieldMap("WasaFieldMap","WasaFieldMap",Wasa_FieldMapName, Field_Strength, signDir);
+      //Field = new WasaSolenoidFieldMap("WasaFieldMap","WasaFieldMap",Wasa_FieldMapName, Field_Strength, signDir); Modified the version of Master
+      Field = new WasaSolenoidFieldMap("WasaFieldMap","WasaFieldMap",Wasa_FieldMapName, Field_Strength, signD);
     }
   else
     Field = new FrsSolenoidHypField();

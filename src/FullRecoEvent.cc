@@ -52,8 +52,9 @@ void FullRecoEvent::Clear(int toclean)
   TrackMother.clear();
   DaughtersTrackDAFInit.clear();
 
-  FragmentTracks.clear();
-  PionTracks.clear();
+  //Added when merging with master
+  //FragmentTracks.clear();
+  //PionTracks.clear();
 
   Si_HitsEnergyLayer.clear();
   
