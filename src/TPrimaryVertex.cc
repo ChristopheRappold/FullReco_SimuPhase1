@@ -5,6 +5,8 @@
 
 #include <tuple>
 
+#include "TVector3.h"
+
 //#define DEBUG_PRIMVTX
 
 //#define RECONS_HITS_MULTIPLICITY
@@ -87,11 +89,11 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_HitMultiplicityDiff_Si1      = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiff_Si1);
   LocalHisto.h_HitMultiplicityDiffNHits_Si1 = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiffNHits_Si1);
 
-  LocalHisto.h_EnergyDiffStrips_Si1       = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si1);
-  LocalHisto.h_nEventsGoodrecons_Si1      = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si1);
-  LocalHisto.h_nEventsGhost_Si1           = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si1);
-  LocalHisto.h_nEventsGoodreconsGhost_Si1 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si1);
-  LocalHisto.h_nEventsRealGoodrecons_Si1  = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si1);
+  LocalHisto.h_EnergyDiffStrips_Si1          = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si1);
+  LocalHisto.h_nEventsGoodrecons_Si1         = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si1);
+  LocalHisto.h_nEventsGhost_Si1              = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si1);
+  LocalHisto.h_nEventsGoodreconsGhost_Si1    = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si1);
+  LocalHisto.h_nEventsRealGoodrecons_Si1     = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si1);
   LocalHisto.h_nEventsRealRejectCuadrant_Si1 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealRejectCuadrant_Si1);
 
   LocalHisto.h_HitMultiplicity_Si2          = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicity_Si2);
@@ -99,13 +101,18 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_HitMultiplicityDiff_Si2      = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiff_Si2);
   LocalHisto.h_HitMultiplicityDiffNHits_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiffNHits_Si2);
 
-  LocalHisto.h_EnergyDiffStrips_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si2);
-
-  LocalHisto.h_nEventsGoodrecons_Si2      = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si2);
-  LocalHisto.h_nEventsGhost_Si2           = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si2);
-  LocalHisto.h_nEventsGoodreconsGhost_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si2);
-  LocalHisto.h_nEventsRealGoodrecons_Si2  = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si2);
+  LocalHisto.h_EnergyDiffStrips_Si2          = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si2);
+  LocalHisto.h_nEventsGoodrecons_Si2         = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si2);
+  LocalHisto.h_nEventsGhost_Si2              = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si2);
+  LocalHisto.h_nEventsGoodreconsGhost_Si2    = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si2);
+  LocalHisto.h_nEventsRealGoodrecons_Si2     = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si2);
   LocalHisto.h_nEventsRealRejectCuadrant_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealRejectCuadrant_Si2);
+
+  LocalHisto.h_MFCheck_Theta_MomSi1MomSi2 = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Theta_MomSi1MomSi2);
+  LocalHisto.h_MFCheck_Dist_MomSi1HitSi2  = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi1HitSi2);
+  LocalHisto.h_MFCheck_Dist_MomSi2HitSi1  = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi2HitSi1);
+  LocalHisto.h_MFCheck_Dist_MomSi1HitIP   = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi1HitIP);
+  LocalHisto.h_MFCheck_Dist_MomSi2HitIP   = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi2HitIP);
 
   LocalHisto.h_EnergyStripEnergyTotalReal = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyStripEnergyTotalReal);
   LocalHisto.h_EnergyStripEnergyTotal     = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyStripEnergyTotal);
@@ -169,10 +176,15 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
   // Reconstruct the real hits from the simulation
   std::vector<std::tuple<double, double, double, size_t, double, double, std::string> > HitEnergyPosXYreal_Si1{};
-  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si1, G4Sol::Si1x_SD, G4Sol::Si1y_SD, LocalHisto.h_EnergyDiffStrips_Si1);
+  std::vector<std::tuple<size_t,TVector3,TVector3>> HitIdMomPos_Si1{};
+  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si1, G4Sol::Si1x_SD, G4Sol::Si1y_SD, LocalHisto.h_EnergyDiffStrips_Si1, HitIdMomPos_Si1);
 
   std::vector<std::tuple<double, double, double, size_t, double, double, std::string> > HitEnergyPosXYreal_Si2{};
-  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si2, G4Sol::Si2x_SD, G4Sol::Si2y_SD, LocalHisto.h_EnergyDiffStrips_Si2);
+  std::vector<std::tuple<size_t,TVector3,TVector3>> HitIdMomPos_Si2{};
+  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si2, G4Sol::Si2x_SD, G4Sol::Si2y_SD, LocalHisto.h_EnergyDiffStrips_Si2, HitIdMomPos_Si2);
+
+  //Check magnetic field effects
+  MFcheck(HitIdMomPos_Si1, HitIdMomPos_Si2, RecoEvent.InteractionPoint);
 
   std::vector<std::tuple<double, size_t> > HitEnergyLayerX_Si1{};
   for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[1])
@@ -618,7 +630,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 void TPrimaryVertex::simulHitstoRealHits(
     FullRecoEvent& REvent,
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal,
-    int id_det_x, int id_det_y, TH1F* h_Diff)
+    int id_det_x, int id_det_y, TH1F* h_Diff, std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos)
 {
   for(auto it_track : REvent.TrackDAFSim)
     {
@@ -633,12 +645,21 @@ void TPrimaryVertex::simulHitstoRealHits(
       double meanPosY = 0.;
       double EnergyY  = 0.;
 
+      double meanPosYinXstrips = 0.;
+      double meanPosZinXstrips = 0.;
+
+      double meanPosXinYstrips = 0.;
+      double meanPosZinYstrips = 0.;
+
       for(size_t idX = 0; idX < it_SiX.size(); ++idX)
         {
           if(it_SiX[idX].Eloss > EnergyThreshold)
             {
               meanPosX += it_SiX[idX].hitX * it_SiX[idX].Eloss;
               EnergyX += it_SiX[idX].Eloss;
+
+              meanPosYinXstrips += it_SiX[idX].hitY * it_SiX[idX].Eloss;
+              meanPosZinXstrips += it_SiX[idX].hitZ * it_SiX[idX].Eloss;
             }
         }
 
@@ -648,11 +669,20 @@ void TPrimaryVertex::simulHitstoRealHits(
             {
               meanPosY += it_SiY[idY].hitY * it_SiY[idY].Eloss;
               EnergyY += it_SiY[idY].Eloss;
+
+              meanPosXinYstrips += it_SiY[idY].hitX * it_SiY[idY].Eloss;
+              meanPosZinYstrips += it_SiY[idY].hitZ * it_SiY[idY].Eloss;
             }
         }
 
       meanPosX /= EnergyX;
       meanPosY /= EnergyY;
+
+      meanPosYinXstrips /= EnergyX;
+      meanPosZinXstrips /= EnergyX;
+
+      meanPosXinYstrips /= EnergyY;
+      meanPosZinYstrips /= EnergyY;
 
       std::string namePart(TDatabasePDG::Instance()->GetParticle(it_SiX[0].pdg)->GetName());
 
@@ -661,6 +691,62 @@ void TPrimaryVertex::simulHitstoRealHits(
       HitEnergyPosXYreal.emplace_back(tempEnergyPosXYreal);
 
       h_Diff->Fill(EnergyX - EnergyY, 1.);
+
+      //Check magnetic field effects on silicon tracking
+
+      TVector3 HitSiX(meanPosX, meanPosYinXstrips, meanPosZinXstrips);
+      TVector3 HitSiY(meanPosXinYstrips, meanPosY, meanPosZinYstrips);
+
+      TVector3 MomSi = HitSiY - HitSiX;
+      std::tuple<size_t,TVector3,TVector3> tempHitIdMomPos(it_track.first, MomSi, HitSiX);
+      HitIdMomPos.emplace_back(tempHitIdMomPos);
+    }
+}
+
+void TPrimaryVertex::MFcheck(std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si1,
+                             std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si2,
+                             std::array<double,3> InteractionPoint)
+{
+  TVector3 Real_IP(InteractionPoint[0], InteractionPoint[1], InteractionPoint[2]);
+
+  for(size_t i = 0; i < HitIdMomPos_Si1.size(); ++i)
+    {
+      size_t temp_idSi1 = get<0>(HitIdMomPos_Si1[i]);
+
+      for(size_t j = 0; j < HitIdMomPos_Si2.size(); ++j)
+        {
+          size_t temp_idSi2 = get<0>(HitIdMomPos_Si2[j]);
+          if (temp_idSi1 != temp_idSi2)
+            continue;
+
+          TVector3 temp_MomSi1 = get<1>(HitIdMomPos_Si1[i]);
+          TVector3 temp_PosSi1 = get<2>(HitIdMomPos_Si1[i]);
+
+          TVector3 temp_MomSi2 = get<1>(HitIdMomPos_Si2[j]);
+          TVector3 temp_PosSi2 = get<2>(HitIdMomPos_Si2[j]);
+
+          //std::cout << "MomSi1: " << temp_MomSi1.X()/temp_MomSi1.Z() << "\t" << temp_MomSi1.Y()/temp_MomSi1.Z() << "\n";
+          //std::cout << "MomSi2: " << temp_MomSi2.X()/temp_MomSi2.Z() << "\t" << temp_MomSi2.Y()/temp_MomSi2.Z() << "\n\n";
+
+          double Theta_MomSi1MomSi2 = temp_MomSi1.Angle(temp_MomSi2) * 180. / M_PI;
+          LocalHisto.h_MFCheck_Theta_MomSi1MomSi2->Fill(Theta_MomSi1MomSi2, 1.);
+
+          TVector3 PosSi1_PosSi2 = temp_PosSi1 - temp_PosSi2;
+          double Dist_MomSi1HitSi2 = (PosSi1_PosSi2.Cross(temp_MomSi1)).Mag() / temp_MomSi1.Mag();
+          LocalHisto.h_MFCheck_Dist_MomSi1HitSi2->Fill(Dist_MomSi1HitSi2, 1.);
+
+          TVector3 PosSi2_PosSi1 = temp_PosSi2 - temp_PosSi1;
+          double Dist_MomSi2HitSi1 = (PosSi2_PosSi1.Cross(temp_MomSi2)).Mag() / temp_MomSi2.Mag();
+          LocalHisto.h_MFCheck_Dist_MomSi2HitSi1->Fill(Dist_MomSi2HitSi1, 1.);
+
+          TVector3 PosSi1_IP = temp_PosSi1 - Real_IP;
+          double Dist_MomSi1HitIP = (PosSi1_IP.Cross(temp_MomSi1)).Mag() / temp_MomSi1.Mag();
+          LocalHisto.h_MFCheck_Dist_MomSi1HitIP->Fill(Dist_MomSi1HitIP, 1.);
+
+          TVector3 PosSi2_IP = temp_PosSi2 - Real_IP;
+          double Dist_MomSi2HitIP = (PosSi2_IP.Cross(temp_MomSi2)).Mag() / temp_MomSi2.Mag();
+          LocalHisto.h_MFCheck_Dist_MomSi2HitIP->Fill(Dist_MomSi2HitIP, 1.);
+        }
     }
 }
 

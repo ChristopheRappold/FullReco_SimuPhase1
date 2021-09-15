@@ -206,7 +206,11 @@ private:
   void simulHitstoRealHits(
       FullRecoEvent& REvent,
       std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal,
-      int id_det_x, int id_det_y, TH1F* h_Diff);
+      int id_det_x, int id_det_y, TH1F* h_Diff, std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos);
+
+  void MFcheck(std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si1,
+               std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si2,
+               std::array<double,3> InteractionPoint);
 
   void nGoodEventsCounter(
       std::vector<std::vector<double> >& HitEnergyPosXY,
@@ -350,6 +354,11 @@ private:
     TH2F* h_nEventsRealGoodrecons_Si2;
     TH2F* h_nEventsRealRejectCuadrant_Si2;
 
+    TH1F* h_MFCheck_Theta_MomSi1MomSi2;
+    TH1F* h_MFCheck_Dist_MomSi1HitSi2;
+    TH1F* h_MFCheck_Dist_MomSi2HitSi1;
+    TH1F* h_MFCheck_Dist_MomSi1HitIP;
+    TH1F* h_MFCheck_Dist_MomSi2HitIP;
 
     TH2F* h_EnergyStripEnergyTotalReal;
     TH2F* h_EnergyStripEnergyTotal;

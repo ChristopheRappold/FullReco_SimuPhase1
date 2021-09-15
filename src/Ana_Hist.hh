@@ -161,7 +161,6 @@ class Ana_Hist
   Hist<TH2F> h_HitMultiplicityDiffNHits_Si1;
 
   Hist<TH1F> h_EnergyDiffStrips_Si1;
-
   Hist<TH1F> h_nEventsGoodrecons_Si1;
   Hist<TH1F> h_nEventsGhost_Si1 ;
   Hist<TH2F> h_nEventsGoodreconsGhost_Si1 ;
@@ -175,14 +174,17 @@ class Ana_Hist
   Hist<TH2F> h_HitMultiplicityDiffNHits_Si2 ;
 
   Hist<TH1F> h_EnergyDiffStrips_Si2 ;
-
   Hist<TH1F> h_nEventsGoodrecons_Si2 ;
   Hist<TH1F> h_nEventsGhost_Si2 ;
   Hist<TH2F> h_nEventsGoodreconsGhost_Si2 ;
   Hist<TH2F> h_nEventsRealGoodrecons_Si2 ;
   Hist<TH2F> h_nEventsRealRejectCuadrant_Si2 ;
 
-
+  Hist<TH1F> h_MFCheck_Theta_MomSi1MomSi2 ;
+  Hist<TH1F> h_MFCheck_Dist_MomSi1HitSi2 ;
+  Hist<TH1F> h_MFCheck_Dist_MomSi2HitSi1 ;
+  Hist<TH1F> h_MFCheck_Dist_MomSi1HitIP ;
+  Hist<TH1F> h_MFCheck_Dist_MomSi2HitIP ;
 
   Hist<TH2F> h_EnergyStripEnergyTotalReal ;
   Hist<TH2F> h_EnergyStripEnergyTotal ;
