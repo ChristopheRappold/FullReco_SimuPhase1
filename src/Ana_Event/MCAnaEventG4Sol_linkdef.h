@@ -7,5 +7,7 @@
 #pragma link C++ class TMcHit+;
 #pragma link C++ class TMcParticle+;
 #pragma link C++ class THyphiTrack+;
+#pragma link C++ class TTrackCand+;
+#pragma link C++ class AnaEvent_Metadata+;
 
 #endif

@@ -75,6 +75,7 @@ MCAnaEventG4Sol::MCAnaEventG4Sol()//:TObject()
   
   Field = 0.;
   ReducFactor = 1.;
+  NtrackCand = 0;
   Ntrack = 0;
   trigger = 0;
 
@@ -105,6 +106,8 @@ void MCAnaEventG4Sol::Clear(Option_t *option)
   PSFE->Clear("C");
   PSCE->Clear("C"); 
   
+  TrackCand->Clear("C");
+
   fTrack->Clear("C");
 
   Setup();
@@ -151,6 +154,7 @@ int MCAnaEventG4Sol::Setup()
 
   Field = 0;
   ReducFactor =1.;
+  NtrackCand =0;
   Ntrack =0;
   trigger = 0;
 

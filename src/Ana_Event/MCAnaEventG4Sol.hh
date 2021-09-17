@@ -8,6 +8,7 @@
 
 #include "TMcHit.hh"
 #include "TMcParticle.hh"
+#include "TTrackCand.hh"
 #include "THyphiTrack_v4.hh"
 
 // class TMcHit;
@@ -59,6 +60,9 @@ public :
   TClonesArray* PSBE; //->
   TClonesArray* PSCE; //->
   
+  Int_t NtrackCand;
+  TClonesArray* TrackCand; //->
+
   Int_t Ntrack;
   TClonesArray* fTrack; //->
 
