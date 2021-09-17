@@ -16,7 +16,8 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
   att._logger->info("TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF");
 
   std::vector<std::string> tempName = {"HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
-    "TR1_log","TR2_log","Si1_Strip_log_x", "Si1_Strip_log_y", "Si2_Strip_log_x", "Si2_Strip_log_y", 
+    "TR1_log","TR2_log","Si1_Strip_log_x", "Si1_Strip_log_y", "Si2_Strip_log_x", "Si2_Strip_log_y",
+    "SD1_Strip_log_u", "SD1_Strip_log_v", "SD2_Strip_log_u", "SD2_Strip_log_v",
     "MiniFiberD1_Core_log_x1", "MiniFiberD1_Core_log_u1", "MiniFiberD1_Core_log_v1",
     "MiniFiberD1_Core_log_x2", "MiniFiberD1_Core_log_u2", "MiniFiberD1_Core_log_v2",
     "FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v",
@@ -220,7 +221,10 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
     OutParticle->GeoAcc = 1.;
 
     if(event.BeamNames[index] == nameMother)
-      continue;
+      {
+	id_mother = event.BeamTrackID[index];
+	continue;
+      }
     if(event.BeamCharges[index] == 0)
       continue;
     int TrackID = event.BeamTrackID[index];
@@ -249,7 +253,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
     TMcParticle* OutParticle = dynamic_cast<TMcParticle*>(OutTree->fMC_Particle->ConstructedAt(OutTree->fMC_Particle->GetEntries()));
     OutParticle->type = event.DaughterNames[index];
     OutParticle->Mc_id = event.DaughterTrackID[index];
-    OutParticle->Mother_id = event.MotherTrackID;
+    OutParticle->Mother_id = id_mother;
     OutParticle->Pdg = pid_fromName(event.DaughterNames[index]);
     OutParticle->Charge = event.DaughterCharges[index];
     OutParticle->MomMass.SetXYZM(event.DaughterMomentums_X[index], event.DaughterMomentums_Y[index], event.DaughterMomentums_Z[index],
@@ -293,6 +297,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
     OutHit->name = hit.Pname;
     OutHit->LayerID = LayerID;
     OutHit->HitID = HitID;
+    OutHit->TrackID = hit.TrackID;
     OutHit->MCHit.SetXYZ(hit.HitPosX, hit.HitPosY, hit.HitPosZ);
     OutHit->Hit.SetXYZ(hitR(0), hitR(1), hitR(2));
     OutHit->MC_id = hit.TrackID;
@@ -301,6 +306,10 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
     OutHit->MCparticle.SetXYZM(hit.MomX, hit.MomY, hit.MomZ, hit.Mass);
     OutHit->Brho = 3.10715497 * OutHit->MCparticle.P() / charge;
     OutHit->MagnetInteraction = 0.;
+    OutHit->Time = hit.Time;
+    OutHit->Energy = hit.Energy;
+    OutHit->TrackLength = hit.TrackLength;
+
     // std::cout<<" Out> LayerID:"<<LayerID<<" "<<HitID<<std::endl;
   };
 

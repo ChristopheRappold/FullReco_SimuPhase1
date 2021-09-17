@@ -51,29 +51,33 @@ enum SolDet : int
   Si1y,
   Si2x,
   Si2y, /*9*/
-  MiniFiberD1_x1, /*10*/
+  SD1u, /*10*/
+  SD1v,
+  SD2u,
+  SD2v, /*13*/
+  MiniFiberD1_x1, /*14*/
   MiniFiberD1_u1,
   MiniFiberD1_v1,
   MiniFiberD1_x2,
   MiniFiberD1_u2,
-  MiniFiberD1_v2, /*15*/
-  FiberD1_x, /*16*/
+  MiniFiberD1_v2, /*19*/
+  FiberD1_x, /*20*/
   FiberD1_u,
   FiberD1_v,
-  FiberD2_x, /*19*/
+  FiberD2_x, /*23*/
   FiberD2_u,
   FiberD2_v,
-  FiberD3_x, /*22*/
+  FiberD3_x, /*25*/
   FiberD3_u,
   FiberD3_v,
-  FiberD4_x, /*25*/
+  FiberD4_x, /*28*/
   FiberD4_u,
   FiberD4_v,
-  FiberD5_x, /*28*/
+  FiberD5_x, /*31*/
   FiberD5_u,
   FiberD5_v,
-  PSFE, /*31*/
-  MG01, /*32*/
+  PSFE, /*34*/
+  MG01, /*35*/
   MG02,
   MG03,
   MG04,
@@ -122,6 +126,7 @@ enum SolDet : int
 constexpr auto nameLiteralDet = {
     "InSi0"         ,          "InSi1",          "InSi2",          "InSi3",            "TR1",            "TR2",
     "Si1x"          ,           "Si1y",           "Si2x",           "Si2y",
+    "SD1u"          ,           "SD1v",           "SD2u",           "SD2v",
     "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1", "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
     "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
     "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      "FiberD4_x",      "FiberD4_u",      "FiberD4_v",
@@ -167,6 +172,7 @@ constexpr T EnumIter<T, args...>::values[];
   using SolDetIter = struct EnumIter<
     SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/,
     Si1x, Si1y, Si2x, Si2y,
+    SD1u, SD1v, SD2u, SD2v,
     MiniFiberD1_x1, MiniFiberD1_x1,MiniFiberD1_v1,
     MiniFiberD1_x2, MiniFiberD1_x2,MiniFiberD1_v2,
     FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x,
@@ -532,6 +538,7 @@ struct CandTrack
   double chi2_circle = -1.;
   double chi2_line = -1.;
 
+  CandTrack() = default;
   CandTrack(const std::vector<int>& Hits, bool R, int Q, const std::vector<double>& P, const TMatrixD& C, double chi2_1, double chi2_2):orderedHitIds(Hits),Rfitted(R),q(Q),par(P),Cov(C),chi2_circle(chi2_1),chi2_line(chi2_2) {};
 };
 
