@@ -101,11 +101,37 @@ int TRiemannFinder::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
   std::vector<RTrack> newTracksCand;
   int res = FinderTrack(RecoEvent, newTracksCand);
 
-  for(auto& trackC : newTracksCand)
+  for(int idT = 0; auto& trackC : newTracksCand)
     {
       int charge = trackC.toRefit ? trackC.helix.q : trackC.q;
       RecoEvent.TracksFound.emplace_back(trackC.sortedHits,trackC.toRefit,charge, trackC.helix.Par,
 	  trackC.helix.Cov, trackC.helix.chi2_circle,trackC.helix.chi2_line);
+
+      TTrackCand* OutTrack = dynamic_cast<TTrackCand*>(OutTree->TrackCand->ConstructedAt(OutTree->TrackCand->GetEntries()));
+
+      OutTrack->FitStatus = trackC.toRefit;
+      OutTrack->Charge = charge;
+
+      for(size_t id_par = 0; id_par<trackC.helix.Par.size();++id_par)
+	OutTrack->Seed_Par[id_par] = trackC.helix.Par[id_par];
+
+      auto* DataCov = trackC.helix.Cov.GetMatrixArray();
+      for(size_t id_cov = 0; id_cov<trackC.helix.Cov.GetNoElements();++id_cov)
+	OutTrack->Seed_Cov[id_cov] = DataCov[id_cov];
+
+      OutTrack->Chi2_C = trackC.helix.chi2_circle;
+      OutTrack->Chi2_L = trackC.helix.chi2_line;
+
+      for(size_t id_dethit = 0; id_dethit<trackC.sortedHits.size();++id_dethit)
+	{
+	  auto [id_det,id_hit,id_track] = TempHitToAllHits[id_dethit];
+	  OutTrack->SetLayerID.emplace_back(id_det);
+	  OutTrack->SetHitID.emplace_back(id_hit);
+	  OutTrack->MCTrackID = id_track;
+	}
+      OutTrack->NSet = OutTrack->SetLayerID.size();
+      OutTrack->TrackID = idT;
+      ++idT;
     }
 
   for(auto [id_det,id_hit,id_track] : TempHitToAllHits)

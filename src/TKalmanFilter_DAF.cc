@@ -223,7 +223,7 @@ int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
       OutTrack->MC_status   = TrackID + 10000 * Decay;
       OutTrack->Chi2        = FitRes.chi2;
       OutTrack->Chi2_X      = FitRes.ndf;
-      OutTrack->Chi2_Y      = FitRes.Ncentral; // FitRes.firstHit;
+      OutTrack->Chi2_Y      = FitRes.firstHit;
       OutTrack->Mass        = FitRes.mass;
       OutTrack->pdgcode     = FitRes.pdg_guess;
       OutTrack->MomMass.SetXYZM(FitRes.momX, FitRes.momY, FitRes.momZ, FitRes.mass);
