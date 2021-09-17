@@ -24,14 +24,8 @@ struct DataSim
   std::map<std::string, double>* simParameters;
 };
 
-class THyphiAttributes
+struct MT
 {
-
-  public:
-  int Nb_CPU;
-  int Nb_Fraction;
-  int NEvent;
-
   enum MTtype : int
     {
       SingleTh = 0,
@@ -46,20 +40,47 @@ class THyphiAttributes
   int NKalman;
   int NMerger;
 
-  std::string addr_initEvent; 
-                   
+  std::string addr_initEvent;
+
   std::string addr_frontBuilder;
   std::string addr_backFitter;
-                   
-  std::string addr_frontFitter; 
+
+  std::string addr_frontFitter;
   std::string addr_backMerger;
-                   
-  std::string addr_frontMerger; 
+
+  std::string addr_frontMerger;
   std::string addr_backEnd;
-                   
+
   std::string addr_control;
   std::string addr_monitor;
-  
+
+  void Init(const FullRecoConfig& Config);
+
+};
+
+struct Task
+{
+  bool Task_ReStart = false;
+  bool Task_CheckField = true;
+  bool Task_PrimaryVtx = false;
+  bool Task_FlatMCOutputML = false;
+  bool Task_BayesFinder = false;
+  bool Task_RiemannFinder = false;
+  bool Task_FinderCM = false;
+  bool Task_FindingPerf = false;
+  bool Task_CheckRZ = true;
+  bool Task_KalmanDAF = true;
+  bool Task_DecayVtx = false;
+
+  void Init(const FullRecoConfig& Config);
+};
+
+// struct KF
+// {
+
+
+// };
+
   bool G4_simu;
   bool G4_TimeResolution;
   bool G4_GeoResolution;
@@ -93,6 +114,48 @@ class THyphiAttributes
   bool Task_CheckRZ;
   bool Task_KalmanDAF;
   bool Task_DecayVtx;
+
+class THyphiAttributes
+{
+
+  public:
+
+  std::string NameIn;
+  std::string NameOut;
+  std::string DateOfRun;
+
+  std::string Hash;
+
+  int Nb_CPU;
+  int Nb_Fraction;
+  int NEvent;
+
+  MT MTsetting;
+
+  Task TaskConfig;
+
+  bool G4_simu;
+  bool G4_TimeResolution;
+  bool G4_GeoResolution;
+
+  bool back_tracking;
+
+  double Target_PositionX;
+  double Target_PositionY;
+  double Target_PositionZ;
+
+  double Target_Size;
+  double Field_Strength;
+
+  int Wasa_Side;
+  bool Wasa_FieldMap;
+  std::string Wasa_FieldMapName;
+
+  std::vector<std::string> name_GeoVolumes;
+
+  bool beam_only;
+  bool Debug_DAF;
+  bool DoNoMaterial;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
