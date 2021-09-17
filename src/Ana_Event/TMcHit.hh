@@ -16,6 +16,8 @@ public :
 
   Int_t LayerID;
   Int_t HitID;
+  Int_t TrackID;
+
   TVector3 MCHit;
   TVector3 Hit;
 
@@ -26,6 +28,9 @@ public :
   Double_t MagnetInteraction;
   TLorentzVector MCparticle;
 
+  Double_t Time;
+  Double_t Energy;
+  Double_t TrackLength;
 
   TMcHit();
 
@@ -38,7 +43,7 @@ public :
   ~TMcHit();
 
  
-  ClassDef(TMcHit,2)
+  ClassDef(TMcHit,3)
 
 };
 

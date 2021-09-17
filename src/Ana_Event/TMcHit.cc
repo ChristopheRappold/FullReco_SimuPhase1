@@ -7,7 +7,7 @@ using namespace std;
 ClassImp(TMcHit)
 
 
-TMcHit::TMcHit():name("default_hit"),LayerID(-1),HitID(-1),MCHit(-999.,-999.,-999.),Hit(-999.,-999.,-999.),MC_id(0),Charge(0),Pdg(0),Brho(0.),MagnetInteraction(0.),MCparticle()
+TMcHit::TMcHit():name("default_hit"),LayerID(-1),HitID(-1),TrackID(-1),MCHit(-999.,-999.,-999.),Hit(-999.,-999.,-999.),MC_id(0),Charge(0),Pdg(0),Brho(0.),MagnetInteraction(0.),MCparticle(),Time(0.),Energy(0.),TrackLength(0.)
 { 
 
 
@@ -28,7 +28,7 @@ TMcHit::~TMcHit()
 }
 
 
-TMcHit::TMcHit(const TMcHit& M):LayerID(M.LayerID),HitID(M.HitID),MCHit(M.MCHit),Hit(M.Hit),MC_id(M.MC_id),Charge(M.Charge),Pdg(M.Pdg),Brho(M.Brho),MagnetInteraction(M.MagnetInteraction),MCparticle(M.MCparticle)
+TMcHit::TMcHit(const TMcHit& M):LayerID(M.LayerID),HitID(M.HitID),TrackID(M.TrackID),MCHit(M.MCHit),Hit(M.Hit),MC_id(M.MC_id),Charge(M.Charge),Pdg(M.Pdg),Brho(M.Brho),MagnetInteraction(M.MagnetInteraction),MCparticle(M.MCparticle),Time(M.Time),Energy(M.Energy),TrackLength(M.TrackLength)
 {
   name = "const_copy";
   name+=M.name;
@@ -49,6 +49,7 @@ TMcHit& TMcHit::operator=(const TMcHit& M)
   name+="op=";
   LayerID = M.LayerID;
   HitID = M.HitID;
+  TrackID = M.TrackID;
   MCHit.SetXYZ(M.MCHit.X(),M.MCHit.Y(),M.MCHit.Z());
   Hit.SetXYZ(M.Hit.X(),M.Hit.Y(),M.Hit.Z());
   MC_id = M.MC_id;
@@ -57,7 +58,10 @@ TMcHit& TMcHit::operator=(const TMcHit& M)
   Brho = M.Brho;
   MagnetInteraction = M.MagnetInteraction;
   MCparticle.SetXYZT(M.MCparticle.X(),M.MCparticle.Y(),M.MCparticle.Z(),M.MCparticle.T());
-    
+  Time = M.Time;
+  Energy = M.Energy;
+  TrackLength = M.TrackLength;
+
   return *this;
 }
 
@@ -84,6 +88,7 @@ void TMcHit::Clear(Option_t * /*option*/)
   name="";
   LayerID = -1;
   HitID = -1;
+  TrackID = -1;
   MCHit.SetXYZ(-999.,-999.,-999.);
   Hit.SetXYZ(-999.,-999.,-999.);
   MC_id = 0;
@@ -92,5 +97,7 @@ void TMcHit::Clear(Option_t * /*option*/)
   Brho = 0;
   MagnetInteraction = 0.;
   MCparticle.SetXYZT(0.,0.,0.,0.);
-  
+  Time = 0.;
+  Energy = 0.;
+  TrackLength = 0.;
 }
