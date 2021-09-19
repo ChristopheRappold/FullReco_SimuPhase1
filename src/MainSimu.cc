@@ -112,8 +112,8 @@ int main(int argc, char** argv)
       // HypHiMC_output_TREE ***********************
       Long64_t total_nentries = 0;
       // Long64_t total_nentries_over_files=0;
-      Long64_t Start_event[3] = {0, 0, 0};
-      Long64_t Stop_event[3]  = {0, 0, 0};
+      Long64_t Start_event = 0;
+      Long64_t Stop_event = 0;
 
       TGeoManager::Import(nameGeo.c_str()); // FOR Kalman_DAF
 
@@ -152,20 +152,24 @@ int main(int argc, char** argv)
       InTree        = dynamic_cast<TTree*>(input_file->Get("G4Tree"));
       assert(InTree != nullptr);
 
-      DataSim InputPar{nullptr, nullptr};
+      DataSim InputPar{nullptr, nullptr, nullptr};
       InputPar.nameDet       = (std::vector<std::string>*)(input_file->Get("nameDet"));
       InputPar.simParameters = (std::map<std::string, double>*)(input_file->Get("simParameters"));
+      InputPar.previousMeta  = (AnaEvent_Metadata*)(input_file->Get("EventMetadata"));
 
-      if(InputPar.nameDet == nullptr)
+      if(InputPar.nameDet == nullptr && InputPar.previousMeta == nullptr)
         {
           ConsoleLogger->error("E> Load nameDet not possible ! {}", fmt::ptr(input_file->Get("nameDet")));
+          ConsoleLogger->error("E> Load AnaEvent_Metadata not possible ! {}", fmt::ptr(input_file->Get("EventMetadata")));
           return -1;
         }
-      if(InputPar.simParameters == nullptr)
+      if(InputPar.simParameters == nullptr && InputPar.previousMeta == nullptr)
         {
           ConsoleLogger->error("E> Load simParameters not possible ! {}", fmt::ptr(input_file->Get("simParameters")));
+          ConsoleLogger->error("E> Load AnaEvent_Metadata not possible ! {}", fmt::ptr(input_file->Get("EventMetadata")));
           return -1;
         }
+
       TG4Sol_Event* fEvent = nullptr;
       InTree->SetBranchAddress("TG4Sol_Event", &fEvent);
 
@@ -194,13 +198,13 @@ int main(int argc, char** argv)
       Long64_t total_nentries_over_files = InTree->GetEntries();
       //int max_loop                       = 1;
 
-      Start_event[0] = Start;
-      Stop_event[0]  = Nb_event != -1 ? Nb_event + Start : total_nentries_over_files;
+      Start_event = Start;
+      Stop_event  = Nb_event != -1 ? Nb_event + Start : total_nentries_over_files;
 
-      if(Stop_event[0] > total_nentries_over_files)
-        Stop_event[0] = total_nentries_over_files;
-      if(Start_event[0] > total_nentries_over_files)
-        Start_event[0] = total_nentries_over_files;
+      if(Stop_event > total_nentries_over_files)
+        Stop_event = total_nentries_over_files;
+      if(Start_event > total_nentries_over_files)
+        Start_event = total_nentries_over_files;
 
       // std::list<std::string> Option;
       // std::list<std::string> ToDo;
@@ -211,16 +215,19 @@ int main(int argc, char** argv)
       // fra_string+=Nb_fraction;
       // Option.push_back(fra_string.Data());
       // TString nevent_string("Event");
-      // nevent_string+=Stop_event[0]-Start_event[0];
+      // nevent_string+=Stop_event-Start_event;
       // Option.push_back(nevent_string.Data());
       // //Option.push_back("NoMaterial");
       // Option.push_back("Debug_DAF");
 
-      config.Add("Nb_Event", Stop_event[0] - Start_event[0]);
+      config.Add("Nb_Event", Stop_event - Start_event);
+      config.Add("Start_Event", Start_event);
+      config.Add("Stop_Event", Stop_event);
 
       Ana_Hist ListHisto(true /*DAF_Debug*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Hough*/,
                          true);
 
+      AnaEvent_Metadata metadata;
       //ListHisto.DebugHists();
       if(MT == false && ZMQ == false)
 	{
@@ -232,16 +239,14 @@ int main(int argc, char** argv)
 	  // EVENT LOOP nentries
 	  TTimeStamp stamp;
 	  
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event[0], Stop_event[0]);
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event[1], Stop_event[1]);
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event[2], Stop_event[2]);
+	  ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
 	  ConsoleLogger->info("---------------------------------------------");
 	  
 	  Long64_t for_display = 0;
 	  Long64_t timing      = 0;
-	  // reader.SetEntriesRange(Start_event[0],Stop_event[0]);
+	  // reader.SetEntriesRange(Start_event,Stop_event);
 	  
-	  for(Long64_t i = Start_event[0]; i < Stop_event[0]; ++i)
+	  for(Long64_t i = Start_event; i < Stop_event; ++i)
 	    {
 	      InTree->GetEntry(i);
 
@@ -253,13 +258,13 @@ int main(int argc, char** argv)
 	      Anaevent->Clear();
 
 	      if(iEvent % 10000 == 0)
-		ConsoleLogger->info("Processing Event# {} / {} | {} %", iEvent, Stop_event[0],
-				    (double)iEvent / (double)(Stop_event[0] - Start_event[0]) * 100);
+		ConsoleLogger->info("Processing Event# {} / {} | {} %", iEvent, Stop_event,
+				    (double)iEvent / (double)(Stop_event - Start_event) * 100);
 
-	      if((int)((double)iEvent / (double)(Stop_event[0] - Start_event[0]) * 4) == timing)
+	      if((int)((double)iEvent / (double)(Stop_event - Start_event) * 4) == timing)
 		{
 		  ConsoleLogger->info("Progress : {} %",
-				      (int)((double)iEvent / (double)(Stop_event[0] - Start_event[0]) * 100.));
+				      (int)((double)iEvent / (double)(Stop_event - Start_event) * 100.));
 		  ++timing;
 		}
 	      // auto event = ReaderEvent.Get();
@@ -270,6 +275,8 @@ int main(int argc, char** argv)
 	      ++for_display;
 	      Anaevent->Clear();
 	    }
+
+	  ReconstructionTask.SetEventMetadata(metadata);
 	}
       else if(MT==true && ZMQ==false)
 	{
@@ -281,10 +288,10 @@ int main(int argc, char** argv)
 	  //-------------------------------------------------------
 	  // EVENT LOOP nentries
 	  
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event[0], Stop_event[0]);
+	  ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
 	  ConsoleLogger->info("---------------------------------------------");
 
-	  int toStop = ReconstructionTaskMT.Run(Start_event[0], Stop_event[0], InTree, *fEvent, AllHits, Anatree, Anaevent);
+	  int toStop = ReconstructionTaskMT.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
 	}
       else if(ZMQ==true && MT==false)
 	{
@@ -295,10 +302,10 @@ int main(int argc, char** argv)
 	  //-------------------------------------------------------
 	  // EVENT LOOP nentries
 	  
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event[0], Stop_event[0]);
+	  ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
 	  ConsoleLogger->info("---------------------------------------------");
 
-	  int toStop = ReconstructionTaskZMQ.Run(Start_event[0], Stop_event[0], InTree, *fEvent, AllHits, Anatree, Anaevent);
+	  int toStop = ReconstructionTaskZMQ.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
 	}
       else
 	{
@@ -345,6 +352,10 @@ int main(int argc, char** argv)
       // additionalPDG->Write();
 
       ConsoleLogger->info("Additional PDG data written");
+
+      offile->WriteTObject(&metadata,"EventMetadata");
+
+      ConsoleLogger->info("Event metadata written");
 
       offile->Close();
       // offile_hist->Close();
