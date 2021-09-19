@@ -40,25 +40,25 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
   //det_build = new TTestUnits(Attributes,"layerDAF");
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
-  if(Attributes.Task_CheckField)
+  if(Attributes.TaskConfig.Task_CheckField)
     list_processMC.emplace_back(new CheckField(Attributes));
-  if(Attributes.Task_PrimaryVtx)
+  if(Attributes.TaskConfig.Task_PrimaryVtx)
     list_processMC.emplace_back(new TPrimaryVertex(Attributes));
-  if(Attributes.Task_FlatMCOutputML)
+  if(Attributes.TaskConfig.Task_FlatMCOutputML)
     list_processMC.emplace_back(new TFlatMCOutputML(Attributes));
-  if(Attributes.Task_BayesFinder)
+  if(Attributes.TaskConfig.Task_BayesFinder)
     list_processMC.emplace_back(new TBayesFinder(Attributes));
-  if(Attributes.Task_RiemannFinder)
+  if(Attributes.TaskConfig.Task_RiemannFinder)
     list_processMC.emplace_back(new TRiemannFinder(Attributes));
-  //if(Attributes.Task_FinderCM)
+  //if(Attributes.TaskConfig.Task_FinderCM)
   //  list_processMC.emplace_back(new TFinderCM(Attributes));
-  if(Attributes.Task_FindingPerf)
+  if(Attributes.TaskConfig.Task_FindingPerf)
     list_processMC.emplace_back(new TFindingPerf(Attributes));
-  if(Attributes.Task_CheckRZ)
+  if(Attributes.TaskConfig.Task_CheckRZ)
     list_processMC.emplace_back(new TCheckRZ(Attributes));
-  if(Attributes.Task_KalmanDAF)
+  if(Attributes.TaskConfig.Task_KalmanDAF)
     list_processMC.emplace_back(new TKalmanFilter_DAF(Attributes));
-  if(Attributes.Task_DecayVtx)
+  if(Attributes.TaskConfig.Task_DecayVtx)
     list_processMC.emplace_back(new TDecayVertex(Attributes));
 
   for(auto task : list_processMC)
