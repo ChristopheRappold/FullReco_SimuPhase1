@@ -1,9 +1,12 @@
 #include "FullRecoConfig.hh"
 
 #include <boost/foreach.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <fstream>
 #include <getopt.h>
 #include <sstream>
+
+
 
 static struct option optlong[] = {{"help", 0, NULL, 'h'},  {"cpu", 1, NULL, 'c'},   {"num", 1, NULL, 'n'},
                                   {"event", 1, NULL, 'e'}, {"start", 1, NULL, 's'}, {"geo", 1, NULL, 'g'},
@@ -189,6 +192,32 @@ std::string FullRecoConfig::display(const int depth, const pt::ptree& t)
 }
 
 std::string FullRecoConfig::CheckConfig() { return display(0, tree); }
+
+void FullRecoConfig::Save(std::string& Sjson) const
+{
+  std::stringstream outs;
+  pt::write_json(outs, tree,false);
+  Sjson = outs.str();
+}
+
+int FullRecoConfig::Reload(const std::vector<char>& confjson) const
+{
+  std::stringstream ins;
+  for(auto c : confjson)
+    ins << c;
+
+  pt::ptree tempTree;
+  pt::read_json(ins,tempTree);
+
+  std::string geo1 = Get<std::string>("Geo");
+  std::string geo2 = tempTree.get<std::string>("Geo");
+
+  int same = 0;
+  if(geo1 != geo2)
+    ++same;
+
+  return same;
+}
 
 double FullRecoConfig::GetDimension(const std::string& dimension)
 {

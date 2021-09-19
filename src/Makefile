@@ -48,9 +48,10 @@ SPDLOGFLAGS = -I./spdlog/include
 ZMQFLAGS = -I./cppzmq/include -I./libzmq/include
 MSGFLAGS = -I./msgpack-c/include
 TRICKTRACKFLAGS = -I./TrickTrack/include
+ORMFLAGS = -I./sqlite_orm/include
 
-CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
-LIBS         += $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol
+CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
+LIBS         += $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lsqlite3
 
 GENFIT_LIB = -lgenfit2
 SPDLOG_LIB = -lspdlog

@@ -46,6 +46,8 @@ public:
       return false;
   }
   std::string CheckConfig();
+  void Save(std::string& out) const;
+  int Reload(const std::vector<char>& confjson) const;
 
 private:
   pt::ptree tree;

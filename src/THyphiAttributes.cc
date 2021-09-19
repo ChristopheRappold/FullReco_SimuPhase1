@@ -1,19 +1,21 @@
 #include "THyphiAttributes.h"
+
 #include <cstdlib>
 #include <fstream>
+#include <functional>
 //#include <iostream>
 
 #include "FairBase/WasaSolenoidFieldMap.h"
+#include "TDatime.h"
 #include "TMath.h"
+#include "TTimeStamp.h"
 //#define FIELD_DEBUG
 #include "FieldManager.h"
 #include "GFHypFieldMap_new.h"
 #include "GFWasaMap.h"
 #include "MaterialEffects.h"
-#include "TGeoMaterialInterface.h"
-
 #include "TGeoManager.h"
-
+#include "TGeoMaterialInterface.h"
 #include "spdlog/spdlog.h"
 
 //#define OLDGENFIT For Kalman_RK
@@ -21,7 +23,7 @@
 // THyphiAttributes::THyphiAttributes() : Field(nullptr), InputPar{nullptr, nullptr}
 // {
 //   _logger = spdlog::get("Console");
-  
+
 //   G4_simu = false;
 //   G4_TimeResolution = false;
 //   G4_GeoResolution = false;
@@ -34,13 +36,31 @@
 // }
 
 THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& In)
-  : Field(nullptr), Config(config), InputPar(In)
+    : Field(nullptr), Config(config), InputPar(In)
 {
   _logger = spdlog::get("Console");
-  _logger->info( "THyphiAttributes()" );
+  _logger->info("THyphiAttributes()");
 
-  
-  G4_simu = false;
+  NameIn  = config.Get<std::string>("Input_Namefile");
+  NameOut = config.Get<std::string>("Output_Namefile");
+
+  TTimeStamp timing;
+  int timeA = timing.GetTime();
+  int dateA = timing.GetDate();
+  TDatime datetime;
+  datetime.Set(dateA, timeA);
+
+  DateOfRun = datetime.AsSQLString();
+
+  std::hash<std::string> HashStr;
+  std::string tempStr(NameIn);
+  tempStr += NameOut;
+  tempStr += DateOfRun;
+  Hash = std::to_string(HashStr(tempStr));
+
+  _logger->info("Id Hash : {} / dateOfRun : {}", Hash, DateOfRun);
+
+  G4_simu           = false;
   G4_TimeResolution = false;
   G4_GeoResolution  = false;
   Debug_DAF         = false;
@@ -111,8 +131,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
 
   _logger->info("KF_RejectionCut : Central < : {} MiniFiber < : {}", KF_NbCentralCut, KF_NbMiniFiberCut);
 
-  std::string temp_name_out = config.Get<std::string>("Output_Namefile");
-  std::string temp_file_base_name = temp_name_out.substr(0,temp_name_out.find_last_of('.'));
+  // std::string temp_name_out = config.Get<std::string>("Output_Namefile");
+  std::string temp_file_base_name = NameOut.substr(0, NameOut.find_last_of('.'));
 
   std::string MLSuffix = Config.IsAvailable("FlatML_Suffix") ? Config.Get<std::string>("FlatML_Suffix") : "ML_MCOutput";
   temp_file_base_name += MLSuffix;
@@ -130,12 +150,17 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
 
   MTsetting.Init(Config);
 
-  _logger->info( " *** > Loading Fieldmap ");
+  if(TaskConfig.Task_ReStart)
+    Reload_Para();
+  else
+    Init_Para();
+
+  _logger->info(" *** > Loading Fieldmap ");
 
   if(Wasa_FieldMap)
     {
-      double signD = Wasa_Side ? 1.0 : -1.0;
-      Field = new WasaSolenoidFieldMap("WasaFieldMap","WasaFieldMap",Wasa_FieldMapName, Field_Strength, signDir);
+      double signDir = Wasa_Side ? 1.0 : -1.0;
+      Field = new WasaSolenoidFieldMap("WasaFieldMap", "WasaFieldMap", Wasa_FieldMapName, Field_Strength, signDir);
     }
   else
     Field = new FrsSolenoidHypField();
@@ -259,6 +284,53 @@ int THyphiAttributes::Init_Para()
 
   return 0;
 }
+
+int THyphiAttributes::Reload_Para()
+{
+  std::string Hash(InputPar.previousMeta->Hash);
+
+  auto storage = InitStorage();
+  storage.sync_schema();
+
+  auto previousConfSel = storage.get_all<AttrOut>(sqlite_orm::where(sqlite_orm::is_equal(&AttrOut::Hash,Hash)));
+  if(previousConfSel.size()!=1)
+    {
+      _logger->info("Reload from database : could not found the proper previous configuration : {} : nb Entries {}",Hash,previousConfSel.size());
+      return -1;
+    }
+
+  auto previousConf = previousConfSel.front();
+
+  Target_PositionX = previousConf.Target_PositionX;
+  Target_PositionY = previousConf.Target_PositionY;
+  Target_PositionZ = previousConf.Target_PositionZ;
+  Target_Size      = previousConf.Target_Size;
+  Field_Strength   = previousConf.Field_Strength;
+  Wasa_Side        = previousConf.Wasa_Side;
+
+  Wasa_FieldMap = previousConf.Wasa_FieldMap;
+  Wasa_FieldMapName = previousConf.Wasa_FieldMapName;
+
+  std::string tempStr;
+  for(size_t i=0; i<previousConf.name_GeoVolumes.size();++i)
+    {
+      if(previousConf.name_GeoVolumes[i] != ';')
+	tempStr += previousConf.name_GeoVolumes[i];
+      else
+	{
+	  name_GeoVolumes.push_back(tempStr);
+	  tempStr.clear();
+	}
+    }
+
+  int diffConf = Config.Reload(previousConf.ConfigJson);
+  if(diffConf !=0)
+    return -2;
+
+  return 0;
+}
+
+
 void MT::Init(const FullRecoConfig& Config)
 {
   if(Config.IsAvailable("MultiThreading"))
@@ -340,3 +412,95 @@ void Task::Init(const FullRecoConfig& Config)
     Task_ReStart = Config.Get<bool>("Task_ReStart");
 }
 
+void THyphiAttributes::SetOut(AttrOut& out) const
+{
+  out.NameIn    = NameIn;
+  out.NameOut   = NameOut;
+  out.DateOfRun = DateOfRun;
+  out.Hash      = Hash;
+
+  out.Nb_CPU               = Nb_CPU;
+  out.Nb_Fraction          = Nb_Fraction;
+  out.NEvent               = NEvent;
+  out.MT_RunType           = MTsetting.RunType;
+  out.MT_IsMain            = MTsetting.IsMain;
+  out.MT_NQueue            = MTsetting.NQueue;
+  out.MT_NBuilder          = MTsetting.NBuilder;
+  out.MT_NKalman           = MTsetting.NKalman;
+  out.MT_NMerger           = MTsetting.NMerger;
+  out.MT_addr_initEvent    = MTsetting.addr_initEvent;
+  out.MT_addr_frontBuilder = MTsetting.addr_frontBuilder;
+  out.MT_addr_backFitter   = MTsetting.addr_backFitter;
+  out.MT_addr_frontFitter  = MTsetting.addr_frontFitter;
+  out.MT_addr_backMerger   = MTsetting.addr_backMerger;
+  out.MT_addr_frontMerger  = MTsetting.addr_frontMerger;
+  out.MT_addr_backEnd      = MTsetting.addr_backEnd;
+  out.MT_addr_control      = MTsetting.addr_control;
+  out.MT_addr_monitor      = MTsetting.addr_monitor;
+  out.Task_CheckField      = TaskConfig.Task_CheckField;
+  out.Task_PrimaryVtx      = TaskConfig.Task_PrimaryVtx;
+  out.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
+  out.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
+  out.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;
+  out.Task_FinderCM        = TaskConfig.Task_FinderCM;
+  out.Task_FindingPerf     = TaskConfig.Task_FindingPerf;
+  out.Task_CheckRZ         = TaskConfig.Task_CheckRZ;
+  out.Task_KalmanDAF       = TaskConfig.Task_KalmanDAF;
+  out.Task_DecayVtx        = TaskConfig.Task_DecayVtx;
+  out.Task_ReStart         = TaskConfig.Task_ReStart;
+  out.G4_simu              = G4_simu;
+  out.G4_TimeResolution    = G4_TimeResolution;
+  out.G4_GeoResolution     = G4_GeoResolution;
+  out.back_tracking        = back_tracking;
+  out.Target_PositionX     = Target_PositionX;
+  out.Target_PositionY     = Target_PositionY;
+  out.Target_PositionZ     = Target_PositionZ;
+  out.Target_Size          = Target_Size;
+  out.Field_Strength       = Field_Strength;
+  out.Wasa_Side            = Wasa_Side;
+  out.Wasa_FieldMap        = Wasa_FieldMap;
+  out.Wasa_FieldMapName    = Wasa_FieldMapName;
+
+  for(auto nameG : name_GeoVolumes)
+    {
+      for(size_t i = 0; i < nameG.length(); ++i)
+        out.name_GeoVolumes.push_back(nameG[i]);
+      out.name_GeoVolumes.push_back(';');
+    }
+
+  out.beam_only          = beam_only;
+  out.Debug_DAF          = Debug_DAF;
+  out.DoNoMaterial       = DoNoMaterial;
+  out.RZ_ChangeMiniFiber = RZ_ChangeMiniFiber;
+  out.RZ_MDCProlate      = RZ_MDCProlate;
+  out.RZ_MDCWire2        = RZ_MDCWire2;
+  out.RZ_MDCBiasCorr     = RZ_MDCBiasCorr;
+  out.KF_Kalman          = KF_Kalman;
+  out.KF_KalmanSqrt      = KF_KalmanSqrt;
+  out.KF_KalmanRef       = KF_KalmanRef;
+  out.KF_DAFRef          = KF_DAFRef;
+  out.KF_DAF             = KF_DAF;
+  out.KF_NbCentralCut    = KF_NbCentralCut;
+  out.KF_NbMiniFiberCut  = KF_NbMiniFiberCut;
+  out.FlatML_namefile    = FlatML_namefile;
+  out.DataML_Out         = DataML_Out;
+  out.RF_OutputEvents    = RF_OutputEvents;
+
+  std::string tempCj;
+  Config.Save(tempCj);
+  for(size_t i = 0; i < tempCj.length(); ++i)
+    out.ConfigJson.push_back(tempCj[i]);
+}
+
+void THyphiAttributes::SaveToDatabase() const
+{
+  auto storage = InitStorage();
+  storage.sync_schema(true);
+
+  AttrOut outA;
+  SetOut(outA);
+  _logger->debug("ToDatabase : hash {} ", outA.Hash);
+  // storage.begin_transaction();
+  storage.insert(outA);
+  // storage.commit();
+}
