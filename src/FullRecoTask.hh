@@ -11,7 +11,7 @@
 #include "EventG4Sol/TG4Sol_Hit.hh"
 #include "Ana_Event/Ana_EventNew_v16.hh"
 #include "Ana_Event/MCAnaEventG4Sol.hh"
-
+#include "Ana_Event/AnaEvent_Metadata.hh"
 
 #include "FullRecoEvent.hh"
 #include "TDataProcess.h"
@@ -46,6 +46,7 @@ public :
   int EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArray*>& hits, MCAnaEventG4Sol* OutTree);
 #endif  
   void AttachHisto(Ana_Hist* h);
+  void SetEventMetadata(AnaEvent_Metadata& metadata);
 
 private :
 

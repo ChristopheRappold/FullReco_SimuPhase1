@@ -87,6 +87,25 @@ void FullRecoTask::AttachHisto(Ana_Hist* h)
   det_build->Init(h);
   for(auto process = list_processMC.begin(),process_last = list_processMC.end(); process!=process_last;++process)
     (*process)->Init(h);
+}
+
+void FullRecoTask::SetEventMetadata(AnaEvent_Metadata& metadata)
+{
+  metadata.NameIn = Attributes.NameIn;
+  metadata.NameOut = Attributes.NameOut;
+  metadata.DateOfRun = Attributes.DateOfRun;
+  metadata.Hash = Attributes.Hash;
+  metadata.FirstStep = det_build->signature;
+  metadata.FinalStep = list_processMC.back()->signature;
+  metadata.G4_simu = Attributes.G4_simu;
+  metadata.NEvent = Attributes.NEvent;
+  metadata.StartEvent = Attributes.Config.Get<uint>("Start_Event");
+  metadata.StopEvent = Attributes.Config.Get<uint>("Stop_Event");
+  metadata.Nb_Fraction = Attributes.Nb_Fraction;
+  metadata.Wasa_Side = Attributes.Wasa_Side;
+  metadata.Wasa_FieldMap = Attributes.Wasa_FieldMap;
+  metadata.Field_Strength = Attributes.Field_Strength;
+  metadata.Wasa_FieldMapName = Attributes.Wasa_FieldMapName;
 
 }
 

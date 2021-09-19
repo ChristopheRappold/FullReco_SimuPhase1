@@ -16,12 +16,16 @@
 #include "FairBase/FrsSolenoidHypField.h"
 #include "FairBase/WasaSolenoidFieldMap.h"
 
+#include "Ana_Event/AnaEvent_Metadata.hh"
+
 #include "spdlog/logger.h"
 
 struct DataSim
 {
   std::vector<std::string>* nameDet;
   std::map<std::string, double>* simParameters;
+
+  AnaEvent_Metadata* previousMeta;
 };
 
 struct MT
