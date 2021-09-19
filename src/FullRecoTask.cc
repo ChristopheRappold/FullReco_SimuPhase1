@@ -1,6 +1,7 @@
 #include "FullRecoTask.hh"
 
 #include "TBuildDetectorLayerPlaneDAF.h"
+#include "TBuildRestarter.h"
 
 #include "TBayesFinder.h"
 //#include "TFinderCM.h"
@@ -13,6 +14,7 @@
 #include "TDecayVertex.h"
 #include "TRiemannFinder.h"
 #include "TFindingPerf.h"
+#include <list>
 //#include "TKalmanFilter_FRS.h"
 
 
@@ -36,7 +38,10 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
   AnaHisto = nullptr;
 
   //det_build = new TBuildDetectorLayerPlane(Attributes,Attributes.beam_only);
-  det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
+  if(Attributes.TaskConfig.Task_ReStart)
+    det_build = new TBuildRestarter(Attributes);
+  else
+    det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
   //det_build = new TTestUnits(Attributes,"layerDAF");
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
@@ -79,6 +84,9 @@ FullRecoTask::~FullRecoTask()
       delete (*process);
       *process = nullptr;
     }
+
+  Attributes.SaveToDatabase();
+
 }
 
 void FullRecoTask::AttachHisto(Ana_Hist* h)
@@ -120,6 +128,25 @@ int FullRecoTask::EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArr
   REvent.Clear();
   int return_build = (*dynamic_cast<TBuildDetectorLayerPlaneDAF*>(det_build))(ev,hits,REvent,OutTree);
   
+  if(return_build !=0)
+    return -1;
+
+  int result_process = EventProcess(REvent,OutTree);
+
+  return result_process;
+
+}
+
+#ifdef ROOT6
+int FullRecoTask::EventLoop(const MCAnaEventG4Sol& RestartEvent, MCAnaEventG4Sol* OutTree)
+#else
+int FullRecoTask::EventLoop(MCAnaEventG4Sol* RestartEvent, MCAnaEventG4Sol* OutTree)
+#endif
+{
+
+  REvent.Clear();
+  int return_build = (*dynamic_cast<TBuildRestarter*>(det_build))(RestartEvent,REvent,OutTree);
+
   if(return_build !=0)
     return -1;
 

@@ -54,6 +54,8 @@ int main(int argc, char** argv)
       std::string nameGeo  = config.Get<std::string>("Geo");
       std::string name_in  = config.Get<std::string>("Input_Namefile");
       std::string name_out = config.Get<std::string>("Output_Namefile");
+      bool Restarting = config.IsAvailable("Task_ReStart") ? config.Get<bool>("Task_ReStart") : false;
+
       if(config.IsAvailable("LocalOutput_Suffix"))
 	{
 	  std::string file_base_name = name_out.substr(0,name_out.find_last_of('.'));
@@ -149,7 +151,11 @@ int main(int argc, char** argv)
       TFile* input_file = new TFile(name_in.c_str());
 
       TTree* InTree = nullptr;
-      InTree        = dynamic_cast<TTree*>(input_file->Get("G4Tree"));
+      if(Restarting == false)
+	InTree        = input_file->Get<TTree>("G4Tree");
+      else
+	InTree        = input_file->Get<TTree>("T");
+
       assert(InTree != nullptr);
 
       DataSim InputPar{nullptr, nullptr, nullptr};
@@ -171,7 +177,12 @@ int main(int argc, char** argv)
         }
 
       TG4Sol_Event* fEvent = nullptr;
-      InTree->SetBranchAddress("TG4Sol_Event", &fEvent);
+      MCAnaEventG4Sol* fEventRe = new MCAnaEventG4Sol();
+
+      if(Restarting == false)
+	InTree->SetBranchAddress("TG4Sol_Event", &fEvent);
+      else
+	InTree->SetBranchAddress("MCAnaEventG4Sol", &fEventRe);
 
 #ifdef ROOT6
       TTreeReader reader(InTree);
@@ -182,12 +193,15 @@ int main(int argc, char** argv)
         AllHits.emplace_back(new TTreeReaderArray<TG4Sol_Hit>(reader, name.c_str()));
 #else
       std::vector<TClonesArray*> AllHits;
-      for(const auto& name : *InputPar.nameDet)
-        {
-          AllHits.emplace_back(new TClonesArray("TG4Sol_Hit", 20));
-          InTree->SetBranchAddress(name.c_str(), &AllHits.back());
-          AllHits.back()->SetName(name.c_str());
-        }
+      if(Restarting == false)
+	{
+	  for(const auto& name : *InputPar.nameDet)
+	    {
+	      AllHits.emplace_back(new TClonesArray("TG4Sol_Hit", 20));
+	      InTree->SetBranchAddress(name.c_str(), &AllHits.back());
+	      AllHits.back()->SetName(name.c_str());
+	    }
+	}
 #endif
 
 #ifdef TREEPERF
@@ -269,7 +283,11 @@ int main(int argc, char** argv)
 		}
 	      // auto event = ReaderEvent.Get();
 
-	      int toStop = ReconstructionTask.EventLoop(*fEvent, AllHits, Anaevent);
+	      int toStop = 0;
+	      if(Restarting == false)
+		toStop = ReconstructionTask.EventLoop(*fEvent, AllHits, Anaevent);
+	      else
+		toStop = ReconstructionTask.EventLoop(fEventRe, Anaevent);
 
 	      nb += Anatree->Fill();
 	      ++for_display;

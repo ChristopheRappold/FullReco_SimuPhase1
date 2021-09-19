@@ -22,7 +22,7 @@ public :
   
   void Clear(Option_t *option ="");
   int Setup();
-  static void   Reset();
+  void   Reset();
   // int Add_MC(const TMcParticle& M);
   // int Add_Hit(const TMcHit& H,TString detector);
   // int Add_Track(const THyphiTrack& T);
@@ -66,24 +66,26 @@ public :
   Int_t Ntrack;
   TClonesArray* fTrack; //->
 
-  static TClonesArray* gMC_Particle; //!
-  
-  static TClonesArray* gInSi; //!
-  static TClonesArray* gTR; //!
-  static TClonesArray* gFiber; //!
-  static TClonesArray* gCDC; //!
-  static TClonesArray* gCDH; //!
-  static TClonesArray* gFwdTracker; //!
-  static TClonesArray* gRPC; //!
-  static TClonesArray* gFMF2; //!
+  // static TClonesArray* gMC_Particle; //!
 
-  static TClonesArray* gPSFE; //!
-  static TClonesArray* gPSBE; //!
-  static TClonesArray* gPSCE; //!
+  // static TClonesArray* gInSi; //!
+  // static TClonesArray* gTR; //!
+  // static TClonesArray* gFiber; //!
+  // static TClonesArray* gCDC; //!
+  // static TClonesArray* gCDH; //!
+  // static TClonesArray* gFwdTracker; //!
+  // static TClonesArray* gRPC; //!
+  // static TClonesArray* gFMF2; //!
 
-  static TClonesArray* gfTrack; //! 
-  
-  ClassDef(MCAnaEventG4Sol,4)
+  // static TClonesArray* gPSFE; //!
+  // static TClonesArray* gPSBE; //!
+  // static TClonesArray* gPSCE; //!
+
+  // static TClonesArray* gTrackCand; //!
+
+  // static TClonesArray* gfTrack; //!
+
+  ClassDef(MCAnaEventG4Sol,5)
 };
 
 #endif

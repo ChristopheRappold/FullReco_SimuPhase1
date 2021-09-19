@@ -4,60 +4,86 @@ using namespace std;
 
 ClassImp(MCAnaEventG4Sol)
 
-TClonesArray *MCAnaEventG4Sol::gMC_Particle = 0;
+// TClonesArray *MCAnaEventG4Sol::gMC_Particle = 0;
 
-TClonesArray *MCAnaEventG4Sol::gInSi = 0;
-TClonesArray *MCAnaEventG4Sol::gTR = 0;
-TClonesArray *MCAnaEventG4Sol::gFiber = 0;
-TClonesArray *MCAnaEventG4Sol::gCDC = 0;
-TClonesArray *MCAnaEventG4Sol::gCDH = 0;
-TClonesArray *MCAnaEventG4Sol::gFwdTracker = 0;
-TClonesArray *MCAnaEventG4Sol::gRPC = 0;
-TClonesArray *MCAnaEventG4Sol::gFMF2 = 0;
+// TClonesArray *MCAnaEventG4Sol::gInSi = 0;
+// TClonesArray *MCAnaEventG4Sol::gTR = 0;
+// TClonesArray *MCAnaEventG4Sol::gFiber = 0;
+// TClonesArray *MCAnaEventG4Sol::gCDC = 0;
+// TClonesArray *MCAnaEventG4Sol::gCDH = 0;
+// TClonesArray *MCAnaEventG4Sol::gFwdTracker = 0;
+// TClonesArray *MCAnaEventG4Sol::gRPC = 0;
+// TClonesArray *MCAnaEventG4Sol::gFMF2 = 0;
 
-TClonesArray *MCAnaEventG4Sol::gPSFE = 0;
-TClonesArray *MCAnaEventG4Sol::gPSBE = 0;
-TClonesArray *MCAnaEventG4Sol::gPSCE = 0;
+// TClonesArray *MCAnaEventG4Sol::gPSFE = 0;
+// TClonesArray *MCAnaEventG4Sol::gPSBE = 0;
+// TClonesArray *MCAnaEventG4Sol::gPSCE = 0;
 
-TClonesArray *MCAnaEventG4Sol::gfTrack = 0;
+// TClonesArray *MCAnaEventG4Sol::gTrackCand = 0;
+
+// TClonesArray *MCAnaEventG4Sol::gfTrack = 0;
 
 MCAnaEventG4Sol::MCAnaEventG4Sol()//:TObject()
 {
-  if(!gMC_Particle) gMC_Particle = new TClonesArray("TMcParticle",10);
+  // if(!gMC_Particle) gMC_Particle = new TClonesArray("TMcParticle",10);
 
-  if(!gInSi) gInSi = new TClonesArray("TMcHit",20);
-  if(!gTR) gTR = new TClonesArray("TMcHit",20);
-  if(!gFiber) gFiber = new TClonesArray("TMcHit",20);
-  if(!gCDC) gCDC = new TClonesArray("TMcHit",20);
-  if(!gCDH) gCDH = new TClonesArray("TMcHit",20);
-  if(!gFwdTracker) gFwdTracker = new TClonesArray("TMcHit",20);
-  if(!gRPC) gRPC = new TClonesArray("TMcHit",20);
-  if(!gFMF2) gFMF2 = new TClonesArray("TMcHit",20);
+  // if(!gInSi) gInSi = new TClonesArray("TMcHit",20);
+  // if(!gTR) gTR = new TClonesArray("TMcHit",20);
+  // if(!gFiber) gFiber = new TClonesArray("TMcHit",20);
+  // if(!gCDC) gCDC = new TClonesArray("TMcHit",20);
+  // if(!gCDH) gCDH = new TClonesArray("TMcHit",20);
+  // if(!gFwdTracker) gFwdTracker = new TClonesArray("TMcHit",20);
+  // if(!gRPC) gRPC = new TClonesArray("TMcHit",20);
+  // if(!gFMF2) gFMF2 = new TClonesArray("TMcHit",20);
 
-  if(!gPSBE) gPSBE = new TClonesArray("TMcHit",20);
-  if(!gPSFE) gPSFE = new TClonesArray("TMcHit",20);
-  if(!gPSCE) gPSCE = new TClonesArray("TMcHit",20);
+  // if(!gPSBE) gPSBE = new TClonesArray("TMcHit",20);
+  // if(!gPSFE) gPSFE = new TClonesArray("TMcHit",20);
+  // if(!gPSCE) gPSCE = new TClonesArray("TMcHit",20);
 
-  if(!gfTrack) gfTrack = new TClonesArray("THyphiTrack",20);
+  // if(!gTrackCand) gTrackCand = new TClonesArray("TTrackCand",100);
+
+  // if(!gfTrack) gfTrack = new TClonesArray("THyphiTrack",20);
+  // //if(!gfHyp) gfHyp = new TClonesArray("THypernucleus",20);
+
+
+  // InSi = gInSi;
+  // TR = gTR;
+  // Fiber = gFiber;
+  // CDC = gCDC;
+  // CDH = gCDH;
+  // FwdTracker = gFwdTracker;
+  // RPC = gRPC;
+  // FMF2 = gFMF2;
+
+  // PSFE = gPSFE;
+  // PSBE = gPSBE;
+  // PSCE = gPSCE;
+
+  // fMC_Particle = gMC_Particle;
+  // TrackCand = gTrackCand;
+  // fTrack = gfTrack;
+  // fHyp = gfHyp;
+
+  fMC_Particle = new TClonesArray("TMcParticle",10);
+
+  InSi = new TClonesArray("TMcHit",20);
+  TR = new TClonesArray("TMcHit",20);
+  Fiber = new TClonesArray("TMcHit",20);
+  CDC = new TClonesArray("TMcHit",20);
+  CDH = new TClonesArray("TMcHit",20);
+  FwdTracker = new TClonesArray("TMcHit",20);
+  RPC = new TClonesArray("TMcHit",20);
+  FMF2 = new TClonesArray("TMcHit",20);
+
+  PSBE = new TClonesArray("TMcHit",20);
+  PSFE = new TClonesArray("TMcHit",20);
+  PSCE = new TClonesArray("TMcHit",20);
+
+  TrackCand = new TClonesArray("TTrackCand",100);
+
+  fTrack = new TClonesArray("THyphiTrack",20);
   //if(!gfHyp) gfHyp = new TClonesArray("THypernucleus",20);
 
-
-  InSi = gInSi;
-  TR = gTR;
-  Fiber = gFiber;
-  CDC = gCDC;
-  CDH = gCDH;
-  FwdTracker = gFwdTracker;
-  RPC = gRPC;
-  FMF2 = gFMF2;
-
-  PSFE = gPSFE; 
-  PSBE = gPSBE; 
-  PSCE = gPSCE;
-  
-  fMC_Particle = gMC_Particle;
-  fTrack = gfTrack;
-  // fHyp = gfHyp;
 
   Nmc=0;
  
@@ -116,20 +142,42 @@ void MCAnaEventG4Sol::Clear(Option_t *option)
 void MCAnaEventG4Sol::Reset()
 {
 
-  delete gMC_Particle; gMC_Particle = 0;
-  delete gfTrack; gfTrack = 0;
+  // delete gMC_Particle; gMC_Particle = 0;
 
-  delete gInSi; gInSi = 0;
-  delete gTR; gTR = 0;
-  delete gFiber; gFiber = 0;
-  delete gCDC; gCDC = 0;
-  delete gCDH; gCDH = 0;
-  delete gFwdTracker; gFwdTracker = 0;
-  delete gRPC; gRPC = 0;
-  delete gFMF2; gFMF2 = 0;
-  delete gPSFE; gPSFE = 0;
-  delete gPSBE; gPSBE = 0;
-  delete gPSCE; gPSCE = 0;
+  // delete gInSi; gInSi = 0;
+  // delete gTR; gTR = 0;
+  // delete gFiber; gFiber = 0;
+  // delete gCDC; gCDC = 0;
+  // delete gCDH; gCDH = 0;
+  // delete gFwdTracker; gFwdTracker = 0;
+  // delete gRPC; gRPC = 0;
+  // delete gFMF2; gFMF2 = 0;
+  // delete gPSFE; gPSFE = 0;
+  // delete gPSBE; gPSBE = 0;
+  // delete gPSCE; gPSCE = 0;
+
+  // delete gTrackCand; gTrackCand = 0;
+
+  // delete gfTrack; gfTrack = 0;
+
+  delete fMC_Particle; fMC_Particle = 0;
+
+  delete InSi; InSi = 0;
+  delete TR; TR = 0;
+  delete Fiber; Fiber = 0;
+  delete CDC; CDC = 0;
+  delete CDH; CDH = 0;
+  delete FwdTracker; FwdTracker = 0;
+  delete RPC; RPC = 0;
+  delete FMF2; FMF2 = 0;
+  delete PSFE; PSFE = 0;
+  delete PSBE; PSBE = 0;
+  delete PSCE; PSCE = 0;
+
+  delete TrackCand; TrackCand = 0;
+
+  delete fTrack; fTrack = 0;
+
 
 }
 

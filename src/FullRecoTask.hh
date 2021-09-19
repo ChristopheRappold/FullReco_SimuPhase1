@@ -45,6 +45,13 @@ public :
 #else
   int EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArray*>& hits, MCAnaEventG4Sol* OutTree);
 #endif  
+
+#ifdef ROOT6
+  int EventLoop(const MCAnaEventG4Sol& RestartEvent, MCAnaEventG4Sol* OutTree);
+#else
+  int EventLoop(MCAnaEventG4Sol* RestartEvent, MCAnaEventG4Sol* OutTree);
+#endif
+
   void AttachHisto(Ana_Hist* h);
   void SetEventMetadata(AnaEvent_Metadata& metadata);
 
