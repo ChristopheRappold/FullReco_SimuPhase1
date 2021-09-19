@@ -35,38 +35,38 @@ FullRecoTaskZMQ::FullRecoTaskZMQ(const FullRecoConfig& conf, const DataSim& In) 
   // REvent.resize(Attributes.NthreadsQueue);
 
   // det_build = new TBuildDetectorLayerPlane(Attributes,Attributes.beam_only);
-  for(int i = 0; i < Attributes.NBuilder; ++i)
+  for(int i = 0; i < Attributes.MTsetting.NBuilder; ++i)
     list_det_build.emplace_back(new TBuildDetectorLayerPlaneDAF_ZMQ(Attributes));
   // det_build = new TTestUnits(Attributes,"layerDAF");
 
   // list_process.push_back(new TKalmanFilter_DAF(Attributes) );
   // list_processMC.emplace_back(new CheckField(Attributes));
   // list_processMC.emplace_back(new TKalmanFilter_DAF(Attributes));
-  for(int i = 0; i < Attributes.NKalman; ++i)
+  for(int i = 0; i < Attributes.MTsetting.NKalman; ++i)
     list_processMC_MT.emplace_back(new TKalmanFilter_DAF_ZMQ(Attributes));
 
-  for(int i = 0; i < Attributes.NMerger; ++i)
+  for(int i = 0; i < Attributes.MTsetting.NMerger; ++i)
     list_merger_out.emplace_back(new TMergerOutput_ZMQ(Attributes));
 
-  IsMain      = Attributes.IsMain;
-  sizeBuilder = Attributes.NBuilder;
-  sizeKalman  = Attributes.NKalman;
-  sizeMerger  = Attributes.NMerger;
+  IsMain      = Attributes.MTsetting.IsMain;
+  sizeBuilder = Attributes.MTsetting.NBuilder;
+  sizeKalman  = Attributes.MTsetting.NKalman;
+  sizeMerger  = Attributes.MTsetting.NMerger;
 
-  addr_initEvent = Attributes.addr_initEvent;
+  addr_initEvent = Attributes.MTsetting.addr_initEvent;
 
-  addr_frontBuilder = Attributes.addr_frontBuilder;
-  addr_backFitter   = Attributes.addr_backFitter;
+  addr_frontBuilder = Attributes.MTsetting.addr_frontBuilder;
+  addr_backFitter   = Attributes.MTsetting.addr_backFitter;
 
-  addr_frontFitter = Attributes.addr_frontFitter;
-  addr_backMerger  = Attributes.addr_backMerger;
+  addr_frontFitter = Attributes.MTsetting.addr_frontFitter;
+  addr_backMerger  = Attributes.MTsetting.addr_backMerger;
 
-  addr_frontMerger = Attributes.addr_frontMerger;
-  addr_backEnd     = Attributes.addr_backEnd;
+  addr_frontMerger = Attributes.MTsetting.addr_frontMerger;
+  addr_backEnd     = Attributes.MTsetting.addr_backEnd;
 
-  addr_control = Attributes.addr_control;
+  addr_control = Attributes.MTsetting.addr_control;
 
-  addr_monitor = Attributes.addr_monitor;
+  addr_monitor = Attributes.MTsetting.addr_monitor;
 
   Attributes._logger->info("IsMain :{} / B: {} / K: {} / M: {}", IsMain, sizeBuilder, sizeKalman, sizeMerger);
   Attributes._logger->info("Addresses :");
@@ -123,7 +123,7 @@ void FullRecoTaskZMQ::AttachHisto(Ana_Hist* h)
 int FullRecoTaskZMQ::Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, const TG4Sol_Event& ev,
                          const std::vector<TClonesArray*>& hits, TTree* OutTree, MCAnaEventG4Sol* OutEvent)
 {
-  Attributes._logger->debug("!> MT Run start: {}", Attributes.NQueue);
+  Attributes._logger->debug("!> MT Run start: {}", Attributes.MTsetting.NQueue);
 
   
   std::thread t0_nE;

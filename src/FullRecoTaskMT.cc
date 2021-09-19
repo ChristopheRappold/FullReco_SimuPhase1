@@ -20,7 +20,7 @@
 // }
 
 FullRecoTaskMT::FullRecoTaskMT(const FullRecoConfig& conf, const DataSim& In)
-  : Attributes(conf, In), REvent(Attributes.NQueue)
+  : Attributes(conf, In), REvent(Attributes.MTsetting.NQueue)
 {
   Attributes._logger->info(" *** > FullRecoTaskMT instance created | Reconstruction requested are :");
   //det_build = nullptr;
@@ -33,17 +33,17 @@ FullRecoTaskMT::FullRecoTaskMT(const FullRecoConfig& conf, const DataSim& In)
   // REvent.resize(Attributes.NthreadsQueue);
 
   // det_build = new TBuildDetectorLayerPlane(Attributes,Attributes.beam_only);
-  for(int i=0;i<Attributes.NBuilder;++i)
+  for(int i=0;i<Attributes.MTsetting.NBuilder;++i)
     list_det_build.emplace_back(new TBuildDetectorLayerPlaneDAF_MT(Attributes));
   // det_build = new TTestUnits(Attributes,"layerDAF");
 
   // list_process.push_back(new TKalmanFilter_DAF(Attributes) );
   //list_processMC.emplace_back(new CheckField(Attributes));
   //list_processMC.emplace_back(new TKalmanFilter_DAF(Attributes));
-  for(int i =0 ;i<Attributes.NKalman;++i)
+  for(int i =0 ;i<Attributes.MTsetting.NKalman;++i)
     list_processMC_MT.emplace_back(new TKalmanFilter_DAF_MT(Attributes));
 
-  for(int i =0 ;i<Attributes.NMerger;++i)
+  for(int i =0 ;i<Attributes.MTsetting.NMerger;++i)
     list_merger_out.emplace_back( new TMergerOutput_MT(Attributes));
 }
 
@@ -91,10 +91,10 @@ int FullRecoTaskMT::Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, 
                         const std::vector<TClonesArray*>& hits, TTree* OutTree, MCAnaEventG4Sol* OutEvent)
 {
   using id_th = int;
-  Attributes._logger->debug("!> MT Run start: {}",Attributes.NQueue);
+  Attributes._logger->debug("!> MT Run start: {}",Attributes.MTsetting.NQueue);
 
-  fast_blocking_queue<std::tuple<id_th, ReturnRes::InfoM> > queueInit(Attributes.NQueue);
-  for(int i = 0; i < Attributes.NQueue; ++i)
+  fast_blocking_queue<std::tuple<id_th, ReturnRes::InfoM> > queueInit(Attributes.MTsetting.NQueue);
+  for(int i = 0; i < Attributes.MTsetting.NQueue; ++i)
     {
       Attributes._logger->debug("!> queueInit : {}",i); 
       REvent[i].idThread = i;
@@ -104,13 +104,13 @@ int FullRecoTaskMT::Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, 
   for(size_t i = 0; i<REvent.size();++i)
     Attributes._logger->debug("!> RecoEvent#{} -> id {} ",i,REvent[i].idThread);
   
-  fast_blocking_queue<std::tuple<id_th, ReturnRes::InfoM> > queueStep1(Attributes.NQueue);
-  fast_blocking_queue<std::tuple<id_th, ReturnRes::InfoM> > queueStep2(Attributes.NQueue);
-  fast_blocking_queue<std::tuple<id_th, ReturnRes::InfoM> > queueStep3(Attributes.NQueue);
+  fast_blocking_queue<std::tuple<id_th, ReturnRes::InfoM> > queueStep1(Attributes.MTsetting.NQueue);
+  fast_blocking_queue<std::tuple<id_th, ReturnRes::InfoM> > queueStep2(Attributes.MTsetting.NQueue);
+  fast_blocking_queue<std::tuple<id_th, ReturnRes::InfoM> > queueStep3(Attributes.MTsetting.NQueue);
 
-  const int sizeStep1 = Attributes.NBuilder;
-  const int sizeStep2 = Attributes.NKalman;
-  const int sizeStep3 = Attributes.NMerger; 
+  const int sizeStep1 = Attributes.MTsetting.NBuilder;
+  const int sizeStep2 = Attributes.MTsetting.NKalman;
+  const int sizeStep3 = Attributes.MTsetting.NMerger;
 
   struct nextingEvent {
     const Long64_t Start;
