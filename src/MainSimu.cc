@@ -132,7 +132,7 @@ int main(int argc, char** argv)
       TDatabasePDG::Instance()->AddParticle("Li6", "Li6", 5.601432 /*5.60152*/ /*5.6015194*/, kTRUE, 0., 3. * 3., "Ions", 10004);
       TDatabasePDG::Instance()->AddParticle("H3L", "H3L", 2.99114, kFALSE, 0., 1. * 3., "Ions", 20001);
       TDatabasePDG::Instance()->AddParticle("H4L", "H4L", 3.9225, kFALSE, 0., 1. * 3., "Ions", 20002);
-      TDatabasePDG::Instance()->AddParticle("He5L", "He5L", 4.8399, kFALSE, 0., 1. * 3., "Ions", 20003);
+      TDatabasePDG::Instance()->AddParticle("He5L", "He5L", 4.8399, kFALSE, 0., 2. * 3., "Ions", 20003);
 
       TFile* offile = new TFile(name_out.c_str(), "RECREATE");
 

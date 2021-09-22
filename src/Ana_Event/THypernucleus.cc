@@ -8,6 +8,7 @@ THypernucleus::THypernucleus()
   Pattern=-1;
   
   //Mother:
+  PDG=-1;
   N_Mother=-1;
   Chi2ndf=-1.;
   MomE.SetPxPyPzE(0.,0.,0.,0.);
@@ -46,6 +47,7 @@ THypernucleus::THypernucleus(const THypernucleus& H)
   Pattern=H.Pattern;
   
   //Mother:
+  PDG=H.PDG;
   N_Mother=H.N_Mother;
   Chi2ndf=H.Chi2ndf;
   MomE=H.MomE;
@@ -94,6 +96,7 @@ void THypernucleus::Clear(Option_t *option)
   Pattern=-1;
   
   //Mother:
+  PDG=-1;
   N_Mother=-1;
   Chi2ndf=-1.;
   MomE.SetPxPyPzE(0.,0.,0.,0.);

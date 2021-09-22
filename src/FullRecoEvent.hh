@@ -532,6 +532,7 @@ struct Hyp
   Int_t Pattern; /// 1 = Simulation / 2 = KFParticle_real / 3 = KFParticle_cut / 4 = KFParticle / 5 = KFParticle_Mass / 6 = LorentzVector
   
   //Mother:
+  Int_t PDG;
   Int_t N_Mother;
   Double32_t Chi2ndf;
   TLorentzVector MomE;

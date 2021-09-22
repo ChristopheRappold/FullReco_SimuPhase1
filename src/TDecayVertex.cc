@@ -45,6 +45,7 @@ int TDecayVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 
     OutHyp->Pattern              = i_Hyp.Pattern;
 
+    OutHyp->PDG                  = i_Hyp.PDG;
     OutHyp->N_Mother             = i_Hyp.N_Mother;
     OutHyp->Chi2ndf              = i_Hyp.Chi2ndf;
     OutHyp->MomE                 = i_Hyp.MomE;
@@ -384,6 +385,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp_Real.Pattern = 1;
 
+      temp_Hyp_Real.PDG = Hyp_pdg;
       temp_Hyp_Real.N_Mother = RealPionTracks.size();
       temp_Hyp_Real.MomE = RecoEvent.Mother_MomE;
       temp_Hyp_Real.PrimVtx = InteractionPoint_real;
@@ -446,6 +448,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp_Real.Pattern = 2;
 
+      temp_Hyp_Real.PDG = Hyp_pdg;
       temp_Hyp_Real.N_Mother = RealMotherTracks.size();
       temp_Hyp_Real.Chi2ndf = RealMotherTracks[i].GetChi2() / static_cast<double>(RealMotherTracks[i].GetNDF());
       temp_Hyp_Real.MomE.SetPxPyPzE(RealMotherTracks[i].GetPx(),RealMotherTracks[i].GetPy(),RealMotherTracks[i].GetPz(),RealMotherTracks[i].GetE());
@@ -601,6 +604,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp_Cut.Pattern = 3;
 
+      temp_Hyp_Cut.PDG = Hyp_pdg;
       temp_Hyp_Cut.N_Mother = CutMotherTracks_PrimVtx.size();
       temp_Hyp_Cut.Chi2ndf = CutMotherTracks_PrimVtx[i].GetChi2() / static_cast<double>(CutMotherTracks_PrimVtx[i].GetNDF());
       temp_Hyp_Cut.MomE.SetPxPyPzE(CutMotherTracks_PrimVtx[i].GetPx(),CutMotherTracks_PrimVtx[i].GetPy(),CutMotherTracks_PrimVtx[i].GetPz(),CutMotherTracks_PrimVtx[i].GetE());
@@ -759,6 +763,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
         temp_Hyp_LV.Pattern = 6;
 
+        temp_Hyp_LV.PDG = Hyp_pdg;
         temp_Hyp_LV.N_Mother = 1;
         //temp_Hyp_LV.Chi2ndf = ;
         temp_Hyp_LV.MomE.SetPxPyPzE(Mother_LorentzVector.Px(),Mother_LorentzVector.Py(),Mother_LorentzVector.Pz(),Mother_LorentzVector.E());
@@ -917,6 +922,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp.Pattern = 4;
 
+      temp_Hyp.PDG = Hyp_pdg;
       temp_Hyp.N_Mother = MotherTracks_PrimVtx.size();
       temp_Hyp.Chi2ndf = MotherTracks_PrimVtx[i].GetChi2() / static_cast<double>(MotherTracks_PrimVtx[i].GetNDF());
       temp_Hyp.MomE.SetPxPyPzE(MotherTracks_PrimVtx[i].GetPx(),MotherTracks_PrimVtx[i].GetPy(),MotherTracks_PrimVtx[i].GetPz(),MotherTracks_PrimVtx[i].GetE());
@@ -1069,6 +1075,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp_Mass.Pattern = 5;
 
+      temp_Hyp_Mass.PDG = Hyp_pdg;
       temp_Hyp_Mass.N_Mother = MotherTracks_PrimVtx_Mass.size();
       temp_Hyp_Mass.Chi2ndf = MotherTracks_PrimVtx_Mass[i].GetChi2() / static_cast<double>(MotherTracks_PrimVtx_Mass[i].GetNDF());
       temp_Hyp_Mass.MomE.SetPxPyPzE(MotherTracks_PrimVtx_Mass[i].GetPx(),MotherTracks_PrimVtx_Mass[i].GetPy(),MotherTracks_PrimVtx_Mass[i].GetPz(),MotherTracks_PrimVtx_Mass[i].GetE());
