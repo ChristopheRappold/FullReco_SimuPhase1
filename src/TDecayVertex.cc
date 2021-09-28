@@ -20,9 +20,9 @@ using namespace std;
 using namespace G4Sol;
 
 TDecayVertex::TDecayVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface("DecayVertexReco"), att(attribut)
+    : TDataProcessInterface("DecayVertexReco"), att(attribut), fieldWASA(att.Field)
   {
-    fieldMDC.SetOneEntry(fieldMDCParameters);
+
   }
 
 TDecayVertex::~TDecayVertex() {}
@@ -1484,10 +1484,13 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
           temp_particle.SetNDF(5); //Change !
           temp_particle.SetChi2(5.); // Change !
 
+          temp_particle.SetField(att.Field);
+
+/*
           for(int iF = 0; iF < 10; ++iF)
             temp_particle.SetFieldCoeff(fieldMDCParameters[iF], iF);
 
-/*          //CHECK Magnetic Field
+          //CHECK Magnetic Field
           const float xyz2[3] = {1.f, 3.f, 25.f};
           float B_fragment[3];
           temp_particle.GetFieldValue(xyz2, B_fragment);
@@ -1531,9 +1534,12 @@ void TDecayVertex::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& D
           temp_particle.Create(temp_fP, temp_fC, temp_charge, temp_mass);
           temp_particle.SetId(itr->first);
 
+          temp_particle.SetField(att.Field);
+
+/*
           for(int iF = 0; iF < 10; ++iF)
             temp_particle.SetFieldCoeff(fieldMDCParameters[iF], iF);
-
+*/
           temp_particle.SetNDF(itr->second.ndf);
           temp_particle.SetChi2(itr->second.chi2);
 
@@ -1622,9 +1628,11 @@ void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_resu
           temp_particle.Create(temp_fP, temp_fC, temp_charge, temp_mass);
           temp_particle.SetId(itr->first);
 
+          temp_particle.SetField(att.Field);
+/*
           for(int iF = 0; iF < 10; ++iF)
             temp_particle.SetFieldCoeff(fieldMDCParameters[iF], iF);
-
+*/
           temp_particle.SetNDF(itr->second.ndf);
           temp_particle.SetChi2(itr->second.chi2);
 
@@ -1890,7 +1898,7 @@ void TDecayVertex::KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<doub
   float_v fMass_PrimVtx = 0.;
 
   temp_PrimVtx.Create(fP_PrimVtx, fC_PrimVtx, fQ_PrimVtx, fMass_PrimVtx);
-  temp_PrimVtx.SetField(fieldMDC);
+  temp_PrimVtx.SetField(fieldWASA);
 
   return;
 }
@@ -1958,8 +1966,8 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
           KFParticleSIMD particleSIMD1(FragmentTracks[i]);    // the same particle is copied to each SIMD element
           KFParticleSIMD particleSIMD2(PionTracks[j]);
 
-          particleSIMD1.SetField(fieldMDC);
-          particleSIMD2.SetField(fieldMDC);
+          particleSIMD1.SetField(fieldWASA);
+          particleSIMD2.SetField(fieldWASA);
 
 /*          //CHECK Magnetic Field
           const float_v xyz[3] = {1.f, 3.f, 25.f};
@@ -1985,7 +1993,7 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
           KFParticleSIMD mother;
           mother.SetConstructMethod(KFPart_fConstructMethod);
           mother.Construct(vDaughtersPointer, 2);
-          mother.SetField(fieldMDC);
+          mother.SetField(fieldWASA);
 
           if( (ifSet_ProductionVertex == 1) && (pointer_PrimVtx != nullptr) )
             mother.SetProductionVertex(*pointer_PrimVtx);
@@ -2005,9 +2013,11 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
           KFParticle temp_MotherTrack;
           mother.GetKFParticle(temp_MotherTrack, 0);
 
+          temp_MotherTrack.SetField(att.Field);
+/*
           for(int iF = 0; iF < 10; ++iF)
             temp_MotherTrack.SetFieldCoeff(fieldMDCParameters[iF], iF);
-
+*/
 /*          // CHECK Magnetic Field
           const float xyz2[3] = {1.f, 3.f, 25.f};
           float B_mother[3];
