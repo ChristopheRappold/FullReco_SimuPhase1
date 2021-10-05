@@ -423,7 +423,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistReg.emplace_back(&h_PosZBeamTracks.store);
       h_thetaTracks.emplace_back(new TH2F("h_thetaTracks","h_thetaTracks", 1000, 0, 90, 3, 0, 3));
       HistReg.emplace_back(&h_thetaTracks.store);
-      h_thetaResol.emplace_back(new TH1F("h_thetaResol","h_thetaResol", 1000, 0, 40));
+      h_thetaResol.emplace_back(new TH1F("h_thetaResol","h_thetaResol", 10000, -5, 5));
       HistReg.emplace_back(&h_thetaResol.store);
 
       //h_nHypTrackReal.emplace_back(new TH1F("h_nHypTrackReal", "h_nHypTrackReal", 3, 0, 3));
@@ -487,7 +487,9 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
   if(EnableState[DECAYVTX])
     {
       std::vector<std::vector<TH1*>*> HistReg;
-      
+
+      h_P_fragments.emplace_back(new TH1F("h_P_fragments", "h_P_fragments", 1500, 0, 15));
+      HistReg.emplace_back(&h_P_fragments.store);
       h_Pt_fragments.emplace_back(new TH1F("h_Pt_fragments", "h_Pt_fragments", 1000, 0, 1));
       HistReg.emplace_back(&h_Pt_fragments.store);
       h_Pz_fragments.emplace_back(new TH1F("h_Pz_fragments", "h_Pz_fragments", 2000, -5, 15));
@@ -495,6 +497,8 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       h_Dist_FragmentTrackPrimVtx.emplace_back(new TH1F("h_Dist_FragmentTrackPrimVtx", "h_Dist_FragmentTrackPrimVtx", 10000, 0, 10));
       HistReg.emplace_back(&h_Dist_FragmentTrackPrimVtx.store);
 
+      h_P_pions.emplace_back(new TH1F("h_P_pions", "h_P_pions", 1000, 0, 10));
+      HistReg.emplace_back(&h_P_pions.store);
       h_Pt_pions.emplace_back(new TH1F("h_Pt_pions", "h_Pt_pions", 1000, 0, 1));
       HistReg.emplace_back(&h_Pt_pions.store);
       h_Pz_pions.emplace_back(new TH1F("h_Pz_pions", "h_Pz_pions", 1000, -5, 5));

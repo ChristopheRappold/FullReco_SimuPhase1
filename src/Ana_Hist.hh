@@ -230,10 +230,12 @@ class Ana_Hist
   Hist<TH1F> h_PrimVtxstats ;
 
   //Decay Vertex
+  Hist<TH1F> h_P_fragments ;
   Hist<TH1F> h_Pt_fragments ;
   Hist<TH1F> h_Pz_fragments ;
   Hist<TH1F> h_Dist_FragmentTrackPrimVtx ;
 
+  Hist<TH1F> h_P_pions ;
   Hist<TH1F> h_Pt_pions ;
   Hist<TH1F> h_Pz_pions ;
   Hist<TH1F> h_Chi2ndf_pions ;

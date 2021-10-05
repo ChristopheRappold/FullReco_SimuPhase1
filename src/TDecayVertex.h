@@ -261,10 +261,12 @@ private:
 
   struct LocalHists
   {
+    TH1F* h_P_fragments;
     TH1F* h_Pt_fragments;
     TH1F* h_Pz_fragments;
     TH1F* h_Dist_FragmentTrackPrimVtx;
 
+    TH1F* h_P_pions;
     TH1F* h_Pt_pions;
     TH1F* h_Pz_pions;
     TH1F* h_Chi2ndf_pions;

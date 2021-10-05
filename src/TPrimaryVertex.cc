@@ -2301,7 +2301,7 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
               nGoodTracks += 1;
               goodCandidateTracks[j] = 1;
 
-              double thetaResol = abs(thetareal - theta);
+              double thetaResol = thetareal - theta;
 
               LocalHisto.h_EnergyDiffSilicons->Fill(DiffEnergySilicons, "Good With-energy", 1.);
               LocalHisto.h_thetaTracks->Fill(theta, "Recons", 1.);

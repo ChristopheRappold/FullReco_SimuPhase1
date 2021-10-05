@@ -142,10 +142,12 @@ ReturnRes::InfoM TDecayVertex::SoftExit(int result_full) {
 
 void TDecayVertex::SelectHists()
 {
+  LocalHisto.h_P_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_P_fragments);
   LocalHisto.h_Pt_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_fragments);
   LocalHisto.h_Pz_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_fragments);
   LocalHisto.h_Dist_FragmentTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_FragmentTrackPrimVtx);
 
+  LocalHisto.h_P_pions = AnaHisto->CloneAndRegister(AnaHisto->h_P_pions);
   LocalHisto.h_Pt_pions = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_pions);
   LocalHisto.h_Pz_pions = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_pions);
   LocalHisto.h_Chi2ndf_pions = AnaHisto->CloneAndRegister(AnaHisto->h_Chi2ndf_pions);
@@ -353,6 +355,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   for(size_t i = 0; i < FragmentTracks.size(); ++i)
     {
+      LocalHisto.h_P_fragments->Fill(FragmentTracks[i].GetP(), 1.);
       LocalHisto.h_Pt_fragments->Fill(FragmentTracks[i].GetPt(), 1.);
       LocalHisto.h_Pz_fragments->Fill(FragmentTracks[i].GetPz(), 1.);
 
@@ -566,9 +569,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   TrackstoDecayVertex(FragmentTracks, CutPionTracks, RecoEvent.PrimVtxRecons, DecayVertexReconscut);
 
-  double cutdistance  = std::sqrt(std::pow((DecayVertex_real.X() - DecayVertexReconscut.X()), 2.) +
-                              std::pow((DecayVertex_real.Y() - DecayVertexReconscut.Y()), 2.) +
-                              std::pow((DecayVertex_real.Z() - DecayVertexReconscut.Z()), 2.));
+  double cutdistance  = (DecayVertex_real - DecayVertexReconscut).Mag();
   double cutdistanceX = DecayVertex_real.X() - DecayVertexReconscut.X();
   double cutdistanceY = DecayVertex_real.Y() - DecayVertexReconscut.Y();
   double cutdistanceZ = DecayVertex_real.Z() - DecayVertexReconscut.Z();
@@ -716,8 +717,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   for(size_t i = 0; i < PionTracks.size(); ++i)
     {
-      LocalHisto.h_Pt_pions->Fill(std::sqrt(std::pow(PionTracks[i].GetPx(),2.)
-                                        + std::pow(PionTracks[i].GetPy(),2.)), 1.);
+      LocalHisto.h_P_pions->Fill(PionTracks[i].GetP(), 1.);
+      LocalHisto.h_Pt_pions->Fill(PionTracks[i].GetPt(), 1.);
       LocalHisto.h_Pz_pions->Fill(PionTracks[i].GetPz(), 1.);
 
       CloseDist(FragmentTracks_All[ref_RealFragment], PionTracks[i], closedist_distance, temp_closedist_pos);
@@ -850,9 +851,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
   TrackstoDecayVertex(FragmentTracks, PionTracks, RecoEvent.PrimVtxRecons, DecayVertexRecons);
   RecoEvent.DecayVtxRecons.SetXYZ(DecayVertexRecons.X(), DecayVertexRecons.Y(), DecayVertexRecons.Z());
 
-  double distance  = std::sqrt(std::pow((DecayVertex_real.X() - DecayVertexRecons.X()), 2.) +
-                          std::pow((DecayVertex_real.Y() - DecayVertexRecons.Y()), 2.) +
-                          std::pow((DecayVertex_real.Z() - DecayVertexRecons.Z()), 2.));
+  double distance  = (DecayVertex_real - DecayVertexRecons).Mag();
   double distanceX = DecayVertex_real.X() - DecayVertexRecons.X();
   double distanceY = DecayVertex_real.Y() - DecayVertexRecons.Y();
   double distanceZ = DecayVertex_real.Z() - DecayVertexRecons.Z();
@@ -1437,6 +1436,7 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
   for(itr = TrackDAFSim.begin(); itr != TrackDAFSim.end(); ++itr)
     {
       size_t iDetFirst = -1;
+      size_t iDetLast = -1;
       
       size_t nHits_MDC = 0;
       size_t nHits_MiniFiber = 0;
@@ -1447,6 +1447,7 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
         {
           if(itr->second[iDet].size() == 0)
             continue;
+
           if(iDetFirst == -1)
             iDetFirst = iDet;
           if(iDet >= G4Sol::MG01 && iDet <= G4Sol::MG17)
@@ -1457,10 +1458,17 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
             nHits_PSCE += 1;
           if(iDet == G4Sol::PSBE)
             nHits_PSBE += 1;
+
+          iDetLast = iDet;
         }
 
       if(iDetFirst == -1)
         continue;
+
+      //Fragment case -> Data from last detector
+      if(pdgParticle == Fragment_pdg)
+        iDetFirst = iDetLast;
+
 
       if(itr->second[iDetFirst][0].pdg == pdgParticle)
         {
