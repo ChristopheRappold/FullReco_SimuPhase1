@@ -197,6 +197,7 @@ class Ana_Hist
   Hist<TH2F> h_DistanceBeamTracks ;
   Hist<TH2F> h_PosZBeamTracks ;
   Hist<TH2F> h_thetaTracks ;
+  Hist<TH1F> h_thetaResol ;
 
   //Hist<TH1F> h_nHypTrackReal;
   Hist<TH1F> h_nHypernucleiTrack ;

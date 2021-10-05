@@ -423,6 +423,8 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistReg.emplace_back(&h_PosZBeamTracks.store);
       h_thetaTracks.emplace_back(new TH2F("h_thetaTracks","h_thetaTracks", 1000, 0, 90, 3, 0, 3));
       HistReg.emplace_back(&h_thetaTracks.store);
+      h_thetaResol.emplace_back(new TH1F("h_thetaResol","h_thetaResol", 1000, 0, 40));
+      HistReg.emplace_back(&h_thetaResol.store);
 
       //h_nHypTrackReal.emplace_back(new TH1F("h_nHypTrackReal", "h_nHypTrackReal", 3, 0, 3));
       //HistReg.emplace_back(&h_nHypTrackReal.store);

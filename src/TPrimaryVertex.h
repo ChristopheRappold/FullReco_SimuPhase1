@@ -70,7 +70,8 @@ class SiliconHits_SD
 {
   double Z_plane_Si1x    = 27.; // in cm
   double Z_plane_Si1y    = 27.05; // in cm
-  double widthStrip_Si1 = 0.019; // in cm
+  size_t combineStrips_Si1 = 1; // power of 2
+  double widthStrip_Si1 = 0.019 * combineStrips_Si1; // in cm
   double lenghtSi_Si1   = 9.728; // in cm
   double thicknessSi_Si1 = 0.032; // in cm
   bool restrict_actlenght_Si1 = true;
@@ -78,14 +79,14 @@ class SiliconHits_SD
   double actlenghtY_Si1 = 3.648; // in cm
   bool restrict_gapcenter_Si1 = true;
   double gapcenter_Si1 = 0.05; //in cm
-  size_t combineStrips_Si1 = 1; // power of 2
   bool ifveto_Si1 = false;
   std::vector<int> inactwiresX_Si1 {254, 255, 256, 257, 1278, 1279, 1280, 1281}; 
   std::vector<int> inactwiresY_Si1 {254, 255, 256, 257, 1278, 1279, 1280, 1281};
 
   double Z_plane_Si2x    = 30.; // in cm
   double Z_plane_Si2y    = 30.05; // in cm
-  double widthStrip_Si2 = 0.038; // in cm
+  size_t combineStrips_Si2 = 2; // power of 2
+  double widthStrip_Si2 = 0.019 * combineStrips_Si2; // in cm
   double lenghtSi_Si2   = 9.728; // in cm
   double thicknessSi_Si2 = 0.032; // in cm
   bool restrict_actlenght_Si2 = true;
@@ -93,7 +94,6 @@ class SiliconHits_SD
   double actlenghtY_Si2 = 7.296; // in cm
   bool restrict_gapcenter_Si2 = true;
   double gapcenter_Si2 = 0.05; //in cm
-  size_t combineStrips_Si2 = 2; // power of 2
   bool ifveto_Si2 = false;
   std::vector<int> inactwiresX_Si2 {254, 255, 256, 257, 1278, 1279, 1280, 1281};
   std::vector<int> inactwiresY_Si2 {254, 255, 256, 257, 1278, 1279, 1280, 1281};
@@ -371,6 +371,7 @@ private:
     TH2F* h_DistanceBeamTracks;
     TH2F* h_PosZBeamTracks;
     TH2F* h_thetaTracks;
+    TH1F* h_thetaResol;
 
     TH1F* h_nHypernucleiTrack;
     TH1F* h_fvalues;

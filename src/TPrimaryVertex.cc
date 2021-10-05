@@ -125,6 +125,7 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_DistanceBeamTracks = AnaHisto->CloneAndRegister(AnaHisto->h_DistanceBeamTracks);
   LocalHisto.h_PosZBeamTracks     = AnaHisto->CloneAndRegister(AnaHisto->h_PosZBeamTracks);
   LocalHisto.h_thetaTracks        = AnaHisto->CloneAndRegister(AnaHisto->h_thetaTracks);
+  LocalHisto.h_thetaResol         = AnaHisto->CloneAndRegister(AnaHisto->h_thetaResol);
 
   LocalHisto.h_nHypernucleiTrack = AnaHisto->CloneAndRegister(AnaHisto->h_nHypernucleiTrack);
   LocalHisto.h_fvalues           = AnaHisto->CloneAndRegister(AnaHisto->h_fvalues);
@@ -2300,8 +2301,11 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
               nGoodTracks += 1;
               goodCandidateTracks[j] = 1;
 
+              double thetaResol = abs(thetareal - theta);
+
               LocalHisto.h_EnergyDiffSilicons->Fill(DiffEnergySilicons, "Good With-energy", 1.);
               LocalHisto.h_thetaTracks->Fill(theta, "Recons", 1.);
+              LocalHisto.h_thetaResol->Fill(thetaResol, 1.);
             }
           else
             LocalHisto.h_EnergyDiffSilicons->Fill(DiffEnergySilicons, "False With-energy", 1.);
