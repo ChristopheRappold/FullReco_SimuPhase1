@@ -64,6 +64,9 @@ class Ana_Hist
   Hist<TH2F> FieldXY[3];
   Hist<TH2F> FieldXZ[3];
   Hist<TH2F> FieldYZ[3];
+  Hist<TH2F> FieldXYmax[3];
+  Hist<TH2F> FieldXZmax[3];
+  Hist<TH2F> FieldYZmax[3];
   Hist<TH2F> FieldXY_n[3];
   Hist<TH2F> FieldXZ_n[3];
   Hist<TH2F> FieldYZ_n[3];

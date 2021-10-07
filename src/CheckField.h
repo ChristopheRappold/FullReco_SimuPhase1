@@ -32,9 +32,12 @@ class CheckField final :  public TDataProcessInterface
 
   struct LocalHists
   {
-    TH2F* FieldXY[3]; 
-    TH2F* FieldXZ[3]; 
-    TH2F* FieldYZ[3]; 
+    TH2F* FieldXY[3];
+    TH2F* FieldXZ[3];
+    TH2F* FieldYZ[3];
+    TH2F* FieldXYmax[3];
+    TH2F* FieldXZmax[3];
+    TH2F* FieldYZmax[3];
     TH2F* FieldXY_n[3];
     TH2F* FieldXZ_n[3];
     TH2F* FieldYZ_n[3];

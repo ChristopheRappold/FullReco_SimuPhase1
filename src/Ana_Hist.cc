@@ -66,32 +66,47 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
     {
       std::string name_h_field = "FieldXY_";
       name_h_field+=name_field[i];
-      FieldXY[i].emplace_back(new TH2F(name_h_field.c_str(),name_h_field.c_str(),600,-150,150,600,-150,150));
+      FieldXY[i].emplace_back(new TH2F(name_h_field.c_str(),name_h_field.c_str(),300,-150,150,300,-150,150));
       h_fields.emplace_back(&FieldXY[i].store);
 
       std::string name_h_field1 = "FieldXZ_";
       name_h_field1+=name_field[i];
-      FieldXZ[i].emplace_back(new TH2F(name_h_field1.c_str(),name_h_field1.c_str(),600,-150,150,1200,-300,300));
+      FieldXZ[i].emplace_back(new TH2F(name_h_field1.c_str(),name_h_field1.c_str(),300,-150,150,600,-300,300));
       h_fields.emplace_back(&FieldXZ[i].store);
 
       std::string name_h_field2 = "FieldYZ_";
       name_h_field2+=name_field[i];
-      FieldYZ[i].emplace_back(new TH2F(name_h_field2.c_str(),name_h_field2.c_str(),600,-150,150,1200,-300,300));
+      FieldYZ[i].emplace_back(new TH2F(name_h_field2.c_str(),name_h_field2.c_str(),300,-150,150,600,-300,300));
       h_fields.emplace_back(&FieldYZ[i].store);
+
+      std::string name_h_fieldm = "FieldXY_max";
+      name_h_fieldm+=name_field[i];
+      FieldXYmax[i].emplace_back(new TH2F(name_h_fieldm.c_str(),name_h_fieldm.c_str(),300,-150,150,300,-150,150));
+      h_fields.emplace_back(&FieldXYmax[i].store);
+
+      std::string name_h_field1m = "FieldXZ_max";
+      name_h_field1m+=name_field[i];
+      FieldXZmax[i].emplace_back(new TH2F(name_h_field1m.c_str(),name_h_field1m.c_str(),300,-150,150,600,-300,300));
+      h_fields.emplace_back(&FieldXZmax[i].store);
+
+      std::string name_h_field2m = "FieldYZ_max";
+      name_h_field2m+=name_field[i];
+      FieldYZmax[i].emplace_back(new TH2F(name_h_field2m.c_str(),name_h_field2m.c_str(),300,-150,150,600,-300,300));
+      h_fields.emplace_back(&FieldYZmax[i].store);
 
       std::string name_h_field_n = "FieldXYn_";
       name_h_field_n+=name_field[i];
-      FieldXY_n[i].emplace_back(new TH2F(name_h_field_n.c_str(),name_h_field_n.c_str(),600,-150,150,600,-150,150));
+      FieldXY_n[i].emplace_back(new TH2F(name_h_field_n.c_str(),name_h_field_n.c_str(),300,-150,150,300,-150,150));
       h_fields.emplace_back(&FieldXY_n[i].store);
 
       std::string name_h_field_n1 = "FieldXZn_";
       name_h_field_n1+=name_field[i];
-      FieldXZ_n[i].emplace_back(new TH2F(name_h_field_n1.c_str(),name_h_field_n1.c_str(),600,-150,150,1200,-300,300));
+      FieldXZ_n[i].emplace_back(new TH2F(name_h_field_n1.c_str(),name_h_field_n1.c_str(),300,-150,150,600,-300,300));
       h_fields.emplace_back(&FieldXZ_n[i].store);
 
       std::string name_h_field_n2 = "FieldYZn_";
       name_h_field_n2+=name_field[i];
-      FieldYZ_n[i].emplace_back(new TH2F(name_h_field_n2.c_str(),name_h_field_n2.c_str(),600,-150,150,1200,-300,300));
+      FieldYZ_n[i].emplace_back(new TH2F(name_h_field_n2.c_str(),name_h_field_n2.c_str(),300,-150,150,600,-300,300));
       h_fields.emplace_back(&FieldYZ_n[i].store);
 
     }
