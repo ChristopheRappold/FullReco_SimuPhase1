@@ -44,6 +44,10 @@ constexpr bool IsPlanar(G4Sol::SolDet idDet) {
   case G4Sol::Si1y: ;
   case G4Sol::Si2x: ;
   case G4Sol::Si2y: ;
+  case G4Sol::Si1x_SD: ;
+  case G4Sol::Si1y_SD: ;
+  case G4Sol::Si2x_SD: ;
+  case G4Sol::Si2y_SD: ;
   case G4Sol::PSFE : ;
   case G4Sol::PSBE : ;
   case G4Sol::TrFwd0 : ;
@@ -83,6 +87,18 @@ constexpr bool IsSilicon(G4Sol::SolDet idDet) {
   case G4Sol::Si1y : ;
   case G4Sol::Si2x : ;
   case G4Sol::Si2y : ;
+    return true;
+  default:
+    return false;
+  };
+};
+
+constexpr bool IsSilicon_SD(G4Sol::SolDet idDet) {
+  switch (idDet) {
+  case G4Sol::Si1x_SD : ;
+  case G4Sol::Si1y_SD : ;
+  case G4Sol::Si2x_SD : ;
+  case G4Sol::Si2y_SD : ;
     return true;
   default:
     return false;

@@ -164,12 +164,11 @@ class Ana_Hist
   Hist<TH2F> h_HitMultiplicityDiffNHits_Si1;
 
   Hist<TH1F> h_EnergyDiffStrips_Si1;
-
   Hist<TH1F> h_nEventsGoodrecons_Si1;
   Hist<TH1F> h_nEventsGhost_Si1 ;
   Hist<TH2F> h_nEventsGoodreconsGhost_Si1 ;
   Hist<TH2F> h_nEventsRealGoodrecons_Si1 ;
-  
+  Hist<TH2F> h_nEventsRealRejectCuadrant_Si1 ;
 
 
   Hist<TH1F> h_HitMultiplicity_Si2 ;
@@ -178,13 +177,17 @@ class Ana_Hist
   Hist<TH2F> h_HitMultiplicityDiffNHits_Si2 ;
 
   Hist<TH1F> h_EnergyDiffStrips_Si2 ;
-
   Hist<TH1F> h_nEventsGoodrecons_Si2 ;
   Hist<TH1F> h_nEventsGhost_Si2 ;
   Hist<TH2F> h_nEventsGoodreconsGhost_Si2 ;
   Hist<TH2F> h_nEventsRealGoodrecons_Si2 ;
+  Hist<TH2F> h_nEventsRealRejectCuadrant_Si2 ;
 
-
+  Hist<TH1F> h_MFCheck_Theta_MomSi1MomSi2 ;
+  Hist<TH1F> h_MFCheck_Dist_MomSi1HitSi2 ;
+  Hist<TH1F> h_MFCheck_Dist_MomSi2HitSi1 ;
+  Hist<TH1F> h_MFCheck_Dist_MomSi1HitIP ;
+  Hist<TH1F> h_MFCheck_Dist_MomSi2HitIP ;
 
   Hist<TH2F> h_EnergyStripEnergyTotalReal ;
   Hist<TH2F> h_EnergyStripEnergyTotal ;
@@ -197,6 +200,7 @@ class Ana_Hist
   Hist<TH2F> h_DistanceBeamTracks ;
   Hist<TH2F> h_PosZBeamTracks ;
   Hist<TH2F> h_thetaTracks ;
+  Hist<TH1F> h_thetaResol ;
 
   //Hist<TH1F> h_nHypTrackReal;
   Hist<TH1F> h_nHypernucleiTrack ;
@@ -229,15 +233,15 @@ class Ana_Hist
   Hist<TH1F> h_PrimVtxstats ;
 
   //Decay Vertex
+  Hist<TH1F> h_P_fragments ;
   Hist<TH1F> h_Pt_fragments ;
   Hist<TH1F> h_Pz_fragments ;
+  Hist<TH1F> h_Dist_FragmentTrackPrimVtx ;
 
+  Hist<TH1F> h_P_pions ;
   Hist<TH1F> h_Pt_pions ;
   Hist<TH1F> h_Pz_pions ;
   Hist<TH1F> h_Chi2ndf_pions ;
-
-  Hist<TH1F> h_Pt_realpions ;
-  Hist<TH1F> h_Pz_realpions ;
 
   Hist<TH1F> h_Pt_cutpions ;
   Hist<TH1F> h_Pz_cutpions ;
@@ -246,17 +250,15 @@ class Ana_Hist
   Hist<TH1F> h_Ncutpions ;
   Hist<TH1F> h_Npions ;
 
+
   Hist<TH1F> h_Closedist_Distance ;
   Hist<TH1F> h_Closedist_PosZ ;
   Hist<TH2F> h_Dist_DecayTrackPrimVtx ;
 
-  Hist<TH1F> h_Closedist_realDistance ;
-  Hist<TH1F> h_Closedist_realPosZ ;
-  Hist<TH2F> h_Dist_realDecayTrackPrimVtx ;
-
   Hist<TH1F> h_Closedist_cutDistance ;
   Hist<TH1F> h_Closedist_cutPosZ ;
   Hist<TH2F> h_Dist_cutDecayTrackPrimVtx ;
+
 
   Hist<TH1F> h_DecayVertexDistance ;
   Hist<TH1F> h_DecayVertexDistanceX ;
@@ -268,32 +270,102 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexDistanceY_centroid ;
   Hist<TH1F> h_DecayVertexDistanceZ_centroid ;
 
-  Hist<TH1F> h_DecayVertexDistance_2centroid_average ;
-  Hist<TH1F> h_DecayVertexDistanceX_2centroid_average ;
-  Hist<TH1F> h_DecayVertexDistanceY_2centroid_average ;
-  Hist<TH1F> h_DecayVertexDistanceZ_2centroid_average ;
+  Hist<TH1F> h_DecayVertexDistance_KFPart ;
+  Hist<TH1F> h_DecayVertexDistanceX_KFPart ;
+  Hist<TH1F> h_DecayVertexDistanceY_KFPart ;
+  Hist<TH1F> h_DecayVertexDistanceZ_KFPart ;
 
-  Hist<TH1F> h_DecayVertexDistance_2centroid_closest ;
-  Hist<TH1F> h_DecayVertexDistanceX_2centroid_closest ;
-  Hist<TH1F> h_DecayVertexDistanceY_2centroid_closest ;
-  Hist<TH1F> h_DecayVertexDistanceZ_2centroid_closest ;
+  Hist<TH1F> h_DecayVertexDistance_KFPart_PrimVtx ;
+  Hist<TH1F> h_DecayVertexDistanceX_KFPart_PrimVtx ;
+  Hist<TH1F> h_DecayVertexDistanceY_KFPart_PrimVtx ;
+  Hist<TH1F> h_DecayVertexDistanceZ_KFPart_PrimVtx ;
 
-  Hist<TH1F> h_DecayVertexrealDistance ;
-  Hist<TH1F> h_DecayVertexrealDistanceX ;
-  Hist<TH1F> h_DecayVertexrealDistanceY ;
-  Hist<TH1F> h_DecayVertexrealDistanceZ ;
+  Hist<TH1F> h_DecayVertexDistance_KFPart_PrimVtx_Mass ;
+  Hist<TH1F> h_DecayVertexDistanceX_KFPart_PrimVtx_Mass ;
+  Hist<TH1F> h_DecayVertexDistanceY_KFPart_PrimVtx_Mass ;
+  Hist<TH1F> h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass ;
 
   Hist<TH1F> h_DecayVertexcutDistance ;
   Hist<TH1F> h_DecayVertexcutDistanceX ;
   Hist<TH1F> h_DecayVertexcutDistanceY ;
   Hist<TH1F> h_DecayVertexcutDistanceZ ;
 
+/*
+  Hist<TH1F> h_DecayVertexcutDistance_KFPart ;
+  Hist<TH1F> h_DecayVertexcutDistanceX_KFPart ;
+  Hist<TH1F> h_DecayVertexcutDistanceY_KFPart ;
+  Hist<TH1F> h_DecayVertexcutDistanceZ_KFPart ;
+*/
+
+  Hist<TH1F> h_DecayVertexcutDistance_KFPart_PrimVtx ;
+  Hist<TH1F> h_DecayVertexcutDistanceX_KFPart_PrimVtx ;
+  Hist<TH1F> h_DecayVertexcutDistanceY_KFPart_PrimVtx ;
+  Hist<TH1F> h_DecayVertexcutDistanceZ_KFPart_PrimVtx ;
+
+
   Hist<TH1F> h_DecayVertexPosZ_real ;
   Hist<TH1F> h_DecayVertexPosZ_vfunction ;
   Hist<TH1F> h_DecayVertexPosZ_centroid ;
+  Hist<TH1F> h_DecayVertexPosZ_KFPart ;
+  Hist<TH1F> h_DecayVertexPosZ_AllVfunc ;
+  Hist<TH1F> h_DecayVertexPosZ_AllCentroid ;
+  Hist<TH1F> h_DecayVertexPosZ_AllKFPart ;
 
+
+  Hist<TH2F> h_N_MotherTracks ;
+  Hist<TH2F> h_Dist_DaughterTracks ;
+  Hist<TH2F> h_Angle_MotherFragment ;
+  Hist<TH2F> h_Angle_MotherPion ;
+  Hist<TH2F> h_Chi2ndf_MotherTracks ;
+  Hist<TH2F> h_Dist_MotherTrackPrimVtx ;
+  Hist<TH2F> h_Theta_MotherTrackPrimVtx ;
+  Hist<TH2F> h_DecayVertexPosZ_KFPart_PrimVtx ;
+  Hist<TH2F> h_DecayFragmentMomZ_KFPart_PrimVtx ;
+  Hist<TH2F> h_DecayPionMomZ_KFPart_PrimVtx ;
+  Hist<TH2F> h_Hyp_ArmenterosPodolanski ;
+  Hist<TH2F> h_Hyp_CutArmenterosPodolanski ;
+  
   Hist<TH1F> h_HypInvariantMass ;
+  Hist<TH1F> h_HypErrorInvariantMass ;
 
+  Hist<TH1F> h_Hyp_RealLifeTime ;
+  Hist<TH1F> h_HypLifeTime_PrimVtx ;
+  Hist<TH1F> h_HypErrorLifeTime_PrimVtx ;
+  Hist<TH1F> h_HypcutLifeTime_PrimVtx ;
+
+  Hist<TH2F> h_HypInvariantMassCheck ;
+  Hist<TH2F> h_HypInvariantErrorMassCheck ;
+
+  Hist<TH1F> h_HypInvariantMass_LorentzVect ;
+  Hist<TH1F> h_HypInvariantMass_CutLorentzVect ;
+
+  Hist<TH1F> h_EffPosZ_real ;
+  Hist<TH1F> h_EffPosZ_preKF ;
+  Hist<TH1F> h_EffPosZ_postKF ;
+  Hist<TH1F> h_EffPosZ_preKFPart ;
+  Hist<TH1F> h_EffPosZ_postKFPart ;
+  
+  Hist<TH2F> h_N_SiHits_ReconsTracks ;
+  
+/*
+  Hist<TH1F> h_N_Si_MotherTracks ;
+
+
+  Hist<TH1F> h_DecayVertexDistance_AllVfunc ;
+  Hist<TH1F> h_DecayVertexDistanceX_AllVfunc ;
+  Hist<TH1F> h_DecayVertexDistanceY_AllVfunc ;
+  Hist<TH1F> h_DecayVertexDistanceZ_AllVfunc ;
+
+  Hist<TH1F> h_DecayVertexDistance_AllCentroid ;
+  Hist<TH1F> h_DecayVertexDistanceX_AllCentroid ;
+  Hist<TH1F> h_DecayVertexDistanceY_AllCentroid ;
+  Hist<TH1F> h_DecayVertexDistanceZ_AllCentroid ;
+
+  Hist<TH1F> h_DecayVertexDistance_AllKFPart ;
+  Hist<TH1F> h_DecayVertexDistanceX_AllKFPart ;
+  Hist<TH1F> h_DecayVertexDistanceY_AllKFPart ;
+  Hist<TH1F> h_DecayVertexDistanceZ_AllKFPart ;
+*/
   Hist<TH1F> h_DecayVtxstats ;
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;

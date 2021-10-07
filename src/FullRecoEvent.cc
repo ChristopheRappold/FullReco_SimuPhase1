@@ -52,12 +52,30 @@ void FullRecoEvent::Clear(int toclean)
   TrackMother.clear();
   DaughtersTrackDAFInit.clear();
 
-
-  FragmentTracks.clear();
-  PionTracks.clear();
+  //Added when merging with master
+  //FragmentTracks.clear();
+  //PionTracks.clear();
 
   Si_HitsEnergyLayer.clear();
+  
+  Hits_Si1.clear();
+  Hits_Si2.clear();
+  
+  HitsX_Si1.clear();
+  HitsY_Si1.clear();
+  HitsX_Si2.clear();
+  HitsY_Si2.clear();
 
-  InteractionPoint = {0.,0.,0.};
-  DecayVertex = {0.,0.,0.};
+  Mother_MomE.SetXYZM(0.,0.,0.,0.);
+  InteractionPoint.fill(0.);
+  DecayVertex.fill(0.);
+  Hyp_LifeTime = -1.;
+
+  PrimVtxRecons.SetXYZ(0., 0., 0.);
+  CovMatrix_IP.fill(0.);
+
+  DecayVtxRecons.SetXYZ(0., 0., 0.);
+  CovMatrix_SV.fill(0.);
+
+  Hyp_Vect.clear();
 }

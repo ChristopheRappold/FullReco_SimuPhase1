@@ -291,6 +291,8 @@ class THyphiAttributes
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
 
+  std::string StudyCase;
+
   std::string FlatML_namefile;
   std::string DataML_Out;
 

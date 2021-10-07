@@ -51,10 +51,10 @@ enum SolDet : int
   Si1y,
   Si2x,
   Si2y, /*9*/
-  SD1u, /*10*/
-  SD1v,
-  SD2u,
-  SD2v, /*13*/
+  Si1x_SD, /*10*/
+  Si1y_SD,
+  Si2x_SD,
+  Si2y_SD, /*13*/
   MiniFiberD1_x1, /*14*/
   MiniFiberD1_u1,
   MiniFiberD1_v1,
@@ -67,17 +67,17 @@ enum SolDet : int
   FiberD2_x, /*23*/
   FiberD2_u,
   FiberD2_v,
-  FiberD3_x, /*25*/
+  FiberD3_x, /*26*/
   FiberD3_u,
   FiberD3_v,
-  FiberD4_x, /*28*/
+  FiberD4_x, /*29*/
   FiberD4_u,
   FiberD4_v,
-  FiberD5_x, /*31*/
+  FiberD5_x, /*32*/
   FiberD5_u,
   FiberD5_v,
-  PSFE, /*34*/
-  MG01, /*35*/
+  PSFE, /*35*/
+  MG01, /*36*/
   MG02,
   MG03,
   MG04,
@@ -93,10 +93,10 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17, /*48*/
-  PSCE, /*49*/
-  PSBE, /*50*/
-  CDC_layer0, /*51*/
+  MG17, /*52*/
+  PSCE, /*53*/
+  PSBE, /*54*/
+  CDC_layer0, /*55*/
   CDC_layer1,
   CDC_layer2,
   CDC_layer3,
@@ -110,23 +110,23 @@ enum SolDet : int
   CDC_layer11,
   CDC_layer12,
   CDC_layer13,
-  CDC_layer14, /*65*/
-  CDHBar, /*66*/
-  TrFwd0, /*67*/
+  CDC_layer14, /*69*/
+  CDHBar, /*70*/
+  TrFwd0, /*71*/
   TrFwd1,
-  TrFwd2, /*69*/
-  RPC_l, /*70*/
-  RPC_h, /*71*/
-  FMF2Stop0, /*72*/
+  TrFwd2, /*73*/
+  RPC_l, /*74*/
+  RPC_h, /*75*/
+  FMF2Stop0, /*76*/
   FMF2Stop1,
-  FMF2Stop2, /*74*/
+  FMF2Stop2, /*78*/
   SIZEOF_G4SOLDETTYPE
 };
 
 constexpr auto nameLiteralDet = {
     "InSi0"         ,          "InSi1",          "InSi2",          "InSi3",            "TR1",            "TR2",
     "Si1x"          ,           "Si1y",           "Si2x",           "Si2y",
-    "SD1u"          ,           "SD1v",           "SD2u",           "SD2v",
+    "Si1x_SD"          ,           "Si1y_SD",           "Si2x_SD",           "Si2y_SD",
     "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1", "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
     "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
     "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      "FiberD4_x",      "FiberD4_u",      "FiberD4_v",
@@ -172,7 +172,7 @@ constexpr T EnumIter<T, args...>::values[];
   using SolDetIter = struct EnumIter<
     SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/,
     Si1x, Si1y, Si2x, Si2y,
-    SD1u, SD1v, SD2u, SD2v,
+    Si1x_SD, Si1y_SD, Si2x_SD, Si2y_SD,
     MiniFiberD1_x1, MiniFiberD1_x1,MiniFiberD1_v1,
     MiniFiberD1_x2, MiniFiberD1_x2,MiniFiberD1_v2,
     FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x,
@@ -528,6 +528,44 @@ struct OutHit
   std::array<double, 4> MCparticle;
 };
 
+struct Hyp
+{
+  Int_t Pattern; /// 1 = Simulation / 2 = KFParticle_real / 3 = KFParticle_cut / 4 = KFParticle / 5 = KFParticle_Mass / 6 = LorentzVector
+  
+  //Mother:
+  Int_t PDG;
+  Int_t N_Mother;
+  Double32_t Chi2ndf;
+  TLorentzVector MomE;
+  TVector3 PrimVtx;
+  TVector3 DecayVtx;
+  TVector3 Dist_RealReconsVtx;
+  Double32_t Dist_MotherPrimVtx;
+  Double32_t Angle_MotherPrimVtx;
+  Double32_t InvMass;
+  Double32_t ErrInvMass;
+  Int_t ErrGetMass;
+  Double32_t LifeTime;
+  Double32_t ErrLifeTime;
+  Int_t ErrGetLifeTime;
+
+  //Daughters:
+  Int_t Id_Fragment;
+  TLorentzVector MomE_Fragment;
+  Double32_t Angle_MotherFragment;
+  Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
+
+  Int_t Id_Pion;
+  TLorentzVector MomE_Pion;
+  Double32_t Chi2ndf_Pion;
+  Double32_t Angle_MotherPion;
+  Int_t N_Pion;
+  Int_t Pion_IsFromHyp; // 0-> No; 1-> Yes
+  Double32_t Dist_Daughters;
+  Double32_t ArmPod_Qt;
+  Double32_t ArmPod_Alfa;
+};
+
 struct CandTrack
 {
   std::vector<int> orderedHitIds;
@@ -606,16 +644,30 @@ public:
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 
-  std::vector<DecayTrackInfo> FragmentTracks;
-  std::vector<DecayTrackInfo> PionTracks;
-
-
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
+  
+  std::vector<std::vector<double> > Hits_Si1{};
+  std::vector<std::vector<double> > Hits_Si2{};
+  
+  std::vector<std::tuple<double, size_t> > HitsX_Si1{};
+  std::vector<std::tuple<double, size_t> > HitsY_Si1{};
+  std::vector<std::tuple<double, size_t> > HitsX_Si2{};
+  std::vector<std::tuple<double, size_t> > HitsY_Si2{};
+
+
+  TLorentzVector Mother_MomE;
   std::array<double,3> InteractionPoint;
   std::array<double,3> DecayVertex;
+  double Hyp_LifeTime;
 
   TVector3 PrimVtxRecons;
+  std::array<double,6> CovMatrix_IP; //lower triangle
+
   TVector3 DecayVtxRecons;
+  std::array<double,6> CovMatrix_SV; //lower triangle
+
+  std::vector<Hyp> Hyp_Vect;
+
   
   explicit FullRecoEvent(unsigned int idTh = 1);
   ~FullRecoEvent();

@@ -23,6 +23,8 @@ ClassImp(MCAnaEventG4Sol)
 
 // TClonesArray *MCAnaEventG4Sol::gfTrack = 0;
 
+// TClonesArray *MCAnaEventG4Sol::gfHyp = 0;
+
 MCAnaEventG4Sol::MCAnaEventG4Sol()//:TObject()
 {
   // if(!gMC_Particle) gMC_Particle = new TClonesArray("TMcParticle",10);
@@ -82,7 +84,7 @@ MCAnaEventG4Sol::MCAnaEventG4Sol()//:TObject()
   TrackCand = new TClonesArray("TTrackCand",100);
 
   fTrack = new TClonesArray("THyphiTrack",20);
-  //if(!gfHyp) gfHyp = new TClonesArray("THypernucleus",20);
+  fHyp = new TClonesArray("THypernucleus",20);
 
 
   Nmc=0;
@@ -103,6 +105,7 @@ MCAnaEventG4Sol::MCAnaEventG4Sol()//:TObject()
   ReducFactor = 1.;
   NtrackCand = 0;
   Ntrack = 0;
+  Nhyp = 0;
   trigger = 0;
 
   Setup();
@@ -135,6 +138,8 @@ void MCAnaEventG4Sol::Clear(Option_t *option)
   TrackCand->Clear("C");
 
   fTrack->Clear("C");
+
+  fHyp->Clear("C");
 
   Setup();
 }
@@ -179,6 +184,8 @@ void MCAnaEventG4Sol::Reset()
   delete fTrack; fTrack = 0;
 
 
+  delete fHyp; fHyp = 0;
+
 }
 
 
@@ -204,6 +211,7 @@ int MCAnaEventG4Sol::Setup()
   ReducFactor =1.;
   NtrackCand =0;
   Ntrack =0;
+  Nhyp = 0;
   trigger = 0;
 
 

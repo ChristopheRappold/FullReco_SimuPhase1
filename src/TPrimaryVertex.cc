@@ -5,6 +5,8 @@
 
 #include <tuple>
 
+#include "TVector3.h"
+
 //#define DEBUG_PRIMVTX
 
 //#define RECONS_HITS_MULTIPLICITY
@@ -12,14 +14,14 @@
 #define TRACK_RECONS_CHECK
 #define MOTHER_DAUGHTERS_CHECK
 #define VERTEX_RECONS_CHECK
-//#define COVARIANCE_MATRIX
+#define COVARIANCE_MATRIX
 //#define DECAY_VERTEX
 
 using namespace std;
 using namespace G4Sol;
 
 TPrimaryVertex::TPrimaryVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface("PrimaryVertexReco"), att(attribut), SiliconHits_Si1(1), SiliconHits_Si2(2)
+    : TDataProcessInterface("PrimaryVertexReco"), att(attribut), SiliconHitsSD_Si1(1), SiliconHitsSD_Si2(2)
 {
   rand = new TRandom3();
 }
@@ -87,23 +89,30 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_HitMultiplicityDiff_Si1      = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiff_Si1);
   LocalHisto.h_HitMultiplicityDiffNHits_Si1 = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiffNHits_Si1);
 
-  LocalHisto.h_EnergyDiffStrips_Si1       = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si1);
-  LocalHisto.h_nEventsGoodrecons_Si1      = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si1);
-  LocalHisto.h_nEventsGhost_Si1           = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si1);
-  LocalHisto.h_nEventsGoodreconsGhost_Si1 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si1);
-  LocalHisto.h_nEventsRealGoodrecons_Si1  = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si1);
+  LocalHisto.h_EnergyDiffStrips_Si1          = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si1);
+  LocalHisto.h_nEventsGoodrecons_Si1         = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si1);
+  LocalHisto.h_nEventsGhost_Si1              = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si1);
+  LocalHisto.h_nEventsGoodreconsGhost_Si1    = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si1);
+  LocalHisto.h_nEventsRealGoodrecons_Si1     = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si1);
+  LocalHisto.h_nEventsRealRejectCuadrant_Si1 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealRejectCuadrant_Si1);
 
   LocalHisto.h_HitMultiplicity_Si2          = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicity_Si2);
   LocalHisto.h_HitMultiplicityRecons_Si2    = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityRecons_Si2);
   LocalHisto.h_HitMultiplicityDiff_Si2      = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiff_Si2);
   LocalHisto.h_HitMultiplicityDiffNHits_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiffNHits_Si2);
 
-  LocalHisto.h_EnergyDiffStrips_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si2);
+  LocalHisto.h_EnergyDiffStrips_Si2          = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si2);
+  LocalHisto.h_nEventsGoodrecons_Si2         = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si2);
+  LocalHisto.h_nEventsGhost_Si2              = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si2);
+  LocalHisto.h_nEventsGoodreconsGhost_Si2    = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si2);
+  LocalHisto.h_nEventsRealGoodrecons_Si2     = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si2);
+  LocalHisto.h_nEventsRealRejectCuadrant_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealRejectCuadrant_Si2);
 
-  LocalHisto.h_nEventsGoodrecons_Si2      = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si2);
-  LocalHisto.h_nEventsGhost_Si2           = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si2);
-  LocalHisto.h_nEventsGoodreconsGhost_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si2);
-  LocalHisto.h_nEventsRealGoodrecons_Si2  = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si2);
+  LocalHisto.h_MFCheck_Theta_MomSi1MomSi2 = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Theta_MomSi1MomSi2);
+  LocalHisto.h_MFCheck_Dist_MomSi1HitSi2  = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi1HitSi2);
+  LocalHisto.h_MFCheck_Dist_MomSi2HitSi1  = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi2HitSi1);
+  LocalHisto.h_MFCheck_Dist_MomSi1HitIP   = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi1HitIP);
+  LocalHisto.h_MFCheck_Dist_MomSi2HitIP   = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi2HitIP);
 
   LocalHisto.h_EnergyStripEnergyTotalReal = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyStripEnergyTotalReal);
   LocalHisto.h_EnergyStripEnergyTotal     = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyStripEnergyTotal);
@@ -116,6 +125,7 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_DistanceBeamTracks = AnaHisto->CloneAndRegister(AnaHisto->h_DistanceBeamTracks);
   LocalHisto.h_PosZBeamTracks     = AnaHisto->CloneAndRegister(AnaHisto->h_PosZBeamTracks);
   LocalHisto.h_thetaTracks        = AnaHisto->CloneAndRegister(AnaHisto->h_thetaTracks);
+  LocalHisto.h_thetaResol         = AnaHisto->CloneAndRegister(AnaHisto->h_thetaResol);
 
   LocalHisto.h_nHypernucleiTrack = AnaHisto->CloneAndRegister(AnaHisto->h_nHypernucleiTrack);
   LocalHisto.h_fvalues           = AnaHisto->CloneAndRegister(AnaHisto->h_fvalues);
@@ -167,34 +177,63 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
   // Reconstruct the real hits from the simulation
   std::vector<std::tuple<double, double, double, size_t, double, double, std::string> > HitEnergyPosXYreal_Si1{};
-  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si1, G4Sol::Si1x, G4Sol::Si1y, LocalHisto.h_EnergyDiffStrips_Si1);
+  std::vector<std::tuple<size_t,TVector3,TVector3>> HitIdMomPos_Si1{};
+  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si1, G4Sol::Si1x_SD, G4Sol::Si1y_SD, LocalHisto.h_EnergyDiffStrips_Si1, HitIdMomPos_Si1);
 
   std::vector<std::tuple<double, double, double, size_t, double, double, std::string> > HitEnergyPosXYreal_Si2{};
-  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si2, G4Sol::Si2x, G4Sol::Si2y, LocalHisto.h_EnergyDiffStrips_Si2);
+  std::vector<std::tuple<size_t,TVector3,TVector3>> HitIdMomPos_Si2{};
+  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si2, G4Sol::Si2x_SD, G4Sol::Si2y_SD, LocalHisto.h_EnergyDiffStrips_Si2, HitIdMomPos_Si2);
+
+  //Check magnetic field effects
+  MFcheck(HitIdMomPos_Si1, HitIdMomPos_Si2, RecoEvent.InteractionPoint);
 
   std::vector<std::tuple<double, size_t> > HitEnergyLayerX_Si1{};
-  for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[0])
+  for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[1])
     HitEnergyLayerX_Si1.emplace_back(std::make_tuple(it_HitSi.second, it_HitSi.first));
 
   std::vector<std::tuple<double, size_t> > HitEnergyLayerY_Si1{};
-  for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[1])
+  for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[0])
     HitEnergyLayerY_Si1.emplace_back(std::make_tuple(it_HitSi.second, it_HitSi.first));
 
   std::vector<std::tuple<double, size_t> > HitEnergyLayerX_Si2{};
-  for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[2])
+  for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[3])
     HitEnergyLayerX_Si2.emplace_back(std::make_tuple(it_HitSi.second, it_HitSi.first));
 
   std::vector<std::tuple<double, size_t> > HitEnergyLayerY_Si2{};
-  for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[3])
+  for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[2])
     HitEnergyLayerY_Si2.emplace_back(std::make_tuple(it_HitSi.second, it_HitSi.first));
 
+  //Combine strips if set in the header
+  SiliconHitsSD_Si1.CombineStrips(HitEnergyLayerX_Si1);
+  SiliconHitsSD_Si1.CombineStrips(HitEnergyLayerY_Si1);
+  SiliconHitsSD_Si2.CombineStrips(HitEnergyLayerX_Si2);
+  SiliconHitsSD_Si2.CombineStrips(HitEnergyLayerY_Si2);
+
+  //Copy silicon signals for later checking the produced by daughters/mother
+  RecoEvent.HitsX_Si1 = HitEnergyLayerX_Si1;
+  RecoEvent.HitsY_Si1 = HitEnergyLayerY_Si1;
+  RecoEvent.HitsX_Si2 = HitEnergyLayerX_Si2;
+  RecoEvent.HitsY_Si2 = HitEnergyLayerY_Si2;
+
+/* FOR PREVIOUS SILICON GEOMETRY
   // Obtain the hits from the energy signals
   std::vector<std::vector<double> > HitEnergyPosXY_Si1{};
   SiliconHits_Si1.SignalstoHits(HitEnergyLayerX_Si1, HitEnergyLayerY_Si1, HitEnergyPosXY_Si1);
+  RecoEvent.Hits_Si1 = HitEnergyPosXY_Si1;
 
   std::vector<std::vector<double> > HitEnergyPosXY_Si2{};
   SiliconHits_Si2.SignalstoHits(HitEnergyLayerX_Si2, HitEnergyLayerY_Si2, HitEnergyPosXY_Si2);
+  RecoEvent.Hits_Si2 = HitEnergyPosXY_Si2;
+*/
+  //FOR NEW SILICON GEOMETRY
+  // Obtain the hits from the energy signals
+  std::vector<std::vector<double> > HitEnergyPosXY_Si1{};
+  SiliconHitsSD_Si1.SignalstoHits_SD(HitEnergyLayerX_Si1, HitEnergyLayerY_Si1, HitEnergyPosXY_Si1);
+  RecoEvent.Hits_Si1 = HitEnergyPosXY_Si1;
 
+  std::vector<std::vector<double> > HitEnergyPosXY_Si2{};
+  SiliconHitsSD_Si2.SignalstoHits_SD(HitEnergyLayerX_Si2, HitEnergyLayerY_Si2, HitEnergyPosXY_Si2);
+  RecoEvent.Hits_Si2 = HitEnergyPosXY_Si2;
 
 
 #ifdef HIT_RECONS_CHECK
@@ -215,6 +254,8 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_nEventsGhost_Si1->Fill(nGhost_Si1, 1.);
   LocalHisto.h_nEventsGoodreconsGhost_Si1->Fill(nGoodrecons_Si1, nGhost_Si1, 1.);
   LocalHisto.h_nEventsRealGoodrecons_Si1->Fill(HitEnergyPosXYreal_Si1.size(), nGoodrecons_Si1, 1.);
+  LocalHisto.h_nEventsRealRejectCuadrant_Si1->Fill(HitEnergyPosXYreal_Si1.size(), SiliconHitsSD_Si1.CountRejectCuadrant(), 1.);
+  SiliconHitsSD_Si1.Clear();
 
   size_t nGoodrecons_Si2 = 0;
   nGoodEventsCounter(HitEnergyPosXY_Si2, HitEnergyPosXYreal_Si2, widthStrip_Si2, nGoodrecons_Si2);
@@ -232,6 +273,8 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_nEventsGhost_Si2->Fill(nGhost_Si2, 1.);
   LocalHisto.h_nEventsGoodreconsGhost_Si2->Fill(nGoodrecons_Si2, nGhost_Si2, 1.);
   LocalHisto.h_nEventsRealGoodrecons_Si2->Fill(HitEnergyPosXYreal_Si2.size(), nGoodrecons_Si2, 1.);
+  LocalHisto.h_nEventsRealRejectCuadrant_Si2->Fill(HitEnergyPosXYreal_Si2.size(), SiliconHitsSD_Si2.CountRejectCuadrant(), 1.);
+  SiliconHitsSD_Si2.Clear();
 
 #endif
 
@@ -285,12 +328,12 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
   for(size_t i = 0; i < RealTracks.size(); ++i)
     {
-      if(abs(RealTracks[i][0][7] - mother_trackID) < 0.01)
+      if(std::abs(RealTracks[i][0][7] - mother_trackID) < 0.01)
         motherTracks.emplace_back(RealTracks[i]);
 
       for(size_t j = 0; j < daughters_TrackID.size(); ++j)
         {
-          if(abs(RealTracks[i][0][7] - daughters_TrackID[j]) < 0.01)
+          if(std::abs(RealTracks[i][0][7] - daughters_TrackID[j]) < 0.01)
             daughtersTracks.emplace_back(RealTracks[i]);
         }
     }
@@ -306,10 +349,10 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
       for(size_t i = 0; i < CandidateTracks.size(); ++i)
         {
-          if((abs(motherTracks[0][0][1] - CandidateTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
-             (abs(motherTracks[0][0][2] - CandidateTracks[i][0][2]) < widthStrip_Si1 / 2.) &&
-             (abs(motherTracks[0][1][1] - CandidateTracks[i][1][1]) < widthStrip_Si2 / 2.) &&
-             (abs(motherTracks[0][1][2] - CandidateTracks[i][1][2]) < widthStrip_Si2 / 2.))
+          if((std::abs(motherTracks[0][0][1] - CandidateTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
+             (std::abs(motherTracks[0][0][2] - CandidateTracks[i][0][2]) < widthStrip_Si1 / 2.) &&
+             (std::abs(motherTracks[0][1][1] - CandidateTracks[i][1][1]) < widthStrip_Si2 / 2.) &&
+             (std::abs(motherTracks[0][1][2] - CandidateTracks[i][1][2]) < widthStrip_Si2 / 2.))
             {
               LocalHisto.h_nHypernucleiTrack->Fill("Recons H3L", 1.);
             }
@@ -335,10 +378,10 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
       for(size_t i = 0; i < CandidateTracks.size(); ++i)
         {
-          if((abs(daughtersTracks[j][0][1] - CandidateTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
-             (abs(daughtersTracks[j][0][2] - CandidateTracks[i][0][2]) < widthStrip_Si1 / 2.) &&
-             (abs(daughtersTracks[j][1][1] - CandidateTracks[i][1][1]) < widthStrip_Si2 / 2.) &&
-             (abs(daughtersTracks[j][1][2] - CandidateTracks[i][1][2]) < widthStrip_Si2 / 2.))
+          if((std::abs(daughtersTracks[j][0][1] - CandidateTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
+             (std::abs(daughtersTracks[j][0][2] - CandidateTracks[i][0][2]) < widthStrip_Si1 / 2.) &&
+             (std::abs(daughtersTracks[j][1][1] - CandidateTracks[i][1][1]) < widthStrip_Si2 / 2.) &&
+             (std::abs(daughtersTracks[j][1][2] - CandidateTracks[i][1][2]) < widthStrip_Si2 / 2.))
             {
               if(daughtersTracks[j][0][6] == 2)
                 {
@@ -360,8 +403,8 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_DistanceBeamTracks->Fill(distance, "Daughters", 1.);
       LocalHisto.h_PosZBeamTracks->Fill(z, "Daughters", 1.);
 
-      double thetadaughters = atan(sqrt(pow((daughtersTracks[j][1][2] - daughtersTracks[j][0][2]), 2.) +
-                                        pow((daughtersTracks[j][1][1] - daughtersTracks[j][0][1]), 2.)) /
+      double thetadaughters = std::atan(std::sqrt(std::pow((daughtersTracks[j][1][2] - daughtersTracks[j][0][2]), 2.) +
+                                        std::pow((daughtersTracks[j][1][1] - daughtersTracks[j][0][1]), 2.)) /
                                    (Z_plane_Si2 - Z_plane_Si1)) *
                               180. / M_PI;
       LocalHisto.h_thetaTracks->Fill(thetadaughters, "Daughters", 1.);
@@ -383,29 +426,29 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
       for(size_t j = 0; j < HitEnergyLayerX_Si1.size(); ++j)
         {
-          double HitX_Si1 = -lenghtSi_Si1 / 2. + (get<1>(HitEnergyLayerX_Si1[j]) + 0.5) * widthStrip_Si1;
+          double HitX_Si1 = -lenghtSi_Si1 / 2. + (get<1>(HitEnergyLayerX_Si1[j])%nStrips_Si1 + 0.5) * widthStrip_Si1;
 
-          if(abs(trackPosX_Si1 - HitX_Si1) <= widthStrip_Si1 / 2.)
+          if(std::abs(trackPosX_Si1 - HitX_Si1) <= widthStrip_Si1 / 2.)
             {
               for(size_t k = 0; k < HitEnergyLayerY_Si1.size(); ++k)
                 {
-                  double HitY_Si1 = lenghtSi_Si1 / 2. - (get<1>(HitEnergyLayerY_Si1[k]) + 0.5) * widthStrip_Si1;
+                  double HitY_Si1 = +lenghtSi_Si1 / 2. - (get<1>(HitEnergyLayerY_Si1[k])%nStrips_Si1 + 0.5) * widthStrip_Si1;
 
-                  if(abs(trackPosY_Si1 - HitY_Si1) <= widthStrip_Si1 / 2.)
+                  if(std::abs(trackPosY_Si1 - HitY_Si1) <= widthStrip_Si1 / 2.)
                     {
                       for(size_t l = 0; l < HitEnergyLayerX_Si2.size(); ++l)
                         {
                           double HitX_Si2 =
-                              -lenghtSi_Si2 / 2. + (get<1>(HitEnergyLayerX_Si2[l]) + 0.5) * widthStrip_Si2;
+                              -lenghtSi_Si2 / 2. + (get<1>(HitEnergyLayerX_Si2[l])%nStrips_Si2 + 0.5) * widthStrip_Si2;
 
-                          if(abs(trackPosX_Si2 - HitX_Si2) <= widthStrip_Si2 / 2.)
+                          if(std::abs(trackPosX_Si2 - HitX_Si2) <= widthStrip_Si2 / 2.)
                             {
                               for(size_t m = 0; m < HitEnergyLayerY_Si2.size(); ++m)
                                 {
                                   double HitY_Si2 =
-                                      lenghtSi_Si2 / 2. - (get<1>(HitEnergyLayerY_Si2[m]) + 0.5) * widthStrip_Si2;
+                                      +lenghtSi_Si2 / 2. - (get<1>(HitEnergyLayerY_Si2[m])%nStrips_Si2 + 0.5) * widthStrip_Si2;
 
-                                  if(abs(trackPosY_Si2 - HitY_Si2) <= widthStrip_Si2 / 2.)
+                                  if(std::abs(trackPosY_Si2 - HitY_Si2) <= widthStrip_Si2 / 2.)
                                     {
                                       LocalHisto.h_EnergyStripEnergyTotal->Fill(get<0>(HitEnergyLayerX_Si1[j]),
                                                                                 TotalEnergy, 1.);
@@ -463,9 +506,9 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   for(size_t i = 0; i < f_values_IP.size(); ++i)
     LocalHisto.h_fvalues->Fill(f_values_IP[i], 1.);
 
-  double distance  = sqrt(pow((InteractionPoint_real_X - InteractionPointRecons[0]), 2.) +
-                          pow((InteractionPoint_real_Y - InteractionPointRecons[1]), 2.) +
-                          pow((InteractionPoint_real_Z - InteractionPointRecons[2]), 2.));
+  double distance  = std::sqrt(std::pow((InteractionPoint_real_X - InteractionPointRecons[0]), 2.) +
+                          std::pow((InteractionPoint_real_Y - InteractionPointRecons[1]), 2.) +
+                          std::pow((InteractionPoint_real_Z - InteractionPointRecons[2]), 2.));
   double distanceX = InteractionPoint_real_X - InteractionPointRecons[0];
   double distanceY = InteractionPoint_real_Y - InteractionPointRecons[1];
   double distanceZ = InteractionPoint_real_Z - InteractionPointRecons[2];
@@ -482,29 +525,18 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   std::vector<std::vector<double> > CovMatrix;
   CovarianceMatrix(CandidateTracks, BeamHit1, BeamHit2, InteractionPointAverage, f_values_IP, CovMatrix);
 
-  LocalHisto.h_InteractionPointDistanceX_pull->Fill(distanceX / sqrt(TMath::Max(CovMatrix[0][0], 1e-10)), 1.);
-  LocalHisto.h_InteractionPointDistanceY_pull->Fill(distanceY / sqrt(TMath::Max(CovMatrix[1][1], 1e-10)), 1.);
-  LocalHisto.h_InteractionPointDistanceZ_pull->Fill(distanceZ / sqrt(TMath::Max(CovMatrix[2][2], 1e-10)), 1.);
+  RecoEvent.CovMatrix_IP = {CovMatrix[0][0],
+                            CovMatrix[1][0], CovMatrix[1][1],
+                            CovMatrix[2][0], CovMatrix[2][1], CovMatrix[2][2]};
 
-  /*
-    LocalHisto.h_InteractionPointDistanceX_pull->Fill((InteractionPoint_real_X -
-    InteractionPointAverage[0])/sqrt(TMath::Max(CovMatrix[0][0], 1e-10)), 1.);
-    LocalHisto.h_InteractionPointDistanceY_pull->Fill((InteractionPoint_real_Y -
-    InteractionPointAverage[1])/sqrt(TMath::Max(CovMatrix[1][1], 1e-10)), 1.);
-    LocalHisto.h_InteractionPointDistanceZ_pull->Fill((InteractionPoint_real_Z -
-    InteractionPointAverage[2])/sqrt(TMath::Max(CovMatrix[2][2], 1e-10)), 1.);
-  */
+  LocalHisto.h_InteractionPointDistanceX_pull->Fill(distanceX / std::sqrt(TMath::Max(CovMatrix[0][0], 1e-10)), 1.);
+  LocalHisto.h_InteractionPointDistanceY_pull->Fill(distanceY / std::sqrt(TMath::Max(CovMatrix[1][1], 1e-10)), 1.);
+  LocalHisto.h_InteractionPointDistanceZ_pull->Fill(distanceZ / std::sqrt(TMath::Max(CovMatrix[2][2], 1e-10)), 1.);
 
-  /*
-    std::cout << "Covariance matrix:\n";
-    std::cout << CovMatrix[0][0] << "\t" << CovMatrix[0][1] << "\t" << CovMatrix[0][2] << "\n";
-    std::cout << CovMatrix[1][0] << "\t" << CovMatrix[1][1] << "\t" << CovMatrix[1][2] << "\n";
-    std::cout << CovMatrix[2][0] << "\t" << CovMatrix[2][1] << "\t" << CovMatrix[2][2] << "\n\n";
-  */
 
-  LocalHisto.h_CovarianceSigmaX->Fill(sqrt(CovMatrix[0][0]), 1.);
-  LocalHisto.h_CovarianceSigmaY->Fill(sqrt(CovMatrix[1][1]), 1.);
-  LocalHisto.h_CovarianceSigmaZ->Fill(sqrt(CovMatrix[2][2]), 1.);
+  LocalHisto.h_CovarianceSigmaX->Fill(std::sqrt(CovMatrix[0][0]), 1.);
+  LocalHisto.h_CovarianceSigmaY->Fill(std::sqrt(CovMatrix[1][1]), 1.);
+  LocalHisto.h_CovarianceSigmaZ->Fill(std::sqrt(CovMatrix[2][2]), 1.);
 
 #endif
 
@@ -519,7 +551,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   double IP_DecayDistanceZ = DecayPosition_real_Z - InteractionPoint_real_Z;
 
   LocalHisto.h_IP_DecayDistance->Fill(
-      sqrt(pow(IP_DecayDistanceX, 2.) + pow(IP_DecayDistanceY, 2.) + pow(IP_DecayDistanceZ, 2.)), 1.);
+      std::sqrt(std::pow(IP_DecayDistanceX, 2.) + std::pow(IP_DecayDistanceY, 2.) + std::pow(IP_DecayDistanceZ, 2.)), 1.);
   LocalHisto.h_IP_DecayDistanceX->Fill(IP_DecayDistanceX, 1.);
   LocalHisto.h_IP_DecayDistanceY->Fill(IP_DecayDistanceY, 1.);
   LocalHisto.h_IP_DecayDistanceZ->Fill(IP_DecayDistanceZ, 1.);
@@ -539,9 +571,9 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   std::vector<double> DecayPositionRecons(3, 0.);
   DecayTrackstoDecayPosition(CandidateDecayTracks, InteractionPointRecons, DecayPositionRecons);
 
-  double distanceDecayPosition  = sqrt(pow((DecayPosition_real_X - DecayPositionRecons[0]), 2.) +
-                                      pow((DecayPosition_real_Y - DecayPositionRecons[1]), 2.) +
-                                      pow((DecayPosition_real_Z - DecayPositionRecons[2]), 2.));
+  double distanceDecayPosition  = std::sqrt(std::pow((DecayPosition_real_X - DecayPositionRecons[0]), 2.) +
+                                      std::pow((DecayPosition_real_Y - DecayPositionRecons[1]), 2.) +
+                                      std::pow((DecayPosition_real_Z - DecayPositionRecons[2]), 2.));
   double distanceDecayPositionX = DecayPosition_real_X - DecayPositionRecons[0];
   double distanceDecayPositionY = DecayPosition_real_Y - DecayPositionRecons[1];
   double distanceDecayPositionZ = DecayPosition_real_Z - DecayPositionRecons[2];
@@ -557,10 +589,10 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
     {
       for(size_t i = 0; i < CandidateDecayTracks.size(); ++i)
         {
-          if((abs(motherTracks[0][0][1] - CandidateDecayTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
-             (abs(motherTracks[0][0][2] - CandidateDecayTracks[i][0][2]) < widthStrip_Si1 / 2.) &&
-             (abs(motherTracks[0][1][1] - CandidateDecayTracks[i][1][1]) < widthStrip_Si2 / 2.) &&
-             (abs(motherTracks[0][1][2] - CandidateDecayTracks[i][1][2]) < widthStrip_Si2 / 2.))
+          if((std::abs(motherTracks[0][0][1] - CandidateDecayTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
+             (std::abs(motherTracks[0][0][2] - CandidateDecayTracks[i][0][2]) < widthStrip_Si1 / 2.) &&
+             (std::abs(motherTracks[0][1][1] - CandidateDecayTracks[i][1][1]) < widthStrip_Si2 / 2.) &&
+             (std::abs(motherTracks[0][1][2] - CandidateDecayTracks[i][1][2]) < widthStrip_Si2 / 2.))
             {
               LocalHisto.h_nHypernucleiTrack->Fill("Decay H3L", 1.);
             }
@@ -571,10 +603,10 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
     {
       for(size_t i = 0; i < CandidateDecayTracks.size(); ++i)
         {
-          if((abs(daughtersTracks[j][0][1] - CandidateDecayTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
-             (abs(daughtersTracks[j][0][2] - CandidateDecayTracks[i][0][2]) < widthStrip_Si1 / 2.) &&
-             (abs(daughtersTracks[j][1][1] - CandidateDecayTracks[i][1][1]) < widthStrip_Si2 / 2.) &&
-             (abs(daughtersTracks[j][1][2] - CandidateDecayTracks[i][1][2]) < widthStrip_Si2 / 2.))
+          if((std::abs(daughtersTracks[j][0][1] - CandidateDecayTracks[i][0][1]) < widthStrip_Si1 / 2.) &&
+             (std::abs(daughtersTracks[j][0][2] - CandidateDecayTracks[i][0][2]) < widthStrip_Si1 / 2.) &&
+             (std::abs(daughtersTracks[j][1][1] - CandidateDecayTracks[i][1][1]) < widthStrip_Si2 / 2.) &&
+             (std::abs(daughtersTracks[j][1][2] - CandidateDecayTracks[i][1][2]) < widthStrip_Si2 / 2.))
             {
               if(daughtersTracks[j][0][6] == 2)
                 {
@@ -599,7 +631,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 void TPrimaryVertex::simulHitstoRealHits(
     FullRecoEvent& REvent,
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal,
-    int id_det_x, int id_det_y, TH1F* h_Diff)
+    int id_det_x, int id_det_y, TH1F* h_Diff, std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos)
 {
   for(auto it_track : REvent.TrackDAFSim)
     {
@@ -614,12 +646,21 @@ void TPrimaryVertex::simulHitstoRealHits(
       double meanPosY = 0.;
       double EnergyY  = 0.;
 
+      double meanPosYinXstrips = 0.;
+      double meanPosZinXstrips = 0.;
+
+      double meanPosXinYstrips = 0.;
+      double meanPosZinYstrips = 0.;
+
       for(size_t idX = 0; idX < it_SiX.size(); ++idX)
         {
           if(it_SiX[idX].Eloss > EnergyThreshold)
             {
               meanPosX += it_SiX[idX].hitX * it_SiX[idX].Eloss;
               EnergyX += it_SiX[idX].Eloss;
+
+              meanPosYinXstrips += it_SiX[idX].hitY * it_SiX[idX].Eloss;
+              meanPosZinXstrips += it_SiX[idX].hitZ * it_SiX[idX].Eloss;
             }
         }
 
@@ -629,11 +670,20 @@ void TPrimaryVertex::simulHitstoRealHits(
             {
               meanPosY += it_SiY[idY].hitY * it_SiY[idY].Eloss;
               EnergyY += it_SiY[idY].Eloss;
+
+              meanPosXinYstrips += it_SiY[idY].hitX * it_SiY[idY].Eloss;
+              meanPosZinYstrips += it_SiY[idY].hitZ * it_SiY[idY].Eloss;
             }
         }
 
       meanPosX /= EnergyX;
       meanPosY /= EnergyY;
+
+      meanPosYinXstrips /= EnergyX;
+      meanPosZinXstrips /= EnergyX;
+
+      meanPosXinYstrips /= EnergyY;
+      meanPosZinYstrips /= EnergyY;
 
       std::string namePart(TDatabasePDG::Instance()->GetParticle(it_SiX[0].pdg)->GetName());
 
@@ -642,9 +692,66 @@ void TPrimaryVertex::simulHitstoRealHits(
       HitEnergyPosXYreal.emplace_back(tempEnergyPosXYreal);
 
       h_Diff->Fill(EnergyX - EnergyY, 1.);
+
+      //Check magnetic field effects on silicon tracking
+
+      TVector3 HitSiX(meanPosX, meanPosYinXstrips, meanPosZinXstrips);
+      TVector3 HitSiY(meanPosXinYstrips, meanPosY, meanPosZinYstrips);
+
+      TVector3 MomSi = HitSiY - HitSiX;
+      std::tuple<size_t,TVector3,TVector3> tempHitIdMomPos(it_track.first, MomSi, HitSiX);
+      HitIdMomPos.emplace_back(tempHitIdMomPos);
     }
 }
 
+void TPrimaryVertex::MFcheck(std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si1,
+                             std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si2,
+                             std::array<double,3> InteractionPoint)
+{
+  TVector3 Real_IP(InteractionPoint[0], InteractionPoint[1], InteractionPoint[2]);
+
+  for(size_t i = 0; i < HitIdMomPos_Si1.size(); ++i)
+    {
+      size_t temp_idSi1 = get<0>(HitIdMomPos_Si1[i]);
+
+      for(size_t j = 0; j < HitIdMomPos_Si2.size(); ++j)
+        {
+          size_t temp_idSi2 = get<0>(HitIdMomPos_Si2[j]);
+          if (temp_idSi1 != temp_idSi2)
+            continue;
+
+          TVector3 temp_MomSi1 = get<1>(HitIdMomPos_Si1[i]);
+          TVector3 temp_PosSi1 = get<2>(HitIdMomPos_Si1[i]);
+
+          TVector3 temp_MomSi2 = get<1>(HitIdMomPos_Si2[j]);
+          TVector3 temp_PosSi2 = get<2>(HitIdMomPos_Si2[j]);
+
+          //std::cout << "MomSi1: " << temp_MomSi1.X()/temp_MomSi1.Z() << "\t" << temp_MomSi1.Y()/temp_MomSi1.Z() << "\n";
+          //std::cout << "MomSi2: " << temp_MomSi2.X()/temp_MomSi2.Z() << "\t" << temp_MomSi2.Y()/temp_MomSi2.Z() << "\n\n";
+
+          double Theta_MomSi1MomSi2 = temp_MomSi1.Angle(temp_MomSi2) * 180. / M_PI;
+          LocalHisto.h_MFCheck_Theta_MomSi1MomSi2->Fill(Theta_MomSi1MomSi2, 1.);
+
+          TVector3 PosSi1_PosSi2 = temp_PosSi1 - temp_PosSi2;
+          double Dist_MomSi1HitSi2 = (PosSi1_PosSi2.Cross(temp_MomSi1)).Mag() / temp_MomSi1.Mag();
+          LocalHisto.h_MFCheck_Dist_MomSi1HitSi2->Fill(Dist_MomSi1HitSi2, 1.);
+
+          TVector3 PosSi2_PosSi1 = temp_PosSi2 - temp_PosSi1;
+          double Dist_MomSi2HitSi1 = (PosSi2_PosSi1.Cross(temp_MomSi2)).Mag() / temp_MomSi2.Mag();
+          LocalHisto.h_MFCheck_Dist_MomSi2HitSi1->Fill(Dist_MomSi2HitSi1, 1.);
+
+          TVector3 PosSi1_IP = temp_PosSi1 - Real_IP;
+          double Dist_MomSi1HitIP = (PosSi1_IP.Cross(temp_MomSi1)).Mag() / temp_MomSi1.Mag();
+          LocalHisto.h_MFCheck_Dist_MomSi1HitIP->Fill(Dist_MomSi1HitIP, 1.);
+
+          TVector3 PosSi2_IP = temp_PosSi2 - Real_IP;
+          double Dist_MomSi2HitIP = (PosSi2_IP.Cross(temp_MomSi2)).Mag() / temp_MomSi2.Mag();
+          LocalHisto.h_MFCheck_Dist_MomSi2HitIP->Fill(Dist_MomSi2HitIP, 1.);
+        }
+    }
+}
+
+/*
 void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEnergyLayerX,
                                 std::vector<std::tuple<double, size_t> >& HitEnergyLayerY,
                                 std::vector<std::vector<double> >& HitEnergyPosXY)
@@ -659,9 +766,9 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
         {
           for(size_t j = 0; j < HitEnergyLayerY.size(); ++j)
             {
-              double EnergyDiff = abs(get<0>(HitEnergyLayerX[i]) - get<0>(HitEnergyLayerY[j]));
+              double EnergyDiff = std::abs(get<0>(HitEnergyLayerX[i]) - get<0>(HitEnergyLayerY[j]));
               double HitX       = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i]) + 0.5) * widthStrip;
-              double HitY       = lenghtSi / 2. - (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
+              double HitY       = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
 
               if(EnergyDiff < MaxEnergyDiffStrips)
                 {
@@ -706,7 +813,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
               for(size_t k = 0; k < HitEnergyLayerY.size(); ++k)
                 {
                   double EnergyDiff =
-                      abs(get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]) - get<0>(HitEnergyLayerY[k]));
+                      std::abs(get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]) - get<0>(HitEnergyLayerY[k]));
                   if(EnergyDiff < MaxEnergyDiffStrips)
                     {
                       if((size_type_abs(get<1>(HitEnergyLayerX[i]), get<1>(HitEnergyLayerX[j])) == 1) &&
@@ -719,7 +826,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                                                     (get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j])) +
                                                 0.5) *
                                                    widthStrip;
-                          double HitY = lenghtSi / 2. - (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
+                          double HitY = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
                           double HitEnergy =
                               get<0>(HitEnergyLayerY[k]) + get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]);
                           std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
@@ -732,7 +839,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                       else
                         {
                           double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i]) + 0.5) * widthStrip;
-                          double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
+                          double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
                           double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerY[k]) / 2.;
                           std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                           HitEnergyPosXY.emplace_back(tempEnergyPosXY);
@@ -780,7 +887,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
               for(size_t k = 0; k < HitEnergyLayerX.size(); ++k)
                 {
                   double EnergyDiff =
-                      abs(get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j]) - get<0>(HitEnergyLayerX[k]));
+                      std::abs(get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j]) - get<0>(HitEnergyLayerX[k]));
                   if(EnergyDiff < MaxEnergyDiffStrips)
                     {
                       if((size_type_abs(get<1>(HitEnergyLayerY[i]), get<1>(HitEnergyLayerY[j])) == 1) &&
@@ -788,7 +895,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                           (get<0>(HitEnergyLayerY[j]) < MaxEnergyMultiplicity)))
                         {
                           double HitX = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[k]) + 0.5) * widthStrip;
-                          double HitY = lenghtSi / 2. - ((get<0>(HitEnergyLayerY[i]) * get<1>(HitEnergyLayerY[i]) +
+                          double HitY = -lenghtSi / 2. + ((get<0>(HitEnergyLayerY[i]) * get<1>(HitEnergyLayerY[i]) +
                                                           get<0>(HitEnergyLayerY[j]) * get<1>(HitEnergyLayerY[j])) /
                                                              (get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j])) +
                                                          0.5) *
@@ -805,12 +912,12 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                       else
                         {
                           double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[k]) + 0.5) * widthStrip;
-                          double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
+                          double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
                           double HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerX[k]) / 2.;
                           std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                           HitEnergyPosXY.emplace_back(tempEnergyPosXY);
 
-                          HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
+                          HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
                           HitEnergy = get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerX[k]) / 2.;
                           std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
                           HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
@@ -854,7 +961,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                 {
                   for(size_t l = 0; l < HitEnergyLayerY.size(); ++l)
                     {
-                      double EnergyDiff = abs(get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]) +
+                      double EnergyDiff = std::abs(get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]) +
                                               get<0>(HitEnergyLayerX[k]) - get<0>(HitEnergyLayerY[l]));
                       if(EnergyDiff < MaxEnergyDiffStrips)
                         {
@@ -868,7 +975,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                                                         (get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j])) +
                                                     0.5) *
                                                        widthStrip;
-                              double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
+                              double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
                               double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]) +
                                                  get<0>(HitEnergyLayerY[l]) / 2.;
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
@@ -894,7 +1001,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                                                         (get<0>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerX[k])) +
                                                     0.5) *
                                                        widthStrip;
-                              double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
+                              double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
                               double HitEnergy = get<0>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerX[k]) +
                                                  get<0>(HitEnergyLayerY[l]) / 2.;
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
@@ -913,13 +1020,13 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                           else
                             {
                               double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i]) + 0.5) * widthStrip;
-                              double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
+                              double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[l]) + 0.5) * widthStrip;
                               double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerY[l]) / 3.;
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY);
 
                               HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[j]) + 0.5) * widthStrip;
-                              HitEnergy = get<1>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerY[l]) / 3.;
+                              HitEnergy = get<0>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerY[l]) / 3.;
                               std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
 
@@ -969,7 +1076,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                 {
                   for(size_t l = 0; l < HitEnergyLayerX.size(); ++l)
                     {
-                      double EnergyDiff = abs(get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j]) +
+                      double EnergyDiff = std::abs(get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j]) +
                                               get<0>(HitEnergyLayerY[k]) - get<0>(HitEnergyLayerX[l]));
                       if(EnergyDiff < MaxEnergyDiffStrips)
                         {
@@ -979,7 +1086,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                             {
                               double HitX = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[l]) + 0.5) * widthStrip;
                               double HitY =
-                                  lenghtSi / 2. - ((get<0>(HitEnergyLayerY[i]) * get<1>(HitEnergyLayerY[i]) +
+                                  -lenghtSi / 2. + ((get<0>(HitEnergyLayerY[i]) * get<1>(HitEnergyLayerY[i]) +
                                                     get<0>(HitEnergyLayerY[j]) * get<1>(HitEnergyLayerY[j])) /
                                                        (get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j])) +
                                                    0.5) *
@@ -989,7 +1096,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY);
 
-                              HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
                               HitEnergy = get<0>(HitEnergyLayerY[k]) + get<0>(HitEnergyLayerX[l]) / 2.;
                               std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
@@ -1005,7 +1112,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                             {
                               double HitX = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[l]) + 0.5) * widthStrip;
                               double HitY =
-                                  lenghtSi / 2. - ((get<0>(HitEnergyLayerY[j]) * get<1>(HitEnergyLayerY[j]) +
+                                  -lenghtSi / 2. + ((get<0>(HitEnergyLayerY[j]) * get<1>(HitEnergyLayerY[j]) +
                                                     get<0>(HitEnergyLayerY[k]) * get<1>(HitEnergyLayerY[k])) /
                                                        (get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerY[k])) +
                                                    0.5) *
@@ -1015,7 +1122,7 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY);
 
-                              HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
                               HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerX[l]) / 2.;
                               std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
@@ -1028,17 +1135,582 @@ void SiliconHits::SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEne
                           else
                             {
                               double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[l]) + 0.5) * widthStrip;
-                              double HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
+                              double HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[i]) + 0.5) * widthStrip;
                               double HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerX[l]) / 3.;
                               std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY);
 
-                              HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[j]) + 0.5) * widthStrip;
                               HitEnergy = get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerX[l]) / 3.;
                               std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
 
-                              HitY      = lenghtSi / 2. - (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k]) + 0.5) * widthStrip;
+                              HitEnergy = get<0>(HitEnergyLayerY[k]) + get<0>(HitEnergyLayerX[l]) / 3.;
+                              std::vector<double> tempEnergyPosXY3{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY3);
+
+                              countHitLayerY[i] += 1.;
+                              countHitLayerY[j] += 1.;
+                              countHitLayerY[k] += 1.;
+                              countHitLayerX[l] += 3.;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+      for(int i = HitEnergyLayerX.size() - 1; i >= 0; --i)
+        {
+          if(countHitLayerX[i] > 0.1)
+            {
+              HitEnergyLayerX.erase(HitEnergyLayerX.begin() + i);
+              countHitLayerX.erase(countHitLayerX.begin() + i);
+            }
+        }
+
+      for(int j = HitEnergyLayerY.size() - 1; j >= 0; --j)
+        {
+          if(countHitLayerY[j] > 0.1)
+            {
+              HitEnergyLayerY.erase(HitEnergyLayerY.begin() + j);
+              countHitLayerY.erase(countHitLayerY.begin() + j);
+            }
+        }
+    }
+
+  if(HitEnergyPosXY.size() >= 2)
+    {
+      for(size_t i = 0; i < HitEnergyPosXY.size() - 1; ++i)
+        {
+          for(size_t j = i + 1; j < HitEnergyPosXY.size(); ++j)
+            {
+              if((HitEnergyPosXY[i][0] == HitEnergyPosXY[j][0]) && (HitEnergyPosXY[i][1] == HitEnergyPosXY[j][1]) &&
+                 (HitEnergyPosXY[i][2] == HitEnergyPosXY[j][2]))
+                {
+                  HitEnergyPosXY.erase(HitEnergyPosXY.begin() + j);
+                  --j;
+                }
+            }
+        }
+    }
+
+#endif
+}
+*/
+
+bool SiliconHits_SD::IsValidCuadrant(size_t& layerX_id, size_t& layerY_id)
+{
+  //Cuadrant I
+  if((layerX_id >= nStrips/2) && (layerX_id < nStrips) && (layerY_id >= 2*nStrips) && (layerY_id < 5*nStrips/2))
+    return true;
+
+  //Cuadrant II
+  else if((layerX_id >= 0) && (layerX_id < nStrips/2) && (layerY_id >= 0) && (layerY_id < nStrips/2))
+    return true;
+
+  //Cuadrant III
+  else if((layerX_id >= 2*nStrips) && (layerX_id < 5*nStrips/2) && (layerY_id >= nStrips/2) && (layerY_id < nStrips))
+    return true;
+    //Cuadrant I
+  else if((layerX_id >= 5*nStrips/2) && (layerX_id < 3*nStrips) && (layerY_id >= 5*nStrips/2) && (layerY_id < 3*nStrips))
+    return true;
+
+  else
+    {
+      nRejectCuadrant += 1;
+      return false;
+    }
+}
+
+void SiliconHits_SD::CombineStrips(std::vector<std::tuple<double, size_t> >& HitEnergyLayer)
+{
+  if(combineStrips == 1)
+    return;
+
+  if((HitEnergyLayer.size() == 0) || (HitEnergyLayer.size() == 1))
+    return;
+
+  std::vector<std::tuple<double, size_t> > temp_HitEnergyLayer;
+
+  std::vector<size_t> usedLayer {};
+  std::vector<size_t>::iterator it_usedLayer;
+
+  for(size_t i = 0; i < HitEnergyLayer.size()-1; ++i)
+    {
+      it_usedLayer = find(usedLayer.begin(), usedLayer.end(), get<1>(HitEnergyLayer[i]));
+      if(it_usedLayer != usedLayer.end())
+        continue;
+
+      double temp_HitEnergy = get<0>(HitEnergyLayer[i]);
+      size_t temp_HitLayer = (get<1>(HitEnergyLayer[i])%(nStrips*combineStrips))/combineStrips;
+      
+      if(get<1>(HitEnergyLayer[i]) >= 2*nStrips*combineStrips)
+        temp_HitLayer += 2*nStrips;
+
+      int temp_remainder = get<1>(HitEnergyLayer[i])%combineStrips;
+
+      for(size_t j = i+1; j < HitEnergyLayer.size(); ++j)
+        {
+          it_usedLayer = find(usedLayer.begin(), usedLayer.end(), get<1>(HitEnergyLayer[j]));
+          if(it_usedLayer != usedLayer.end())
+            continue;
+
+          int temp_diflayers = get<1>(HitEnergyLayer[i]) - get<1>(HitEnergyLayer[j]);
+          if((temp_diflayers <= temp_remainder) && (temp_diflayers > temp_remainder - combineStrips))
+            {
+              temp_HitEnergy += get<0>(HitEnergyLayer[j]);
+              usedLayer.emplace_back(j);
+            }
+        }
+
+        temp_HitEnergyLayer.emplace_back(std::make_tuple(temp_HitEnergy, temp_HitLayer));
+    }
+
+    HitEnergyLayer.clear();
+    HitEnergyLayer = temp_HitEnergyLayer;
+
+    return;
+}
+
+
+void SiliconHits_SD::SignalstoHits_SD(std::vector<std::tuple<double, size_t> > HitEnergyLayerX,
+                                      std::vector<std::tuple<double, size_t> > HitEnergyLayerY,
+                                      std::vector<std::vector<double> >& HitEnergyPosXY)
+{
+  std::vector<double> countHitLayerX(HitEnergyLayerX.size(), 0.);
+  std::vector<double> countHitLayerY(HitEnergyLayerY.size(), 0.);
+
+  // Events with multiplicityX = multiplicityY = 1
+  if((HitEnergyLayerX.size() > 0.1) && (HitEnergyLayerY.size() > 0.1))
+    {
+      for(size_t i = 0; i < HitEnergyLayerX.size(); ++i)
+        {
+          for(size_t j = 0; j < HitEnergyLayerY.size(); ++j)
+            {
+              double EnergyDiff = std::abs(get<0>(HitEnergyLayerX[i]) - get<0>(HitEnergyLayerY[j]));
+
+              if(EnergyDiff > MaxEnergyDiffStrips)
+                continue;
+
+              if(ifveto && (std::find(inactwiresX.begin(), inactwiresX.end(), get<1>(HitEnergyLayerX[i])) != inactwiresX.end()))
+                continue;
+
+              if(ifveto && (std::find(inactwiresY.begin(), inactwiresY.end(), get<1>(HitEnergyLayerY[j])) != inactwiresY.end()))
+                continue;
+
+              if(IsValidCuadrant(get<1>(HitEnergyLayerX[i]), get<1>(HitEnergyLayerY[j])))
+                {
+                  double HitX       = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i])%nStrips + 0.5) * widthStrip;
+                  double HitY       = +lenghtSi / 2. - (get<1>(HitEnergyLayerY[j])%nStrips + 0.5) * widthStrip;
+                  double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerY[j]);
+
+                  if(restrict_actlenght && ((HitX < -actlenghtX/2.) || (HitX > actlenghtX/2.) || (HitY < -actlenghtY/2.) || (HitY > actlenghtY/2.)))
+                    continue;
+
+                  if(restrict_gapcenter && (HitX > -gapcenter/2.) && (HitX < gapcenter/2.))
+                    continue;
+
+                  if(restrict_gapcenter && (HitY > -gapcenter/2.) && (HitY < gapcenter/2.))
+                    continue;
+
+                  std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                  HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                  countHitLayerX[i] += 1.;
+                  countHitLayerY[j] += 1.;
+                }
+            }
+        }
+    }
+
+#ifdef RECONS_HITS_MULTIPLICITY
+    //If used, it has to be added:
+    // - restrict_actlenght conditions
+    // - inactwires conditions
+
+  for(int i = HitEnergyLayerX.size() - 1; i >= 0; --i)
+    {
+      if(countHitLayerX[i] > 0.1)
+        {
+          HitEnergyLayerX.erase(HitEnergyLayerX.begin() + i);
+          countHitLayerX.erase(countHitLayerX.begin() + i);
+        }
+    }
+
+  for(int j = HitEnergyLayerY.size() - 1; j >= 0; --j)
+    {
+      if(countHitLayerY[j] > 0.1)
+        {
+          HitEnergyLayerY.erase(HitEnergyLayerY.begin() + j);
+          countHitLayerY.erase(countHitLayerY.begin() + j);
+        }
+    }
+
+  // Events with multiplicityX = 1 and multiplicityY = 2
+  if((HitEnergyLayerX.size() > 1.1) && (HitEnergyLayerY.size() > 0.1))
+    {
+      for(size_t i = 0; i < HitEnergyLayerX.size() - 1; ++i)
+        {
+          for(size_t j = i + 1; j < HitEnergyLayerX.size(); ++j)
+            {
+              for(size_t k = 0; k < HitEnergyLayerY.size(); ++k)
+                {
+                  double EnergyDiff =
+                      std::abs(get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]) - get<0>(HitEnergyLayerY[k]));
+                  if(EnergyDiff > MaxEnergyDiffStrips)
+                    continue;
+
+                  if((IsValidCuadrant(get<1>(HitEnergyLayerX[i]), get<1>(HitEnergyLayerY[k])))
+                    && (IsValidCuadrant(get<1>(HitEnergyLayerX[j]), get<1>(HitEnergyLayerY[k]))))
+                    {
+                         if((size_type_abs(get<1>(HitEnergyLayerX[i]), get<1>(HitEnergyLayerX[j])) == 1) &&
+                         ((get<0>(HitEnergyLayerX[i]) < MaxEnergyMultiplicity) ||
+                          (get<0>(HitEnergyLayerX[j]) < MaxEnergyMultiplicity)))
+                        {
+                          double HitX =
+                              -lenghtSi / 2. + ((get<0>(HitEnergyLayerX[i]) * (get<1>(HitEnergyLayerX[i])%nStrips) +
+                                                 get<0>(HitEnergyLayerX[j]) * (get<1>(HitEnergyLayerX[j])%nStrips)) /
+                                                    (get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j])) +
+                                                0.5) *
+                                                   widthStrip;
+                          double HitY = +lenghtSi / 2. - (get<1>(HitEnergyLayerY[k])%nStrips + 0.5) * widthStrip;
+                          double HitEnergy =
+                              get<0>(HitEnergyLayerY[k]) + get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]);
+
+                          std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                          HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                          countHitLayerX[i] += 0.5;
+                          countHitLayerX[j] += 0.5;
+                          countHitLayerY[k] += 1.;
+                        }
+                      else
+                        {
+                          double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i])%nStrips + 0.5) * widthStrip;
+                          double HitY      = +lenghtSi / 2. - (get<1>(HitEnergyLayerY[k])%nStrips + 0.5) * widthStrip;
+                          double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerY[k]) / 2.;
+
+                          std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                          HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                          HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[j])%nStrips + 0.5) * widthStrip;
+                          HitEnergy = get<0>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerY[k]) / 2.;
+                          std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
+                          HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
+
+                          countHitLayerX[i] += 1.;
+                          countHitLayerX[j] += 1.;
+                          countHitLayerY[k] += 2.;
+                        }
+                    }
+                }
+            }
+        }
+
+      for(int i = HitEnergyLayerX.size() - 1; i >= 0; --i)
+        {
+          if(countHitLayerX[i] > 0.1)
+            {
+              HitEnergyLayerX.erase(HitEnergyLayerX.begin() + i);
+              countHitLayerX.erase(countHitLayerX.begin() + i);
+            }
+        }
+
+      for(int j = HitEnergyLayerY.size() - 1; j >= 0; --j)
+        {
+          if(countHitLayerY[j] > 0.1)
+            {
+              HitEnergyLayerY.erase(HitEnergyLayerY.begin() + j);
+              countHitLayerY.erase(countHitLayerY.begin() + j);
+            }
+        }
+    }
+
+  // Events with multiplicityX = 2 and multiplicityY = 1
+  if((HitEnergyLayerX.size() > 0.1) && (HitEnergyLayerY.size() > 1.1))
+    {
+      for(size_t i = 0; i < HitEnergyLayerY.size() - 1; ++i)
+        {
+          for(size_t j = i + 1; j < HitEnergyLayerY.size(); ++j)
+            {
+              for(size_t k = 0; k < HitEnergyLayerX.size(); ++k)
+                {
+                  double EnergyDiff =
+                      std::abs(get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j]) - get<0>(HitEnergyLayerX[k]));
+                  if(EnergyDiff > MaxEnergyDiffStrips)
+                    continue;
+
+                  if((IsValidCuadrant(get<1>(HitEnergyLayerX[k]), get<1>(HitEnergyLayerY[i]))) && 
+                      (IsValidCuadrant(get<1>(HitEnergyLayerX[k]), get<1>(HitEnergyLayerY[j]))))
+                    {
+                      if((size_type_abs(get<1>(HitEnergyLayerY[i]), get<1>(HitEnergyLayerY[j])) == 1) &&
+                         ((get<0>(HitEnergyLayerY[i]) < MaxEnergyMultiplicity) ||
+                          (get<0>(HitEnergyLayerY[j]) < MaxEnergyMultiplicity)))
+                        {
+                          double HitX = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[k])%nStrips + 0.5) * widthStrip;
+                          double HitY = +lenghtSi / 2. - ((get<0>(HitEnergyLayerY[i]) * (get<1>(HitEnergyLayerY[i])%nStrips) +
+                                                          get<0>(HitEnergyLayerY[j]) * (get<1>(HitEnergyLayerY[j])%nStrips)) /
+                                                             (get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j])) +
+                                                         0.5) *
+                                                            widthStrip;
+                          double HitEnergy =
+                              get<0>(HitEnergyLayerX[k]) + get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j]);
+                          std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                          HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                          countHitLayerY[i] += 0.5;
+                          countHitLayerY[j] += 0.5;
+                          countHitLayerX[k] += 1.;
+                        }
+                      else
+                        {
+                          double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[k])%nStrips + 0.5) * widthStrip;
+                          double HitY      = +lenghtSi / 2. - (get<1>(HitEnergyLayerY[i])%nStrips + 0.5) * widthStrip;
+                          double HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerX[k]) / 2.;
+                          std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                          HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                          HitY      = +lenghtSi / 2. - (get<1>(HitEnergyLayerY[j])%nStrips + 0.5) * widthStrip;
+                          HitEnergy = get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerX[k]) / 2.;
+                          std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
+                          HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
+
+                          countHitLayerY[i] += 1.;
+                          countHitLayerY[j] += 1.;
+                          countHitLayerX[k] += 2.;
+                        }
+                    }
+                }
+            }
+        }
+
+      for(int i = HitEnergyLayerX.size() - 1; i >= 0; --i)
+        {
+          if(countHitLayerX[i] > 0.1)
+            {
+              HitEnergyLayerX.erase(HitEnergyLayerX.begin() + i);
+              countHitLayerX.erase(countHitLayerX.begin() + i);
+            }
+        }
+
+      for(int j = HitEnergyLayerY.size() - 1; j >= 0; --j)
+        {
+          if(countHitLayerY[j] > 0.1)
+            {
+              HitEnergyLayerY.erase(HitEnergyLayerY.begin() + j);
+              countHitLayerY.erase(countHitLayerY.begin() + j);
+            }
+        }
+    }
+
+  // Events with multiplicityX = 1 and multiplicityY = 3
+  if((HitEnergyLayerX.size() > 2.1) && (HitEnergyLayerY.size() > 0.1))
+    {
+      for(size_t i = 0; i < HitEnergyLayerX.size() - 2; ++i)
+        {
+          for(size_t j = i + 1; j < HitEnergyLayerX.size() - 1; ++j)
+            {
+              for(size_t k = j + 1; k < HitEnergyLayerX.size(); ++k)
+                {
+                  for(size_t l = 0; l < HitEnergyLayerY.size(); ++l)
+                    {
+                      double EnergyDiff = std::abs(get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]) +
+                                              get<0>(HitEnergyLayerX[k]) - get<0>(HitEnergyLayerY[l]));
+                      if(EnergyDiff > MaxEnergyDiffStrips)
+                        continue;
+
+                      if((IsValidCuadrant(get<1>(HitEnergyLayerX[i]), get<1>(HitEnergyLayerY[l])))
+                        && (IsValidCuadrant(get<1>(HitEnergyLayerX[j]), get<1>(HitEnergyLayerY[l])))
+                        && (IsValidCuadrant(get<1>(HitEnergyLayerX[k]), get<1>(HitEnergyLayerY[l]))))
+                        {
+                          if((size_type_abs(get<1>(HitEnergyLayerX[i]), get<1>(HitEnergyLayerX[j])) == 1) &&
+                             ((get<0>(HitEnergyLayerX[i]) < MaxEnergyMultiplicity) ||
+                              (get<0>(HitEnergyLayerX[j]) < MaxEnergyMultiplicity)))
+                            {
+                              double HitX =
+                                  -lenghtSi / 2. + ((get<0>(HitEnergyLayerX[i]) * (get<1>(HitEnergyLayerX[i])%nStrips) +
+                                                     get<0>(HitEnergyLayerX[j]) * (get<1>(HitEnergyLayerX[j]))%nStrips) /
+                                                        (get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j])) +
+                                                    0.5) *
+                                                       widthStrip;
+                              double HitY      = +lenghtSi / 2. - (get<1>(HitEnergyLayerY[l])%nStrips + 0.5) * widthStrip;
+                              double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerX[j]) +
+                                                 get<0>(HitEnergyLayerY[l]) / 2.;
+                              std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                              HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[k])%nStrips + 0.5) * widthStrip;
+                              HitEnergy = get<0>(HitEnergyLayerX[k]) + get<0>(HitEnergyLayerY[l]) / 2.;
+                              std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
+
+                              countHitLayerX[i] += 0.5;
+                              countHitLayerX[j] += 0.5;
+                              countHitLayerX[k] += 1.;
+                              countHitLayerY[l] += 2.;
+                            }
+                          else if((size_type_abs(get<1>(HitEnergyLayerX[j]), get<1>(HitEnergyLayerX[k])) == 1) &&
+                                  ((get<0>(HitEnergyLayerX[j]) < MaxEnergyMultiplicity) ||
+                                   (get<0>(HitEnergyLayerX[k]) < MaxEnergyMultiplicity)))
+                            {
+                              double HitX =
+                                  -lenghtSi / 2. + ((get<0>(HitEnergyLayerX[j]) * (get<1>(HitEnergyLayerX[j])%nStrips) +
+                                                     get<0>(HitEnergyLayerX[k]) * (get<1>(HitEnergyLayerX[k])%nStrips)) /
+                                                        (get<0>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerX[k])) +
+                                                    0.5) *
+                                                       widthStrip;
+                              double HitY      = +lenghtSi / 2. - (get<1>(HitEnergyLayerY[l])%nStrips + 0.5) * widthStrip;
+                              double HitEnergy = get<0>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerX[k]) +
+                                                 get<0>(HitEnergyLayerY[l]) / 2.;
+                              std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                              HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i])%nStrips + 0.5) * widthStrip;
+                              HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerY[l]) / 2.;
+                              std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
+
+                              countHitLayerX[i] += 1.;
+                              countHitLayerX[j] += 0.5;
+                              countHitLayerX[k] += 0.5;
+                              countHitLayerY[l] += 2.;
+                            }
+                          else
+                            {
+                              double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[i])%nStrips + 0.5) * widthStrip;
+                              double HitY      = +lenghtSi / 2. - (get<1>(HitEnergyLayerY[l])%nStrips + 0.5) * widthStrip;
+                              double HitEnergy = get<0>(HitEnergyLayerX[i]) + get<0>(HitEnergyLayerY[l]) / 3.;
+                              std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                              HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[j])%nStrips + 0.5) * widthStrip;
+                              HitEnergy = get<0>(HitEnergyLayerX[j]) + get<0>(HitEnergyLayerY[l]) / 3.;
+                              std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
+
+                              HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[k])%nStrips + 0.5) * widthStrip;
+                              HitEnergy = get<0>(HitEnergyLayerX[k]) + get<0>(HitEnergyLayerY[l]) / 3.;
+                              std::vector<double> tempEnergyPosXY3{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY3);
+
+                              countHitLayerX[i] += 1.;
+                              countHitLayerX[j] += 1.;
+                              countHitLayerX[k] += 1.;
+                              countHitLayerY[l] += 3.;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+      for(int i = HitEnergyLayerX.size() - 1; i >= 0; --i)
+        {
+          if(countHitLayerX[i] > 0.1)
+            {
+              HitEnergyLayerX.erase(HitEnergyLayerX.begin() + i);
+              countHitLayerX.erase(countHitLayerX.begin() + i);
+            }
+        }
+
+      for(int j = HitEnergyLayerY.size() - 1; j >= 0; --j)
+        {
+          if(countHitLayerY[j] > 0.1)
+            {
+              HitEnergyLayerY.erase(HitEnergyLayerY.begin() + j);
+              countHitLayerY.erase(countHitLayerY.begin() + j);
+            }
+        }
+    }
+
+  // Events with multiplicityX = 3 and multiplicityY = 1
+  if((HitEnergyLayerX.size() > 0.1) && (HitEnergyLayerY.size() > 2.1))
+    {
+      for(size_t i = 0; i < HitEnergyLayerY.size() - 2; ++i)
+        {
+          for(size_t j = i + 1; j < HitEnergyLayerY.size() - 1; ++j)
+            {
+              for(size_t k = j + 1; k < HitEnergyLayerY.size(); ++k)
+                {
+                  for(size_t l = 0; l < HitEnergyLayerX.size(); ++l)
+                    {
+                      double EnergyDiff = std::abs(get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j]) +
+                                              get<0>(HitEnergyLayerY[k]) - get<0>(HitEnergyLayerX[l]));
+                      if(EnergyDiff > MaxEnergyDiffStrips)
+                        continue;
+
+                      if((IsValidCuadrant(get<1>(HitEnergyLayerX[l]), get<1>(HitEnergyLayerY[i]))) && 
+                      (IsValidCuadrant(get<1>(HitEnergyLayerX[l]), get<1>(HitEnergyLayerY[j]))) &&
+                      (IsValidCuadrant(get<1>(HitEnergyLayerX[l]), get<1>(HitEnergyLayerY[k]))))
+                        {
+                          if((size_type_abs(get<1>(HitEnergyLayerY[i]), get<1>(HitEnergyLayerY[j])) == 1) &&
+                             ((get<0>(HitEnergyLayerY[i]) < MaxEnergyMultiplicity) ||
+                              (get<0>(HitEnergyLayerY[j]) < MaxEnergyMultiplicity)))
+                            {
+                              double HitX = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[l])%nStrips + 0.5) * widthStrip;
+                              double HitY =
+                                  +lenghtSi / 2. - ((get<0>(HitEnergyLayerY[i]) * (get<1>(HitEnergyLayerY[i])%nStrips) +
+                                                    get<0>(HitEnergyLayerY[j]) * (get<1>(HitEnergyLayerY[j])%nStrips)) /
+                                                       (get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j])) +
+                                                   0.5) *
+                                                      widthStrip;
+                              double HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerY[j]) +
+                                                 get<0>(HitEnergyLayerX[l]) / 2.;
+                              std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k])%nStrips + 0.5) * widthStrip;
+                              HitEnergy = get<0>(HitEnergyLayerY[k]) + get<0>(HitEnergyLayerX[l]) / 2.;
+                              std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
+
+                              countHitLayerY[i] += 0.5;
+                              countHitLayerY[j] += 0.5;
+                              countHitLayerY[k] += 1.;
+                              countHitLayerX[l] += 2.;
+                            }
+                          else if((size_type_abs(get<1>(HitEnergyLayerY[j]), get<1>(HitEnergyLayerY[k])) == 1) &&
+                                  ((get<0>(HitEnergyLayerY[j]) < MaxEnergyMultiplicity) ||
+                                   (get<0>(HitEnergyLayerY[k]) < MaxEnergyMultiplicity)))
+                            {
+                              double HitX = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[l])%nStrips + 0.5) * widthStrip;
+                              double HitY =
+                                  +lenghtSi / 2. - ((get<0>(HitEnergyLayerY[j]) * (get<1>(HitEnergyLayerY[j])%nStrips +
+                                                    get<0>(HitEnergyLayerY[k]) * (get<1>(HitEnergyLayerY[k])%nStrips)) /
+                                                       (get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerY[k])) +
+                                                   0.5) *
+                                                      widthStrip;
+                              double HitEnergy = get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerY[k]) +
+                                                 get<0>(HitEnergyLayerX[l]) / 2.;
+                              std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[i])%nStrips + 0.5) * widthStrip;
+                              HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerX[l]) / 2.;
+                              std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
+
+                              countHitLayerY[i] += 1.;
+                              countHitLayerY[j] += 0.5;
+                              countHitLayerY[k] += 0.5;
+                              countHitLayerX[l] += 2.;
+                            }
+                          else
+                            {
+                              double HitX      = -lenghtSi / 2. + (get<1>(HitEnergyLayerX[l])%nStrips + 0.5) * widthStrip;
+                              double HitY      = +lenghtSi / 2. - (get<1>(HitEnergyLayerY[i])%nStrips + 0.5) * widthStrip;
+                              double HitEnergy = get<0>(HitEnergyLayerY[i]) + get<0>(HitEnergyLayerX[l]) / 3.;
+                              std::vector<double> tempEnergyPosXY{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY);
+
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[j])%nStrips + 0.5) * widthStrip;
+                              HitEnergy = get<0>(HitEnergyLayerY[j]) + get<0>(HitEnergyLayerX[l]) / 3.;
+                              std::vector<double> tempEnergyPosXY2{HitEnergy, HitX, HitY, Z_plane};
+                              HitEnergyPosXY.emplace_back(tempEnergyPosXY2);
+
+                              HitY      = -lenghtSi / 2. + (get<1>(HitEnergyLayerY[k])%nStrips + 0.5) * widthStrip;
                               HitEnergy = get<0>(HitEnergyLayerY[k]) + get<0>(HitEnergyLayerX[l]) / 3.;
                               std::vector<double> tempEnergyPosXY3{HitEnergy, HitX, HitY, Z_plane};
                               HitEnergyPosXY.emplace_back(tempEnergyPosXY3);
@@ -1121,7 +1793,7 @@ void TPrimaryVertex::CloseDist(std::vector<double>& BeamHit1, std::vector<double
     }
 
   distance =
-      sqrt((c2[0] - c1[0]) * (c2[0] - c1[0]) + (c2[1] - c1[1]) * (c2[1] - c1[1]) + (c2[2] - c1[2]) * (c2[2] - c1[2]));
+      std::sqrt((c2[0] - c1[0]) * (c2[0] - c1[0]) + (c2[1] - c1[1]) * (c2[1] - c1[1]) + (c2[2] - c1[2]) * (c2[2] - c1[2]));
   z = (c1[2] + c2[2]) / 2.;
 }
 
@@ -1133,11 +1805,11 @@ double TPrimaryVertex::f_function(std::vector<double>& Hit1, std::vector<double>
   double intercept_y = Hit2[2] - slope_y * Hit2[3];
 
   double distanceStepX = 2. * boxDistBeamXY / static_cast<double>(NstepsdiscretXY - 1);
-  double sigma2        = pow(distanceStepX, 2.) / 12.;
+  double sigma2        = std::pow(distanceStepX, 2.) / 12.;
 
   double f = exp(-0.5 *
-                 (pow((PosXYZ[0] - slope_x * PosXYZ[2] - intercept_x), 2.) +
-                  pow((PosXYZ[1] - slope_y * PosXYZ[2] - intercept_y), 2.)) /
+                 (std::pow((PosXYZ[0] - slope_x * PosXYZ[2] - intercept_x), 2.) +
+                  std::pow((PosXYZ[1] - slope_y * PosXYZ[2] - intercept_y), 2.)) /
                  sigma2);
   return f;
 }
@@ -1151,13 +1823,13 @@ double TPrimaryVertex::V_function(std::vector<double>& f_vector)
   for(size_t i = 0; i < f_vector.size() - 1; ++i)
     {
       sum_f += f_vector[i];
-      sum_f2 += pow(f_vector[i], 2.);
+      sum_f2 += std::pow(f_vector[i], 2.);
     }
 
   if((sum_f > 1.E-9) && (sum_f2 > 1.E-9))
     {
       v = k_factor * f_vector[f_vector.size() - 1] + sum_f -
-          (k_factor * pow(f_vector[f_vector.size() - 1], 2.) + sum_f2) /
+          (k_factor * std::pow(f_vector[f_vector.size() - 1], 2.) + sum_f2) /
               (k_factor * f_vector[f_vector.size() - 1] + sum_f);
     }
 
@@ -1214,7 +1886,7 @@ void TPrimaryVertex::HitstoTracks(std::vector<std::vector<double> >& HitEnergyPo
 
           if((z > Zo_target - ErrorDistTarget) && (z < Zf_target + ErrorDistTarget) &&
              (distance < MaxClosestDistance) &&
-             (abs(HitEnergyPosXY_Si1[i][0] - HitEnergyPosXY_Si2[j][0]) < MaxEnergyDiffSilicons))
+             (std::abs(HitEnergyPosXY_Si1[i][0] - HitEnergyPosXY_Si2[j][0]) < MaxEnergyDiffSilicons))
             {
               std::vector<std::vector<double> > temp_CandidateTracks{HitEnergyPosXY_Si1[i], HitEnergyPosXY_Si2[j]};
               CandidateTracks.emplace_back(temp_CandidateTracks);
@@ -1335,8 +2007,8 @@ void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double
               for(size_t idDecisiveTrack = 0; idDecisiveTrack < DecisiveTracks.size(); ++idDecisiveTrack)
                 {
                   double value_not_variation = DecisiveTracks[idDecisiveTrack][idSilicon][idStrip];
-                  DecisiveTracks[idDecisiveTrack][idSilicon][idStrip] += pow(-1., static_cast<double>(variationsign)) *
-                                                                         sqrt(nDimensions) *
+                  DecisiveTracks[idDecisiveTrack][idSilicon][idStrip] += std::pow(-1., static_cast<double>(variationsign)) *
+                                                                         std::sqrt(nDimensions) *
                                                                          sigma_Si[idSilicon];
 
                   TrackstoVertexPosition(DecisiveTracks, BeamHit1, BeamHit2, temp_IP, temp_f_values_IP);
@@ -1354,9 +2026,9 @@ void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double
           double value_not_variation3 = BeamHit2[idSilicon + 1];
 
           BeamHit1[idSilicon + 1] +=
-              pow(-1., static_cast<double>(variationsign)) * sqrt(nDimensions) * sigma_beam;
+              std::pow(-1., static_cast<double>(variationsign)) * std::sqrt(nDimensions) * sigma_beam;
           BeamHit2[idSilicon + 1] +=
-              pow(-1., static_cast<double>(variationsign)) * sqrt(nDimensions) * sigma_beam;
+              std::pow(-1., static_cast<double>(variationsign)) * std::sqrt(nDimensions) * sigma_beam;
 
           TrackstoVertexPosition(DecisiveTracks, BeamHit1, BeamHit2, temp_IP, temp_f_values_IP);
           variations_IP.emplace_back(temp_IP);
@@ -1370,7 +2042,7 @@ void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double
         }
     }
 
-  if(abs(variations_IP.size() - 2. * nDimensions) > 0.01)
+  if(std::abs(variations_IP.size() - 2. * nDimensions) > 0.01)
     {
       std::cout << "Error with dimensions covariance matrix\t" << variations_IP.size() << "\t" << 2. * nDimensions
                 << "\n";
@@ -1429,7 +2101,7 @@ void TPrimaryVertex::HitstoDecayTracks(std::vector<std::vector<double> >& HitEne
 
           if((z > InteractionPointRecons[2] + MinDistIPDecay) && (z < Z_plane_Si1 - MinDistIPDecay) &&
              (distance < 1.5 * MaxClosestDistance) &&
-             (abs(HitEnergyPosXY_Si1[i][0] - HitEnergyPosXY_Si2[j][0]) < MaxEnergyDiffSilicons))
+             (std::abs(HitEnergyPosXY_Si1[i][0] - HitEnergyPosXY_Si2[j][0]) < MaxEnergyDiffSilicons))
             {
               std::vector<std::vector<double> > temp_CandidateDecayTracks{HitEnergyPosXY_Si1[i], HitEnergyPosXY_Si2[j]};
               CandidateDecayTracks.emplace_back(temp_CandidateDecayTracks);
@@ -1489,10 +2161,9 @@ void TPrimaryVertex::DecayTrackstoDecayPosition(std::vector<std::vector<std::vec
       for(size_t i = 0; i < PosXYZ.size(); ++i)
         {
           std::vector<double> temp_PosXYZ = PosXYZ[i];
-          double alpha                    = atan(sqrt(pow((InteractionPointRecons[0] - temp_PosXYZ[0]), 2.) +
-                                   pow((InteractionPointRecons[1] - temp_PosXYZ[1]), 2.)) /
-                              (InteractionPointRecons[2] - temp_PosXYZ[2])) *
-                         180. / M_PI;
+          double alpha                    = std::atan(std::sqrt(std::pow((InteractionPointRecons[0] - temp_PosXYZ[0]), 2.) +
+                                   std::pow((InteractionPointRecons[1] - temp_PosXYZ[1]), 2.)) /
+                              (InteractionPointRecons[2] - temp_PosXYZ[2])) * 180. / M_PI;
 
           for(size_t j = 0; j < CandidateTracks.size(); ++j)
             {
@@ -1522,8 +2193,8 @@ void TPrimaryVertex::nGoodEventsCounter(
     {
       for(size_t j = 0; j < HitEnergyPosXYreal.size(); ++j)
         {
-          if((abs(HitEnergyPosXY[i][1] - get<1>(HitEnergyPosXYreal[j])) < widthStrip / 2.) &&
-             (abs(HitEnergyPosXY[i][2] - get<2>(HitEnergyPosXYreal[j])) < widthStrip / 2.))
+          if((std::abs(HitEnergyPosXY[i][1] - get<1>(HitEnergyPosXYreal[j])) < widthStrip / 2.) &&
+             (std::abs(HitEnergyPosXY[i][2] - get<2>(HitEnergyPosXYreal[j])) < widthStrip / 2.))
             {
               nGoodrecons += 1;
             }
@@ -1597,12 +2268,6 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
                                         std::vector<std::vector<std::vector<double> > >& RealTracks,
                                         size_t& nGoodTracks, std::vector<size_t>& goodCandidateTracks)
 {
-  double widthStrip_Si1 = 0.03; // in cm
-  double widthStrip_Si2 = 0.03; // in cm
-
-  double Z_plane_Si1 = 27.; // in cm
-  double Z_plane_Si2 = 30.; // in cm
-
   for(size_t i = 0; i < RealTracks.size(); ++i)
     {
       double realPosX_Si1 = RealTracks[i][0][1];
@@ -1611,9 +2276,8 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
       double realPosX_Si2 = RealTracks[i][1][1];
       double realPosY_Si2 = RealTracks[i][1][2];
 
-      double thetareal    = atan(sqrt(pow((realPosY_Si2 - realPosY_Si1), 2.) + pow((realPosX_Si2 - realPosX_Si1), 2.)) /
-                              (Z_plane_Si2 - Z_plane_Si1)) *
-                         180. / M_PI;
+      double thetareal    = std::atan(std::sqrt(std::pow((realPosY_Si2 - realPosY_Si1), 2.) + std::pow((realPosX_Si2 - realPosX_Si1), 2.)) /
+                              (Z_plane_Si2 - Z_plane_Si1)) * 180. / M_PI;
 
       LocalHisto.h_thetaTracks->Fill(thetareal, "Real", 1.);
 
@@ -1626,25 +2290,25 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
           double candPosY_Si2 = CandidateTracks[j][1][2];
 
           double DiffEnergySilicons = CandidateTracks[j][0][0] - CandidateTracks[j][1][0];
-          double theta = atan(sqrt(pow((candPosY_Si2 - candPosY_Si1), 2.) + pow((candPosX_Si2 - candPosX_Si1), 2.)) /
-                              (Z_plane_Si2 - Z_plane_Si1)) *
-                         180. / M_PI;
+          double theta = std::atan(std::sqrt(std::pow((candPosY_Si2 - candPosY_Si1), 2.) + std::pow((candPosX_Si2 - candPosX_Si1), 2.)) /
+                              (Z_plane_Si2 - Z_plane_Si1)) * 180. / M_PI;
 
-          if((abs(realPosX_Si1 - candPosX_Si1) < widthStrip_Si1 / 2.) &&
-             (abs(realPosY_Si1 - candPosY_Si1) < widthStrip_Si1 / 2.) &&
-             (abs(realPosX_Si2 - candPosX_Si2) < widthStrip_Si2 / 2.) &&
-             (abs(realPosY_Si2 - candPosY_Si2) < widthStrip_Si2 / 2.))
+          if((std::abs(realPosX_Si1 - candPosX_Si1) < widthStrip_Si1 / 2.) &&
+             (std::abs(realPosY_Si1 - candPosY_Si1) < widthStrip_Si1 / 2.) &&
+             (std::abs(realPosX_Si2 - candPosX_Si2) < widthStrip_Si2 / 2.) &&
+             (std::abs(realPosY_Si2 - candPosY_Si2) < widthStrip_Si2 / 2.))
             {
               nGoodTracks += 1;
               goodCandidateTracks[j] = 1;
 
+              double thetaResol = thetareal - theta;
+
               LocalHisto.h_EnergyDiffSilicons->Fill(DiffEnergySilicons, "Good With-energy", 1.);
               LocalHisto.h_thetaTracks->Fill(theta, "Recons", 1.);
+              LocalHisto.h_thetaResol->Fill(thetaResol, 1.);
             }
           else
-            {
-              LocalHisto.h_EnergyDiffSilicons->Fill(DiffEnergySilicons, "False With-energy", 1.);
-            }
+            LocalHisto.h_EnergyDiffSilicons->Fill(DiffEnergySilicons, "False With-energy", 1.);
         }
     }
 }
@@ -1652,9 +2316,6 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
 void TPrimaryVertex::nForwardTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                            size_t& nForwardTracks, std::vector<size_t>& forwardCandidateTracks)
 {
-
-  double Z_plane_Si1 = 27.; // in cm
-  double Z_plane_Si2 = 30.; // in cm
 
   nForwardTracks = 0;
 
@@ -1666,9 +2327,8 @@ void TPrimaryVertex::nForwardTracksCounter(std::vector<std::vector<std::vector<d
       double candPosX_Si2 = CandidateTracks[i][1][1];
       double candPosY_Si2 = CandidateTracks[i][1][2];
 
-      double theta = atan(sqrt(pow((candPosY_Si2 - candPosY_Si1), 2.) + pow((candPosX_Si2 - candPosX_Si1), 2.)) /
-                          (Z_plane_Si2 - Z_plane_Si1)) *
-                     180. / M_PI;
+      double theta = std::atan(std::sqrt(std::pow((candPosY_Si2 - candPosY_Si1), 2.) + std::pow((candPosX_Si2 - candPosX_Si1), 2.)) /
+                          (Z_plane_Si2 - Z_plane_Si1)) * 180. / M_PI;
 
       if(theta <= 5.)
         {

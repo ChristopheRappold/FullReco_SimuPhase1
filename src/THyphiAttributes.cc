@@ -131,6 +131,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
 
   _logger->info("KF_RejectionCut : Central < : {} MiniFiber < : {}", KF_NbCentralCut, KF_NbMiniFiberCut);
 
+  StudyCase = Config.Get<std::string>("StudyCase");
   // std::string temp_name_out = config.Get<std::string>("Output_Namefile");
   std::string temp_file_base_name = NameOut.substr(0, NameOut.find_last_of('.'));
 
