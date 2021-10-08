@@ -55,29 +55,33 @@ enum SolDet : int
   Si1y_SD,
   Si2x_SD,
   Si2y_SD, /*13*/
-  MiniFiberD1_x1, /*14*/
+  Si1x_SD_pad, /*14*/
+  Si1y_SD_pad,
+  Si2x_SD_pad,
+  Si2y_SD_pad, /*17*/
+  MiniFiberD1_x1, /*18*/
   MiniFiberD1_u1,
   MiniFiberD1_v1,
   MiniFiberD1_x2,
   MiniFiberD1_u2,
-  MiniFiberD1_v2, /*19*/
-  FiberD1_x, /*20*/
+  MiniFiberD1_v2, /*23*/
+  FiberD1_x, /*24*/
   FiberD1_u,
   FiberD1_v,
-  FiberD2_x, /*23*/
+  FiberD2_x, /*27*/
   FiberD2_u,
   FiberD2_v,
-  FiberD3_x, /*26*/
+  FiberD3_x, /*30*/
   FiberD3_u,
   FiberD3_v,
-  FiberD4_x, /*29*/
+  FiberD4_x, /*33*/
   FiberD4_u,
   FiberD4_v,
-  FiberD5_x, /*32*/
+  FiberD5_x, /*36*/
   FiberD5_u,
   FiberD5_v,
-  PSFE, /*35*/
-  MG01, /*36*/
+  PSFE, /*39*/
+  MG01, /*40*/
   MG02,
   MG03,
   MG04,
@@ -93,10 +97,10 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17, /*52*/
-  PSCE, /*53*/
-  PSBE, /*54*/
-  CDC_layer0, /*55*/
+  MG17, /*56*/
+  PSCE, /*57*/
+  PSBE, /*58*/
+  CDC_layer0, /*60*/
   CDC_layer1,
   CDC_layer2,
   CDC_layer3,
@@ -110,16 +114,16 @@ enum SolDet : int
   CDC_layer11,
   CDC_layer12,
   CDC_layer13,
-  CDC_layer14, /*69*/
-  CDHBar, /*70*/
-  TrFwd0, /*71*/
+  CDC_layer14, /*74*/
+  CDHBar, /*75*/
+  TrFwd0, /*76*/
   TrFwd1,
-  TrFwd2, /*73*/
-  RPC_l, /*74*/
-  RPC_h, /*75*/
-  FMF2Stop0, /*76*/
+  TrFwd2, /*77*/
+  RPC_l, /*78*/
+  RPC_h, /*79*/
+  FMF2Stop0, /*80*/
   FMF2Stop1,
-  FMF2Stop2, /*78*/
+  FMF2Stop2, /*82*/
   SIZEOF_G4SOLDETTYPE
 };
 
@@ -127,6 +131,7 @@ constexpr auto nameLiteralDet = {
     "InSi0"         ,          "InSi1",          "InSi2",          "InSi3",            "TR1",            "TR2",
     "Si1x"          ,           "Si1y",           "Si2x",           "Si2y",
     "Si1x_SD"          ,           "Si1y_SD",           "Si2x_SD",           "Si2y_SD",
+    "Si1x_SD_pad"          ,           "Si1y_SD_pad",           "Si2x_SD_pad",           "Si2y_SD_pad",
     "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1", "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
     "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
     "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      "FiberD4_x",      "FiberD4_u",      "FiberD4_v",

@@ -105,6 +105,18 @@ constexpr bool IsSilicon_SD(G4Sol::SolDet idDet) {
   };
 };
 
+constexpr bool IsSilicon_SD_pad(G4Sol::SolDet idDet) {
+  switch (idDet) {
+  case G4Sol::Si1x_SD_pad : ;
+  case G4Sol::Si1y_SD_pad : ;
+  case G4Sol::Si2x_SD_pad : ;
+  case G4Sol::Si2y_SD_pad : ;
+    return true;
+  default:
+    return false;
+  };
+};
+
 constexpr bool IsFiberU_Vetoed(G4Sol::SolDet idDet) {
   switch (idDet) {
   case G4Sol::FiberD1_x : ;
