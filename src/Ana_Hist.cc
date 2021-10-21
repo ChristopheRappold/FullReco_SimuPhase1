@@ -381,8 +381,8 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistReg.emplace_back(&h_nEventsGoodreconsGhost_Si1.store);
       h_nEventsRealGoodrecons_Si1.emplace_back(new TH2F("h_nEventsRealGoodrecons_Si1", "h_nEventsRealGoodrecons_Si1", 20, 0, 20, 20, 0, 20));
       HistReg.emplace_back(&h_nEventsRealGoodrecons_Si1.store);
-      h_nEventsRealRejectCuadrant_Si1.emplace_back(new TH2F("h_nEventsRealRejectCuadrant_Si1", "h_nEventsRealRejectCuadrant_Si1", 20, 0, 20, 300, 0, 300));
-      HistReg.emplace_back(&h_nEventsRealRejectCuadrant_Si1.store);
+      h_nEventsRealRejectPad_Si1.emplace_back(new TH2F("h_nEventsRealRejectPad_Si1", "h_nEventsRealRejectPad_Si1", 20, 0, 20, 300, 0, 300));
+      HistReg.emplace_back(&h_nEventsRealRejectPad_Si1.store);
 
 
       h_HitMultiplicity_Si2.emplace_back(new TH1F("h_HitMultiplicity_Si2","h_HitMultiplicity_Si2", 20, 0, 20));
@@ -404,8 +404,8 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistReg.emplace_back(&h_nEventsGoodreconsGhost_Si2.store);
       h_nEventsRealGoodrecons_Si2.emplace_back(new TH2F("h_nEventsRealGoodrecons_Si2","h_nEventsRealGoodrecons_Si2", 20, 0, 20, 20, 0, 20));
       HistReg.emplace_back(&h_nEventsRealGoodrecons_Si2.store);
-      h_nEventsRealRejectCuadrant_Si2.emplace_back(new TH2F("h_nEventsRealRejectCuadrant_Si2", "h_nEventsRealRejectCuadrant_Si2", 20, 0, 20, 300, 0, 300));
-      HistReg.emplace_back(&h_nEventsRealRejectCuadrant_Si2.store);
+      h_nEventsRealRejectPad_Si2.emplace_back(new TH2F("h_nEventsRealRejectPad_Si2", "h_nEventsRealRejectPad_Si2", 20, 0, 20, 300, 0, 300));
+      HistReg.emplace_back(&h_nEventsRealRejectPad_Si2.store);
 
       h_MFCheck_Theta_MomSi1MomSi2.emplace_back(new TH1F("h_MFCheck_Theta_MomSi1MomSi2", "h_MFCheck_Theta_MomSi1MomSi2", 2000, 0, 5));
       HistReg.emplace_back(&h_MFCheck_Theta_MomSi1MomSi2.store);

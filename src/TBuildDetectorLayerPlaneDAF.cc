@@ -562,6 +562,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   const double EnergyThreshold = 0.001; // MeV
 #ifdef DEBUG_BUILD
                   std::cout << "Silicon pad \n";
+                  std::cout << "SiliconID: " << TypeDet << "\n";
                   std::string tempName = orderDetName.find(TypeDet)->second;
                   std::cout << " name : " << tempName << "\n";
                   std::cout << " LayerID :" << LayerID << "\n";
