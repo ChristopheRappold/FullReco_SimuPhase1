@@ -7,6 +7,27 @@ HypHI experiments (phase0 & phase0.5). It is responsible for the track and event
 reconstruction of simulated and experimental data. It uses the external library, Genfit,
 for the Kalman Filter. It is written in C++14.
 
+The framework uses several extrenal packages or libraries, either internal programming or
+physics analysis purposes.
+The current list of the dependencies and their purposes is :
+
+| Libraries:    | Purposes:                                                                         |
+|---------------|-----------------------------------------------------------------------------------|
+| ROOT v6       | General analysis framework in particle & nuclear physics                          | 
+| boost         | Library for Boost.PropertyTree                                                    |
+| Genfit v2     | Library for Kalman Filter track fitting                                           |
+| Eigen3        | Library for linear algebra fast SIMD computation                                  |
+| spdlog        | Library for fast and multithread logging                                          |
+| msgpack-c     | Library for efficient binary serialization to use in message passing              |
+| zeroMQ        | Library for high-performance asynchronous messaging in distributed computation    |
+| cppzmq        | Library for C++ handling of ZeroMQ framework                                      |
+| sqlite3       | Library for sqlite database to use in book keeping configuration, calibration etc |
+| sqlite_orm    | Library for modern C++ handling of sqlite database                                |
+| KFParticle    | Library for Kalman Filter vertex fitting from CBM, STAR &  ALICE                  |
+| Vc            | Library for SIMD vector data structure and calculation                            |
+| TrickTrack    | Library for track finding via Cellular Automaton from CMS                         |
+
+
 ## Installation
 
 OS X & Linux:
@@ -45,12 +66,12 @@ input/ \
 field/ \
 config/
 
-The following directories are mandatory : geo/, src/, src/.deps and lib/. 
-If lib or .deps is missing just:
+The following directories are mandatory : geo/, src/, src/.deps, lib/ and config/. 
+If lib or .deps or config is missing just:
 ```sh
 mkdir lib
 mkdir src/.deps
-
+mkdir config 
 ```
 | Dir:    | Usage:                                            |
 |---------|---------------------------------------------------|
@@ -63,9 +84,9 @@ mkdir src/.deps
 
 ## Requirements
 
-External: ROOT v6 + boost + Genfit library + Eigen3 + spdlog + msgpack-c + zeroMQ \
+External: ROOT v6 + boost + Genfit library + Eigen3 + spdlog + msgpack-c + zeroMQ + cppzmq + sqlite_orm + KFParticle + Vc + TrickTrack \
 Build: make + gcc > 9.3 or clang > 9 \
-Libraries from package manager of the system : libboost-dev + libeigen3-dev \
+Libraries from package manager of the system : libboost-dev + libeigen3-dev + libsqlite3-dev \
 
 Your $PATH must include ROOT bin directory. Example:
 ```sh
@@ -140,7 +161,7 @@ git clone https://github.com/zeromq/cppzmq
 cd cppzmq
 mkdir build
 cd build
-cmake -DZeroMQ_DIR=/home/christophe/Workspace/FullReco_SimuPhase1/src/libzmq/lib/cmake/ZeroMQ -DCMAKE_INSTALL_PREFIX=.. ..
+cmake -DZeroMQ_DIR=/#ZEROMQ_INSTALL#/lib/cmake/ZeroMQ -DCMAKE_INSTALL_PREFIX=.. ..
 make
 make install
 ```
@@ -157,6 +178,36 @@ cmake -DCMAKE_INSTALL_PREFIX=.. ..
 make
 make install
 ```
+
+Now sqlite_orm must be only cloned with:
+```sh
+cd src/
+git clone https://github.com/fnc12/sqlite_orm
+```
+
+Now Vc and KFParticle must be cloned, configured and built with :
+```sh
+cd src/
+git clone https://github.com/VcDevel/Vc
+cd Vc
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=../install -DBUILD_TESTING=OFF ..
+make -j
+make install
+
+export Vc_DIR=/#VC_INSTALL_DIR#/lib/cmake/Vc
+
+cd src/
+git clone git@gitlab.com:HypHI-GSI/KFParticle.git
+cd KFParticle
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=../install ../ -DFIXTARGET=TRUE
+make -j
+make install
+```
+
 
 Then to build everything (-j# is for parallel compilation with # being number of cpu):
 ```sh
