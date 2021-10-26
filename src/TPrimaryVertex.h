@@ -112,9 +112,9 @@ class SiliconHits_SDpad
   double phirot_Si2 = 0.; //in degrees
 */
 
-// For 4 layers: 1234rota
-  double Z_plane_Si1x    = 27.8; // in cm
-  double Z_plane_Si1y    = 27.85; // in cm
+// For 4 layers: pad1234a
+  double Z_plane_Si1x    = 27.4; // in cm
+  double Z_plane_Si1y    = 27.45; // in cm
   size_t combineStrips_Si1 = 4; // power of 2
   double widthStrip_Si1 = 0.008 * combineStrips_Si1; // in cm
   double lenghtSi_Si1   = 2.048; // in cm
@@ -123,7 +123,7 @@ class SiliconHits_SDpad
   double actlenghtX_Si1 = 50.; // in cm
   double actlenghtY_Si1 = 50.; // in cm
   bool restrict_gapcenter_Si1 = false;
-  double gapcenter_Si1 = 0.05; //in cm
+  double gapcenter_Si1 = 0.188; //in cm
   bool ifveto_Si1 = false;
   std::vector<int> inactwiresX_Si1 {};
   std::vector<int> inactwiresY_Si1 {};
@@ -133,8 +133,8 @@ class SiliconHits_SDpad
   bool ifphirot_Si1 = true;
   double phirot_Si1 = -45.; //in degrees
 
-  double Z_plane_Si2x    = 28.3; // in cm
-  double Z_plane_Si2y    = 28.35; // in cm
+  double Z_plane_Si2x    = 28.2; // in cm
+  double Z_plane_Si2y    = 28.25; // in cm
   size_t combineStrips_Si2 = 4; // power of 2
   double widthStrip_Si2 = 0.008 * combineStrips_Si2; // in cm
   double lenghtSi_Si2   = 2.048; // in cm
@@ -143,7 +143,7 @@ class SiliconHits_SDpad
   double actlenghtX_Si2 = 50.; // in cm
   double actlenghtY_Si2 = 50.; // in cm
   bool restrict_gapcenter_Si2 = false;
-  double gapcenter_Si2 = 0.05; //in cm
+  double gapcenter_Si2 = 0.188; //in cm
   bool ifveto_Si2 = false;
   std::vector<int> inactwiresX_Si2 {};
   std::vector<int> inactwiresY_Si2 {};
@@ -154,8 +154,8 @@ class SiliconHits_SDpad
   double phirot_Si2 = -45.; //in degrees
 
 
-  double Z_plane_Si3x    = 26.97; // in cm
-  double Z_plane_Si3y    = 27.03; // in cm
+  double Z_plane_Si3x    = 26.475; // in cm
+  double Z_plane_Si3y    = 26.525; // in cm
   size_t combineStrips_Si3 = 1; // power of 2
   double widthStrip_Si3 = 0.008 * combineStrips_Si3; // in cm
   double lenghtSi_Si3   = 2.048; // in cm
@@ -164,7 +164,7 @@ class SiliconHits_SDpad
   double actlenghtX_Si3 = 50.; // in cm
   double actlenghtY_Si3 = 50.; // in cm
   bool restrict_gapcenter_Si3 = false;
-  double gapcenter_Si3 = 0.05; //in cm
+  double gapcenter_Si3 = 0.188; //in cm
   bool ifveto_Si3 = false;
   std::vector<int> inactwiresX_Si3 {};
   std::vector<int> inactwiresY_Si3 {};
@@ -174,8 +174,8 @@ class SiliconHits_SDpad
   bool ifphirot_Si3 = false;
   double phirot_Si3 = 0.; //in degrees
 
-  double Z_plane_Si4x    = 27.47; // in cm
-  double Z_plane_Si4y    = 27.53; // in cm
+  double Z_plane_Si4x    = 27.075; // in cm
+  double Z_plane_Si4y    = 27.125; // in cm
   size_t combineStrips_Si4 = 1; // power of 2
   double widthStrip_Si4 = 0.008 * combineStrips_Si4; // in cm
   double lenghtSi_Si4   = 2.048; // in cm
@@ -184,7 +184,7 @@ class SiliconHits_SDpad
   double actlenghtX_Si4 = 50.; // in cm
   double actlenghtY_Si4 = 50.; // in cm
   bool restrict_gapcenter_Si4 = false;
-  double gapcenter_Si4 = 0.05; //in cm
+  double gapcenter_Si4 = 0.188; //in cm
   bool ifveto_Si4 = false;
   std::vector<int> inactwiresX_Si4 {};
   std::vector<int> inactwiresY_Si4 {};
@@ -566,8 +566,8 @@ private:
 */
 
 
-  double Z_plane_Si1x   = 27.8; // in cm
-  double Z_plane_Si1y   = 27.85; // in cm
+  double Z_plane_Si1x   = 27.4; // in cm
+  double Z_plane_Si1y   = 27.45; // in cm
   double Z_plane_Si1    = (Z_plane_Si1x + Z_plane_Si1y)/2.;
   size_t combineStrips_Si1 = 4; // power of 2
   double widthStrip_Si1 = 0.008 * combineStrips_Si1; // in cm
@@ -575,8 +575,8 @@ private:
   double lenghtSi_Si1   = 2.048; // in cm
   int nStrips_Si1 = static_cast<int>(lenghtSi_Si1 / widthStrip_Si1);
 
-  double Z_plane_Si2x    = 28.3; // in cm
-  double Z_plane_Si2y    = 28.35; // in cm
+  double Z_plane_Si2x    = 28.2; // in cm
+  double Z_plane_Si2y    = 28.25; // in cm
   double Z_plane_Si2     = (Z_plane_Si2x + Z_plane_Si2y)/2.;  // in cm
   size_t combineStrips_Si2 = 4; // power of 2
   double widthStrip_Si2 = 0.008 * combineStrips_Si2; // in cm

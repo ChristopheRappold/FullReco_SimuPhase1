@@ -653,6 +653,8 @@ public:
   
   std::vector<std::vector<double> > Hits_Si1{};
   std::vector<std::vector<double> > Hits_Si2{};
+  std::vector<std::vector<double> > Hits_Si3{};
+  std::vector<std::vector<double> > Hits_Si4{};
   
   std::vector<std::tuple<double, size_t> > HitsX_Si1{};
   std::vector<std::tuple<double, size_t> > HitsY_Si1{};

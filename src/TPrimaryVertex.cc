@@ -190,10 +190,27 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
   std::vector<std::tuple<double, double, double, size_t, double, double, std::string> > HitEnergyPosXYreal_Si2{};
   std::vector<std::tuple<size_t,TVector3,TVector3>> HitIdMomPos_Si2{};
-  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si2, G4Sol::Si2y_SD_pad, G4Sol::Si2x_SD_pad, LocalHisto.h_EnergyDiffStrips_Si2, HitIdMomPos_Si2);
+  simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si2, G4Sol::Si2y_SD_pad, G4Sol::Si2x_SD_pad, LocalHisto.h_EnergyDiffStrips_Si1, HitIdMomPos_Si2);
+
+
+  std::vector<std::tuple<double, double, double, size_t, double, double, std::string> > HitEnergyPosXYreal_Si3{};
+  std::vector<std::tuple<size_t,TVector3,TVector3>> HitIdMomPos_Si3{};
+
+  std::vector<std::tuple<double, double, double, size_t, double, double, std::string> > HitEnergyPosXYreal_Si4{};
+  std::vector<std::tuple<size_t,TVector3,TVector3>> HitIdMomPos_Si4{};
+  
+  if(Si_4layers)
+  {
+    simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si3, G4Sol::Si1x, G4Sol::Si1y, LocalHisto.h_EnergyDiffStrips_Si2, HitIdMomPos_Si3);
+    simulHitstoRealHits(RecoEvent, HitEnergyPosXYreal_Si4, G4Sol::Si2x, G4Sol::Si2y, LocalHisto.h_EnergyDiffStrips_Si2, HitIdMomPos_Si4);
+  }
 
   //Check magnetic field effects
   MFcheck(HitIdMomPos_Si1, HitIdMomPos_Si2, RecoEvent.InteractionPoint);
+  
+  if(Si_4layers)
+    MFcheck(HitIdMomPos_Si3, HitIdMomPos_Si4, RecoEvent.InteractionPoint);
+
 
   std::vector<std::tuple<double, size_t> > HitEnergyLayerX_Si1{};
   for(auto it_HitSi : RecoEvent.Si_HitsEnergyLayer[5])
@@ -305,7 +322,10 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   if(Si_4layers)
     {
       SiliconHitsSD_Si3.SignalstoHits_SDpad(HitEnergyLayerX_Si3, HitEnergyLayerY_Si3, HitEnergyPosXY_Si3);
+      RecoEvent.Hits_Si3 = HitEnergyPosXY_Si3;
+
       SiliconHitsSD_Si4.SignalstoHits_SDpad(HitEnergyLayerX_Si4, HitEnergyLayerY_Si4, HitEnergyPosXY_Si4);
+      RecoEvent.Hits_Si4 = HitEnergyPosXY_Si4;
     }
 
 
@@ -382,6 +402,9 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   // Real tracks
   std::vector<std::vector<std::vector<double> > > RealTracks{};
   RealHitstoRealTracks(HitEnergyPosXYreal_Si1, HitEnergyPosXYreal_Si2, RealTracks);
+  
+  if(Si_4layers)
+    RealHitstoRealTracks(HitEnergyPosXYreal_Si3, HitEnergyPosXYreal_Si4, RealTracks);
 
 #endif
 
@@ -1902,23 +1925,40 @@ void SiliconHits_SDpad::CombineStrips(std::vector<std::tuple<double, size_t> >& 
         if((get<1>(HitEnergyLayer[i]) >= k*2*nStrips*combineStrips) && (get<1>(HitEnergyLayer[i]) < (k+0.5)*2*nStrips*combineStrips))
           temp_HitLayer += k*2*nStrips;
 
-      int temp_remainder = get<1>(HitEnergyLayer[i])%combineStrips;
-
       for(size_t j = i+1; j < HitEnergyLayer.size(); ++j)
         {
           it_usedLayer = find(usedLayer.begin(), usedLayer.end(), get<1>(HitEnergyLayer[j]));
           if(it_usedLayer != usedLayer.end())
             continue;
 
-          int temp_diflayers = get<1>(HitEnergyLayer[i]) - get<1>(HitEnergyLayer[j]);
-          if((temp_diflayers <= temp_remainder) && (temp_diflayers > temp_remainder - combineStrips))
-            {
-              temp_HitEnergy += get<0>(HitEnergyLayer[j]);
-              usedLayer.emplace_back(j);
-            }
+          size_t temp_diflayers = size_type_abs(get<1>(HitEnergyLayer[i]), get<1>(HitEnergyLayer[j]));
+          if(temp_diflayers >= combineStrips)
+            continue;
+
+          if(((get<1>(HitEnergyLayer[i])%(nStrips*combineStrips))/combineStrips)
+              != ((get<1>(HitEnergyLayer[j])%(nStrips*combineStrips))/combineStrips))
+                continue;
+
+          temp_HitEnergy += get<0>(HitEnergyLayer[j]);
+          usedLayer.emplace_back(get<1>(HitEnergyLayer[j]));
         }
 
         temp_HitEnergyLayer.emplace_back(std::make_tuple(temp_HitEnergy, temp_HitLayer));
+    }
+
+    //Check last entry: vector.size()-1
+    it_usedLayer = find(usedLayer.begin(), usedLayer.end(), get<1>(HitEnergyLayer[HitEnergyLayer.size()-1]));
+    if(it_usedLayer == usedLayer.end())
+    {
+      double temp_HitEnergy = get<0>(HitEnergyLayer[HitEnergyLayer.size()-1]);
+      size_t temp_HitLayer = (get<1>(HitEnergyLayer[HitEnergyLayer.size()-1])%(nStrips*combineStrips))/combineStrips;
+
+      for(size_t k = 1; k < nPads; ++k)
+        if((get<1>(HitEnergyLayer[HitEnergyLayer.size()-1]) >= k*2*nStrips*combineStrips)
+          && (get<1>(HitEnergyLayer[HitEnergyLayer.size()-1]) < (k+0.5)*2*nStrips*combineStrips))
+            temp_HitLayer += k*2*nStrips;
+
+      temp_HitEnergyLayer.emplace_back(std::make_tuple(temp_HitEnergy, temp_HitLayer));
     }
 
     HitEnergyLayer.clear();
@@ -1971,11 +2011,14 @@ void SiliconHits_SDpad::SignalstoHits_SDpad(std::vector<std::tuple<double, size_
                   if(ifphirot)
                   {
                     double HitX_rot = HitX_prime * std::cos(phirot * M_PI / 180.) - HitY_prime * std::sin(phirot * M_PI / 180.);
-                    double HitY_rot = HitX_prime * std::sin(phirot * M_PI / 180.) + HitY_prime * std::sin(phirot * M_PI / 180.);
+                    double HitY_rot = HitX_prime * std::sin(phirot * M_PI / 180.) + HitY_prime * std::cos(phirot * M_PI / 180.);
 
                     HitX_prime = HitX_rot;
                     HitY_prime = HitY_rot;
                   }
+
+                  //if(Si_station == 1)
+                      //std::cout << "ReconsPosX : " << HitX_prime << "\tReconsPosY : " << HitY_prime << std::endl;
 
                   double HitX = HitX_prime;
                   double HitY = HitY_prime;
