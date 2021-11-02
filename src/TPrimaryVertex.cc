@@ -10,9 +10,9 @@
 //#define DEBUG_PRIMVTX
 
 //#define RECONS_HITS_MULTIPLICITY
-#define HIT_RECONS_CHECK
-#define TRACK_RECONS_CHECK
-#define MOTHER_DAUGHTERS_CHECK
+//#define HIT_RECONS_CHECK
+//#define TRACK_RECONS_CHECK
+//#define MOTHER_DAUGHTERS_CHECK
 #define VERTEX_RECONS_CHECK
 #define COVARIANCE_MATRIX
 //#define DECAY_VERTEX
@@ -24,6 +24,7 @@ TPrimaryVertex::TPrimaryVertex(const THyphiAttributes& attribut)
     : TDataProcessInterface("PrimaryVertexReco"), att(attribut), SiliconHitsSD_Si1(1), SiliconHitsSD_Si2(2),
         SiliconHitsSD_Si3(3), SiliconHitsSD_Si4(4)
 {
+  TranslationZ_Target_System(att.Target_PositionZ);
   rand = new TRandom3();
 }
 
@@ -128,6 +129,12 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_thetaTracks        = AnaHisto->CloneAndRegister(AnaHisto->h_thetaTracks);
   LocalHisto.h_thetaResol         = AnaHisto->CloneAndRegister(AnaHisto->h_thetaResol);
 
+  LocalHisto.h_Acc_ThetaCandidates = AnaHisto->CloneAndRegister(AnaHisto->h_Acc_ThetaCandidates);
+  LocalHisto.h_Acc_ThetaAllReal    = AnaHisto->CloneAndRegister(AnaHisto->h_Acc_ThetaAllReal);
+
+  LocalHisto.h_nCandidatesRealTracks          = AnaHisto->CloneAndRegister(AnaHisto->h_nCandidatesRealTracks);
+  LocalHisto.h_nCandidatesRealTracks_IfRecons = AnaHisto->CloneAndRegister(AnaHisto->h_nCandidatesRealTracks_IfRecons);
+
   LocalHisto.h_nHypernucleiTrack = AnaHisto->CloneAndRegister(AnaHisto->h_nHypernucleiTrack);
   LocalHisto.h_fvalues           = AnaHisto->CloneAndRegister(AnaHisto->h_fvalues);
 
@@ -182,6 +189,24 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
         return -4;
 
   LocalHisto.h_PrimStatus->Fill("Si_acc", 1., 1);
+
+  // Check all real particles
+  size_t nRealTracksCounter = 0;
+
+  for(auto& it: RecoEvent.TrackDAFInit)
+    {
+      if(it.second.charge == 0)
+        continue;
+
+      if(it.second.posZ >= Z_plane_Si1)
+        continue;
+
+      nRealTracksCounter += 1;
+
+      double temp_thetaAllReal = std::atan(std::sqrt(std::pow(it.second.momX, 2.) + std::pow(it.second.momY, 2.))
+                                            / it.second.momZ) * 180. / M_PI;
+      LocalHisto.h_Acc_ThetaAllReal->Fill(temp_thetaAllReal, 1.);
+    }
 
   // Reconstruct the real hits from the simulation
   std::vector<std::tuple<double, double, double, size_t, double, double, std::string> > HitEnergyPosXYreal_Si1{};
@@ -406,6 +431,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   if(Si_4layers)
     RealHitstoRealTracks(HitEnergyPosXYreal_Si3, HitEnergyPosXYreal_Si4, RealTracks);
 
+  LocalHisto.h_nCandidatesRealTracks->Fill(CandidateTracks.size(), nRealTracksCounter, 1.);
 #endif
 
 #ifdef MOTHER_DAUGHTERS_CHECK
@@ -504,8 +530,7 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
       double thetadaughters = std::atan(std::sqrt(std::pow((daughtersTracks[j][1][2] - daughtersTracks[j][0][2]), 2.) +
                                         std::pow((daughtersTracks[j][1][1] - daughtersTracks[j][0][1]), 2.)) /
-                                   (Z_plane_Si2 - Z_plane_Si1)) *
-                              180. / M_PI;
+                                   (Z_plane_Si2 - Z_plane_Si1)) * 180. / M_PI;
       LocalHisto.h_thetaTracks->Fill(thetadaughters, "Daughters", 1.);
     }
 
@@ -601,6 +626,8 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   RecoEvent.PrimVtxRecons.SetXYZ(InteractionPointRecons[0],InteractionPointRecons[1],InteractionPointRecons[2]);
 
 #ifdef VERTEX_RECONS_CHECK
+
+  LocalHisto.h_nCandidatesRealTracks_IfRecons->Fill(CandidateTracks.size(), nRealTracksCounter, 1.);
 
   for(size_t i = 0; i < f_values_IP.size(); ++i)
     LocalHisto.h_fvalues->Fill(f_values_IP[i], 1.);
@@ -1864,6 +1891,12 @@ void SiliconHits_SD::SignalstoHits_SD(std::vector<std::tuple<double, size_t> > H
 }
 */
 
+void SiliconHits_SDpad::TranslationZ_Si_System(double Target_PosZ)
+{
+  double Dist_to_TransZ = Target_PosZ - 25.; // Reference target PosZ = 25.
+  Z_plane += Dist_to_TransZ;
+}
+
 bool SiliconHits_SDpad::IsSamePad(size_t& layerX_id, size_t& layerY_id)
 {
   size_t iPad_X = layerX_id / nStrips;
@@ -2491,6 +2524,25 @@ void SiliconHits_SDpad::SignalstoHits_SDpad(std::vector<std::tuple<double, size_
 }
 
 
+void TPrimaryVertex::TranslationZ_Target_System(double Target_PosZ)
+{
+  double Dist_to_TransZ = Target_PosZ - 25.; // Reference target PosZ = 25.
+  Zo_target += Dist_to_TransZ;
+  Zf_target += Dist_to_TransZ;
+/* 
+  Z_plane_Si1 += Dist_to_TransZ;
+  Z_plane_Si2 += Dist_to_TransZ;
+
+  SiliconHitsSD_Si1.TranslationZ_Si_System(Target_PosZ);
+  SiliconHitsSD_Si2.TranslationZ_Si_System(Target_PosZ);
+  
+  if(Si_4layers)
+    {
+      SiliconHitsSD_Si3.TranslationZ_Si_System(Target_PosZ);
+      SiliconHitsSD_Si4.TranslationZ_Si_System(Target_PosZ);
+    }
+*/
+}
 
 void TPrimaryVertex::CloseDist(std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                std::vector<double>& TrackHit1, std::vector<double>& TrackHit2, double& distance,
@@ -2618,6 +2670,11 @@ void TPrimaryVertex::HitstoTracks(std::vector<std::vector<double> >& HitEnergyPo
             {
               std::vector<std::vector<double> > temp_CandidateTracks{HitEnergyPosXY_Si1[i], HitEnergyPosXY_Si2[j]};
               CandidateTracks.emplace_back(temp_CandidateTracks);
+
+              double temp_thetaCand = std::atan(std::sqrt(std::pow((HitEnergyPosXY_Si1[i][1] - HitEnergyPosXY_Si2[j][1]), 2.)
+                                                          + std::pow((HitEnergyPosXY_Si1[i][2] - HitEnergyPosXY_Si2[j][2]), 2.))
+                                                  / (HitEnergyPosXY_Si1[i][3] - HitEnergyPosXY_Si2[j][3])) * 180. / M_PI;
+              LocalHisto.h_Acc_ThetaCandidates->Fill(temp_thetaCand, 1.);
             }
         }
     }

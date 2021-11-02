@@ -123,7 +123,7 @@ class SiliconHits_SDpad
   double actlenghtX_Si1 = 50.; // in cm
   double actlenghtY_Si1 = 50.; // in cm
   bool restrict_gapcenter_Si1 = false;
-  double gapcenter_Si1 = 0.188; //in cm
+  double gapcenter_Si1 = 0.188*2.; //in cm
   bool ifveto_Si1 = false;
   std::vector<int> inactwiresX_Si1 {};
   std::vector<int> inactwiresY_Si1 {};
@@ -143,7 +143,7 @@ class SiliconHits_SDpad
   double actlenghtX_Si2 = 50.; // in cm
   double actlenghtY_Si2 = 50.; // in cm
   bool restrict_gapcenter_Si2 = false;
-  double gapcenter_Si2 = 0.188; //in cm
+  double gapcenter_Si2 = 0.188*2.; //in cm
   bool ifveto_Si2 = false;
   std::vector<int> inactwiresX_Si2 {};
   std::vector<int> inactwiresY_Si2 {};
@@ -164,7 +164,7 @@ class SiliconHits_SDpad
   double actlenghtX_Si3 = 50.; // in cm
   double actlenghtY_Si3 = 50.; // in cm
   bool restrict_gapcenter_Si3 = false;
-  double gapcenter_Si3 = 0.188; //in cm
+  double gapcenter_Si3 = 0.188*2.; //in cm
   bool ifveto_Si3 = false;
   std::vector<int> inactwiresX_Si3 {};
   std::vector<int> inactwiresY_Si3 {};
@@ -184,7 +184,7 @@ class SiliconHits_SDpad
   double actlenghtX_Si4 = 50.; // in cm
   double actlenghtY_Si4 = 50.; // in cm
   bool restrict_gapcenter_Si4 = false;
-  double gapcenter_Si4 = 0.188; //in cm
+  double gapcenter_Si4 = 0.188*2.; //in cm
   bool ifveto_Si4 = false;
   std::vector<int> inactwiresX_Si4 {};
   std::vector<int> inactwiresY_Si4 {};
@@ -343,6 +343,9 @@ public:
   {
     nRejectPad = 0;
   }
+
+  void TranslationZ_Si_System(double Target_PosZ);
+
 };
 
 
@@ -542,6 +545,7 @@ private:
                                   std::vector<double>& InteractionPointRecons,
                                   std::vector<double>& DecayPositionRecons);
 
+  void TranslationZ_Target_System(double Target_PosZ);
 
   SiliconHits_SDpad SiliconHitsSD_Si1;
   SiliconHits_SDpad SiliconHitsSD_Si2;
@@ -552,19 +556,6 @@ private:
 
   double Zo_target = 24.; // in cm
   double Zf_target = 26.; // in cm
-
-/*
-  double Z_plane_Si1    = 27.;  // in cm
-  double widthStrip_Si1 = 0.03; // in cm
-  double sigma_Si1      = widthStrip_Si1 / std::sqrt(12.);
-  double lenghtSi_Si1    = 4.;   // in cm
-
-  double Z_plane_Si2     = 30.;  // in cm
-  double widthStrip_Si2  = 0.03; // in cm
-  double sigma_Si2       = widthStrip_Si2 / std::sqrt(12.);
-  double lenghtSi_Si2    = 6.;   // in cm
-*/
-
 
   double Z_plane_Si1x   = 27.4; // in cm
   double Z_plane_Si1y   = 27.45; // in cm
@@ -659,6 +650,12 @@ private:
     TH2F* h_PosZBeamTracks;
     TH2F* h_thetaTracks;
     TH1F* h_thetaResol;
+
+    TH1F* h_Acc_ThetaCandidates;
+    TH1F* h_Acc_ThetaAllReal;
+    
+    TH2F* h_nCandidatesRealTracks;
+    TH2F* h_nCandidatesRealTracks_IfRecons;
 
     TH1F* h_nHypernucleiTrack;
     TH1F* h_fvalues;

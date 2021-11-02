@@ -441,6 +441,17 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       h_thetaResol.emplace_back(new TH1F("h_thetaResol","h_thetaResol", 10000, -5, 5));
       HistReg.emplace_back(&h_thetaResol.store);
 
+      h_Acc_ThetaCandidates.emplace_back(new TH1F("h_Acc_ThetaCandidates", "h_Acc_ThetaCandidates", 1800, 0, 90));
+      HistReg.emplace_back(&h_Acc_ThetaCandidates.store);
+      h_Acc_ThetaAllReal.emplace_back(new TH1F("h_Acc_ThetaAllReal", "h_Acc_ThetaAllReal", 1800, 0, 90));
+      HistReg.emplace_back(&h_Acc_ThetaAllReal.store);
+
+      h_nCandidatesRealTracks.emplace_back(new TH2F("h_nCandidatesRealTracks","h_nCandidatesRealTracks", 100, 0, 100, 100, 0, 100));
+      HistReg.emplace_back(&h_nCandidatesRealTracks.store);
+
+      h_nCandidatesRealTracks_IfRecons.emplace_back(new TH2F("h_nCandidatesRealTracks_IfRecons","h_nCandidatesRealTracks_IfRecons", 100, 0, 100, 100, 0, 100));
+      HistReg.emplace_back(&h_nCandidatesRealTracks_IfRecons.store);
+
       //h_nHypTrackReal.emplace_back(new TH1F("h_nHypTrackReal", "h_nHypTrackReal", 3, 0, 3));
       //HistReg.emplace_back(&h_nHypTrackReal.store);
       h_nHypernucleiTrack.emplace_back(new TH1F("h_nHypernucleiTrack", "h_nHypernucleiTrack", 9, 0, 9));
@@ -691,16 +702,22 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistReg.emplace_back(&h_HypInvariantMass_CutLorentzVect.store);
 
 
-      h_EffPosZ_real.emplace_back(new TH1F("h_EffPosZ_real", "h_EffPosZ_real", 30, 20, 60));
+      h_EffPosZ_real.emplace_back(new TH1F("h_EffPosZ_real", "h_EffPosZ_real", 600, 10, 70));
       HistReg.emplace_back(&h_EffPosZ_real.store);
-      h_EffPosZ_preKF.emplace_back(new TH1F("h_EffPosZ_preKF", "h_EffPosZ_preKF", 30, 20, 60));
+      h_EffPosZ_preKF.emplace_back(new TH1F("h_EffPosZ_preKF", "h_EffPosZ_preKF", 600, 10, 70));
       HistReg.emplace_back(&h_EffPosZ_preKF.store);
-      h_EffPosZ_postKF.emplace_back(new TH1F("h_EffPosZ_postKF", "h_EffPosZ_postKF", 30, 20, 60));
+      h_EffPosZ_postKF.emplace_back(new TH1F("h_EffPosZ_postKF", "h_EffPosZ_postKF", 600, 10, 70));
       HistReg.emplace_back(&h_EffPosZ_postKF.store);
-      h_EffPosZ_preKFPart.emplace_back(new TH1F("h_EffPosZ_preKFPart", "h_EffPosZ_preKFPart", 30, 20, 60));
+      h_EffPosZ_preKFPart.emplace_back(new TH1F("h_EffPosZ_preKFPart", "h_EffPosZ_preKFPart", 600, 10, 70));
       HistReg.emplace_back(&h_EffPosZ_preKFPart.store);
-      h_EffPosZ_postKFPart.emplace_back(new TH1F("h_EffPosZ_postKFPart", "h_EffPosZ_postKFPart", 30, 20, 60));
+      h_EffPosZ_postKFPart.emplace_back(new TH1F("h_EffPosZ_postKFPart", "h_EffPosZ_postKFPart", 600, 10, 70));
       HistReg.emplace_back(&h_EffPosZ_postKFPart.store);
+
+      h_EffPosZPosR_real.emplace_back(new TH2F("h_EffPosZPosR_real", "h_EffPosZPosR_real", 600, 10, 70, 50, 0, 5));
+      HistReg.emplace_back(&h_EffPosZPosR_real.store);
+      h_EffPosZPosR_postKFPart.emplace_back(new TH2F("h_EffPosZPosR_postKFPart", "h_EffPosZPosR_postKFPart", 600, 10, 70, 50, 0, 5));
+      HistReg.emplace_back(&h_EffPosZPosR_postKFPart.store);
+
 
       h_N_SiHits_ReconsTracks.emplace_back(new TH2F("h_N_SiHits_ReconsTracks", "h_N_SiHits_ReconsTracks", 20, 0, 20, 6, 0, 6));
       HistReg.emplace_back(&h_N_SiHits_ReconsTracks.store);

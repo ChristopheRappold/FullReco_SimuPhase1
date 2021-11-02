@@ -98,28 +98,30 @@ private:
 
   void AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& AllTracks, TVector3& DecayVertexRecons);
 
+  void TranslationZ_Target_System(double Target_PosZ);
+
 
   //Silicon details (copy from TPrimaryVertex.h)
-  double Z_plane_Si1x    = 27.; // in cm
-  double Z_plane_Si1y    = 27.05; // in cm
-  double widthStrip_Si1 = 0.019; // in cm
-  double lenghtSi_Si1   = 9.728; // in cm
-  double thicknessSi_Si1 = 0.03; // in cm
-  bool restrict_actlenght_Si1 = true;
-  double actlenghtX_Si1 = 6.08; // in cm
-  double actlenghtY_Si1 = 6.08; // in cm
 
-  double Z_plane_Si2x    = 30.; // in cm
-  double Z_plane_Si2y    = 30.05; // in cm
-  double widthStrip_Si2 = 0.019; // in cm
-  double lenghtSi_Si2   = 9.728; // in cm
-  double thicknessSi_Si2 = 0.03; // in cm
-  bool restrict_actlenght_Si2 = true;
-  double actlenghtX_Si2 = 6.08; // in cm
-  double actlenghtY_Si2 = 6.08; // in cm
-
+  double Z_plane_Si1x   = 27.4; // in cm
+  double Z_plane_Si1y   = 27.45; // in cm
+  double Z_plane_Si1    = (Z_plane_Si1x + Z_plane_Si1y)/2.;
+  size_t combineStrips_Si1 = 4; // power of 2
+  double widthStrip_Si1 = 0.008 * combineStrips_Si1; // in cm
   double sigma_Si1      = widthStrip_Si1 / std::sqrt(12.);
-  double sigma_Si2      = widthStrip_Si2 / std::sqrt(12.);
+  double lenghtSi_Si1   = 2.048; // in cm
+  double thicknessSi_Si1 = 0.0285; // in cm
+  int nStrips_Si1 = static_cast<int>(lenghtSi_Si1 / widthStrip_Si1);
+
+  double Z_plane_Si2x    = 28.2; // in cm
+  double Z_plane_Si2y    = 28.25; // in cm
+  double Z_plane_Si2     = (Z_plane_Si2x + Z_plane_Si2y)/2.;  // in cm
+  size_t combineStrips_Si2 = 4; // power of 2
+  double widthStrip_Si2 = 0.008 * combineStrips_Si2; // in cm
+  double sigma_Si2       = widthStrip_Si2 / std::sqrt(12.);
+  double lenghtSi_Si2   = 2.048; // in cm
+  double thicknessSi_Si2 = 0.0285; // in cm
+  int nStrips_Si2 = static_cast<int>(lenghtSi_Si2 / widthStrip_Si2);
 
   float Z_plane;
   double widthStrip;
@@ -130,15 +132,10 @@ private:
   double sigma;
   int nStrips;
 
-  double Zo_target = 24.5; // in cm
-  double Zf_target = 25.5; // in cm
-  double Zo_minifibers = 45; // in cm
+  double Zo_target = 24.; // in cm
+  double Zf_target = 26.; // in cm
+  double Zo_minifibers = 47.5; // in cm
 
-  double Z_plane_Si1    = (Z_plane_Si1x + Z_plane_Si1y)/2.;  // in cm
-  //double widthStrip_Si1 = 0.019; // in cm
-
-  double Z_plane_Si2    = (Z_plane_Si2x + Z_plane_Si2y)/2.;  // in cm
-  //double widthStrip_Si2 = 0.019; // in cm
 
   double Dist_to_Target = 0.5; // in cm
   double Dist_to_Silicons = 0.5; // in cm
@@ -373,6 +370,9 @@ private:
     TH1F* h_EffPosZ_postKF;
     TH1F* h_EffPosZ_preKFPart;
     TH1F* h_EffPosZ_postKFPart;
+
+    TH2F* h_EffPosZPosR_real;
+    TH2F* h_EffPosZPosR_postKFPart;
 
     TH2F* h_N_SiHits_ReconsTracks;
 /*

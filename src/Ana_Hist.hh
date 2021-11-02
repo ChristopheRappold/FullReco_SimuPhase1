@@ -202,6 +202,12 @@ class Ana_Hist
   Hist<TH2F> h_thetaTracks ;
   Hist<TH1F> h_thetaResol ;
 
+  Hist<TH1F> h_Acc_ThetaCandidates ;
+  Hist<TH1F> h_Acc_ThetaAllReal ;
+
+  Hist<TH2F> h_nCandidatesRealTracks ;
+  Hist<TH2F> h_nCandidatesRealTracks_IfRecons ;
+
   //Hist<TH1F> h_nHypTrackReal;
   Hist<TH1F> h_nHypernucleiTrack ;
   Hist<TH1F> h_fvalues ;
@@ -344,7 +350,10 @@ class Ana_Hist
   Hist<TH1F> h_EffPosZ_postKF ;
   Hist<TH1F> h_EffPosZ_preKFPart ;
   Hist<TH1F> h_EffPosZ_postKFPart ;
-  
+
+  Hist<TH2F> h_EffPosZPosR_real ;
+  Hist<TH2F> h_EffPosZPosR_postKFPart ;
+
   Hist<TH2F> h_N_SiHits_ReconsTracks ;
   
 /*
