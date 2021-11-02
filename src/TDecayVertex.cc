@@ -22,7 +22,7 @@ using namespace G4Sol;
 TDecayVertex::TDecayVertex(const THyphiAttributes& attribut)
     : TDataProcessInterface("DecayVertexReco"), att(attribut), fieldWASA(att.Field)
   {
-
+    TranslationZ_Target_System(att.Target_PositionZ);
   }
 
 TDecayVertex::~TDecayVertex() {}
@@ -242,17 +242,20 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_HypErrorLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypErrorLifeTime_PrimVtx);
   LocalHisto.h_HypcutLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypcutLifeTime_PrimVtx);
 
-  LocalHisto.h_HypInvariantMassCheck = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMassCheck);
+  LocalHisto.h_HypInvariantMassCheck      = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMassCheck);
   LocalHisto.h_HypInvariantErrorMassCheck = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantErrorMassCheck);
 
-  LocalHisto.h_HypInvariantMass_LorentzVect = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass_LorentzVect);
+  LocalHisto.h_HypInvariantMass_LorentzVect    = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass_LorentzVect);
   LocalHisto.h_HypInvariantMass_CutLorentzVect = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass_CutLorentzVect);
 
-  LocalHisto.h_EffPosZ_real = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_real);
-  LocalHisto.h_EffPosZ_preKF = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKF);
-  LocalHisto.h_EffPosZ_postKF = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_postKF);
-  LocalHisto.h_EffPosZ_preKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKFPart);
+  LocalHisto.h_EffPosZ_real       = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_real);
+  LocalHisto.h_EffPosZ_preKF      = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKF);
+  LocalHisto.h_EffPosZ_postKF     = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_postKF);
+  LocalHisto.h_EffPosZ_preKFPart  = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKFPart);
   LocalHisto.h_EffPosZ_postKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_postKFPart);
+
+  LocalHisto.h_EffPosZPosR_real       = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZPosR_real);
+  LocalHisto.h_EffPosZPosR_postKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZPosR_postKFPart);
 
 
   LocalHisto.h_N_SiHits_ReconsTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_SiHits_ReconsTracks);
@@ -298,6 +301,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   LocalHisto.h_DecayVertexPosZ_real->Fill(DecayVertex_real.Z(), 1.);
   LocalHisto.h_EffPosZ_real->Fill(DecayVertex_real.Z(), 1.);
+  LocalHisto.h_EffPosZPosR_real->Fill(DecayVertex_real.Z(), DecayVertex_real.Perp(), 1.);
   LocalHisto.h_Hyp_RealLifeTime->Fill(RecoEvent.Hyp_LifeTime, 1.);
 
   StudyCaseSelector(att.StudyCase, Hyp_pdg, Fragment_pdg);
@@ -1016,6 +1020,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Theta_MotherTrackPrimVtx->Fill(theta_MotherTrackPrimVtx, MotherTracks_PrimVtx[i].GetMass(), 1.);
 
       LocalHisto.h_EffPosZ_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ(), 1.);
+      double PosR_DecayVertex = std::sqrt(std::pow(MotherTracks_PrimVtx[i].GetX(), 2.) + std::pow(MotherTracks_PrimVtx[i].GetY(), 2.));
+      LocalHisto.h_EffPosZPosR_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ(), PosR_DecayVertex, 1.);
       LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx->Fill(MotherTracks_PrimVtx[i].GetZ(), MotherTracks_PrimVtx[i].GetMass(), 1.);
 
       LocalHisto.h_DecayFragmentMomZ_KFPart_PrimVtx->Fill(FragmentTracks[temp_id_fragment].GetPz(), MotherTracks_PrimVtx[i].GetMass(), 1.);
@@ -2197,9 +2203,7 @@ void TDecayVertex::SiHitsFinder2(KFParticle& Track, int idSilicon, int stripDire
 
       widthStrip = widthStrip_Si1;
       lenghtSi   = lenghtSi_Si1;
-      restrict_actlenght = restrict_actlenght_Si1;
-      actlenghtX = actlenghtX_Si1;
-      actlenghtY = actlenghtY_Si1;
+
       sigma = sigma_Si1;
     }
 
@@ -2212,9 +2216,6 @@ void TDecayVertex::SiHitsFinder2(KFParticle& Track, int idSilicon, int stripDire
 
       widthStrip = widthStrip_Si2;
       lenghtSi   = lenghtSi_Si2;
-      restrict_actlenght = restrict_actlenght_Si2;
-      actlenghtX = actlenghtX_Si2;
-      actlenghtY = actlenghtY_Si2;
       sigma = sigma_Si2;
     }
 
@@ -2493,4 +2494,16 @@ void TDecayVertex::AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& All
     DecayVertexRecons += Vect_Centroids[i];
 
   DecayVertexRecons *= 1. / static_cast<double>(Vect_Centroids.size());
+}
+
+
+void TDecayVertex::TranslationZ_Target_System(double Target_PosZ)
+{
+  double Dist_to_TransZ = Target_PosZ - 25.; // Reference target PosZ = 25.
+  Zo_target += Dist_to_TransZ;
+  Zf_target += Dist_to_TransZ;
+/* 
+  Z_plane_Si1 += Dist_to_TransZ;
+  Z_plane_Si2 += Dist_to_TransZ;
+*/
 }

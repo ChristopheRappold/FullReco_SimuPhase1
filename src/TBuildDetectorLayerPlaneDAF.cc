@@ -225,6 +225,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   RecoEvent.InteractionPoint[1] = event.InteractionPoint_Y;
   RecoEvent.InteractionPoint[2] = event.InteractionPoint_Z;
 
+  RecoEvent.PrimVtxRecons.SetXYZ(event.InteractionPoint_X, event.InteractionPoint_Y, event.InteractionPoint_Z);
+
   RecoEvent.DecayVertex[0] = event.DecayVertex_X;
   RecoEvent.DecayVertex[1] = event.DecayVertex_Y;
   RecoEvent.DecayVertex[2] = event.DecayVertex_Z;
@@ -257,6 +259,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
 
       InfoInit tempInit;
+      tempInit.charge = event.BeamCharges[index];
       tempInit.posX = event.InteractionPoint_X;
       tempInit.posY = event.InteractionPoint_Y;
       tempInit.posZ = event.InteractionPoint_Z;
@@ -293,6 +296,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
 
       InfoInit tempInit;
+      tempInit.charge = event.DaughterCharges[index];
       tempInit.posX = event.DecayVertex_X;
       tempInit.posY = event.DecayVertex_Y;
       tempInit.posZ = event.DecayVertex_Z;
