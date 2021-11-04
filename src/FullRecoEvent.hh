@@ -558,18 +558,33 @@ struct Hyp
   //Daughters:
   Int_t Id_Fragment;
   TLorentzVector MomE_Fragment;
+  Double32_t Chi2ndf_Fragment;
+  Int_t NDF_Fragment;
+  Double32_t Pvalue_Fragment;
   Double32_t Angle_MotherFragment;
   Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
 
   Int_t Id_Pion;
   TLorentzVector MomE_Pion;
   Double32_t Chi2ndf_Pion;
+  Int_t NDF_Pion;
+  Double32_t Pvalue_Pion;
   Double32_t Angle_MotherPion;
+  Int_t NHitsMDC_Pion;
+  Int_t NHitsMinifiber_Pion;
   Int_t N_Pion;
   Int_t Pion_IsFromHyp; // 0-> No; 1-> Yes
+
   Double32_t Dist_Daughters;
   Double32_t ArmPod_Qt;
   Double32_t ArmPod_Alfa;
+};
+
+struct KFFitInfo
+{
+  Double32_t Pvalue = -1.;
+  Int_t NHitsMDC = -1;
+  Int_t NHitsMinifiber = -1;
 };
 
 struct CandTrack
