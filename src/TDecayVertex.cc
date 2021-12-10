@@ -5,6 +5,7 @@
 
 #include <tuple>
 #include <string>
+#include <cmath>
 
 #include "TLorentzVector.h"
 #include "TVector3.h"
@@ -41,6 +42,13 @@ int TDecayVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 
   for(auto i_Hyp : RecoEvent.Hyp_Vect)
   {
+    if(std::isfinite(i_Hyp.Chi2ndf) == false)
+      continue;
+    if(std::isfinite(i_Hyp.Dist_Daughters) == false)
+      continue;
+    if(std::isfinite(i_Hyp.MomE_Fragment.Px()) == false)
+      continue;
+
     THypernucleus* OutHyp = dynamic_cast<THypernucleus*>(OutTree->fHyp->ConstructedAt(OutTree->fHyp->GetEntries()));
 
     OutHyp->Pattern              = i_Hyp.Pattern;
@@ -48,6 +56,7 @@ int TDecayVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
     OutHyp->PDG                  = i_Hyp.PDG;
     OutHyp->N_Mother             = i_Hyp.N_Mother;
     OutHyp->Chi2ndf              = i_Hyp.Chi2ndf;
+    OutHyp->NDF                  = i_Hyp.NDF;
     OutHyp->MomE                 = i_Hyp.MomE;
     OutHyp->PrimVtx              = i_Hyp.PrimVtx;
     OutHyp->DecayVtx             = i_Hyp.DecayVtx;
@@ -60,6 +69,7 @@ int TDecayVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
     OutHyp->LifeTime             = i_Hyp.LifeTime;
     OutHyp->ErrLifeTime          = i_Hyp.ErrLifeTime;
     OutHyp->ErrGetLifeTime       = i_Hyp.ErrGetLifeTime;
+    OutHyp->Mother_IsFromHyp     = i_Hyp.Mother_IsFromHyp;
 
     OutHyp->Id_Fragment          = i_Hyp.Id_Fragment;
     OutHyp->MomE_Fragment        = i_Hyp.MomE_Fragment;
@@ -408,7 +418,15 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Real.PrimVtx = InteractionPoint_real;
       temp_Hyp_Real.DecayVtx.SetXYZ(RecoEvent.DecayVertex[0], RecoEvent.DecayVertex[1], RecoEvent.DecayVertex[2]);
       temp_Hyp_Real.Dist_RealReconsVtx.SetXYZ(0.,0.,0.);
+      temp_Hyp_Real.Dist_MotherPrimVtx = 0.;
+      temp_Hyp_Real.Angle_MotherPrimVtx = 0.;
+      temp_Hyp_Real.InvMass = Hyp_mass;
+      temp_Hyp_Real.ErrInvMass = 0.;
+      temp_Hyp_Real.ErrGetMass = 0;
       temp_Hyp_Real.LifeTime = RecoEvent.Hyp_LifeTime;
+      temp_Hyp_Real.ErrLifeTime = 0.;
+      temp_Hyp_Real.ErrGetLifeTime = 0;
+
       TVector3 Mother_Mom(RecoEvent.Mother_MomE.Px(), RecoEvent.Mother_MomE.Py(), RecoEvent.Mother_MomE.Pz());
 
       temp_Hyp_Real.Id_Fragment = FragmentTracks_All[ref_RealFragment].Id();
@@ -437,6 +455,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
           if(itr_real->first == RealPionTracks[i].Id())
             temp_Hyp_Real.Pion_IsFromHyp = 1;
         }
+
+      temp_Hyp_Real.Mother_IsFromHyp = temp_Hyp_Real.Fragment_IsFromHyp * temp_Hyp_Real.Pion_IsFromHyp;
 
       CloseDist(FragmentTracks_All[ref_RealFragment], RealPionTracks[i], dist_RealDaughters, centroid_RealDaughters);
       temp_Hyp_Real.Dist_Daughters = dist_RealDaughters;
@@ -476,6 +496,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Real.PDG = Hyp_pdg;
       temp_Hyp_Real.N_Mother = RealMotherTracks.size();
       temp_Hyp_Real.Chi2ndf = RealMotherTracks[i].GetChi2() / static_cast<double>(RealMotherTracks[i].GetNDF());
+      temp_Hyp_Real.NDF = RealMotherTracks[i].GetNDF();
       temp_Hyp_Real.MomE.SetPxPyPzE(RealMotherTracks[i].GetPx(),RealMotherTracks[i].GetPy(),RealMotherTracks[i].GetPz(),RealMotherTracks[i].GetE());
       RealMotherTracks[i].TransportToProductionVertex();
       temp_Hyp_Real.PrimVtx.SetXYZ(RealMotherTracks[i].GetX(),RealMotherTracks[i].GetY(),RealMotherTracks[i].GetZ());
@@ -526,6 +547,12 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
           if(itr_real->first == RealPionTracks[temp_id_pion].Id())
             temp_Hyp_Real.Pion_IsFromHyp = 1;
         }
+
+      temp_Hyp_Real.Mother_IsFromHyp = temp_Hyp_Real.Fragment_IsFromHyp * temp_Hyp_Real.Pion_IsFromHyp;
+
+      float Vertex[3] = {RealMotherTracks[i].GetX(), RealMotherTracks[i].GetY(), RealMotherTracks[i].GetZ()};
+      FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
+      RealPionTracks[temp_id_pion].TransportToPoint(Vertex);
 
       CloseDist(FragmentTracks[temp_id_fragment], RealPionTracks[temp_id_pion], dist_RealDaughters, centroid_RealDaughters);
       temp_Hyp_Real.Dist_Daughters = dist_RealDaughters;
@@ -639,6 +666,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Cut.PDG = Hyp_pdg;
       temp_Hyp_Cut.N_Mother = CutMotherTracks_PrimVtx.size();
       temp_Hyp_Cut.Chi2ndf = CutMotherTracks_PrimVtx[i].GetChi2() / static_cast<double>(CutMotherTracks_PrimVtx[i].GetNDF());
+      temp_Hyp_Cut.NDF = CutMotherTracks_PrimVtx[i].GetNDF();
       temp_Hyp_Cut.MomE.SetPxPyPzE(CutMotherTracks_PrimVtx[i].GetPx(),CutMotherTracks_PrimVtx[i].GetPy(),CutMotherTracks_PrimVtx[i].GetPz(),CutMotherTracks_PrimVtx[i].GetE());
       CutMotherTracks_PrimVtx[i].TransportToProductionVertex();
       temp_Hyp_Cut.PrimVtx.SetXYZ(CutMotherTracks_PrimVtx[i].GetX(),CutMotherTracks_PrimVtx[i].GetY(),CutMotherTracks_PrimVtx[i].GetZ());
@@ -689,12 +717,14 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
             temp_Hyp_Cut.Pion_IsFromHyp = 1;
         }
 
-      CloseDist(FragmentTracks[temp_id_fragment], CutPionTracks[temp_id_pion], dist_CutDaughters, centroid_CutDaughters);
-      temp_Hyp_Cut.Dist_Daughters = dist_CutDaughters;
+      temp_Hyp_Cut.Mother_IsFromHyp = temp_Hyp_Cut.Fragment_IsFromHyp * temp_Hyp_Cut.Pion_IsFromHyp;
 
       float Vertex[3] = {CutMotherTracks_PrimVtx[i].GetX(), CutMotherTracks_PrimVtx[i].GetY(), CutMotherTracks_PrimVtx[i].GetZ()};
       FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
       CutPionTracks[temp_id_pion].TransportToPoint(Vertex);
+
+      CloseDist(FragmentTracks[temp_id_fragment], CutPionTracks[temp_id_pion], dist_CutDaughters, centroid_CutDaughters);
+      temp_Hyp_Cut.Dist_Daughters = dist_CutDaughters;
 
       float armenterosQtAlfa[2] = {0.};
       CutMotherTracks_PrimVtx[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], CutPionTracks[temp_id_pion], armenterosQtAlfa);
@@ -805,20 +835,22 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
         temp_Hyp_LV.Pattern = 6;
 
         temp_Hyp_LV.PDG = Hyp_pdg;
-        temp_Hyp_LV.N_Mother = 1;
-        //temp_Hyp_LV.Chi2ndf = ;
+        temp_Hyp_LV.N_Mother = 1; //Change!
+        temp_Hyp_LV.Chi2ndf = -1.; //Change!
+        temp_Hyp_LV.NDF = -999; //Change!
         temp_Hyp_LV.MomE.SetPxPyPzE(Mother_LorentzVector.Px(),Mother_LorentzVector.Py(),Mother_LorentzVector.Pz(),Mother_LorentzVector.E());
-        //temp_Hyp_LV.PrimVtx.SetXYZ();
+        temp_Hyp_LV.PrimVtx.SetXYZ(0.,0.,0.); //Change!
         temp_Hyp_LV.DecayVtx.SetXYZ(temp_closedist_pos.X(),temp_closedist_pos.Y(),temp_closedist_pos.Z());
         temp_Hyp_LV.Dist_RealReconsVtx.SetXYZ(DecayVertex_real.X()-temp_closedist_pos.X(),DecayVertex_real.Y()-temp_closedist_pos.Y(),DecayVertex_real.Z()-temp_closedist_pos.Z());
-        //temp_Hyp_LV.Dist_MotherPrimVtx = ;
-        //temp_Hyp_LV.Angle_MotherPrimVtx = ;
-        //temp_Hyp_LV.ErrGetMass = ;
+        temp_Hyp_LV.Dist_MotherPrimVtx = -1.; //Change!
+        temp_Hyp_LV.Angle_MotherPrimVtx = -1.; //Change!
+        temp_Hyp_LV.ErrGetMass = -1; //Change!
         temp_Hyp_LV.InvMass = Mother_LorentzVector.M();
-        //temp_Hyp_LV.ErrInvMass = ;
-        //temp_Hyp_LV.ErrGetLifeTime = ;
-        //temp_Hyp_LV.LifeTime = ;
-        //temp_Hyp_LV.ErrLifeTime = ;
+        temp_Hyp_LV.ErrInvMass = -1.; //Change!
+        temp_Hyp_LV.ErrGetLifeTime = -1; //Change!
+        temp_Hyp_LV.LifeTime = -1.; //Change!
+        temp_Hyp_LV.ErrLifeTime = -1.; //Change!
+
         TVector3 Mother_Mom(Mother_LorentzVector.Px(), Mother_LorentzVector.Py(), Mother_LorentzVector.Pz());
 
         temp_Hyp_LV.Id_Fragment = FragmentTracks_All[ref_RealFragment].Id();
@@ -839,7 +871,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
         temp_Hyp_LV.Angle_MotherPion = Mother_Mom.Angle(Pion_Mom) * 180. / M_PI;
         temp_Hyp_LV.NHitsMDC_Pion = Pion_FitInfo[new_pionid].NHitsMDC;
         temp_Hyp_LV.NHitsMinifiber_Pion = Pion_FitInfo[new_pionid].NHitsMinifiber;
-        temp_Hyp_LV.N_Pion = PionTracks.size();
+        temp_Hyp_LV.N_Pion = 1;
         temp_Hyp_LV.Pion_IsFromHyp = 0;
 
         for(itr_recons = RecoEvent.DaughtersTrackDAFInit.begin(); itr_recons != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_recons)
@@ -848,12 +880,13 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
               temp_Hyp_LV.Pion_IsFromHyp = 1;
           }
 
+        temp_Hyp_LV.Mother_IsFromHyp = temp_Hyp_LV.Fragment_IsFromHyp * temp_Hyp_LV.Pion_IsFromHyp;
 
         CloseDist(FragmentTracks_All[ref_RealFragment], PionTracks[new_pionid], dist_DaughtersLV, centroid_DaughtersLV);
         temp_Hyp_LV.Dist_Daughters = dist_DaughtersLV;
 
-        //temp_Hyp_LV.ArmPod_Qt = ;
-        //temp_Hyp_LV.ArmPod_Alfa = ;
+        temp_Hyp_LV.ArmPod_Qt = -1.; //Change!
+        temp_Hyp_LV.ArmPod_Alfa = -1.; //Change!
 
         RecoEvent.Hyp_Vect.emplace_back(temp_Hyp_LV);
       }
@@ -971,6 +1004,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp.PDG = Hyp_pdg;
       temp_Hyp.N_Mother = MotherTracks_PrimVtx.size();
       temp_Hyp.Chi2ndf = MotherTracks_PrimVtx[i].GetChi2() / static_cast<double>(MotherTracks_PrimVtx[i].GetNDF());
+      temp_Hyp.NDF = MotherTracks_PrimVtx[i].GetNDF();
       temp_Hyp.MomE.SetPxPyPzE(MotherTracks_PrimVtx[i].GetPx(),MotherTracks_PrimVtx[i].GetPy(),MotherTracks_PrimVtx[i].GetPz(),MotherTracks_PrimVtx[i].GetE());
       MotherTracks_PrimVtx[i].TransportToProductionVertex();
       temp_Hyp.PrimVtx.SetXYZ(MotherTracks_PrimVtx[i].GetX(),MotherTracks_PrimVtx[i].GetY(),MotherTracks_PrimVtx[i].GetZ());
@@ -1021,12 +1055,14 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
             temp_Hyp.Pion_IsFromHyp = 1;
         }
 
-      CloseDist(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], dist_Daughters, centroid_Daughters);
-      temp_Hyp.Dist_Daughters = dist_Daughters;
+      temp_Hyp.Mother_IsFromHyp = temp_Hyp.Fragment_IsFromHyp * temp_Hyp.Pion_IsFromHyp;
 
       float Vertex[3] = {MotherTracks_PrimVtx[i].GetX(), MotherTracks_PrimVtx[i].GetY(), MotherTracks_PrimVtx[i].GetZ()};
       FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
       PionTracks[temp_id_pion].TransportToPoint(Vertex);
+
+      CloseDist(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], dist_Daughters, centroid_Daughters);
+      temp_Hyp.Dist_Daughters = dist_Daughters;
 
       float armenterosQtAlfa[2] = {0.};
       MotherTracks_PrimVtx[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
@@ -1133,6 +1169,7 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Mass.PDG = Hyp_pdg;
       temp_Hyp_Mass.N_Mother = MotherTracks_PrimVtx_Mass.size();
       temp_Hyp_Mass.Chi2ndf = MotherTracks_PrimVtx_Mass[i].GetChi2() / static_cast<double>(MotherTracks_PrimVtx_Mass[i].GetNDF());
+      temp_Hyp_Mass.NDF = MotherTracks_PrimVtx_Mass[i].GetNDF();
       temp_Hyp_Mass.MomE.SetPxPyPzE(MotherTracks_PrimVtx_Mass[i].GetPx(),MotherTracks_PrimVtx_Mass[i].GetPy(),MotherTracks_PrimVtx_Mass[i].GetPz(),MotherTracks_PrimVtx_Mass[i].GetE());
       MotherTracks_PrimVtx_Mass[i].TransportToProductionVertex();
       temp_Hyp_Mass.PrimVtx.SetXYZ(MotherTracks_PrimVtx_Mass[i].GetX(),MotherTracks_PrimVtx_Mass[i].GetY(),MotherTracks_PrimVtx_Mass[i].GetZ());
@@ -1183,12 +1220,14 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
             temp_Hyp_Mass.Pion_IsFromHyp = 1;
         }
 
-      CloseDist(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], dist_DaughtersMass, centroid_DaughtersMass);
-      temp_Hyp_Mass.Dist_Daughters = dist_DaughtersMass;
+      temp_Hyp_Mass.Mother_IsFromHyp = temp_Hyp_Mass.Fragment_IsFromHyp * temp_Hyp_Mass.Pion_IsFromHyp;
 
       float Vertex[3] = {MotherTracks_PrimVtx_Mass[i].GetX(), MotherTracks_PrimVtx_Mass[i].GetY(), MotherTracks_PrimVtx_Mass[i].GetZ()};
       FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
       PionTracks[temp_id_pion].TransportToPoint(Vertex);
+
+      CloseDist(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], dist_DaughtersMass, centroid_DaughtersMass);
+      temp_Hyp_Mass.Dist_Daughters = dist_DaughtersMass;
 
       float armenterosQtAlfa[2] = {0.};
       MotherTracks_PrimVtx_Mass[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
