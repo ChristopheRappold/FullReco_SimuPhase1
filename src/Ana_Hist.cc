@@ -657,7 +657,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistReg.emplace_back(&h_Angle_MotherFragment.store);
       h_Angle_MotherPion.emplace_back(new TH2F("h_Angle_MotherPion", "h_Angle_MotherPion", 1000, 0, 30, 5000, 0, 5));
       HistReg.emplace_back(&h_Angle_MotherPion.store);
-      h_Chi2ndf_MotherTracks.emplace_back(new TH2F("h_Chi2ndf_MotherTracks", "h_Chi2ndf_MotherTracks", 2000, 0, 40, 5000, 0, 5));
+      h_Chi2ndf_MotherTracks.emplace_back(new TH2F("h_Chi2ndf_MotherTracks", "h_Chi2ndf_MotherTracks", 2000, 0, 160, 5000, 0, 5));
       HistReg.emplace_back(&h_Chi2ndf_MotherTracks.store);
       h_Dist_MotherTrackPrimVtx.emplace_back(new TH2F("h_Dist_MotherTrackPrimVtx", "h_Dist_MotherTrackPrimVtx", 1000, 0, 0.2, 5000, 0, 5));
       HistReg.emplace_back(&h_Dist_MotherTrackPrimVtx.store);

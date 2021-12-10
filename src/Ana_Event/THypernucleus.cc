@@ -11,6 +11,7 @@ THypernucleus::THypernucleus()
   PDG=-1;
   N_Mother=-1;
   Chi2ndf=-1.;
+  NDF=-999;
   MomE.SetPxPyPzE(0.,0.,0.,0.);
   PrimVtx.SetXYZ(0.,0.,0.);
   DecayVtx.SetXYZ(0.,0.,0.);
@@ -23,6 +24,7 @@ THypernucleus::THypernucleus()
   LifeTime=-1.;
   ErrLifeTime=-1.;
   ErrGetLifeTime=-1;
+  Mother_IsFromHyp=-1;
 
 
   //Daughters:
@@ -58,6 +60,7 @@ THypernucleus::THypernucleus(const THypernucleus& H)
   PDG=H.PDG;
   N_Mother=H.N_Mother;
   Chi2ndf=H.Chi2ndf;
+  NDF=H.NDF;
   MomE=H.MomE;
   PrimVtx=H.PrimVtx;
   DecayVtx=H.DecayVtx;
@@ -70,6 +73,7 @@ THypernucleus::THypernucleus(const THypernucleus& H)
   LifeTime=H.LifeTime;
   ErrLifeTime=H.ErrLifeTime;
   ErrGetLifeTime=H.ErrGetLifeTime;
+  Mother_IsFromHyp=H.Mother_IsFromHyp;
 
   //Daughters:
   Id_Fragment=H.Id_Fragment;
@@ -115,6 +119,7 @@ void THypernucleus::Clear(Option_t *option)
   PDG=-1;
   N_Mother=-1;
   Chi2ndf=-1.;
+  NDF=-999;
   MomE.SetPxPyPzE(0.,0.,0.,0.);
   PrimVtx.SetXYZ(0.,0.,0.);
   DecayVtx.SetXYZ(0.,0.,0.);
@@ -127,7 +132,8 @@ void THypernucleus::Clear(Option_t *option)
   LifeTime=-1.;
   ErrLifeTime=-1.;
   ErrGetLifeTime=-1;
-
+  Mother_IsFromHyp=-1;
+  
   //Daughters:
   Id_Fragment=-1;
   MomE_Fragment.SetXYZT(0.,0.,0.,0.);

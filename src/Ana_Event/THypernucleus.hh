@@ -19,6 +19,7 @@ public :
   Int_t PDG;
   Int_t N_Mother;
   Double32_t Chi2ndf;
+  Int_t NDF;
   TLorentzVector MomE;
   TVector3 PrimVtx;
   TVector3 DecayVtx;
@@ -31,6 +32,7 @@ public :
   Double32_t LifeTime;
   Double32_t ErrLifeTime;
   Int_t ErrGetLifeTime;
+  Int_t Mother_IsFromHyp; // 0-> No; 1-> Yes
 
   //Daughters:
   Int_t Id_Fragment;
