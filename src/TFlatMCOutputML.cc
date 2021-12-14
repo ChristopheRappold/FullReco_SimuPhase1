@@ -173,7 +173,7 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
 
       b_pt    = TMath::Sqrt(TMath::Sq(it_hitBeforeSim.momX) + TMath::Sq(it_hitBeforeSim.momY));
       b_phi   = TMath::ATan2(it_hitBeforeSim.momY, it_hitBeforeSim.momX);
-      b_theta = TMath::ASin(a_pt / temp_mom);
+      b_theta = TMath::ASin(b_pt / temp_mom);
 
       b_x = it_hitBeforeSim.hitX;
       b_y = it_hitBeforeSim.hitY;
