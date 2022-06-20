@@ -1,3 +1,4 @@
+#include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "Ana_Hist.hh"
 #include "Debug.hh"
 #include "FullRecoConfig.hh"
@@ -37,6 +38,7 @@
 #include "spdlog/spdlog.h"
 
 using namespace std;
+
 
 int main(int argc, char** argv)
 {
@@ -253,7 +255,7 @@ int main(int argc, char** argv)
       //ListHisto.DebugHists();
       if(MT == false && ZMQ == false)
 	{
-	  FullRecoTask ReconstructionTask(config, InputPar);
+	  FullRecoTask<MCAnaEventG4Sol> ReconstructionTask(config, InputPar);
 	  
 	  ReconstructionTask.AttachHisto(&ListHisto);
 	  ConsoleLogger->info("Init done");
