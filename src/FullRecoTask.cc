@@ -1,5 +1,6 @@
 #include "FullRecoTask.hh"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "TBuildDetectorLayerPlaneDAF.h"
 #include "TBuildRestarter.h"
 
@@ -17,11 +18,10 @@
 #include <list>
 //#include "TKalmanFilter_FRS.h"
 
-
 /****************************************************************************************************/
 /****************************************************************************************************/
 
-// FullRecoTask::FullRecoTask():Attributes(),REvent()
+//template<class TEOut> FullRecoTask<TEOut>::FullRecoTask():Attributes(),REvent()
 // {
 //   Attributes._logger->info(" *** > default FullRecoTask instance created !");
 //   det_build = 0;
@@ -30,8 +30,8 @@
 // }
 
 
-
-FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attributes(config,In),REvent()
+template<class TEOut>
+FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attributes(config,In),REvent()
 {
   Attributes._logger->info(" *** > FullRecoTask instance created | Reconstruction requested are :");
   det_build = nullptr;
@@ -46,25 +46,25 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
   if(Attributes.TaskConfig.Task_CheckField)
-    list_processMC.emplace_back(new CheckField(Attributes));
+    list_processMC.emplace_back(new CheckField<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_PrimaryVtx)
-    list_processMC.emplace_back(new TPrimaryVertex(Attributes));
+    list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_FlatMCOutputML)
-    list_processMC.emplace_back(new TFlatMCOutputML(Attributes));
+    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_BayesFinder)
-    list_processMC.emplace_back(new TBayesFinder(Attributes));
+    list_processMC.emplace_back(new TBayesFinder<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_RiemannFinder)
-    list_processMC.emplace_back(new TRiemannFinder(Attributes));
+    list_processMC.emplace_back(new TRiemannFinder<TEOut>(Attributes));
   //if(Attributes.TaskConfig.Task_FinderCM)
   //  list_processMC.emplace_back(new TFinderCM(Attributes));
   if(Attributes.TaskConfig.Task_FindingPerf)
-    list_processMC.emplace_back(new TFindingPerf(Attributes));
+    list_processMC.emplace_back(new TFindingPerf<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_CheckRZ)
-    list_processMC.emplace_back(new TCheckRZ(Attributes));
+    list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_KalmanDAF)
-    list_processMC.emplace_back(new TKalmanFilter_DAF(Attributes));
+    list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_DecayVtx)
-    list_processMC.emplace_back(new TDecayVertex(Attributes));
+    list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes));
 
   for(auto task : list_processMC)
     Attributes._logger->info(" -> Task : {}",task->signature);
@@ -72,7 +72,8 @@ FullRecoTask::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attr
 }
 
 
-FullRecoTask::~FullRecoTask()
+template<class TEOut>
+FullRecoTask<TEOut>::~FullRecoTask()
 {
   //delete REvent;
   //FieldMap.clear();
@@ -89,7 +90,8 @@ FullRecoTask::~FullRecoTask()
 
 }
 
-void FullRecoTask::AttachHisto(Ana_Hist* h)
+template<class TEOut>
+void FullRecoTask<TEOut>::AttachHisto(Ana_Hist* h)
 {
   AnaHisto = h;
   det_build->Init(h);
@@ -97,7 +99,8 @@ void FullRecoTask::AttachHisto(Ana_Hist* h)
     (*process)->Init(h);
 }
 
-void FullRecoTask::SetEventMetadata(AnaEvent_Metadata& metadata)
+template<class TEOut>
+void FullRecoTask<TEOut>::SetEventMetadata(AnaEvent_Metadata& metadata)
 {
   metadata.NameIn = Attributes.NameIn;
   metadata.NameOut = Attributes.NameOut;
@@ -117,11 +120,13 @@ void FullRecoTask::SetEventMetadata(AnaEvent_Metadata& metadata)
 
 }
 
-//int FullRecoTask::EventLoop(THypHi_Event *event,std::vector<TUTracker_Event*> *UTrackerEvents,Ana_Event* OutTree)
+//int template<class TEOut> FullRecoTask<TEOut>::EventLoop(THypHi_Event *event,std::vector<TUTracker_Event*> *UTrackerEvents,Ana_Event* OutTree)
 #ifdef ROOT6
-int FullRecoTask::EventLoop(const TG4Sol_Event& ev, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits, MCAnaEventG4Sol* OutTree)
+template<class TEOut>
+int FullRecoTask<TEOut>::EventLoop(const TG4Sol_Event& ev, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits, TEOut* OutTree)
 #else
-int FullRecoTask::EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArray*>& hits, MCAnaEventG4Sol* OutTree)
+template<class TEOut>
+int FullRecoTask<TEOut>::EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArray*>& hits, TEOut* OutTree)
 #endif
 {
 
@@ -138,9 +143,11 @@ int FullRecoTask::EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArr
 }
 
 #ifdef ROOT6
-int FullRecoTask::EventLoop(const MCAnaEventG4Sol& RestartEvent, MCAnaEventG4Sol* OutTree)
+template<class TEOut>
+int FullRecoTask<TEOut>::EventLoop(const MCAnaEventG4Sol& RestartEvent, TEOut* OutTree)
 #else
-int FullRecoTask::EventLoop(MCAnaEventG4Sol* RestartEvent, MCAnaEventG4Sol* OutTree)
+template<class TEOut>
+int FullRecoTask<TEOut>::EventLoop(TEOut* RestartEvent, TEOut* OutTree)
 #endif
 {
 
@@ -158,7 +165,8 @@ int FullRecoTask::EventLoop(MCAnaEventG4Sol* RestartEvent, MCAnaEventG4Sol* OutT
 
 
 
-int FullRecoTask::EventProcess(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
+template<class TEOut>
+int FullRecoTask<TEOut>::EventProcess(FullRecoEvent& RecoEvent,TEOut* OutTree)
 {
 
   for(auto process = list_processMC.begin(), process_last = list_processMC.end(); process!=process_last;++process)
@@ -173,3 +181,5 @@ int FullRecoTask::EventProcess(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree
     }
   return 0;
 }
+
+template class FullRecoTask<MCAnaEventG4Sol>;

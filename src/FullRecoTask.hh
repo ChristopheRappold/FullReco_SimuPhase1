@@ -30,6 +30,7 @@ class FullRecoEvent;
 class Ana_Hist;
 class FullRecoConfig;
 
+template<class TEOut>
 class FullRecoTask
 {
 
@@ -41,15 +42,15 @@ public :
   //int EventLoop(THypHi_Event *event,std::vector<TUTracker_Event*> *UTrackerEvents,Ana_Event* OutTree);
 
 #ifdef ROOT6
-  int EventLoop(const TG4Sol_Event& ev, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits, MCAnaEventG4Sol* OutTree);
+  int EventLoop(const TG4Sol_Event& ev, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits, TEOut* OutTree);
 #else
-  int EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArray*>& hits, MCAnaEventG4Sol* OutTree);
+  int EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArray*>& hits, TEOut* OutTree);
 #endif  
 
 #ifdef ROOT6
-  int EventLoop(const MCAnaEventG4Sol& RestartEvent, MCAnaEventG4Sol* OutTree);
+  int EventLoop(const TEOut& RestartEvent, TEOut* OutTree);
 #else
-  int EventLoop(MCAnaEventG4Sol* RestartEvent, MCAnaEventG4Sol* OutTree);
+  int EventLoop(TEOut* RestartEvent, TEOut* OutTree);
 #endif
 
   void AttachHisto(Ana_Hist* h);
@@ -64,9 +65,9 @@ private :
 
   TDataBuilder* det_build;
 
-  std::list<TDataProcess<FullRecoEvent,MCAnaEventG4Sol>*> list_processMC;
+  std::list<TDataProcess<FullRecoEvent,TEOut>*> list_processMC;
 
-  int EventProcess(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree);
+  int EventProcess(FullRecoEvent& RecoEvent,TEOut* OutTree);
   
 
 };
