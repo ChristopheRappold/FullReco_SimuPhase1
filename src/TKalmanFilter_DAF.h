@@ -28,8 +28,8 @@
 //#include "GFRaveVertexFactory.h"
 
 //#include "Math/ProbFunc.h"
-
-using TDataProcessInterface = TDataProcess<FullRecoEvent, MCAnaEventG4Sol>;
+template<class Out>
+using TDataProcessInterface = TDataProcess<FullRecoEvent, Out>;
 // namespace MathKalman
 // {
 //   struct Prob {
@@ -52,7 +52,8 @@ using TDataProcessInterface = TDataProcess<FullRecoEvent, MCAnaEventG4Sol>;
 
 //}
 
-class TKalmanFilter_DAF final : public TDataProcessInterface
+template<class Out>
+class TKalmanFilter_DAF final : public TDataProcessInterface<Out>
 {
 public:
   const THyphiAttributes& att;
@@ -61,11 +62,11 @@ public:
   ~TKalmanFilter_DAF() final;
 
   // int Init(Ana_Hist* h);
-  ReturnRes::InfoM operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) final;
+  ReturnRes::InfoM operator()(FullRecoEvent& RecoEvent, Out* OutTree) final;
   void InitMT() final;
 
 private:
-  int Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) final;
+  int Exec(FullRecoEvent& RecoEvent, Out* OutTree) final;
   ReturnRes::InfoM SoftExit(int) final;
   void SelectHists() final;
 

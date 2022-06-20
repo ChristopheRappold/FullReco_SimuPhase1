@@ -1,5 +1,6 @@
 #include "TDecayVertex.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "FullRecoEvent.hh"
 #include "ReturnRes.hh"
 
@@ -19,23 +20,28 @@
 using namespace std;
 using namespace G4Sol;
 
-TDecayVertex::TDecayVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface("DecayVertexReco"), att(attribut), fieldWASA(att.Field)
+template <class Out>
+TDecayVertex<Out>::TDecayVertex(const THyphiAttributes& attribut)
+    : TDataProcessInterface<Out>("DecayVertexReco"), att(attribut), fieldWASA(att.Field)
   {
 
   }
 
-TDecayVertex::~TDecayVertex() {}
+template <class Out>
+TDecayVertex<Out>::~TDecayVertex() {}
 
-void TDecayVertex::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template <class Out>
+void TDecayVertex<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TDecayVertex::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template <class Out>
+ReturnRes::InfoM TDecayVertex<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
   int result_finder = Exec(RecoEvent, OutTree);
   return SoftExit(result_finder);
 }
 
-int TDecayVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) 
+template <class Out>
+int TDecayVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 {
   int res_finder = FinderDecayVertex(RecoEvent); 
 
@@ -82,7 +88,8 @@ int TDecayVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
   return res_finder;
 }
 
-ReturnRes::InfoM TDecayVertex::SoftExit(int result_full) {
+template <class Out>
+ReturnRes::InfoM TDecayVertex<Out>::SoftExit(int result_full) {
   
   if(result_full == -1)
     {
@@ -140,7 +147,8 @@ ReturnRes::InfoM TDecayVertex::SoftExit(int result_full) {
 
 
 
-void TDecayVertex::SelectHists()
+template <class Out>
+void TDecayVertex<Out>::SelectHists()
 {
   LocalHisto.h_P_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_P_fragments);
   LocalHisto.h_Pt_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_fragments);
@@ -278,7 +286,8 @@ void TDecayVertex::SelectHists()
   LocalHisto.h_DecayVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVtxstats);
 }
 
-int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
+template <class Out>
+int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 {
 
 /*
@@ -1384,7 +1393,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
 
-void TDecayVertex::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg)
+template <class Out>
+void TDecayVertex<Out>::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg)
 {
   if(StudyCase.compare("H3L") == 0)
     {
@@ -1427,7 +1437,8 @@ void TDecayVertex::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& F
 }
 
 
-void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
+template <class Out>
+void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                                         int& pdgParticle, int& cutConditions,
                                         std::vector<KFParticle>& RealTracks)
 {
@@ -1504,7 +1515,8 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
   return;
 }
 
-void TDecayVertex::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
+template <class Out>
+void TDecayVertex<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
                                     std::vector<KFParticle>& FragmentMDCTracks)
 {
   int temp_charge = TDatabasePDG::Instance()->GetParticle(fragment_pdg)->Charge()/3.;
@@ -1547,7 +1559,8 @@ void TDecayVertex::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& D
 }
 
 
-void TDecayVertex::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks)
+template <class Out>
+void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks)
 {
 /*
   Possible cuts:
@@ -1596,7 +1609,8 @@ void TDecayVertex::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All,
 }
 
 
-void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
+template <class Out>
+void TDecayVertex<Out>::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
                                     std::vector<KFParticle>& PionTracks)
 {
   std::unordered_map<int, ResSolDAF>::iterator itr;
@@ -1636,7 +1650,8 @@ void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_resu
   return;
 }
 
-void TDecayVertex::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& PionTracks)
+template <class Out>
+void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& PionTracks)
 {
 /*
   Possible cuts:
@@ -1674,7 +1689,8 @@ void TDecayVertex::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector
 }
 
 
-void TDecayVertex::CloseDist(KFParticle& FragmentTrack, KFParticle& PionTrack, double& distance, TVector3& centroid)
+template <class Out>
+void TDecayVertex<Out>::CloseDist(KFParticle& FragmentTrack, KFParticle& PionTrack, double& distance, TVector3& centroid)
 {
   TVector3 n(FragmentTrack.GetPy() * PionTrack.GetPz() - FragmentTrack.GetPz() * PionTrack.GetPy(),
              FragmentTrack.GetPz() * PionTrack.GetPx() - FragmentTrack.GetPx() * PionTrack.GetPz(),
@@ -1715,7 +1731,8 @@ void TDecayVertex::CloseDist(KFParticle& FragmentTrack, KFParticle& PionTrack, d
   return;
 }
 
-double TDecayVertex::f_function(KFParticle& DecayTrack, TVector3& PosXYZ)
+template <class Out>
+double TDecayVertex<Out>::f_function(KFParticle& DecayTrack, TVector3& PosXYZ)
 {
   double slope_x     = DecayTrack.GetPx() / DecayTrack.GetPz();
   double intercept_x = DecayTrack.GetX() - slope_x * DecayTrack.GetZ();
@@ -1732,7 +1749,8 @@ double TDecayVertex::f_function(KFParticle& DecayTrack, TVector3& PosXYZ)
   return f;
 }
 
-double TDecayVertex::V_function(std::vector<double>& f_vector)
+template <class Out>
+double TDecayVertex<Out>::V_function(std::vector<double>& f_vector)
 {
   double sum_f  = 0;
   double sum_f2 = 0;
@@ -1751,7 +1769,8 @@ double TDecayVertex::V_function(std::vector<double>& f_vector)
   return v;
 }
 
-void TDecayVertex::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf,
+template <class Out>
+void TDecayVertex<Out>::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf,
                                          size_t& NstepsY, double& Zi, double& Zf, size_t& NstepsZ, size_t& border,
                                          std::vector<TVector3>& PosXYZ)
 {
@@ -1787,7 +1806,8 @@ void TDecayVertex::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, 
   return;
 }
 
-void TDecayVertex::TrackstoDecayVertex(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::TrackstoDecayVertex(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                                         TVector3& PrimVtxRecons, TVector3& DecayVertexRecons)
 {
   std::vector<double> temp_f(FragmentTracks.size() + PionTracks.size(), 0.);
@@ -1856,7 +1876,8 @@ void TDecayVertex::TrackstoDecayVertex(std::vector<KFParticle>& FragmentTracks, 
   return;
 }
 
-void TDecayVertex::ThetaDist_TrackPrimVtx(KFParticle& Track, TVector3& PrimVtxRecons, double& theta, double& distance)
+template <class Out>
+void TDecayVertex<Out>::ThetaDist_TrackPrimVtx(KFParticle& Track, TVector3& PrimVtxRecons, double& theta, double& distance)
 {
   TVector3 u(Track.GetPx(), Track.GetPy(), Track.GetPz());
   TVector3 P(Track.GetX(), Track.GetY(), Track.GetZ());
@@ -1868,7 +1889,8 @@ void TDecayVertex::ThetaDist_TrackPrimVtx(KFParticle& Track, TVector3& PrimVtxRe
   return;
 }
 
-void TDecayVertex::KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<double,6> Cov_PrimVtx, KFParticleSIMD& temp_PrimVtx)
+template <class Out>
+void TDecayVertex<Out>::KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<double,6> Cov_PrimVtx, KFParticleSIMD& temp_PrimVtx)
 {
   const float_v fP_PrimVtx [] = {PrimVtxRecons.X(), PrimVtxRecons.Y(), PrimVtxRecons.Z(), 0., 0., 0.};
   
@@ -1889,7 +1911,8 @@ void TDecayVertex::KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<doub
 }
 
 /* //WORKING FINE FOR HOMOGENEUS FIELD
-void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                                       const KFParticleSIMD* pointer_PrimVtx, std::vector<KFParticle>& MotherTracks,
                                       std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks)
 {
@@ -1937,7 +1960,8 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
 }
 */
 
-void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                                       const KFParticleSIMD* pointer_PrimVtx, std::vector<KFParticle>& MotherTracks,
                                       std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks)
 {
@@ -1987,7 +2011,8 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
   return;
 }
 
-void TDecayVertex::MotherSelector(std::vector<KFParticle>& MotherTracks_All, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks_All,
+template <class Out>
+void TDecayVertex<Out>::MotherSelector(std::vector<KFParticle>& MotherTracks_All, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks_All,
                                   std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks, TVector3& PrimVtxRecons,
                                   std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks)
 {
@@ -2066,7 +2091,8 @@ void TDecayVertex::MotherSelector(std::vector<KFParticle>& MotherTracks_All, std
 }
 
 
-void TDecayVertex::SiHitsFinder(KFParticle& Track, std::vector<std::vector<double> >& Hits_Si,
+template <class Out>
+void TDecayVertex<Out>::SiHitsFinder(KFParticle& Track, std::vector<std::vector<double> >& Hits_Si,
                                   std::vector<std::vector<double> >& Track_Sihit)
 {
   if(Hits_Si.size() == 0)
@@ -2101,7 +2127,8 @@ void TDecayVertex::SiHitsFinder(KFParticle& Track, std::vector<std::vector<doubl
   return;
 }
 
-void TDecayVertex::MotherDaughtersTrack_SiHits(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::MotherDaughtersTrack_SiHits(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                     std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks,
                     std::vector<std::vector<double> >& Hits_Si1, std::vector<std::vector<double> >& Hits_Si2,
                     std::vector<std::tuple<int, std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>>>& Fragment_SiHits,
@@ -2179,7 +2206,8 @@ void TDecayVertex::MotherDaughtersTrack_SiHits(std::vector<KFParticle>& Fragment
 }
 
 
-void TDecayVertex::SiHitsFinder2(KFParticle& Track, int idSilicon, int stripDirection, //Strip direction: 1 -> X, 2 -> Y 
+template <class Out>
+void TDecayVertex<Out>::SiHitsFinder2(KFParticle& Track, int idSilicon, int stripDirection, //Strip direction: 1 -> X, 2 -> Y
                                   std::vector<std::tuple<double, size_t> >& Hits_Si, std::vector<std::vector<double> >& Track_Sihit)
 {
   if(Hits_Si.size() == 0)
@@ -2260,7 +2288,8 @@ void TDecayVertex::SiHitsFinder2(KFParticle& Track, int idSilicon, int stripDire
   return;
 }
 
-void TDecayVertex::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                     std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks,
                     std::vector<std::tuple<double, size_t> >& HitsX_Si1, std::vector<std::tuple<double, size_t> >& HitsY_Si1,
                     std::vector<std::tuple<double, size_t> >& HitsX_Si2, std::vector<std::tuple<double, size_t> >& HitsY_Si2,
@@ -2410,7 +2439,8 @@ void TDecayVertex::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& Fragmen
 */
 
 
-void TDecayVertex::AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& AllTracks, TVector3& Old_DecayVertexRecons, TVector3& DecayVertexRecons)
+template <class Out>
+void TDecayVertex<Out>::AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& AllTracks, TVector3& Old_DecayVertexRecons, TVector3& DecayVertexRecons)
 {
   std::vector<double> temp_f(AllTracks.size(), 0.);
 
@@ -2473,7 +2503,8 @@ void TDecayVertex::AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& All
     }
 }
 
-void TDecayVertex::AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& AllTracks, TVector3& DecayVertexRecons)
+template <class Out>
+void TDecayVertex<Out>::AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& AllTracks, TVector3& DecayVertexRecons)
 {
   std::vector<TVector3> Vect_Centroids;
 
@@ -2494,3 +2525,6 @@ void TDecayVertex::AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& All
 
   DecayVertexRecons *= 1. / static_cast<double>(Vect_Centroids.size());
 }
+
+
+template class TDecayVertex<MCAnaEventG4Sol>;

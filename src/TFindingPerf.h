@@ -10,6 +10,7 @@
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 
 #include "TFile.h"
+//#include "TKalmanFilter_DAF_ZMQ.h"
 #include "TRandom3.h"
 #include "TTree.h"
 #include "TH2I.h"
@@ -104,10 +105,12 @@ namespace TPerf {
 
 };
 
-typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
+//typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
+template<class Out>
+using TDataProcessInterface = TDataProcess<FullRecoEvent,Out>;
 
-
-class TFindingPerf final :  public TDataProcessInterface
+template<class Out>
+class TFindingPerf final :  public TDataProcessInterface<Out>
 {
   public :
   const THyphiAttributes& att;
@@ -117,9 +120,9 @@ class TFindingPerf final :  public TDataProcessInterface
 
   //int Init(Ana_Hist* h);
   void InitMT() final;
-  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
+  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,Out* OutTree) override;
  private:
-  int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
+  int Exec(FullRecoEvent& RecoEvent,Out* OutTree) override;
 
   ReturnRes::InfoM SoftExit(int) override;
   void SelectHists() final;

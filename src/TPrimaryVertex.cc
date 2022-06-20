@@ -1,10 +1,12 @@
 #include "TPrimaryVertex.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "FullRecoEvent.hh"
 #include "ReturnRes.hh"
 
 #include <tuple>
 
+//#include "TDecayVertex.h"
 #include "TVector3.h"
 
 //#define DEBUG_PRIMVTX
@@ -20,17 +22,21 @@
 using namespace std;
 using namespace G4Sol;
 
-TPrimaryVertex::TPrimaryVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface("PrimaryVertexReco"), att(attribut), SiliconHitsSD_Si1(1), SiliconHitsSD_Si2(2)
+template<class Out>
+TPrimaryVertex<Out>::TPrimaryVertex(const THyphiAttributes& attribut)
+  : TDataProcessInterface<Out>("PrimaryVertexReco"), att(attribut), SiliconHitsSD_Si1(1), SiliconHitsSD_Si2(2)
 {
   rand = new TRandom3();
 }
 
-TPrimaryVertex::~TPrimaryVertex() {}
+template<class Out>
+TPrimaryVertex<Out>::~TPrimaryVertex() {}
 
-void TPrimaryVertex::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template<class Out>
+void TPrimaryVertex<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TPrimaryVertex::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+ReturnRes::InfoM TPrimaryVertex<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   int result_finder = Exec(RecoEvent, OutTree);
@@ -38,9 +44,11 @@ ReturnRes::InfoM TPrimaryVertex::operator()(FullRecoEvent& RecoEvent, MCAnaEvent
   return SoftExit(result_finder);
 }
 
-int TPrimaryVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FinderPrimaryVertex(RecoEvent); }
+template<class Out>
+int TPrimaryVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FinderPrimaryVertex(RecoEvent); }
 
-ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
+template<class Out>
+ReturnRes::InfoM TPrimaryVertex<Out>::SoftExit(int result_full) {
    
   if(result_full == -1)
     {
@@ -82,7 +90,8 @@ ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
 
 
 
-void TPrimaryVertex::SelectHists()
+template<class Out>
+void TPrimaryVertex<Out>::SelectHists()
 {
   LocalHisto.h_HitMultiplicity_Si1          = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicity_Si1);
   LocalHisto.h_HitMultiplicityRecons_Si1    = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityRecons_Si1);
@@ -157,7 +166,8 @@ void TPrimaryVertex::SelectHists()
   LocalHisto.h_PrimStatus = AnaHisto->CloneAndRegister(AnaHisto->h_PrimStatus);
 }
 
-int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
+template<class Out>
+int TPrimaryVertex<Out>::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 {
   LocalHisto.h_PrimStatus->Fill("Si1x", RecoEvent.Si_HitsEnergyLayer[0].size(), 1);
   LocalHisto.h_PrimStatus->Fill("Si1y", RecoEvent.Si_HitsEnergyLayer[1].size(), 1);
@@ -628,7 +638,8 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   return 0;
 }
 
-void TPrimaryVertex::simulHitstoRealHits(
+template<class Out>
+void TPrimaryVertex<Out>::simulHitstoRealHits(
     FullRecoEvent& REvent,
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal,
     int id_det_x, int id_det_y, TH1F* h_Diff, std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos)
@@ -704,7 +715,8 @@ void TPrimaryVertex::simulHitstoRealHits(
     }
 }
 
-void TPrimaryVertex::MFcheck(std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si1,
+template<class Out>
+void TPrimaryVertex<Out>::MFcheck(std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si1,
                              std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si2,
                              std::array<double,3> InteractionPoint)
 {
@@ -1764,7 +1776,8 @@ void SiliconHits_SD::SignalstoHits_SD(std::vector<std::tuple<double, size_t> > H
 #endif
 }
 
-void TPrimaryVertex::CloseDist(std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
+template<class Out>
+void TPrimaryVertex<Out>::CloseDist(std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                std::vector<double>& TrackHit1, std::vector<double>& TrackHit2, double& distance,
                                double& z)
 {
@@ -1797,7 +1810,8 @@ void TPrimaryVertex::CloseDist(std::vector<double>& BeamHit1, std::vector<double
   z = (c1[2] + c2[2]) / 2.;
 }
 
-double TPrimaryVertex::f_function(std::vector<double>& Hit1, std::vector<double>& Hit2, std::vector<double>& PosXYZ)
+template<class Out>
+double TPrimaryVertex<Out>::f_function(std::vector<double>& Hit1, std::vector<double>& Hit2, std::vector<double>& PosXYZ)
 {
   double slope_x     = (Hit2[1] - Hit1[1]) / (Hit2[3] - Hit1[3]);
   double intercept_x = Hit2[1] - slope_x * Hit2[3];
@@ -1814,7 +1828,8 @@ double TPrimaryVertex::f_function(std::vector<double>& Hit1, std::vector<double>
   return f;
 }
 
-double TPrimaryVertex::V_function(std::vector<double>& f_vector)
+template<class Out>
+double TPrimaryVertex<Out>::V_function(std::vector<double>& f_vector)
 {
   double sum_f  = 0;
   double sum_f2 = 0;
@@ -1836,7 +1851,8 @@ double TPrimaryVertex::V_function(std::vector<double>& f_vector)
   return v;
 }
 
-void TPrimaryVertex::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf,
+template<class Out>
+void TPrimaryVertex<Out>::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf,
                                          size_t& NstepsY, double& Zi, double& Zf, size_t& NstepsZ, size_t& border,
                                          std::vector<std::vector<double> >& PosXYZ)
 {
@@ -1870,7 +1886,8 @@ void TPrimaryVertex::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX
     }
 }
 
-void TPrimaryVertex::HitstoTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
+template<class Out>
+void TPrimaryVertex<Out>::HitstoTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
                                   std::vector<std::vector<double> >& HitEnergyPosXY_Si2, std::vector<double>& BeamHit1,
                                   std::vector<double>& BeamHit2,
                                   std::vector<std::vector<std::vector<double> > >& CandidateTracks)
@@ -1895,7 +1912,8 @@ void TPrimaryVertex::HitstoTracks(std::vector<std::vector<double> >& HitEnergyPo
     }
 }
 
-void TPrimaryVertex::TrackstoVertexPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template<class Out>
+void TPrimaryVertex<Out>::TrackstoVertexPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                             std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                             std::vector<double>& InteractionPointRecons,
                                             std::vector<double>& f_values_IP)
@@ -1971,7 +1989,8 @@ void TPrimaryVertex::TrackstoVertexPosition(std::vector<std::vector<std::vector<
     }
 }
 
-void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template<class Out>
+void TPrimaryVertex<Out>::CovarianceMatrix(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                       std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                       std::vector<double>& InteractionPointAverage, std::vector<double>& f_values_IP,
                                       std::vector<std::vector<double> >& CovMatrix)
@@ -2084,7 +2103,8 @@ void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double
     }
 }
 
-void TPrimaryVertex::HitstoDecayTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
+template<class Out>
+void TPrimaryVertex<Out>::HitstoDecayTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
                                        std::vector<std::vector<double> >& HitEnergyPosXY_Si2,
                                        std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                        std::vector<double>& InteractionPointRecons,
@@ -2110,7 +2130,8 @@ void TPrimaryVertex::HitstoDecayTracks(std::vector<std::vector<double> >& HitEne
     }
 }
 
-void TPrimaryVertex::DecayTrackstoDecayPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template<class Out>
+void TPrimaryVertex<Out>::DecayTrackstoDecayPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                                 std::vector<double>& InteractionPointRecons,
                                                 std::vector<double>& DecayPositionRecons)
 {
@@ -2184,7 +2205,8 @@ void TPrimaryVertex::DecayTrackstoDecayPosition(std::vector<std::vector<std::vec
     }
 }
 
-void TPrimaryVertex::nGoodEventsCounter(
+template<class Out>
+void TPrimaryVertex<Out>::nGoodEventsCounter(
     std::vector<std::vector<double> >& HitEnergyPosXY,
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal,
     double& widthStrip, size_t& nGoodrecons)
@@ -2202,7 +2224,8 @@ void TPrimaryVertex::nGoodEventsCounter(
     }
 }
 
-void TPrimaryVertex::RealHitstoRealTracks(
+template<class Out>
+void TPrimaryVertex<Out>::RealHitstoRealTracks(
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal_Si1,
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal_Si2,
     std::vector<std::vector<std::vector<double> > >& RealTracks)
@@ -2264,7 +2287,8 @@ void TPrimaryVertex::RealHitstoRealTracks(
     }
 }
 
-void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template<class Out>
+void TPrimaryVertex<Out>::nGoodTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                         std::vector<std::vector<std::vector<double> > >& RealTracks,
                                         size_t& nGoodTracks, std::vector<size_t>& goodCandidateTracks)
 {
@@ -2313,7 +2337,8 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
     }
 }
 
-void TPrimaryVertex::nForwardTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template<class Out>
+void TPrimaryVertex<Out>::nForwardTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                            size_t& nForwardTracks, std::vector<size_t>& forwardCandidateTracks)
 {
 
@@ -2337,3 +2362,6 @@ void TPrimaryVertex::nForwardTracksCounter(std::vector<std::vector<std::vector<d
         }
     }
 }
+
+
+template class TPrimaryVertex<MCAnaEventG4Sol>;

@@ -1,5 +1,6 @@
 #include "TFlatMCOutputML.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "FullRecoEvent.hh"
 #include "ReturnRes.hh"
 
@@ -250,8 +251,9 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
     }
 }
 
-TFlatMCOutputML::TFlatMCOutputML(const THyphiAttributes& attribut)
-    : TDataProcessInterface("FlatMCOutputML"), att(attribut), namefileFlat(att.FlatML_namefile)
+template<class Out>
+TFlatMCOutputML<Out>::TFlatMCOutputML(const THyphiAttributes& attribut)
+    : TDataProcessInterface<Out>("FlatMCOutputML"), att(attribut), namefileFlat(att.FlatML_namefile)
 {
   f_flat = new TFile(namefileFlat, "RECREATE");
   t_flat = new TTree("MCDataML_Tree", "Flat data event tracks");
@@ -269,7 +271,8 @@ TFlatMCOutputML::TFlatMCOutputML(const THyphiAttributes& attribut)
   att._logger->info("FlatMC : tree out set ");
 }
 
-TFlatMCOutputML::~TFlatMCOutputML()
+template<class Out>
+TFlatMCOutputML<Out>::~TFlatMCOutputML()
 {
   f_flat->cd();
   t_flat->Write();
@@ -285,27 +288,35 @@ TFlatMCOutputML::~TFlatMCOutputML()
     }
 }
 
-void TFlatMCOutputML::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template<class Out>
+void TFlatMCOutputML<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TFlatMCOutputML::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+ReturnRes::InfoM TFlatMCOutputML<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
   int result_finder = Exec(RecoEvent, OutTree);
 
   return SoftExit(result_finder);
 }
 
-int TFlatMCOutputML::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FlattenOut(RecoEvent); }
+template<class Out>
+int TFlatMCOutputML<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FlattenOut(RecoEvent); }
 
-ReturnRes::InfoM TFlatMCOutputML::SoftExit(int result_full) { return ReturnRes::Fine; }
+template<class Out>
+ReturnRes::InfoM TFlatMCOutputML<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
 
-void TFlatMCOutputML::SelectHists()
+template<class Out>
+void TFlatMCOutputML<Out>::SelectHists()
 {
   // LocalHisto.h_RZStats      = AnaHisto->CloneAndRegister(AnaHisto->h_RZStats);
 }
 
-int TFlatMCOutputML::FlattenOut(FullRecoEvent& RecoEvent)
+template<class Out>
+int TFlatMCOutputML<Out>::FlattenOut(FullRecoEvent& RecoEvent)
 {
   data_out->FillEvent(RecoEvent);
 
   return 0;
 }
+
+template class TFlatMCOutputML<MCAnaEventG4Sol>;

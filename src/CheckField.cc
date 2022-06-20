@@ -1,5 +1,6 @@
 #include "CheckField.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "TGeoMedium.h"
@@ -15,12 +16,15 @@
 
 #include "FieldManager.h"
 
-CheckField::CheckField(const THyphiAttributes& attribut):TDataProcessInterface("check_field"),att(attribut),done(0)
+template<class Out>
+CheckField<Out>::CheckField(const THyphiAttributes& attribut):TDataProcessInterface<Out>("check_field"),att(attribut),done(0)
 { }
 
-void CheckField::InitMT() {att._logger->error("E> Not supposed to be multithreaded !"); }
+template<class Out>
+void CheckField<Out>::InitMT() {att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM CheckField::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
+template<class Out>
+ReturnRes::InfoM CheckField<Out>::operator() (FullRecoEvent& RecoEvent,Out* OutTree)
 {
 
   if(done==0)
@@ -31,17 +35,20 @@ ReturnRes::InfoM CheckField::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4So
   return SoftExit(0);
 }
 
-int CheckField::Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
+template<class Out>
+int CheckField<Out>::Exec(FullRecoEvent& RecoEvent,Out* OutTree)
 {
   return Check();
 }
 
-ReturnRes::InfoM CheckField::SoftExit(int result_full)
+template<class Out>
+ReturnRes::InfoM CheckField<Out>::SoftExit(int result_full)
 {
   return ReturnRes::Fine;    
 }
 
-void CheckField::SelectHists()
+template<class Out>
+void CheckField<Out>::SelectHists()
 {
   for(size_t i=0;i<3;++i)
     {
@@ -64,7 +71,8 @@ void CheckField::SelectHists()
     }
 }
 
-int CheckField::Check()
+template<class Out>
+int CheckField<Out>::Check()
 {
   att._logger->info("Start Field check :");
 
@@ -190,3 +198,6 @@ int CheckField::Check()
 
   return 0;
 }
+
+
+template class CheckField<MCAnaEventG4Sol>;

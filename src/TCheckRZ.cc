@@ -1,5 +1,6 @@
 #include "TCheckRZ.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "FullRecoEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
@@ -15,7 +16,8 @@
 using namespace std;
 using namespace G4Sol;
 
-TCheckRZ::TCheckRZ(const THyphiAttributes& attribut) : TDataProcessInterface("Check_R_Z"), att(attribut)
+template<class Out>
+TCheckRZ<Out>::TCheckRZ(const THyphiAttributes& attribut) : TDataProcessInterface<Out>("Check_R_Z"), att(attribut)
 {
   ChangeMiniFiber = att.RZ_ChangeMiniFiber;
 
@@ -39,11 +41,14 @@ TCheckRZ::TCheckRZ(const THyphiAttributes& attribut) : TDataProcessInterface("Ch
   //   }
 }
 
-TCheckRZ::~TCheckRZ() {}
+template<class Out>
+TCheckRZ<Out>::~TCheckRZ() {}
 
-void TCheckRZ::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template<class Out>
+void TCheckRZ<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TCheckRZ::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+ReturnRes::InfoM TCheckRZ<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   int result_finder = Exec(RecoEvent, OutTree);
@@ -51,11 +56,14 @@ ReturnRes::InfoM TCheckRZ::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol*
   return SoftExit(result_finder);
 }
 
-int TCheckRZ::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FinderTrack(RecoEvent); }
+template<class Out>
+int TCheckRZ<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FinderTrack(RecoEvent); }
 
-ReturnRes::InfoM TCheckRZ::SoftExit(int result_full) { return ReturnRes::Fine; }
+template<class Out>
+ReturnRes::InfoM TCheckRZ<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
 
-void TCheckRZ::SelectHists()
+template<class Out>
+void TCheckRZ<Out>::SelectHists()
 {
 
   LocalHisto.h_RZStats      = AnaHisto->CloneAndRegister(AnaHisto->h_RZStats);
@@ -69,7 +77,8 @@ void TCheckRZ::SelectHists()
   LocalHisto.h_MDC_R_pull   = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_R_pull);
 }
 
-int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
+template<class Out>
+int TCheckRZ<Out>::FinderTrack(FullRecoEvent& RecoEvent)
 {
 
   // auto printW = [](const auto a, const int width) -> std::string {
@@ -1121,3 +1130,5 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
 
   return 0;
 }
+
+template class TCheckRZ<MCAnaEventG4Sol>;

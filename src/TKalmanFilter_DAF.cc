@@ -1,5 +1,6 @@
 #include "TKalmanFilter_DAF.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
 #include "StateOnPlane.h"
@@ -29,9 +30,9 @@
 
 using namespace std;
 using namespace G4Sol;
-
-TKalmanFilter_DAF::TKalmanFilter_DAF(const THyphiAttributes& attribut)
-    : TDataProcessInterface("mom_fit_kalman"), att(attribut)
+template<class Out>
+TKalmanFilter_DAF<Out>::TKalmanFilter_DAF(const THyphiAttributes& attribut)
+    : TDataProcessInterface<Out>("mom_fit_kalman"), att(attribut)
 {
 
   const int nIter    = 10;    // max number of iterations
@@ -89,7 +90,8 @@ TKalmanFilter_DAF::TKalmanFilter_DAF(const THyphiAttributes& attribut)
 #endif
 }
 
-TKalmanFilter_DAF::~TKalmanFilter_DAF()
+template<class Out>
+TKalmanFilter_DAF<Out>::~TKalmanFilter_DAF()
 {
   if(Vtracks != nullptr)
     {
@@ -116,9 +118,11 @@ TKalmanFilter_DAF::~TKalmanFilter_DAF()
       }
 }
 
-void TKalmanFilter_DAF::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template<class Out>
+void TKalmanFilter_DAF<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TKalmanFilter_DAF::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+ReturnRes::InfoM TKalmanFilter_DAF<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   int result_mom = Exec(RecoEvent, OutTree);
@@ -136,7 +140,8 @@ ReturnRes::InfoM TKalmanFilter_DAF::operator()(FullRecoEvent& RecoEvent, MCAnaEv
   return SoftExit(result_mom);
 }
 
-void TKalmanFilter_DAF::SelectHists()
+template<class Out>
+void TKalmanFilter_DAF<Out>::SelectHists()
 {
 
   LocalHisto.h_stats         = AnaHisto->CloneAndRegister(AnaHisto->h_stats);
@@ -203,7 +208,8 @@ void TKalmanFilter_DAF::SelectHists()
 }
   
 
-int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+int TKalmanFilter_DAF<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   //  int result_kalman = Kalman_Filter(RecoEvent);
@@ -307,9 +313,11 @@ int TKalmanFilter_DAF::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
   return result_kalman;
 }
 
-ReturnRes::InfoM TKalmanFilter_DAF::SoftExit(int result_full) { return ReturnRes::Fine; }
+template<class Out>
+ReturnRes::InfoM TKalmanFilter_DAF<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
 
-int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
+template<class Out>
+int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 {
   auto printW = [](const auto a, const int width) -> std::string {
     std::stringstream ss;
@@ -1288,3 +1296,6 @@ int TKalmanFilter_DAF::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
   
   return 0;
 }
+
+
+template class TKalmanFilter_DAF<MCAnaEventG4Sol>;
