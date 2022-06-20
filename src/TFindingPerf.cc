@@ -169,8 +169,8 @@ ReturnRes::InfoM TFindingPerf<Out>::SoftExit(int result_full) { return ReturnRes
 template<class Out>
 void TFindingPerf<Out>::SelectHists()
 {
-  LocalHisto.h_PerfFinder =  AnaHisto->CloneAndRegister(AnaHisto->h_PerfFinder);
-  LocalHisto.h_PerfFinderLevenshtein = AnaHisto->CloneAndRegister(AnaHisto->h_PerfFinderLevenshtein);
+  LocalHisto.h_PerfFinder =  this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PerfFinder);
+  LocalHisto.h_PerfFinderLevenshtein = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PerfFinderLevenshtein);
   // auto Yaxis = LocalHisto.h_PerfFinder->GetYaxis();
   // Yaxis->SetBinLabel(1,"NotFoundReal");
   // Yaxis->SetBinLabel(2,"FoundReal");

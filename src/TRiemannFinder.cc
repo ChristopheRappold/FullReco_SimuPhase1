@@ -152,8 +152,8 @@ ReturnRes::InfoM TRiemannFinder<Out>::SoftExit(int result_full) { return ReturnR
 template<class Out>
 void TRiemannFinder<Out>::SelectHists()
 {
-  LocalHisto.h_RiemannChi2         = AnaHisto->CloneAndRegister(AnaHisto->h_RiemannChi2);
-  LocalHisto.h_RiemannResidus = AnaHisto->CloneAndRegister(AnaHisto->h_RiemannResidus);
+  LocalHisto.h_RiemannChi2         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RiemannChi2);
+  LocalHisto.h_RiemannResidus = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RiemannResidus);
 
 
 

@@ -52,15 +52,15 @@ void CheckField<Out>::SelectHists()
 {
   for(size_t i=0;i<3;++i)
     {
-      LocalHisto.FieldXY[i]   = AnaHisto->CloneAndRegister(AnaHisto->FieldXY[i]); 
-      LocalHisto.FieldXZ[i]   = AnaHisto->CloneAndRegister(AnaHisto->FieldXZ[i]); 
-      LocalHisto.FieldYZ[i]   = AnaHisto->CloneAndRegister(AnaHisto->FieldYZ[i]); 
-      LocalHisto.FieldXYmax[i]   = AnaHisto->CloneAndRegister(AnaHisto->FieldXYmax[i]);
-      LocalHisto.FieldXZmax[i]   = AnaHisto->CloneAndRegister(AnaHisto->FieldXZmax[i]);
-      LocalHisto.FieldYZmax[i]   = AnaHisto->CloneAndRegister(AnaHisto->FieldYZmax[i]);
-      LocalHisto.FieldXY_n[i] = AnaHisto->CloneAndRegister(AnaHisto->FieldXY_n[i]); 
-      LocalHisto.FieldXZ_n[i] = AnaHisto->CloneAndRegister(AnaHisto->FieldXZ_n[i]); 
-      LocalHisto.FieldYZ_n[i] = AnaHisto->CloneAndRegister(AnaHisto->FieldYZ_n[i]); 
+      LocalHisto.FieldXY[i]   = this->AnaHisto->CloneAndRegister(this->AnaHisto->FieldXY[i]);
+      LocalHisto.FieldXZ[i]   = this->AnaHisto->CloneAndRegister(this->AnaHisto->FieldXZ[i]);
+      LocalHisto.FieldYZ[i]   = this->AnaHisto->CloneAndRegister(this->AnaHisto->FieldYZ[i]);
+      LocalHisto.FieldXYmax[i]   = this->AnaHisto->CloneAndRegister(this->AnaHisto->FieldXYmax[i]);
+      LocalHisto.FieldXZmax[i]   = this->AnaHisto->CloneAndRegister(this->AnaHisto->FieldXZmax[i]);
+      LocalHisto.FieldYZmax[i]   = this->AnaHisto->CloneAndRegister(this->AnaHisto->FieldYZmax[i]);
+      LocalHisto.FieldXY_n[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->FieldXY_n[i]);
+      LocalHisto.FieldXZ_n[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->FieldXZ_n[i]);
+      LocalHisto.FieldYZ_n[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->FieldYZ_n[i]);
 
       LocalHisto.FieldXY[i]->Sumw2()  ;
       LocalHisto.FieldXZ[i]->Sumw2()  ;

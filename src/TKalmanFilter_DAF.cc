@@ -144,66 +144,66 @@ template<class Out>
 void TKalmanFilter_DAF<Out>::SelectHists()
 {
 
-  LocalHisto.h_stats         = AnaHisto->CloneAndRegister(AnaHisto->h_stats);
-  LocalHisto.h_statsLess3Mes = AnaHisto->CloneAndRegister(AnaHisto->h_statsLess3Mes);
-  LocalHisto.h_statsInvalid  = AnaHisto->CloneAndRegister(AnaHisto->h_statsInvalid);
-  LocalHisto.h_pv            = AnaHisto->CloneAndRegister(AnaHisto->h_pv);
-  LocalHisto.h_chi2          = AnaHisto->CloneAndRegister(AnaHisto->h_chi2);
+  LocalHisto.h_stats         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_stats);
+  LocalHisto.h_statsLess3Mes = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_statsLess3Mes);
+  LocalHisto.h_statsInvalid  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_statsInvalid);
+  LocalHisto.h_pv            = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_pv);
+  LocalHisto.h_chi2          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_chi2);
   for(size_t i = 0; i < 2; ++i)
     {
-      LocalHisto.hd_chi[i] = AnaHisto->CloneAndRegister(AnaHisto->hd_chi[i]);
-      LocalHisto.hd_pv[i]  = AnaHisto->CloneAndRegister(AnaHisto->hd_pv[i]);
+      LocalHisto.hd_chi[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->hd_chi[i]);
+      LocalHisto.hd_pv[i]  = this->AnaHisto->CloneAndRegister(this->AnaHisto->hd_pv[i]);
     }
-  LocalHisto.h_Path             = AnaHisto->CloneAndRegister(AnaHisto->h_Path);
-  LocalHisto.h_MeanPath         = AnaHisto->CloneAndRegister(AnaHisto->h_MeanPath);
-  LocalHisto.h_beta             = AnaHisto->CloneAndRegister(AnaHisto->h_beta);
-  LocalHisto.h_beta2            = AnaHisto->CloneAndRegister(AnaHisto->h_beta2);
-  LocalHisto.h_beta3            = AnaHisto->CloneAndRegister(AnaHisto->h_beta3);
-  LocalHisto.h_Mass_All         = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_All);
-  LocalHisto.h_Mass_All2        = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_All2);
-  LocalHisto.h_Mass_All3        = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_All3);
-  LocalHisto.h_Mass_charge_All  = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_charge_All);
-  LocalHisto.h_Mass_charge_All2 = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_charge_All2);
-  LocalHisto.h_Mass_charge_All3 = AnaHisto->CloneAndRegister(AnaHisto->h_Mass_charge_All3);
-  LocalHisto.h_beta_mom         = AnaHisto->CloneAndRegister(AnaHisto->h_beta_mom);
-  LocalHisto.h_beta_mom2        = AnaHisto->CloneAndRegister(AnaHisto->h_beta_mom2);
-  LocalHisto.h_beta_mom3        = AnaHisto->CloneAndRegister(AnaHisto->h_beta_mom3);
-  LocalHisto.h_pv_mom           = AnaHisto->CloneAndRegister(AnaHisto->h_pv_mom);
-  LocalHisto.h_pv_beta          = AnaHisto->CloneAndRegister(AnaHisto->h_pv_beta);
-  LocalHisto.h_pv_mass          = AnaHisto->CloneAndRegister(AnaHisto->h_pv_mass);
-  LocalHisto.h_path_tof         = AnaHisto->CloneAndRegister(AnaHisto->h_path_tof);
-  LocalHisto.h_mom_tof_cut      = AnaHisto->CloneAndRegister(AnaHisto->h_mom_tof_cut);
-  LocalHisto.h_path_mom_cut     = AnaHisto->CloneAndRegister(AnaHisto->h_path_mom_cut);
-  LocalHisto.h_path_tof_cut     = AnaHisto->CloneAndRegister(AnaHisto->h_path_tof_cut);
+  LocalHisto.h_Path             = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Path);
+  LocalHisto.h_MeanPath         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MeanPath);
+  LocalHisto.h_beta             = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta);
+  LocalHisto.h_beta2            = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta2);
+  LocalHisto.h_beta3            = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta3);
+  LocalHisto.h_Mass_All         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Mass_All);
+  LocalHisto.h_Mass_All2        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Mass_All2);
+  LocalHisto.h_Mass_All3        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Mass_All3);
+  LocalHisto.h_Mass_charge_All  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Mass_charge_All);
+  LocalHisto.h_Mass_charge_All2 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Mass_charge_All2);
+  LocalHisto.h_Mass_charge_All3 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Mass_charge_All3);
+  LocalHisto.h_beta_mom         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta_mom);
+  LocalHisto.h_beta_mom2        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta_mom2);
+  LocalHisto.h_beta_mom3        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta_mom3);
+  LocalHisto.h_pv_mom           = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_pv_mom);
+  LocalHisto.h_pv_beta          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_pv_beta);
+  LocalHisto.h_pv_mass          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_pv_mass);
+  LocalHisto.h_path_tof         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_path_tof);
+  LocalHisto.h_mom_tof_cut      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_mom_tof_cut);
+  LocalHisto.h_path_mom_cut     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_path_mom_cut);
+  LocalHisto.h_path_tof_cut     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_path_tof_cut);
   for(size_t i = 0; i < 4; ++i)
     {
-      LocalHisto.h_Mass[i]          = AnaHisto->CloneAndRegister(AnaHisto->h_Mass[i]);
-      LocalHisto.h_chi2_particle[i] = AnaHisto->CloneAndRegister(AnaHisto->h_chi2_particle[i]);
-      LocalHisto.h_pv_particle[i]   = AnaHisto->CloneAndRegister(AnaHisto->h_pv_particle[i]);
+      LocalHisto.h_Mass[i]          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Mass[i]);
+      LocalHisto.h_chi2_particle[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_chi2_particle[i]);
+      LocalHisto.h_pv_particle[i]   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_pv_particle[i]);
     }
   for(size_t i = 0; i < 5; ++i)
     {
-      LocalHisto.h_mom_res[i] = AnaHisto->CloneAndRegister(AnaHisto->h_mom_res[i]);
+      LocalHisto.h_mom_res[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_mom_res[i]);
       for(size_t j = 0; j < 10; ++j)
         {
-          LocalHisto.h_ResPull[i][j]        = AnaHisto->CloneAndRegister(AnaHisto->h_ResPull[i][j]);
-          LocalHisto.h_ResPull_normal[i][j] = AnaHisto->CloneAndRegister(AnaHisto->h_ResPull_normal[i][j]);
+          LocalHisto.h_ResPull[i][j]        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResPull[i][j]);
+          LocalHisto.h_ResPull_normal[i][j] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResPull_normal[i][j]);
         }
     }
-  LocalHisto.h_total_dE = AnaHisto->CloneAndRegister(AnaHisto->h_total_dE);
+  LocalHisto.h_total_dE = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_total_dE);
 
   for(size_t i = 0;i < 9 ;++i)
-    LocalHisto.h_ResFiber[i] = AnaHisto->CloneAndRegister(AnaHisto->h_ResFiber[i]);
+    LocalHisto.h_ResFiber[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResFiber[i]);
 
   for(size_t i = 0;i < 6 ;++i)
-    LocalHisto.h_ResMiniFiber[i] = AnaHisto->CloneAndRegister(AnaHisto->h_ResMiniFiber[i]);
+    LocalHisto.h_ResMiniFiber[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResMiniFiber[i]);
 
   for(size_t i = 0;i < 17 ;++i)
     for(size_t j =0 ; j<3;++j)
-      LocalHisto.h_ResMDC[i][j] = AnaHisto->CloneAndRegister(AnaHisto->h_ResMDC[i][j]);
+      LocalHisto.h_ResMDC[i][j] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResMDC[i][j]);
 
   for(size_t i = 0;i < 2 ;++i)
-    LocalHisto.h_ResPSCE[i] = AnaHisto->CloneAndRegister(AnaHisto->h_ResPSCE[i]);
+    LocalHisto.h_ResPSCE[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResPSCE[i]);
   
 }
   

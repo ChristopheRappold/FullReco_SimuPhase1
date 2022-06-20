@@ -93,77 +93,79 @@ ReturnRes::InfoM TPrimaryVertex<Out>::SoftExit(int result_full) {
 template<class Out>
 void TPrimaryVertex<Out>::SelectHists()
 {
-  LocalHisto.h_HitMultiplicity_Si1          = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicity_Si1);
-  LocalHisto.h_HitMultiplicityRecons_Si1    = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityRecons_Si1);
-  LocalHisto.h_HitMultiplicityDiff_Si1      = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiff_Si1);
-  LocalHisto.h_HitMultiplicityDiffNHits_Si1 = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiffNHits_Si1);
+  //using this->AnaHisto = typename TDataProcessInterface<Out>::this->AnaHisto;
 
-  LocalHisto.h_EnergyDiffStrips_Si1          = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si1);
-  LocalHisto.h_nEventsGoodrecons_Si1         = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si1);
-  LocalHisto.h_nEventsGhost_Si1              = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si1);
-  LocalHisto.h_nEventsGoodreconsGhost_Si1    = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si1);
-  LocalHisto.h_nEventsRealGoodrecons_Si1     = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si1);
-  LocalHisto.h_nEventsRealRejectCuadrant_Si1 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealRejectCuadrant_Si1);
+  LocalHisto.h_HitMultiplicity_Si1          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicity_Si1);
+  LocalHisto.h_HitMultiplicityRecons_Si1    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityRecons_Si1);
+  LocalHisto.h_HitMultiplicityDiff_Si1      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityDiff_Si1);
+  LocalHisto.h_HitMultiplicityDiffNHits_Si1 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityDiffNHits_Si1);
 
-  LocalHisto.h_HitMultiplicity_Si2          = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicity_Si2);
-  LocalHisto.h_HitMultiplicityRecons_Si2    = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityRecons_Si2);
-  LocalHisto.h_HitMultiplicityDiff_Si2      = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiff_Si2);
-  LocalHisto.h_HitMultiplicityDiffNHits_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiffNHits_Si2);
+  LocalHisto.h_EnergyDiffStrips_Si1          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDiffStrips_Si1);
+  LocalHisto.h_nEventsGoodrecons_Si1         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGoodrecons_Si1);
+  LocalHisto.h_nEventsGhost_Si1              = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGhost_Si1);
+  LocalHisto.h_nEventsGoodreconsGhost_Si1    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGoodreconsGhost_Si1);
+  LocalHisto.h_nEventsRealGoodrecons_Si1     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsRealGoodrecons_Si1);
+  LocalHisto.h_nEventsRealRejectCuadrant_Si1 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsRealRejectCuadrant_Si1);
 
-  LocalHisto.h_EnergyDiffStrips_Si2          = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si2);
-  LocalHisto.h_nEventsGoodrecons_Si2         = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si2);
-  LocalHisto.h_nEventsGhost_Si2              = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si2);
-  LocalHisto.h_nEventsGoodreconsGhost_Si2    = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si2);
-  LocalHisto.h_nEventsRealGoodrecons_Si2     = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si2);
-  LocalHisto.h_nEventsRealRejectCuadrant_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealRejectCuadrant_Si2);
+  LocalHisto.h_HitMultiplicity_Si2          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicity_Si2);
+  LocalHisto.h_HitMultiplicityRecons_Si2    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityRecons_Si2);
+  LocalHisto.h_HitMultiplicityDiff_Si2      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityDiff_Si2);
+  LocalHisto.h_HitMultiplicityDiffNHits_Si2 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityDiffNHits_Si2);
 
-  LocalHisto.h_MFCheck_Theta_MomSi1MomSi2 = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Theta_MomSi1MomSi2);
-  LocalHisto.h_MFCheck_Dist_MomSi1HitSi2  = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi1HitSi2);
-  LocalHisto.h_MFCheck_Dist_MomSi2HitSi1  = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi2HitSi1);
-  LocalHisto.h_MFCheck_Dist_MomSi1HitIP   = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi1HitIP);
-  LocalHisto.h_MFCheck_Dist_MomSi2HitIP   = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi2HitIP);
+  LocalHisto.h_EnergyDiffStrips_Si2          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDiffStrips_Si2);
+  LocalHisto.h_nEventsGoodrecons_Si2         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGoodrecons_Si2);
+  LocalHisto.h_nEventsGhost_Si2              = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGhost_Si2);
+  LocalHisto.h_nEventsGoodreconsGhost_Si2    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGoodreconsGhost_Si2);
+  LocalHisto.h_nEventsRealGoodrecons_Si2     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsRealGoodrecons_Si2);
+  LocalHisto.h_nEventsRealRejectCuadrant_Si2 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsRealRejectCuadrant_Si2);
 
-  LocalHisto.h_EnergyStripEnergyTotalReal = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyStripEnergyTotalReal);
-  LocalHisto.h_EnergyStripEnergyTotal     = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyStripEnergyTotal);
-  LocalHisto.h_EnergyDiffSilicons         = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffSilicons);
+  LocalHisto.h_MFCheck_Theta_MomSi1MomSi2 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Theta_MomSi1MomSi2);
+  LocalHisto.h_MFCheck_Dist_MomSi1HitSi2  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Dist_MomSi1HitSi2);
+  LocalHisto.h_MFCheck_Dist_MomSi2HitSi1  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Dist_MomSi2HitSi1);
+  LocalHisto.h_MFCheck_Dist_MomSi1HitIP   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Dist_MomSi1HitIP);
+  LocalHisto.h_MFCheck_Dist_MomSi2HitIP   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Dist_MomSi2HitIP);
 
-  LocalHisto.h_EnergyDepositionMother    = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDepositionMother);
-  LocalHisto.h_EnergyDepositionDaughters = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDepositionDaughters);
+  LocalHisto.h_EnergyStripEnergyTotalReal = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyStripEnergyTotalReal);
+  LocalHisto.h_EnergyStripEnergyTotal     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyStripEnergyTotal);
+  LocalHisto.h_EnergyDiffSilicons         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDiffSilicons);
 
-  LocalHisto.h_nTrackCandidates   = AnaHisto->CloneAndRegister(AnaHisto->h_nTrackCandidates);
-  LocalHisto.h_DistanceBeamTracks = AnaHisto->CloneAndRegister(AnaHisto->h_DistanceBeamTracks);
-  LocalHisto.h_PosZBeamTracks     = AnaHisto->CloneAndRegister(AnaHisto->h_PosZBeamTracks);
-  LocalHisto.h_thetaTracks        = AnaHisto->CloneAndRegister(AnaHisto->h_thetaTracks);
-  LocalHisto.h_thetaResol         = AnaHisto->CloneAndRegister(AnaHisto->h_thetaResol);
+  LocalHisto.h_EnergyDepositionMother    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDepositionMother);
+  LocalHisto.h_EnergyDepositionDaughters = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDepositionDaughters);
 
-  LocalHisto.h_nHypernucleiTrack = AnaHisto->CloneAndRegister(AnaHisto->h_nHypernucleiTrack);
-  LocalHisto.h_fvalues           = AnaHisto->CloneAndRegister(AnaHisto->h_fvalues);
+  LocalHisto.h_nTrackCandidates   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nTrackCandidates);
+  LocalHisto.h_DistanceBeamTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DistanceBeamTracks);
+  LocalHisto.h_PosZBeamTracks     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PosZBeamTracks);
+  LocalHisto.h_thetaTracks        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_thetaTracks);
+  LocalHisto.h_thetaResol         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_thetaResol);
 
-  LocalHisto.h_InteractionPointDistance  = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistance);
-  LocalHisto.h_InteractionPointDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceX);
-  LocalHisto.h_InteractionPointDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceY);
-  LocalHisto.h_InteractionPointDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceZ);
+  LocalHisto.h_nHypernucleiTrack = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nHypernucleiTrack);
+  LocalHisto.h_fvalues           = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_fvalues);
 
-  LocalHisto.h_InteractionPointDistanceX_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceX_pull);
-  LocalHisto.h_InteractionPointDistanceY_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceY_pull);
-  LocalHisto.h_InteractionPointDistanceZ_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceZ_pull);
+  LocalHisto.h_InteractionPointDistance  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistance);
+  LocalHisto.h_InteractionPointDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceX);
+  LocalHisto.h_InteractionPointDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceY);
+  LocalHisto.h_InteractionPointDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceZ);
 
-  LocalHisto.h_CovarianceSigmaX = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaX);
-  LocalHisto.h_CovarianceSigmaY = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaY);
-  LocalHisto.h_CovarianceSigmaZ = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaZ);
+  LocalHisto.h_InteractionPointDistanceX_pull = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceX_pull);
+  LocalHisto.h_InteractionPointDistanceY_pull = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceY_pull);
+  LocalHisto.h_InteractionPointDistanceZ_pull = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceZ_pull);
 
-  LocalHisto.h_IP_DecayDistance  = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistance);
-  LocalHisto.h_IP_DecayDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistanceX);
-  LocalHisto.h_IP_DecayDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistanceY);
-  LocalHisto.h_IP_DecayDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistanceZ);
+  LocalHisto.h_CovarianceSigmaX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_CovarianceSigmaX);
+  LocalHisto.h_CovarianceSigmaY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_CovarianceSigmaY);
+  LocalHisto.h_CovarianceSigmaZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_CovarianceSigmaZ);
 
-  LocalHisto.h_DecayPositionDistance  = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistance);
-  LocalHisto.h_DecayPositionDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceX);
-  LocalHisto.h_DecayPositionDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceY);
-  LocalHisto.h_DecayPositionDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceZ);
+  LocalHisto.h_IP_DecayDistance  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_IP_DecayDistance);
+  LocalHisto.h_IP_DecayDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_IP_DecayDistanceX);
+  LocalHisto.h_IP_DecayDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_IP_DecayDistanceY);
+  LocalHisto.h_IP_DecayDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_IP_DecayDistanceZ);
 
-  LocalHisto.h_PrimVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_PrimVtxstats);
-  LocalHisto.h_PrimStatus = AnaHisto->CloneAndRegister(AnaHisto->h_PrimStatus);
+  LocalHisto.h_DecayPositionDistance  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPositionDistance);
+  LocalHisto.h_DecayPositionDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPositionDistanceX);
+  LocalHisto.h_DecayPositionDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPositionDistanceY);
+  LocalHisto.h_DecayPositionDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPositionDistanceZ);
+
+  LocalHisto.h_PrimVtxstats = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PrimVtxstats);
+  LocalHisto.h_PrimStatus = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PrimStatus);
 }
 
 template<class Out>

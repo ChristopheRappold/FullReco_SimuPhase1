@@ -150,140 +150,140 @@ ReturnRes::InfoM TDecayVertex<Out>::SoftExit(int result_full) {
 template <class Out>
 void TDecayVertex<Out>::SelectHists()
 {
-  LocalHisto.h_P_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_P_fragments);
-  LocalHisto.h_Pt_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_fragments);
-  LocalHisto.h_Pz_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_fragments);
-  LocalHisto.h_Dist_FragmentTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_FragmentTrackPrimVtx);
+  LocalHisto.h_P_fragments = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_P_fragments);
+  LocalHisto.h_Pt_fragments = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pt_fragments);
+  LocalHisto.h_Pz_fragments = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pz_fragments);
+  LocalHisto.h_Dist_FragmentTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_FragmentTrackPrimVtx);
 
-  LocalHisto.h_P_pions = AnaHisto->CloneAndRegister(AnaHisto->h_P_pions);
-  LocalHisto.h_Pt_pions = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_pions);
-  LocalHisto.h_Pz_pions = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_pions);
-  LocalHisto.h_Chi2ndf_pions = AnaHisto->CloneAndRegister(AnaHisto->h_Chi2ndf_pions);
+  LocalHisto.h_P_pions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_P_pions);
+  LocalHisto.h_Pt_pions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pt_pions);
+  LocalHisto.h_Pz_pions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pz_pions);
+  LocalHisto.h_Chi2ndf_pions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Chi2ndf_pions);
 
-  LocalHisto.h_Pt_cutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_cutpions);
-  LocalHisto.h_Pz_cutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_cutpions);
+  LocalHisto.h_Pt_cutpions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pt_cutpions);
+  LocalHisto.h_Pz_cutpions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pz_cutpions);
 
-  LocalHisto.h_Nrealpions = AnaHisto->CloneAndRegister(AnaHisto->h_Nrealpions);
-  LocalHisto.h_Ncutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Ncutpions);
-  LocalHisto.h_Npions = AnaHisto->CloneAndRegister(AnaHisto->h_Npions);
-
-
-  LocalHisto.h_Closedist_Distance = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_Distance);
-  LocalHisto.h_Closedist_PosZ = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_PosZ);
-  LocalHisto.h_Dist_DecayTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_DecayTrackPrimVtx);
-
-  LocalHisto.h_Closedist_cutDistance = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_cutDistance);
-  LocalHisto.h_Closedist_cutPosZ = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_cutPosZ);
-  LocalHisto.h_Dist_cutDecayTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_cutDecayTrackPrimVtx);
+  LocalHisto.h_Nrealpions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Nrealpions);
+  LocalHisto.h_Ncutpions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Ncutpions);
+  LocalHisto.h_Npions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Npions);
 
 
-  LocalHisto.h_DecayVertexDistance = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance);
-  LocalHisto.h_DecayVertexDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX);
-  LocalHisto.h_DecayVertexDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY);
-  LocalHisto.h_DecayVertexDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ);
+  LocalHisto.h_Closedist_Distance = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Closedist_Distance);
+  LocalHisto.h_Closedist_PosZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Closedist_PosZ);
+  LocalHisto.h_Dist_DecayTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_DecayTrackPrimVtx);
 
-  LocalHisto.h_DecayVertexDistance_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_centroid);
-  LocalHisto.h_DecayVertexDistanceX_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_centroid);
-  LocalHisto.h_DecayVertexDistanceY_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_centroid);
-  LocalHisto.h_DecayVertexDistanceZ_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_centroid);
+  LocalHisto.h_Closedist_cutDistance = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Closedist_cutDistance);
+  LocalHisto.h_Closedist_cutPosZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Closedist_cutPosZ);
+  LocalHisto.h_Dist_cutDecayTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_cutDecayTrackPrimVtx);
 
-  LocalHisto.h_DecayVertexDistance_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_KFPart);
-  LocalHisto.h_DecayVertexDistanceX_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_KFPart);
-  LocalHisto.h_DecayVertexDistanceY_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_KFPart);
-  LocalHisto.h_DecayVertexDistanceZ_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_KFPart);
 
-  LocalHisto.h_DecayVertexDistance_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexDistanceX_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexDistanceY_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexDistanceZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexDistance = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance);
+  LocalHisto.h_DecayVertexDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX);
+  LocalHisto.h_DecayVertexDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY);
+  LocalHisto.h_DecayVertexDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ);
 
-  LocalHisto.h_DecayVertexDistance_KFPart_PrimVtx_Mass = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_KFPart_PrimVtx_Mass);
-  LocalHisto.h_DecayVertexDistanceX_KFPart_PrimVtx_Mass = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_KFPart_PrimVtx_Mass);
-  LocalHisto.h_DecayVertexDistanceY_KFPart_PrimVtx_Mass = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_KFPart_PrimVtx_Mass);
-  LocalHisto.h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass);
+  LocalHisto.h_DecayVertexDistance_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_centroid);
+  LocalHisto.h_DecayVertexDistanceX_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_centroid);
+  LocalHisto.h_DecayVertexDistanceY_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_centroid);
+  LocalHisto.h_DecayVertexDistanceZ_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_centroid);
 
-  LocalHisto.h_DecayVertexcutDistance = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistance);
-  LocalHisto.h_DecayVertexcutDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceX);
-  LocalHisto.h_DecayVertexcutDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceY);
-  LocalHisto.h_DecayVertexcutDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceZ);
+  LocalHisto.h_DecayVertexDistance_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_KFPart);
+  LocalHisto.h_DecayVertexDistanceX_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_KFPart);
+  LocalHisto.h_DecayVertexDistanceY_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_KFPart);
+  LocalHisto.h_DecayVertexDistanceZ_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_KFPart);
+
+  LocalHisto.h_DecayVertexDistance_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexDistanceX_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexDistanceY_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexDistanceZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_KFPart_PrimVtx);
+
+  LocalHisto.h_DecayVertexDistance_KFPart_PrimVtx_Mass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_KFPart_PrimVtx_Mass);
+  LocalHisto.h_DecayVertexDistanceX_KFPart_PrimVtx_Mass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_KFPart_PrimVtx_Mass);
+  LocalHisto.h_DecayVertexDistanceY_KFPart_PrimVtx_Mass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_KFPart_PrimVtx_Mass);
+  LocalHisto.h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass);
+
+  LocalHisto.h_DecayVertexcutDistance = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistance);
+  LocalHisto.h_DecayVertexcutDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceX);
+  LocalHisto.h_DecayVertexcutDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceY);
+  LocalHisto.h_DecayVertexcutDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceZ);
 
 /*
-  LocalHisto.h_DecayVertexcutDistance_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistance_KFPart);
-  LocalHisto.h_DecayVertexcutDistanceX_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceX_KFPart);
-  LocalHisto.h_DecayVertexcutDistanceY_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceY_KFPart);
-  LocalHisto.h_DecayVertexcutDistanceZ_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceZ_KFPart);
+  LocalHisto.h_DecayVertexcutDistance_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistance_KFPart);
+  LocalHisto.h_DecayVertexcutDistanceX_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceX_KFPart);
+  LocalHisto.h_DecayVertexcutDistanceY_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceY_KFPart);
+  LocalHisto.h_DecayVertexcutDistanceZ_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceZ_KFPart);
 */
 
-  LocalHisto.h_DecayVertexcutDistance_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistance_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexcutDistanceX_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceX_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexcutDistanceY_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceY_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexcutDistanceZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexcutDistance_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistance_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexcutDistanceX_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceX_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexcutDistanceY_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceY_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexcutDistanceZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceZ_KFPart_PrimVtx);
 
 
-  LocalHisto.h_DecayVertexPosZ_real = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_real);
-  LocalHisto.h_DecayVertexPosZ_vfunction = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_vfunction);
-  LocalHisto.h_DecayVertexPosZ_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_centroid);
-  LocalHisto.h_DecayVertexPosZ_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_KFPart);
-  LocalHisto.h_DecayVertexPosZ_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_AllVfunc);
-  LocalHisto.h_DecayVertexPosZ_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_AllCentroid);
-  LocalHisto.h_DecayVertexPosZ_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_AllKFPart);
+  LocalHisto.h_DecayVertexPosZ_real = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_real);
+  LocalHisto.h_DecayVertexPosZ_vfunction = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_vfunction);
+  LocalHisto.h_DecayVertexPosZ_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_centroid);
+  LocalHisto.h_DecayVertexPosZ_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_KFPart);
+  LocalHisto.h_DecayVertexPosZ_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_AllVfunc);
+  LocalHisto.h_DecayVertexPosZ_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_AllCentroid);
+  LocalHisto.h_DecayVertexPosZ_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_AllKFPart);
 
 //HISTO FOR POSSIBLE CUTS ON MOTHER TRACK
-  LocalHisto.h_N_MotherTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_MotherTracks);
-  LocalHisto.h_Dist_DaughterTracks = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_DaughterTracks);
-  LocalHisto.h_Angle_MotherFragment = AnaHisto->CloneAndRegister(AnaHisto->h_Angle_MotherFragment);
-  LocalHisto.h_Angle_MotherPion = AnaHisto->CloneAndRegister(AnaHisto->h_Angle_MotherPion);
-  LocalHisto.h_Chi2ndf_MotherTracks = AnaHisto->CloneAndRegister(AnaHisto->h_Chi2ndf_MotherTracks);
-  LocalHisto.h_Dist_MotherTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_MotherTrackPrimVtx);
-  LocalHisto.h_Theta_MotherTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Theta_MotherTrackPrimVtx);
-  LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_KFPart_PrimVtx);
-  LocalHisto.h_DecayFragmentMomZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayFragmentMomZ_KFPart_PrimVtx);
-  LocalHisto.h_DecayPionMomZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPionMomZ_KFPart_PrimVtx);
-  LocalHisto.h_Hyp_ArmenterosPodolanski = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_ArmenterosPodolanski);
-  LocalHisto.h_Hyp_CutArmenterosPodolanski = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_CutArmenterosPodolanski);
+  LocalHisto.h_N_MotherTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_N_MotherTracks);
+  LocalHisto.h_Dist_DaughterTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_DaughterTracks);
+  LocalHisto.h_Angle_MotherFragment = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Angle_MotherFragment);
+  LocalHisto.h_Angle_MotherPion = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Angle_MotherPion);
+  LocalHisto.h_Chi2ndf_MotherTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Chi2ndf_MotherTracks);
+  LocalHisto.h_Dist_MotherTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_MotherTrackPrimVtx);
+  LocalHisto.h_Theta_MotherTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Theta_MotherTrackPrimVtx);
+  LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayFragmentMomZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayFragmentMomZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayPionMomZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPionMomZ_KFPart_PrimVtx);
+  LocalHisto.h_Hyp_ArmenterosPodolanski = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Hyp_ArmenterosPodolanski);
+  LocalHisto.h_Hyp_CutArmenterosPodolanski = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Hyp_CutArmenterosPodolanski);
   
-  LocalHisto.h_HypInvariantMass = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass);
-  LocalHisto.h_HypErrorInvariantMass = AnaHisto->CloneAndRegister(AnaHisto->h_HypErrorInvariantMass);
+  LocalHisto.h_HypInvariantMass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantMass);
+  LocalHisto.h_HypErrorInvariantMass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypErrorInvariantMass);
 
-  LocalHisto.h_Hyp_RealLifeTime = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_RealLifeTime);
-  LocalHisto.h_HypLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypLifeTime_PrimVtx);
-  LocalHisto.h_HypErrorLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypErrorLifeTime_PrimVtx);
-  LocalHisto.h_HypcutLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypcutLifeTime_PrimVtx);
+  LocalHisto.h_Hyp_RealLifeTime = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Hyp_RealLifeTime);
+  LocalHisto.h_HypLifeTime_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypLifeTime_PrimVtx);
+  LocalHisto.h_HypErrorLifeTime_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypErrorLifeTime_PrimVtx);
+  LocalHisto.h_HypcutLifeTime_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypcutLifeTime_PrimVtx);
 
-  LocalHisto.h_HypInvariantMassCheck = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMassCheck);
-  LocalHisto.h_HypInvariantErrorMassCheck = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantErrorMassCheck);
+  LocalHisto.h_HypInvariantMassCheck = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantMassCheck);
+  LocalHisto.h_HypInvariantErrorMassCheck = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantErrorMassCheck);
 
-  LocalHisto.h_HypInvariantMass_LorentzVect = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass_LorentzVect);
-  LocalHisto.h_HypInvariantMass_CutLorentzVect = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass_CutLorentzVect);
+  LocalHisto.h_HypInvariantMass_LorentzVect = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantMass_LorentzVect);
+  LocalHisto.h_HypInvariantMass_CutLorentzVect = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantMass_CutLorentzVect);
 
-  LocalHisto.h_EffPosZ_real = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_real);
-  LocalHisto.h_EffPosZ_preKF = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKF);
-  LocalHisto.h_EffPosZ_postKF = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_postKF);
-  LocalHisto.h_EffPosZ_preKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKFPart);
-  LocalHisto.h_EffPosZ_postKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_postKFPart);
+  LocalHisto.h_EffPosZ_real = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_real);
+  LocalHisto.h_EffPosZ_preKF = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_preKF);
+  LocalHisto.h_EffPosZ_postKF = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_postKF);
+  LocalHisto.h_EffPosZ_preKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_preKFPart);
+  LocalHisto.h_EffPosZ_postKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_postKFPart);
 
 
-  LocalHisto.h_N_SiHits_ReconsTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_SiHits_ReconsTracks);
+  LocalHisto.h_N_SiHits_ReconsTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_N_SiHits_ReconsTracks);
 
 /*
-  LocalHisto.h_N_Si_MotherTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_Si_MotherTracks);
+  LocalHisto.h_N_Si_MotherTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_N_Si_MotherTracks);
 
-  LocalHisto.h_DecayVertexDistance_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_AllVfunc);
-  LocalHisto.h_DecayVertexDistanceX_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_AllVfunc);
-  LocalHisto.h_DecayVertexDistanceY_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_AllVfunc);
-  LocalHisto.h_DecayVertexDistanceZ_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_AllVfunc);
+  LocalHisto.h_DecayVertexDistance_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_AllVfunc);
+  LocalHisto.h_DecayVertexDistanceX_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_AllVfunc);
+  LocalHisto.h_DecayVertexDistanceY_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_AllVfunc);
+  LocalHisto.h_DecayVertexDistanceZ_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_AllVfunc);
 
-  LocalHisto.h_DecayVertexDistance_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_AllCentroid);
-  LocalHisto.h_DecayVertexDistanceX_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_AllCentroid);
-  LocalHisto.h_DecayVertexDistanceY_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_AllCentroid);
-  LocalHisto.h_DecayVertexDistanceZ_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_AllCentroid);
+  LocalHisto.h_DecayVertexDistance_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_AllCentroid);
+  LocalHisto.h_DecayVertexDistanceX_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_AllCentroid);
+  LocalHisto.h_DecayVertexDistanceY_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_AllCentroid);
+  LocalHisto.h_DecayVertexDistanceZ_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_AllCentroid);
 
-  LocalHisto.h_DecayVertexDistance_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_AllKFPart);
-  LocalHisto.h_DecayVertexDistanceX_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_AllKFPart);
-  LocalHisto.h_DecayVertexDistanceY_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_AllKFPart);
-  LocalHisto.h_DecayVertexDistanceZ_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_AllKFPart);
+  LocalHisto.h_DecayVertexDistance_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_AllKFPart);
+  LocalHisto.h_DecayVertexDistanceX_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_AllKFPart);
+  LocalHisto.h_DecayVertexDistanceY_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_AllKFPart);
+  LocalHisto.h_DecayVertexDistanceZ_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_AllKFPart);
 */
-  LocalHisto.h_DecayVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVtxstats);
+  LocalHisto.h_DecayVtxstats = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVtxstats);
 }
 
 template <class Out>

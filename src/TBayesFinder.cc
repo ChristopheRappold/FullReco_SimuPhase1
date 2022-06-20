@@ -177,13 +177,13 @@ ReturnRes::InfoM TBayesFinder<Out>::SoftExit(int result_full)
 template<class Out>
 void TBayesFinder<Out>::SelectHists()
 {
-    LocalHisto.h_xy          = AnaHisto->CloneAndRegister(AnaHisto->h_xy);
-    LocalHisto.h_PxPy        = AnaHisto->CloneAndRegister(AnaHisto->h_PxPy);
-    LocalHisto.h_xy_extrap   = AnaHisto->CloneAndRegister(AnaHisto->h_xy_extrap);
-    LocalHisto.h_PxPy_extrap = AnaHisto->CloneAndRegister(AnaHisto->h_PxPy_extrap);
-    LocalHisto.h_TrackFindingStat = AnaHisto->CloneAndRegister(AnaHisto->h_TrackFindingStat);
+    LocalHisto.h_xy          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_xy);
+    LocalHisto.h_PxPy        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PxPy);
+    LocalHisto.h_xy_extrap   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_xy_extrap);
+    LocalHisto.h_PxPy_extrap = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PxPy_extrap);
+    LocalHisto.h_TrackFindingStat = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_TrackFindingStat);
   for(int i=0;i<3;++i)
-    LocalHisto.h_SolenoidGeo[i]         = AnaHisto->CloneAndRegister(AnaHisto->h_SolenoidGeo[i]);
+    LocalHisto.h_SolenoidGeo[i]         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_SolenoidGeo[i]);
 }
 
 
@@ -194,9 +194,9 @@ int TBayesFinder<Out>::FinderTrack(FullRecoEvent& RecoEvent)
   for(double radius : radiusCDC)
     if(index_ell<17)
       {
-	att._logger->error("GEO: {} {}",fmt::ptr(AnaHisto->geoSolenoid[index_ell]), radius);
-	AnaHisto->geoSolenoid[index_ell] = new TEllipse(0,0,radius);
-	AnaHisto->geoSolenoid[index_ell]->SetFillStyle(2);
+	att._logger->error("GEO: {} {}",fmt::ptr(this->AnaHisto->geoSolenoid[index_ell]), radius);
+	this->AnaHisto->geoSolenoid[index_ell] = new TEllipse(0,0,radius);
+	this->AnaHisto->geoSolenoid[index_ell]->SetFillStyle(2);
 	++index_ell;
       }
 

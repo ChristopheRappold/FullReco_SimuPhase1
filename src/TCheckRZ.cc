@@ -66,15 +66,15 @@ template<class Out>
 void TCheckRZ<Out>::SelectHists()
 {
 
-  LocalHisto.h_RZStats      = AnaHisto->CloneAndRegister(AnaHisto->h_RZStats);
-  LocalHisto.h_RZ           = AnaHisto->CloneAndRegister(AnaHisto->h_RZ);
-  LocalHisto.h_XYfit_miniF  = AnaHisto->CloneAndRegister(AnaHisto->h_XYfit_miniF);
-  LocalHisto.h_RZfit_mom    = AnaHisto->CloneAndRegister(AnaHisto->h_RZfit_mom);
-  LocalHisto.h_RZfit_Chi2   = AnaHisto->CloneAndRegister(AnaHisto->h_RZfit_Chi2);
-  LocalHisto.h_MDC_Z_residu = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_Z_residu);
-  LocalHisto.h_MDC_R_residu = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_R_residu);
-  LocalHisto.h_MDC_Z_pull   = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_Z_pull);
-  LocalHisto.h_MDC_R_pull   = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_R_pull);
+  LocalHisto.h_RZStats      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RZStats);
+  LocalHisto.h_RZ           = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RZ);
+  LocalHisto.h_XYfit_miniF  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_XYfit_miniF);
+  LocalHisto.h_RZfit_mom    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RZfit_mom);
+  LocalHisto.h_RZfit_Chi2   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RZfit_Chi2);
+  LocalHisto.h_MDC_Z_residu = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MDC_Z_residu);
+  LocalHisto.h_MDC_R_residu = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MDC_R_residu);
+  LocalHisto.h_MDC_Z_pull   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MDC_Z_pull);
+  LocalHisto.h_MDC_R_pull   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MDC_R_pull);
 }
 
 template<class Out>
