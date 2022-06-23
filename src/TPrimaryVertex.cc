@@ -20,7 +20,8 @@
 using namespace std;
 using namespace G4Sol;
 
-TPrimaryVertex::TPrimaryVertex(const THyphiAttributes& attribut)
+template <class Out>
+TPrimaryVertex<Out>::TPrimaryVertex(const THyphiAttributes& attribut)
     : TDataProcessInterface("PrimaryVertexReco"), att(attribut), SiliconHitsSD_Si1(1), SiliconHitsSD_Si2(2),
         SiliconHitsSD_Si3(3), SiliconHitsSD_Si4(4)
 {
@@ -28,11 +29,14 @@ TPrimaryVertex::TPrimaryVertex(const THyphiAttributes& attribut)
   rand = new TRandom3();
 }
 
-TPrimaryVertex::~TPrimaryVertex() {}
+template <class Out>
+TPrimaryVertex<Out>::~TPrimaryVertex() {}
 
-void TPrimaryVertex::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template <class Out>
+void TPrimaryVertex<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TPrimaryVertex::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template <class Out>
+ReturnRes::InfoM TPrimaryVertex<Out>::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 {
 
   int result_finder = Exec(RecoEvent, OutTree);
@@ -40,9 +44,11 @@ ReturnRes::InfoM TPrimaryVertex::operator()(FullRecoEvent& RecoEvent, MCAnaEvent
   return SoftExit(result_finder);
 }
 
-int TPrimaryVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FinderPrimaryVertex(RecoEvent); }
+template <class Out>
+int TPrimaryVertex<Out>::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FinderPrimaryVertex(RecoEvent); }
 
-ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
+template <class Out>
+ReturnRes::InfoM TPrimaryVertex<Out>::SoftExit(int result_full) {
    
   if(result_full == -1)
     {
@@ -84,88 +90,90 @@ ReturnRes::InfoM TPrimaryVertex::SoftExit(int result_full) {
 
 
 
-void TPrimaryVertex::SelectHists()
+template <class Out>
+void TPrimaryVertex<Out>::SelectHists()
 {
-  LocalHisto.h_HitMultiplicity_Si1          = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicity_Si1);
-  LocalHisto.h_HitMultiplicityRecons_Si1    = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityRecons_Si1);
-  LocalHisto.h_HitMultiplicityDiff_Si1      = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiff_Si1);
-  LocalHisto.h_HitMultiplicityDiffNHits_Si1 = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiffNHits_Si1);
+  LocalHisto.h_HitMultiplicity_Si1          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicity_Si1);
+  LocalHisto.h_HitMultiplicityRecons_Si1    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityRecons_Si1);
+  LocalHisto.h_HitMultiplicityDiff_Si1      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityDiff_Si1);
+  LocalHisto.h_HitMultiplicityDiffNHits_Si1 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityDiffNHits_Si1);
 
-  LocalHisto.h_EnergyDiffStrips_Si1          = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si1);
-  LocalHisto.h_nEventsGoodrecons_Si1         = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si1);
-  LocalHisto.h_nEventsGhost_Si1              = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si1);
-  LocalHisto.h_nEventsGoodreconsGhost_Si1    = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si1);
-  LocalHisto.h_nEventsRealGoodrecons_Si1     = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si1);
-  LocalHisto.h_nEventsRealRejectPad_Si1      = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealRejectPad_Si1);
+  LocalHisto.h_EnergyDiffStrips_Si1          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDiffStrips_Si1);
+  LocalHisto.h_nEventsGoodrecons_Si1         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGoodrecons_Si1);
+  LocalHisto.h_nEventsGhost_Si1              = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGhost_Si1);
+  LocalHisto.h_nEventsGoodreconsGhost_Si1    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGoodreconsGhost_Si1);
+  LocalHisto.h_nEventsRealGoodrecons_Si1     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsRealGoodrecons_Si1);
+  LocalHisto.h_nEventsRealRejectPad_Si1      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsRealRejectPad_Si1);
 
-  LocalHisto.h_HitMultiplicity_Si2          = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicity_Si2);
-  LocalHisto.h_HitMultiplicityRecons_Si2    = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityRecons_Si2);
-  LocalHisto.h_HitMultiplicityDiff_Si2      = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiff_Si2);
-  LocalHisto.h_HitMultiplicityDiffNHits_Si2 = AnaHisto->CloneAndRegister(AnaHisto->h_HitMultiplicityDiffNHits_Si2);
+  LocalHisto.h_HitMultiplicity_Si2          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicity_Si2);
+  LocalHisto.h_HitMultiplicityRecons_Si2    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityRecons_Si2);
+  LocalHisto.h_HitMultiplicityDiff_Si2      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityDiff_Si2);
+  LocalHisto.h_HitMultiplicityDiffNHits_Si2 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HitMultiplicityDiffNHits_Si2);
 
-  LocalHisto.h_EnergyDiffStrips_Si2          = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffStrips_Si2);
-  LocalHisto.h_nEventsGoodrecons_Si2         = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodrecons_Si2);
-  LocalHisto.h_nEventsGhost_Si2              = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGhost_Si2);
-  LocalHisto.h_nEventsGoodreconsGhost_Si2    = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsGoodreconsGhost_Si2);
-  LocalHisto.h_nEventsRealGoodrecons_Si2     = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealGoodrecons_Si2);
-  LocalHisto.h_nEventsRealRejectPad_Si2      = AnaHisto->CloneAndRegister(AnaHisto->h_nEventsRealRejectPad_Si2);
+  LocalHisto.h_EnergyDiffStrips_Si2          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDiffStrips_Si2);
+  LocalHisto.h_nEventsGoodrecons_Si2         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGoodrecons_Si2);
+  LocalHisto.h_nEventsGhost_Si2              = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGhost_Si2);
+  LocalHisto.h_nEventsGoodreconsGhost_Si2    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsGoodreconsGhost_Si2);
+  LocalHisto.h_nEventsRealGoodrecons_Si2     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsRealGoodrecons_Si2);
+  LocalHisto.h_nEventsRealRejectPad_Si2      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nEventsRealRejectPad_Si2);
 
-  LocalHisto.h_MFCheck_Theta_MomSi1MomSi2 = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Theta_MomSi1MomSi2);
-  LocalHisto.h_MFCheck_Dist_MomSi1HitSi2  = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi1HitSi2);
-  LocalHisto.h_MFCheck_Dist_MomSi2HitSi1  = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi2HitSi1);
-  LocalHisto.h_MFCheck_Dist_MomSi1HitIP   = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi1HitIP);
-  LocalHisto.h_MFCheck_Dist_MomSi2HitIP   = AnaHisto->CloneAndRegister(AnaHisto->h_MFCheck_Dist_MomSi2HitIP);
+  LocalHisto.h_MFCheck_Theta_MomSi1MomSi2 = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Theta_MomSi1MomSi2);
+  LocalHisto.h_MFCheck_Dist_MomSi1HitSi2  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Dist_MomSi1HitSi2);
+  LocalHisto.h_MFCheck_Dist_MomSi2HitSi1  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Dist_MomSi2HitSi1);
+  LocalHisto.h_MFCheck_Dist_MomSi1HitIP   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Dist_MomSi1HitIP);
+  LocalHisto.h_MFCheck_Dist_MomSi2HitIP   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MFCheck_Dist_MomSi2HitIP);
 
-  LocalHisto.h_EnergyStripEnergyTotalReal = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyStripEnergyTotalReal);
-  LocalHisto.h_EnergyStripEnergyTotal     = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyStripEnergyTotal);
-  LocalHisto.h_EnergyDiffSilicons         = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDiffSilicons);
+  LocalHisto.h_EnergyStripEnergyTotalReal = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyStripEnergyTotalReal);
+  LocalHisto.h_EnergyStripEnergyTotal     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyStripEnergyTotal);
+  LocalHisto.h_EnergyDiffSilicons         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDiffSilicons);
 
-  LocalHisto.h_EnergyDepositionMother    = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDepositionMother);
-  LocalHisto.h_EnergyDepositionDaughters = AnaHisto->CloneAndRegister(AnaHisto->h_EnergyDepositionDaughters);
+  LocalHisto.h_EnergyDepositionMother    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDepositionMother);
+  LocalHisto.h_EnergyDepositionDaughters = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EnergyDepositionDaughters);
 
-  LocalHisto.h_nTrackCandidates   = AnaHisto->CloneAndRegister(AnaHisto->h_nTrackCandidates);
-  LocalHisto.h_DistanceBeamTracks = AnaHisto->CloneAndRegister(AnaHisto->h_DistanceBeamTracks);
-  LocalHisto.h_PosZBeamTracks     = AnaHisto->CloneAndRegister(AnaHisto->h_PosZBeamTracks);
-  LocalHisto.h_thetaTracks        = AnaHisto->CloneAndRegister(AnaHisto->h_thetaTracks);
-  LocalHisto.h_thetaResol         = AnaHisto->CloneAndRegister(AnaHisto->h_thetaResol);
+  LocalHisto.h_nTrackCandidates   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nTrackCandidates);
+  LocalHisto.h_DistanceBeamTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DistanceBeamTracks);
+  LocalHisto.h_PosZBeamTracks     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PosZBeamTracks);
+  LocalHisto.h_thetaTracks        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_thetaTracks);
+  LocalHisto.h_thetaResol         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_thetaResol);
 
-  LocalHisto.h_Acc_ThetaCandidates = AnaHisto->CloneAndRegister(AnaHisto->h_Acc_ThetaCandidates);
-  LocalHisto.h_Acc_ThetaAllReal    = AnaHisto->CloneAndRegister(AnaHisto->h_Acc_ThetaAllReal);
+  LocalHisto.h_Acc_ThetaCandidates = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Acc_ThetaCandidates);
+  LocalHisto.h_Acc_ThetaAllReal    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Acc_ThetaAllReal);
 
-  LocalHisto.h_nCandidatesRealTracks          = AnaHisto->CloneAndRegister(AnaHisto->h_nCandidatesRealTracks);
-  LocalHisto.h_nCandidatesRealTracks_IfRecons = AnaHisto->CloneAndRegister(AnaHisto->h_nCandidatesRealTracks_IfRecons);
+  LocalHisto.h_nCandidatesRealTracks          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nCandidatesRealTracks);
+  LocalHisto.h_nCandidatesRealTracks_IfRecons = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nCandidatesRealTracks_IfRecons);
 
-  LocalHisto.h_nHypernucleiTrack = AnaHisto->CloneAndRegister(AnaHisto->h_nHypernucleiTrack);
-  LocalHisto.h_fvalues           = AnaHisto->CloneAndRegister(AnaHisto->h_fvalues);
+  LocalHisto.h_nHypernucleiTrack = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_nHypernucleiTrack);
+  LocalHisto.h_fvalues           = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_fvalues);
 
-  LocalHisto.h_InteractionPointDistance  = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistance);
-  LocalHisto.h_InteractionPointDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceX);
-  LocalHisto.h_InteractionPointDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceY);
-  LocalHisto.h_InteractionPointDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceZ);
+  LocalHisto.h_InteractionPointDistance  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistance);
+  LocalHisto.h_InteractionPointDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceX);
+  LocalHisto.h_InteractionPointDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceY);
+  LocalHisto.h_InteractionPointDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceZ);
 
-  LocalHisto.h_InteractionPointDistanceX_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceX_pull);
-  LocalHisto.h_InteractionPointDistanceY_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceY_pull);
-  LocalHisto.h_InteractionPointDistanceZ_pull = AnaHisto->CloneAndRegister(AnaHisto->h_InteractionPointDistanceZ_pull);
+  LocalHisto.h_InteractionPointDistanceX_pull = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceX_pull);
+  LocalHisto.h_InteractionPointDistanceY_pull = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceY_pull);
+  LocalHisto.h_InteractionPointDistanceZ_pull = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_InteractionPointDistanceZ_pull);
 
-  LocalHisto.h_CovarianceSigmaX = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaX);
-  LocalHisto.h_CovarianceSigmaY = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaY);
-  LocalHisto.h_CovarianceSigmaZ = AnaHisto->CloneAndRegister(AnaHisto->h_CovarianceSigmaZ);
+  LocalHisto.h_CovarianceSigmaX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_CovarianceSigmaX);
+  LocalHisto.h_CovarianceSigmaY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_CovarianceSigmaY);
+  LocalHisto.h_CovarianceSigmaZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_CovarianceSigmaZ);
 
-  LocalHisto.h_IP_DecayDistance  = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistance);
-  LocalHisto.h_IP_DecayDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistanceX);
-  LocalHisto.h_IP_DecayDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistanceY);
-  LocalHisto.h_IP_DecayDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_IP_DecayDistanceZ);
+  LocalHisto.h_IP_DecayDistance  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_IP_DecayDistance);
+  LocalHisto.h_IP_DecayDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_IP_DecayDistanceX);
+  LocalHisto.h_IP_DecayDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_IP_DecayDistanceY);
+  LocalHisto.h_IP_DecayDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_IP_DecayDistanceZ);
 
-  LocalHisto.h_DecayPositionDistance  = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistance);
-  LocalHisto.h_DecayPositionDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceX);
-  LocalHisto.h_DecayPositionDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceY);
-  LocalHisto.h_DecayPositionDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPositionDistanceZ);
+  LocalHisto.h_DecayPositionDistance  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPositionDistance);
+  LocalHisto.h_DecayPositionDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPositionDistanceX);
+  LocalHisto.h_DecayPositionDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPositionDistanceY);
+  LocalHisto.h_DecayPositionDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPositionDistanceZ);
 
-  LocalHisto.h_PrimVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_PrimVtxstats);
-  LocalHisto.h_PrimStatus = AnaHisto->CloneAndRegister(AnaHisto->h_PrimStatus);
+  LocalHisto.h_PrimVtxstats = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PrimVtxstats);
+  LocalHisto.h_PrimStatus = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PrimStatus);
 }
 
-int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
+template <class Out>
+int TPrimaryVertex<Out>::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 {
   LocalHisto.h_PrimStatus->Fill("Si1x", RecoEvent.Si_HitsEnergyLayer[5].size(), 1);
   LocalHisto.h_PrimStatus->Fill("Si1y", RecoEvent.Si_HitsEnergyLayer[4].size(), 1);
@@ -754,7 +762,8 @@ int TPrimaryVertex::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
   return 0;
 }
 
-void TPrimaryVertex::simulHitstoRealHits(
+template <class Out>
+void TPrimaryVertex<Out>::simulHitstoRealHits(
     FullRecoEvent& REvent,
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal,
     int id_det_x, int id_det_y, TH1F* h_Diff, std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos)
@@ -830,7 +839,8 @@ void TPrimaryVertex::simulHitstoRealHits(
     }
 }
 
-void TPrimaryVertex::MFcheck(std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si1,
+template <class Out>
+void TPrimaryVertex<Out>::MFcheck(std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si1,
                              std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si2,
                              std::array<double,3> InteractionPoint)
 {
@@ -2524,7 +2534,8 @@ void SiliconHits_SDpad::SignalstoHits_SDpad(std::vector<std::tuple<double, size_
 }
 
 
-void TPrimaryVertex::TranslationZ_Target_System(double Target_PosZ)
+template <class Out>
+void TPrimaryVertex<Out>::TranslationZ_Target_System(double Target_PosZ)
 {
   double Dist_to_TransZ = Target_PosZ - 25.; // Reference target PosZ = 25.
   Zo_target += Dist_to_TransZ;
@@ -2544,7 +2555,8 @@ void TPrimaryVertex::TranslationZ_Target_System(double Target_PosZ)
 */
 }
 
-void TPrimaryVertex::CloseDist(std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
+template <class Out>
+void TPrimaryVertex<Out>::CloseDist(std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                std::vector<double>& TrackHit1, std::vector<double>& TrackHit2, double& distance,
                                double& z)
 {
@@ -2577,7 +2589,8 @@ void TPrimaryVertex::CloseDist(std::vector<double>& BeamHit1, std::vector<double
   z = (c1[2] + c2[2]) / 2.;
 }
 
-double TPrimaryVertex::f_function(std::vector<double>& Hit1, std::vector<double>& Hit2, std::vector<double>& PosXYZ)
+template <class Out>
+double TPrimaryVertex<Out>::f_function(std::vector<double>& Hit1, std::vector<double>& Hit2, std::vector<double>& PosXYZ)
 {
   double slope_x     = (Hit2[1] - Hit1[1]) / (Hit2[3] - Hit1[3]);
   double intercept_x = Hit2[1] - slope_x * Hit2[3];
@@ -2594,7 +2607,8 @@ double TPrimaryVertex::f_function(std::vector<double>& Hit1, std::vector<double>
   return f;
 }
 
-double TPrimaryVertex::V_function(std::vector<double>& f_vector)
+template <class Out>
+double TPrimaryVertex<Out>::V_function(std::vector<double>& f_vector)
 {
   double sum_f  = 0;
   double sum_f2 = 0;
@@ -2616,7 +2630,8 @@ double TPrimaryVertex::V_function(std::vector<double>& f_vector)
   return v;
 }
 
-void TPrimaryVertex::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf,
+template <class Out>
+void TPrimaryVertex<Out>::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf,
                                          size_t& NstepsY, double& Zi, double& Zf, size_t& NstepsZ, size_t& border,
                                          std::vector<std::vector<double> >& PosXYZ)
 {
@@ -2650,7 +2665,8 @@ void TPrimaryVertex::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX
     }
 }
 
-void TPrimaryVertex::HitstoTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
+template <class Out>
+void TPrimaryVertex<Out>::HitstoTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
                                   std::vector<std::vector<double> >& HitEnergyPosXY_Si2,
                                   std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                   std::vector<std::vector<std::vector<double> > >& CandidateTracks)
@@ -2680,7 +2696,8 @@ void TPrimaryVertex::HitstoTracks(std::vector<std::vector<double> >& HitEnergyPo
     }
 }
 
-void TPrimaryVertex::TrackstoVertexPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template <class Out>
+void TPrimaryVertex<Out>::TrackstoVertexPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                             std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                             std::vector<double>& InteractionPointRecons,
                                             std::vector<double>& f_values_IP)
@@ -2756,7 +2773,8 @@ void TPrimaryVertex::TrackstoVertexPosition(std::vector<std::vector<std::vector<
     }
 }
 
-void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template <class Out>
+void TPrimaryVertex<Out>::CovarianceMatrix(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                       std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                       std::vector<double>& InteractionPointAverage, std::vector<double>& f_values_IP,
                                       std::vector<std::vector<double> >& CovMatrix)
@@ -2869,7 +2887,8 @@ void TPrimaryVertex::CovarianceMatrix(std::vector<std::vector<std::vector<double
     }
 }
 
-void TPrimaryVertex::HitstoDecayTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
+template <class Out>
+void TPrimaryVertex<Out>::HitstoDecayTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
                                        std::vector<std::vector<double> >& HitEnergyPosXY_Si2,
                                        std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
                                        std::vector<double>& InteractionPointRecons,
@@ -2895,7 +2914,8 @@ void TPrimaryVertex::HitstoDecayTracks(std::vector<std::vector<double> >& HitEne
     }
 }
 
-void TPrimaryVertex::DecayTrackstoDecayPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template <class Out>
+void TPrimaryVertex<Out>::DecayTrackstoDecayPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                                 std::vector<double>& InteractionPointRecons,
                                                 std::vector<double>& DecayPositionRecons)
 {
@@ -2969,7 +2989,8 @@ void TPrimaryVertex::DecayTrackstoDecayPosition(std::vector<std::vector<std::vec
     }
 }
 
-void TPrimaryVertex::nGoodEventsCounter(
+template <class Out>
+void TPrimaryVertex<Out>::nGoodEventsCounter(
     std::vector<std::vector<double> >& HitEnergyPosXY,
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal,
     double& widthStrip, size_t& nGoodrecons)
@@ -2987,7 +3008,8 @@ void TPrimaryVertex::nGoodEventsCounter(
     }
 }
 
-void TPrimaryVertex::RealHitstoRealTracks(
+template <class Out>
+void TPrimaryVertex<Out>::RealHitstoRealTracks(
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal_Si1,
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal_Si2,
     std::vector<std::vector<std::vector<double> > >& RealTracks)
@@ -3049,7 +3071,8 @@ void TPrimaryVertex::RealHitstoRealTracks(
     }
 }
 
-void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template <class Out>
+void TPrimaryVertex<Out>::nGoodTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                         std::vector<std::vector<std::vector<double> > >& RealTracks,
                                         size_t& nGoodTracks, std::vector<size_t>& goodCandidateTracks)
 {
@@ -3098,7 +3121,8 @@ void TPrimaryVertex::nGoodTracksCounter(std::vector<std::vector<std::vector<doub
     }
 }
 
-void TPrimaryVertex::nForwardTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
+template <class Out>
+void TPrimaryVertex<Out>::nForwardTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
                                            size_t& nForwardTracks, std::vector<size_t>& forwardCandidateTracks)
 {
 
@@ -3122,3 +3146,5 @@ void TPrimaryVertex::nForwardTracksCounter(std::vector<std::vector<std::vector<d
         }
     }
 }
+
+template class TPrimaryVertex<MCAnaEventG4Sol>;

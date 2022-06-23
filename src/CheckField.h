@@ -9,9 +9,11 @@
 
 #include "THyphiAttributes.h"
 
-using TDataProcessInterface = TDataProcess<FullRecoEvent,MCAnaEventG4Sol>;
+template<class Out>
+using TDataProcessInterface = TDataProcess<FullRecoEvent,Out>;
 
-class CheckField final :  public TDataProcessInterface
+template<class Out>
+class CheckField final :  public TDataProcessInterface<Out>
 {
   public :
   const THyphiAttributes& att;
@@ -21,9 +23,9 @@ class CheckField final :  public TDataProcessInterface
   ~CheckField() final = default;
 
   void InitMT() final;
-  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
+  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,Out* OutTree) final;
  private:
-  int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
+  int Exec(FullRecoEvent& RecoEvent,Out* OutTree) final;
   ReturnRes::InfoM SoftExit(int) final;
   void SelectHists() final;
   int Check();
