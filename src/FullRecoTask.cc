@@ -49,8 +49,6 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSim& I
     list_processMC.emplace_back(new CheckField<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_PrimaryVtx)
     list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
-  if(Attributes.TaskConfig.Task_FlatMCOutputML)
-    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_BayesFinder)
     list_processMC.emplace_back(new TBayesFinder<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_RiemannFinder)
@@ -65,6 +63,8 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSim& I
     list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
   if(Attributes.TaskConfig.Task_DecayVtx)
     list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes));
+  if(Attributes.TaskConfig.Task_FlatMCOutputML)
+    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
 
   for(auto task : list_processMC)
     Attributes._logger->info(" -> Task : {}",task->signature);

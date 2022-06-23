@@ -6,6 +6,7 @@
 
 #include <tuple>
 #include <string>
+#include <cmath>
 
 #include "TLorentzVector.h"
 #include "TVector3.h"
@@ -24,7 +25,7 @@ template <class Out>
 TDecayVertex<Out>::TDecayVertex(const THyphiAttributes& attribut)
     : TDataProcessInterface<Out>("DecayVertexReco"), att(attribut), fieldWASA(att.Field)
   {
-
+    TranslationZ_Target_System(att.Target_PositionZ);
   }
 
 template <class Out>
@@ -47,6 +48,13 @@ int TDecayVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 
   for(auto i_Hyp : RecoEvent.Hyp_Vect)
   {
+    if(std::isfinite(i_Hyp.Chi2ndf) == false)
+      continue;
+    if(std::isfinite(i_Hyp.Dist_Daughters) == false)
+      continue;
+    if(std::isfinite(i_Hyp.MomE_Fragment.Px()) == false)
+      continue;
+
     THypernucleus* OutHyp = dynamic_cast<THypernucleus*>(OutTree->fHyp->ConstructedAt(OutTree->fHyp->GetEntries()));
 
     OutHyp->Pattern              = i_Hyp.Pattern;
@@ -54,6 +62,7 @@ int TDecayVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
     OutHyp->PDG                  = i_Hyp.PDG;
     OutHyp->N_Mother             = i_Hyp.N_Mother;
     OutHyp->Chi2ndf              = i_Hyp.Chi2ndf;
+    OutHyp->NDF                  = i_Hyp.NDF;
     OutHyp->MomE                 = i_Hyp.MomE;
     OutHyp->PrimVtx              = i_Hyp.PrimVtx;
     OutHyp->DecayVtx             = i_Hyp.DecayVtx;
@@ -66,18 +75,27 @@ int TDecayVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
     OutHyp->LifeTime             = i_Hyp.LifeTime;
     OutHyp->ErrLifeTime          = i_Hyp.ErrLifeTime;
     OutHyp->ErrGetLifeTime       = i_Hyp.ErrGetLifeTime;
+    OutHyp->Mother_IsFromHyp     = i_Hyp.Mother_IsFromHyp;
 
     OutHyp->Id_Fragment          = i_Hyp.Id_Fragment;
     OutHyp->MomE_Fragment        = i_Hyp.MomE_Fragment;
+    OutHyp->Chi2ndf_Fragment     = i_Hyp.Chi2ndf_Fragment;
+    OutHyp->NDF_Fragment         = i_Hyp.NDF_Fragment;
+    OutHyp->Pvalue_Fragment      = i_Hyp.Pvalue_Fragment;
     OutHyp->Angle_MotherFragment = i_Hyp.Angle_MotherFragment;
     OutHyp->Fragment_IsFromHyp   = i_Hyp.Fragment_IsFromHyp;
 
     OutHyp->Id_Pion              = i_Hyp.Id_Pion;
     OutHyp->MomE_Pion            = i_Hyp.MomE_Pion;
     OutHyp->Chi2ndf_Pion         = i_Hyp.Chi2ndf_Pion;
+    OutHyp->NDF_Pion             = i_Hyp.NDF_Pion;
+    OutHyp->Pvalue_Pion          = i_Hyp.Pvalue_Pion;
     OutHyp->Angle_MotherPion     = i_Hyp.Angle_MotherPion;
+    OutHyp->NHitsMDC_Pion        = i_Hyp.NHitsMDC_Pion;
+    OutHyp->NHitsMinifiber_Pion  = i_Hyp.NHitsMinifiber_Pion;
     OutHyp->N_Pion               = i_Hyp.N_Pion;
     OutHyp->Pion_IsFromHyp       = i_Hyp.Pion_IsFromHyp;
+
     OutHyp->Dist_Daughters       = i_Hyp.Dist_Daughters;
     OutHyp->ArmPod_Qt            = i_Hyp.ArmPod_Qt;
     OutHyp->ArmPod_Alfa          = i_Hyp.ArmPod_Alfa;
@@ -262,6 +280,9 @@ void TDecayVertex<Out>::SelectHists()
   LocalHisto.h_EffPosZ_preKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_preKFPart);
   LocalHisto.h_EffPosZ_postKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_postKFPart);
 
+  LocalHisto.h_EffPosZPosR_real       = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZPosR_real);
+  LocalHisto.h_EffPosZPosR_postKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZPosR_postKFPart);
+
 
   LocalHisto.h_N_SiHits_ReconsTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_N_SiHits_ReconsTracks);
 
@@ -307,6 +328,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   LocalHisto.h_DecayVertexPosZ_real->Fill(DecayVertex_real.Z(), 1.);
   LocalHisto.h_EffPosZ_real->Fill(DecayVertex_real.Z(), 1.);
+  LocalHisto.h_EffPosZPosR_real->Fill(DecayVertex_real.Z(), DecayVertex_real.Perp(), 1.);
   LocalHisto.h_Hyp_RealLifeTime->Fill(RecoEvent.Hyp_LifeTime, 1.);
 
   StudyCaseSelector(att.StudyCase, Hyp_pdg, Fragment_pdg);
@@ -326,9 +348,10 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   //Fragment tracks
   std::vector<KFParticle> FragmentTracks_All {};
+  std::vector<KFFitInfo> Fragment_FitInfo {};
   
   if(recons_from_FRS_MDC == 1)
-    RealTracksFinder(RecoEvent.TrackDAFSim, Fragment_pdg, No_cutconditions, FragmentTracks_All);
+    RealTracksFinder(RecoEvent.TrackDAFSim, Fragment_pdg, No_cutconditions, FragmentTracks_All, Fragment_FitInfo);
   
   else if(recons_from_FRS_MDC == 2)
     FragmentMDCTracksFinder(RecoEvent.DAF_results, Fragment_pdg, FragmentTracks_All);
@@ -376,13 +399,14 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   //Real pion tracks
   std::vector<KFParticle> RealPionTracks_All {};
-  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, No_cutconditions, RealPionTracks_All);
+  std::vector<KFFitInfo> RealPion_FitInfo {};
+  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, No_cutconditions, RealPionTracks_All, RealPion_FitInfo);
   LocalHisto.h_Nrealpions->Fill(RealPionTracks_All.size(), 1.);
   if(RealPionTracks_All.size() == 0)
     return -2;
 
   std::vector<KFParticle> RealPionTracks {};
-  PionSelector(RealPionTracks_All, RecoEvent.PrimVtxRecons, RealPionTracks);
+  PionSelector(RealPionTracks_All, RecoEvent.PrimVtxRecons, RealPionTracks, RealPion_FitInfo);
   if(RealPionTracks.size() == 0)
     return -2;
 
@@ -402,20 +426,36 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Real.MomE = RecoEvent.Mother_MomE;
       temp_Hyp_Real.PrimVtx = InteractionPoint_real;
       temp_Hyp_Real.DecayVtx.SetXYZ(RecoEvent.DecayVertex[0], RecoEvent.DecayVertex[1], RecoEvent.DecayVertex[2]);
-      //temp_Hyp_Real.Dist_RealReconsVtx = ;
+      temp_Hyp_Real.Dist_RealReconsVtx.SetXYZ(0.,0.,0.);
+      temp_Hyp_Real.Dist_MotherPrimVtx = 0.;
+      temp_Hyp_Real.Angle_MotherPrimVtx = 0.;
+      temp_Hyp_Real.InvMass = Hyp_mass;
+      temp_Hyp_Real.ErrInvMass = 0.;
+      temp_Hyp_Real.ErrGetMass = 0;
       temp_Hyp_Real.LifeTime = RecoEvent.Hyp_LifeTime;
+      temp_Hyp_Real.ErrLifeTime = 0.;
+      temp_Hyp_Real.ErrGetLifeTime = 0;
+
       TVector3 Mother_Mom(RecoEvent.Mother_MomE.Px(), RecoEvent.Mother_MomE.Py(), RecoEvent.Mother_MomE.Pz());
 
       temp_Hyp_Real.Id_Fragment = FragmentTracks_All[ref_RealFragment].Id();
       temp_Hyp_Real.MomE_Fragment.SetPxPyPzE(FragmentTracks_All[ref_RealFragment].GetPx(), FragmentTracks_All[ref_RealFragment].GetPy(), FragmentTracks_All[ref_RealFragment].GetPz(), FragmentTracks_All[ref_RealFragment].GetE());
+      temp_Hyp_Real.Chi2ndf_Fragment = FragmentTracks_All[ref_RealFragment].GetChi2() / static_cast<double>(FragmentTracks_All[ref_RealFragment].GetNDF());
+      temp_Hyp_Real.NDF_Fragment = FragmentTracks_All[ref_RealFragment].GetNDF();
+      temp_Hyp_Real.Pvalue_Fragment = Fragment_FitInfo[ref_RealFragment].Pvalue;
       TVector3 Fragment_Mom(FragmentTracks_All[ref_RealFragment].GetPx(), FragmentTracks_All[ref_RealFragment].GetPy(), FragmentTracks_All[ref_RealFragment].GetPz());
       temp_Hyp_Real.Angle_MotherFragment = Mother_Mom.Angle(Fragment_Mom) * 180. / M_PI;
       temp_Hyp_Real.Fragment_IsFromHyp = 1;
 
       temp_Hyp_Real.Id_Pion = RealPionTracks[i].Id();
       temp_Hyp_Real.MomE_Pion.SetPxPyPzE(RealPionTracks[i].GetPx(), RealPionTracks[i].GetPy(), RealPionTracks[i].GetPz(), RealPionTracks[i].GetE());
+      temp_Hyp_Real.Chi2ndf_Pion = RealPionTracks[i].GetChi2() / static_cast<double>(RealPionTracks[i].GetNDF());
+      temp_Hyp_Real.NDF_Pion = RealPionTracks[i].GetNDF();
+      temp_Hyp_Real.Pvalue_Pion = RealPion_FitInfo[i].Pvalue;
       TVector3 Pion_Mom(RealPionTracks[i].GetPx(), RealPionTracks[i].GetPy(), RealPionTracks[i].GetPz());
       temp_Hyp_Real.Angle_MotherPion = Mother_Mom.Angle(Pion_Mom) * 180. / M_PI;
+      temp_Hyp_Real.NHitsMDC_Pion = RealPion_FitInfo[i].NHitsMDC;
+      temp_Hyp_Real.NHitsMinifiber_Pion = RealPion_FitInfo[i].NHitsMinifiber;
       temp_Hyp_Real.N_Pion = RealPionTracks.size();
       temp_Hyp_Real.Pion_IsFromHyp = 0;
 
@@ -424,6 +464,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
           if(itr_real->first == RealPionTracks[i].Id())
             temp_Hyp_Real.Pion_IsFromHyp = 1;
         }
+
+      temp_Hyp_Real.Mother_IsFromHyp = temp_Hyp_Real.Fragment_IsFromHyp * temp_Hyp_Real.Pion_IsFromHyp;
 
       CloseDist(FragmentTracks_All[ref_RealFragment], RealPionTracks[i], dist_RealDaughters, centroid_RealDaughters);
       temp_Hyp_Real.Dist_Daughters = dist_RealDaughters;
@@ -463,6 +505,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Real.PDG = Hyp_pdg;
       temp_Hyp_Real.N_Mother = RealMotherTracks.size();
       temp_Hyp_Real.Chi2ndf = RealMotherTracks[i].GetChi2() / static_cast<double>(RealMotherTracks[i].GetNDF());
+      temp_Hyp_Real.NDF = RealMotherTracks[i].GetNDF();
       temp_Hyp_Real.MomE.SetPxPyPzE(RealMotherTracks[i].GetPx(),RealMotherTracks[i].GetPy(),RealMotherTracks[i].GetPz(),RealMotherTracks[i].GetE());
       RealMotherTracks[i].TransportToProductionVertex();
       temp_Hyp_Real.PrimVtx.SetXYZ(RealMotherTracks[i].GetX(),RealMotherTracks[i].GetY(),RealMotherTracks[i].GetZ());
@@ -486,6 +529,9 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp_Real.Id_Fragment = FragmentTracks[temp_id_fragment].Id();
       temp_Hyp_Real.MomE_Fragment.SetPxPyPzE(FragmentTracks[temp_id_fragment].GetPx(), FragmentTracks[temp_id_fragment].GetPy(), FragmentTracks[temp_id_fragment].GetPz(), FragmentTracks[temp_id_fragment].GetE());
+      temp_Hyp_Real.Chi2ndf_Fragment = FragmentTracks[temp_id_fragment].GetChi2() / static_cast<double>(FragmentTracks[temp_id_fragment].GetNDF());      
+      temp_Hyp_Real.NDF_Fragment = FragmentTracks[temp_id_fragment].GetNDF();
+      temp_Hyp_Real.Pvalue_Fragment = Fragment_FitInfo[temp_id_fragment].Pvalue;
       TVector3 Fragment_Mom(FragmentTracks[temp_id_fragment].GetPx(), FragmentTracks[temp_id_fragment].GetPy(), FragmentTracks[temp_id_fragment].GetPz());
       temp_Hyp_Real.Angle_MotherFragment = Mother_Mom.Angle(Fragment_Mom) * 180. / M_PI;
       temp_Hyp_Real.Fragment_IsFromHyp = 0;
@@ -495,8 +541,13 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp_Real.Id_Pion = RealPionTracks[temp_id_pion].Id();
       temp_Hyp_Real.MomE_Pion.SetPxPyPzE(RealPionTracks[temp_id_pion].GetPx(), RealPionTracks[temp_id_pion].GetPy(), RealPionTracks[temp_id_pion].GetPz(), RealPionTracks[temp_id_pion].GetE());
+      temp_Hyp_Real.Chi2ndf_Pion = RealPionTracks[temp_id_pion].GetChi2() / static_cast<double>(RealPionTracks[temp_id_pion].GetNDF());
+      temp_Hyp_Real.NDF_Pion = RealPionTracks[temp_id_pion].GetNDF();
+      temp_Hyp_Real.Pvalue_Pion = RealPion_FitInfo[temp_id_pion].Pvalue;
       TVector3 Pion_Mom(RealPionTracks[temp_id_pion].GetPx(), RealPionTracks[temp_id_pion].GetPy(), RealPionTracks[temp_id_pion].GetPz());
       temp_Hyp_Real.Angle_MotherPion = Mother_Mom.Angle(Pion_Mom) * 180. / M_PI;
+      temp_Hyp_Real.NHitsMDC_Pion = RealPion_FitInfo[temp_id_pion].NHitsMDC;
+      temp_Hyp_Real.NHitsMinifiber_Pion = RealPion_FitInfo[temp_id_pion].NHitsMinifiber;
       temp_Hyp_Real.N_Pion = RealPionTracks.size();
       temp_Hyp_Real.Pion_IsFromHyp = 0;
 
@@ -505,6 +556,12 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
           if(itr_real->first == RealPionTracks[temp_id_pion].Id())
             temp_Hyp_Real.Pion_IsFromHyp = 1;
         }
+
+      temp_Hyp_Real.Mother_IsFromHyp = temp_Hyp_Real.Fragment_IsFromHyp * temp_Hyp_Real.Pion_IsFromHyp;
+
+      float Vertex[3] = {RealMotherTracks[i].GetX(), RealMotherTracks[i].GetY(), RealMotherTracks[i].GetZ()};
+      FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
+      RealPionTracks[temp_id_pion].TransportToPoint(Vertex);
 
       CloseDist(FragmentTracks[temp_id_fragment], RealPionTracks[temp_id_pion], dist_RealDaughters, centroid_RealDaughters);
       temp_Hyp_Real.Dist_Daughters = dist_RealDaughters;
@@ -523,7 +580,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
  //Cut pion tracks
   std::vector<KFParticle> CutPionTracks_All {};
-  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, Yes_cutconditions, CutPionTracks_All);
+  std::vector<KFFitInfo> CutPion_FitInfo {};
+  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, Yes_cutconditions, CutPionTracks_All, CutPion_FitInfo);
 
   LocalHisto.h_Ncutpions->Fill(CutPionTracks_All.size(), 1.);
 
@@ -531,7 +589,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
     return -3;
 
   std::vector<KFParticle> CutPionTracks {};
-  PionSelector(CutPionTracks_All, RecoEvent.PrimVtxRecons, CutPionTracks);
+  PionSelector(CutPionTracks_All, RecoEvent.PrimVtxRecons, CutPionTracks, CutPion_FitInfo);
   if(CutPionTracks.size() == 0)
     return -3;
 
@@ -617,6 +675,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Cut.PDG = Hyp_pdg;
       temp_Hyp_Cut.N_Mother = CutMotherTracks_PrimVtx.size();
       temp_Hyp_Cut.Chi2ndf = CutMotherTracks_PrimVtx[i].GetChi2() / static_cast<double>(CutMotherTracks_PrimVtx[i].GetNDF());
+      temp_Hyp_Cut.NDF = CutMotherTracks_PrimVtx[i].GetNDF();
       temp_Hyp_Cut.MomE.SetPxPyPzE(CutMotherTracks_PrimVtx[i].GetPx(),CutMotherTracks_PrimVtx[i].GetPy(),CutMotherTracks_PrimVtx[i].GetPz(),CutMotherTracks_PrimVtx[i].GetE());
       CutMotherTracks_PrimVtx[i].TransportToProductionVertex();
       temp_Hyp_Cut.PrimVtx.SetXYZ(CutMotherTracks_PrimVtx[i].GetX(),CutMotherTracks_PrimVtx[i].GetY(),CutMotherTracks_PrimVtx[i].GetZ());
@@ -640,6 +699,9 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp_Cut.Id_Fragment = FragmentTracks[temp_id_fragment].Id();
       temp_Hyp_Cut.MomE_Fragment.SetPxPyPzE(FragmentTracks[temp_id_fragment].GetPx(), FragmentTracks[temp_id_fragment].GetPy(), FragmentTracks[temp_id_fragment].GetPz(), FragmentTracks[temp_id_fragment].GetE());
+      temp_Hyp_Cut.Chi2ndf_Fragment = FragmentTracks[temp_id_fragment].GetChi2() / static_cast<double>(FragmentTracks[temp_id_fragment].GetNDF());      
+      temp_Hyp_Cut.NDF_Fragment = FragmentTracks[temp_id_fragment].GetNDF();
+      temp_Hyp_Cut.Pvalue_Fragment = Fragment_FitInfo[temp_id_fragment].Pvalue;
       TVector3 Fragment_Mom(FragmentTracks[temp_id_fragment].GetPx(), FragmentTracks[temp_id_fragment].GetPy(), FragmentTracks[temp_id_fragment].GetPz());
       temp_Hyp_Cut.Angle_MotherFragment = Mother_Mom.Angle(Fragment_Mom) * 180. / M_PI;
       temp_Hyp_Cut.Fragment_IsFromHyp = 0;
@@ -648,8 +710,13 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp_Cut.Id_Pion = CutPionTracks[temp_id_pion].Id();
       temp_Hyp_Cut.MomE_Pion.SetPxPyPzE(CutPionTracks[temp_id_pion].GetPx(), CutPionTracks[temp_id_pion].GetPy(), CutPionTracks[temp_id_pion].GetPz(), CutPionTracks[temp_id_pion].GetE());
+      temp_Hyp_Cut.Chi2ndf_Pion = CutPionTracks[temp_id_pion].GetChi2() / static_cast<double>(CutPionTracks[temp_id_pion].GetNDF());
+      temp_Hyp_Cut.NDF_Pion = CutPionTracks[temp_id_pion].GetNDF();
+      temp_Hyp_Cut.Pvalue_Pion = CutPion_FitInfo[temp_id_pion].Pvalue;
       TVector3 Pion_Mom(CutPionTracks[temp_id_pion].GetPx(), CutPionTracks[temp_id_pion].GetPy(), CutPionTracks[temp_id_pion].GetPz());
       temp_Hyp_Cut.Angle_MotherPion = Mother_Mom.Angle(Pion_Mom) * 180. / M_PI;
+      temp_Hyp_Cut.NHitsMDC_Pion = CutPion_FitInfo[temp_id_pion].NHitsMDC;
+      temp_Hyp_Cut.NHitsMinifiber_Pion = CutPion_FitInfo[temp_id_pion].NHitsMinifiber;
       temp_Hyp_Cut.N_Pion = CutPionTracks.size();
       temp_Hyp_Cut.Pion_IsFromHyp = 0;
 
@@ -659,12 +726,14 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
             temp_Hyp_Cut.Pion_IsFromHyp = 1;
         }
 
-      CloseDist(FragmentTracks[temp_id_fragment], CutPionTracks[temp_id_pion], dist_CutDaughters, centroid_CutDaughters);
-      temp_Hyp_Cut.Dist_Daughters = dist_CutDaughters;
+      temp_Hyp_Cut.Mother_IsFromHyp = temp_Hyp_Cut.Fragment_IsFromHyp * temp_Hyp_Cut.Pion_IsFromHyp;
 
       float Vertex[3] = {CutMotherTracks_PrimVtx[i].GetX(), CutMotherTracks_PrimVtx[i].GetY(), CutMotherTracks_PrimVtx[i].GetZ()};
       FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
       CutPionTracks[temp_id_pion].TransportToPoint(Vertex);
+
+      CloseDist(FragmentTracks[temp_id_fragment], CutPionTracks[temp_id_pion], dist_CutDaughters, centroid_CutDaughters);
+      temp_Hyp_Cut.Dist_Daughters = dist_CutDaughters;
 
       float armenterosQtAlfa[2] = {0.};
       CutMotherTracks_PrimVtx[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], CutPionTracks[temp_id_pion], armenterosQtAlfa);
@@ -698,13 +767,14 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   //Pion tracks
   std::vector<KFParticle> PionTracks_All {};
-  PionTracksFinder(RecoEvent.DAF_results, PionTracks_All);
+  std::vector<KFFitInfo> Pion_FitInfo {};
+  PionTracksFinder(RecoEvent.DAF_results, PionTracks_All, Pion_FitInfo);
   LocalHisto.h_Npions->Fill(PionTracks_All.size(), 1.);
   if(PionTracks_All.size() == 0)
     return -4;
 
   std::vector<KFParticle> PionTracks {};
-  PionSelector(PionTracks_All, RecoEvent.PrimVtxRecons, PionTracks);
+  PionSelector(PionTracks_All, RecoEvent.PrimVtxRecons, PionTracks, Pion_FitInfo);
   if(PionTracks.size() == 0)
     return -4;
 
@@ -774,24 +844,29 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
         temp_Hyp_LV.Pattern = 6;
 
         temp_Hyp_LV.PDG = Hyp_pdg;
-        temp_Hyp_LV.N_Mother = 1;
-        //temp_Hyp_LV.Chi2ndf = ;
+        temp_Hyp_LV.N_Mother = 1; //Change!
+        temp_Hyp_LV.Chi2ndf = -1.; //Change!
+        temp_Hyp_LV.NDF = -999; //Change!
         temp_Hyp_LV.MomE.SetPxPyPzE(Mother_LorentzVector.Px(),Mother_LorentzVector.Py(),Mother_LorentzVector.Pz(),Mother_LorentzVector.E());
-        //temp_Hyp_LV.PrimVtx.SetXYZ();
+        temp_Hyp_LV.PrimVtx.SetXYZ(0.,0.,0.); //Change!
         temp_Hyp_LV.DecayVtx.SetXYZ(temp_closedist_pos.X(),temp_closedist_pos.Y(),temp_closedist_pos.Z());
         temp_Hyp_LV.Dist_RealReconsVtx.SetXYZ(DecayVertex_real.X()-temp_closedist_pos.X(),DecayVertex_real.Y()-temp_closedist_pos.Y(),DecayVertex_real.Z()-temp_closedist_pos.Z());
-        //temp_Hyp_LV.Dist_MotherPrimVtx = ;
-        //temp_Hyp_LV.Angle_MotherPrimVtx = ;
-        //temp_Hyp_LV.ErrGetMass = ;
+        temp_Hyp_LV.Dist_MotherPrimVtx = -1.; //Change!
+        temp_Hyp_LV.Angle_MotherPrimVtx = -1.; //Change!
+        temp_Hyp_LV.ErrGetMass = -1; //Change!
         temp_Hyp_LV.InvMass = Mother_LorentzVector.M();
-        //temp_Hyp_LV.ErrInvMass = ;
-        //temp_Hyp_LV.ErrGetLifeTime = ;
-        //temp_Hyp_LV.LifeTime = ;
-        //temp_Hyp_LV.ErrLifeTime = ;
+        temp_Hyp_LV.ErrInvMass = -1.; //Change!
+        temp_Hyp_LV.ErrGetLifeTime = -1; //Change!
+        temp_Hyp_LV.LifeTime = -1.; //Change!
+        temp_Hyp_LV.ErrLifeTime = -1.; //Change!
+
         TVector3 Mother_Mom(Mother_LorentzVector.Px(), Mother_LorentzVector.Py(), Mother_LorentzVector.Pz());
 
         temp_Hyp_LV.Id_Fragment = FragmentTracks_All[ref_RealFragment].Id();
         temp_Hyp_LV.MomE_Fragment.SetPxPyPzE(FragmentTracks_All[ref_RealFragment].GetPx(), FragmentTracks_All[ref_RealFragment].GetPy(), FragmentTracks_All[ref_RealFragment].GetPz(), FragmentTracks_All[ref_RealFragment].GetE());
+        temp_Hyp_LV.Chi2ndf_Fragment = FragmentTracks_All[ref_RealFragment].GetChi2() / static_cast<double>(FragmentTracks_All[ref_RealFragment].GetNDF());      
+        temp_Hyp_LV.NDF_Fragment = FragmentTracks_All[ref_RealFragment].GetNDF();
+        temp_Hyp_LV.Pvalue_Fragment = Fragment_FitInfo[ref_RealFragment].Pvalue;
         TVector3 Fragment_Mom(FragmentTracks_All[ref_RealFragment].GetPx(), FragmentTracks_All[ref_RealFragment].GetPy(), FragmentTracks_All[ref_RealFragment].GetPz());
         temp_Hyp_LV.Angle_MotherFragment = Mother_Mom.Angle(Fragment_Mom) * 180. / M_PI;
         temp_Hyp_LV.Fragment_IsFromHyp = 1;
@@ -799,9 +874,13 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
         temp_Hyp_LV.Id_Pion = PionTracks[new_pionid].Id();
         temp_Hyp_LV.MomE_Pion.SetPxPyPzE(PionTracks[new_pionid].GetPx(), PionTracks[new_pionid].GetPy(), PionTracks[new_pionid].GetPz(), PionTracks[new_pionid].GetE());
         temp_Hyp_LV.Chi2ndf_Pion = PionTracks[new_pionid].GetChi2() / static_cast<double>(PionTracks[new_pionid].GetNDF());
+        temp_Hyp_LV.NDF_Pion = PionTracks[new_pionid].GetNDF();
+        temp_Hyp_LV.Pvalue_Pion = Pion_FitInfo[new_pionid].Pvalue;
         TVector3 Pion_Mom(PionTracks[new_pionid].GetPx(), PionTracks[new_pionid].GetPy(), PionTracks[new_pionid].GetPz());
         temp_Hyp_LV.Angle_MotherPion = Mother_Mom.Angle(Pion_Mom) * 180. / M_PI;
-        temp_Hyp_LV.N_Pion = PionTracks.size();
+        temp_Hyp_LV.NHitsMDC_Pion = Pion_FitInfo[new_pionid].NHitsMDC;
+        temp_Hyp_LV.NHitsMinifiber_Pion = Pion_FitInfo[new_pionid].NHitsMinifiber;
+        temp_Hyp_LV.N_Pion = 1;
         temp_Hyp_LV.Pion_IsFromHyp = 0;
 
         for(itr_recons = RecoEvent.DaughtersTrackDAFInit.begin(); itr_recons != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_recons)
@@ -810,12 +889,13 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
               temp_Hyp_LV.Pion_IsFromHyp = 1;
           }
 
+        temp_Hyp_LV.Mother_IsFromHyp = temp_Hyp_LV.Fragment_IsFromHyp * temp_Hyp_LV.Pion_IsFromHyp;
 
         CloseDist(FragmentTracks_All[ref_RealFragment], PionTracks[new_pionid], dist_DaughtersLV, centroid_DaughtersLV);
         temp_Hyp_LV.Dist_Daughters = dist_DaughtersLV;
 
-        //temp_Hyp_LV.ArmPod_Qt = ;
-        //temp_Hyp_LV.ArmPod_Alfa = ;
+        temp_Hyp_LV.ArmPod_Qt = -1.; //Change!
+        temp_Hyp_LV.ArmPod_Alfa = -1.; //Change!
 
         RecoEvent.Hyp_Vect.emplace_back(temp_Hyp_LV);
       }
@@ -933,6 +1013,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp.PDG = Hyp_pdg;
       temp_Hyp.N_Mother = MotherTracks_PrimVtx.size();
       temp_Hyp.Chi2ndf = MotherTracks_PrimVtx[i].GetChi2() / static_cast<double>(MotherTracks_PrimVtx[i].GetNDF());
+      temp_Hyp.NDF = MotherTracks_PrimVtx[i].GetNDF();
       temp_Hyp.MomE.SetPxPyPzE(MotherTracks_PrimVtx[i].GetPx(),MotherTracks_PrimVtx[i].GetPy(),MotherTracks_PrimVtx[i].GetPz(),MotherTracks_PrimVtx[i].GetE());
       MotherTracks_PrimVtx[i].TransportToProductionVertex();
       temp_Hyp.PrimVtx.SetXYZ(MotherTracks_PrimVtx[i].GetX(),MotherTracks_PrimVtx[i].GetY(),MotherTracks_PrimVtx[i].GetZ());
@@ -956,6 +1037,9 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp.Id_Fragment = FragmentTracks[temp_id_fragment].Id();
       temp_Hyp.MomE_Fragment.SetPxPyPzE(FragmentTracks[temp_id_fragment].GetPx(), FragmentTracks[temp_id_fragment].GetPy(), FragmentTracks[temp_id_fragment].GetPz(), FragmentTracks[temp_id_fragment].GetE());
+      temp_Hyp.Chi2ndf_Fragment = FragmentTracks[temp_id_fragment].GetChi2() / static_cast<double>(FragmentTracks[temp_id_fragment].GetNDF());      
+      temp_Hyp.NDF_Fragment = FragmentTracks[temp_id_fragment].GetNDF();
+      temp_Hyp.Pvalue_Fragment = Fragment_FitInfo[temp_id_fragment].Pvalue;
       TVector3 Fragment_Mom(FragmentTracks[temp_id_fragment].GetPx(), FragmentTracks[temp_id_fragment].GetPy(), FragmentTracks[temp_id_fragment].GetPz());
       temp_Hyp.Angle_MotherFragment = Mother_Mom.Angle(Fragment_Mom) * 180. / M_PI;
       temp_Hyp.Fragment_IsFromHyp = 0;
@@ -964,9 +1048,13 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp.Id_Pion = PionTracks[temp_id_pion].Id();
       temp_Hyp.MomE_Pion.SetPxPyPzE(PionTracks[temp_id_pion].GetPx(), PionTracks[temp_id_pion].GetPy(), PionTracks[temp_id_pion].GetPz(), PionTracks[temp_id_pion].GetE());
-      TVector3 Pion_Mom(PionTracks[temp_id_pion].GetPx(), PionTracks[temp_id_pion].GetPy(), PionTracks[temp_id_pion].GetPz());
       temp_Hyp.Chi2ndf_Pion = PionTracks[temp_id_pion].GetChi2() / static_cast<double>(PionTracks[temp_id_pion].GetNDF());
+      temp_Hyp.NDF_Pion = PionTracks[temp_id_pion].GetNDF();
+      temp_Hyp.Pvalue_Pion = Pion_FitInfo[temp_id_pion].Pvalue;
+      TVector3 Pion_Mom(PionTracks[temp_id_pion].GetPx(), PionTracks[temp_id_pion].GetPy(), PionTracks[temp_id_pion].GetPz());
       temp_Hyp.Angle_MotherPion = Mother_Mom.Angle(Pion_Mom) * 180. / M_PI;
+      temp_Hyp.NHitsMDC_Pion = Pion_FitInfo[temp_id_pion].NHitsMDC;
+      temp_Hyp.NHitsMinifiber_Pion = Pion_FitInfo[temp_id_pion].NHitsMinifiber;
       temp_Hyp.N_Pion = PionTracks.size();
       temp_Hyp.Pion_IsFromHyp = 0;
 
@@ -976,12 +1064,14 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
             temp_Hyp.Pion_IsFromHyp = 1;
         }
 
-      CloseDist(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], dist_Daughters, centroid_Daughters);
-      temp_Hyp.Dist_Daughters = dist_Daughters;
+      temp_Hyp.Mother_IsFromHyp = temp_Hyp.Fragment_IsFromHyp * temp_Hyp.Pion_IsFromHyp;
 
       float Vertex[3] = {MotherTracks_PrimVtx[i].GetX(), MotherTracks_PrimVtx[i].GetY(), MotherTracks_PrimVtx[i].GetZ()};
       FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
       PionTracks[temp_id_pion].TransportToPoint(Vertex);
+
+      CloseDist(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], dist_Daughters, centroid_Daughters);
+      temp_Hyp.Dist_Daughters = dist_Daughters;
 
       float armenterosQtAlfa[2] = {0.};
       MotherTracks_PrimVtx[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
@@ -1025,6 +1115,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Theta_MotherTrackPrimVtx->Fill(theta_MotherTrackPrimVtx, MotherTracks_PrimVtx[i].GetMass(), 1.);
 
       LocalHisto.h_EffPosZ_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ(), 1.);
+      double PosR_DecayVertex = std::sqrt(std::pow(MotherTracks_PrimVtx[i].GetX(), 2.) + std::pow(MotherTracks_PrimVtx[i].GetY(), 2.));
+      LocalHisto.h_EffPosZPosR_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ(), PosR_DecayVertex, 1.);
       LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx->Fill(MotherTracks_PrimVtx[i].GetZ(), MotherTracks_PrimVtx[i].GetMass(), 1.);
 
       LocalHisto.h_DecayFragmentMomZ_KFPart_PrimVtx->Fill(FragmentTracks[temp_id_fragment].GetPz(), MotherTracks_PrimVtx[i].GetMass(), 1.);
@@ -1086,6 +1178,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Mass.PDG = Hyp_pdg;
       temp_Hyp_Mass.N_Mother = MotherTracks_PrimVtx_Mass.size();
       temp_Hyp_Mass.Chi2ndf = MotherTracks_PrimVtx_Mass[i].GetChi2() / static_cast<double>(MotherTracks_PrimVtx_Mass[i].GetNDF());
+      temp_Hyp_Mass.NDF = MotherTracks_PrimVtx_Mass[i].GetNDF();
       temp_Hyp_Mass.MomE.SetPxPyPzE(MotherTracks_PrimVtx_Mass[i].GetPx(),MotherTracks_PrimVtx_Mass[i].GetPy(),MotherTracks_PrimVtx_Mass[i].GetPz(),MotherTracks_PrimVtx_Mass[i].GetE());
       MotherTracks_PrimVtx_Mass[i].TransportToProductionVertex();
       temp_Hyp_Mass.PrimVtx.SetXYZ(MotherTracks_PrimVtx_Mass[i].GetX(),MotherTracks_PrimVtx_Mass[i].GetY(),MotherTracks_PrimVtx_Mass[i].GetZ());
@@ -1109,6 +1202,9 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       temp_Hyp_Mass.Id_Fragment = FragmentTracks[temp_id_fragment].Id();
       temp_Hyp_Mass.MomE_Fragment.SetPxPyPzE(FragmentTracks[temp_id_fragment].GetPx(), FragmentTracks[temp_id_fragment].GetPy(), FragmentTracks[temp_id_fragment].GetPz(), FragmentTracks[temp_id_fragment].GetE());
+      temp_Hyp_Mass.Chi2ndf_Fragment = FragmentTracks[temp_id_fragment].GetChi2() / static_cast<double>(FragmentTracks[temp_id_fragment].GetNDF());      
+      temp_Hyp_Mass.NDF_Fragment = FragmentTracks[temp_id_fragment].GetNDF();
+      temp_Hyp_Mass.Pvalue_Fragment = Fragment_FitInfo[temp_id_fragment].Pvalue;
       TVector3 Fragment_Mom(FragmentTracks[temp_id_fragment].GetPx(), FragmentTracks[temp_id_fragment].GetPy(), FragmentTracks[temp_id_fragment].GetPz());
       temp_Hyp_Mass.Angle_MotherFragment = Mother_Mom.Angle(Fragment_Mom) * 180. / M_PI;
       temp_Hyp_Mass.Fragment_IsFromHyp = 0;
@@ -1118,8 +1214,12 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Mass.Id_Pion = PionTracks[temp_id_pion].Id();
       temp_Hyp_Mass.MomE_Pion.SetPxPyPzE(PionTracks[temp_id_pion].GetPx(), PionTracks[temp_id_pion].GetPy(), PionTracks[temp_id_pion].GetPz(), PionTracks[temp_id_pion].GetE());
       temp_Hyp_Mass.Chi2ndf_Pion = PionTracks[temp_id_pion].GetChi2() / static_cast<double>(PionTracks[temp_id_pion].GetNDF());
+      temp_Hyp_Mass.NDF_Pion = PionTracks[temp_id_pion].GetNDF();
+      temp_Hyp_Mass.Pvalue_Pion = Pion_FitInfo[temp_id_pion].Pvalue;
       TVector3 Pion_Mom(PionTracks[temp_id_pion].GetPx(), PionTracks[temp_id_pion].GetPy(), PionTracks[temp_id_pion].GetPz());
       temp_Hyp_Mass.Angle_MotherPion = Mother_Mom.Angle(Pion_Mom) * 180. / M_PI;
+      temp_Hyp_Mass.NHitsMDC_Pion = Pion_FitInfo[temp_id_pion].NHitsMDC;
+      temp_Hyp_Mass.NHitsMinifiber_Pion = Pion_FitInfo[temp_id_pion].NHitsMinifiber;
       temp_Hyp_Mass.N_Pion = PionTracks.size();
       temp_Hyp_Mass.Pion_IsFromHyp = 0;
 
@@ -1129,12 +1229,14 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
             temp_Hyp_Mass.Pion_IsFromHyp = 1;
         }
 
-      CloseDist(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], dist_DaughtersMass, centroid_DaughtersMass);
-      temp_Hyp_Mass.Dist_Daughters = dist_DaughtersMass;
+      temp_Hyp_Mass.Mother_IsFromHyp = temp_Hyp_Mass.Fragment_IsFromHyp * temp_Hyp_Mass.Pion_IsFromHyp;
 
       float Vertex[3] = {MotherTracks_PrimVtx_Mass[i].GetX(), MotherTracks_PrimVtx_Mass[i].GetY(), MotherTracks_PrimVtx_Mass[i].GetZ()};
       FragmentTracks[temp_id_fragment].TransportToPoint(Vertex);
       PionTracks[temp_id_pion].TransportToPoint(Vertex);
+
+      CloseDist(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], dist_DaughtersMass, centroid_DaughtersMass);
+      temp_Hyp_Mass.Dist_Daughters = dist_DaughtersMass;
 
       float armenterosQtAlfa[2] = {0.};
       MotherTracks_PrimVtx_Mass[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
@@ -1440,9 +1542,9 @@ void TDecayVertex<Out>::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, i
 template <class Out>
 void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                                         int& pdgParticle, int& cutConditions,
-                                        std::vector<KFParticle>& RealTracks)
+                                        std::vector<KFParticle>& RealTracks,
+                                        std::vector<KFFitInfo>& Vect_FitInfo)
 {
-
   std::unordered_map<int, std::vector<std::vector<SimHit> > >::iterator itr;
   for(itr = TrackDAFSim.begin(); itr != TrackDAFSim.end(); ++itr)
     {
@@ -1505,10 +1607,16 @@ void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std
 
           temp_particle.SetField(att.Field);
 
-          if(cutConditions == 0)
-              RealTracks.emplace_back(temp_particle);
-          else if((cutConditions == 1) && (nHits_MDC >= 6) && (nHits_MiniFiber >= 4) && ((nHits_PSCE != 0) || (nHits_PSBE != 0)))
-              RealTracks.emplace_back(temp_particle);
+          KFFitInfo temp_FitInfo;
+          temp_FitInfo.Pvalue = 0.; //Change!
+          temp_FitInfo.NHitsMDC = nHits_MDC;
+          temp_FitInfo.NHitsMinifiber = nHits_MiniFiber;
+
+          if((cutConditions == 1) && ((nHits_MDC < 6) || (nHits_MiniFiber < 4) || ((nHits_PSCE == 0) && (nHits_PSBE == 0))))
+            continue;
+
+          RealTracks.emplace_back(temp_particle);
+          Vect_FitInfo.emplace_back(temp_FitInfo);
         }
     }
 
@@ -1611,7 +1719,8 @@ void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks
 
 template <class Out>
 void TDecayVertex<Out>::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
-                                    std::vector<KFParticle>& PionTracks)
+                                    std::vector<KFParticle>& PionTracks,
+                                        std::vector<KFFitInfo>& Vect_FitInfo)
 {
   std::unordered_map<int, ResSolDAF>::iterator itr;
   for(itr = DAF_results.begin(); itr != DAF_results.end(); ++itr)
@@ -1644,6 +1753,13 @@ void TDecayVertex<Out>::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF
           temp_particle.SetChi2(itr->second.chi2);
 
           PionTracks.emplace_back(temp_particle);
+
+          KFFitInfo temp_FitInfo;
+          temp_FitInfo.Pvalue = itr->second.pvalue;
+          temp_FitInfo.NHitsMDC = itr->second.Ncentral;
+          temp_FitInfo.NHitsMinifiber = itr->second.Nmfiber;
+
+          Vect_FitInfo.emplace_back(temp_FitInfo);
         }
     }
 
@@ -1651,7 +1767,7 @@ void TDecayVertex<Out>::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF
 }
 
 template <class Out>
-void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& PionTracks)
+void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& PionTracks, std::vector<KFFitInfo>& Vect_FitInfo)
 {
 /*
   Possible cuts:
@@ -1669,6 +1785,10 @@ void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TV
   double temp_theta;
   double temp_dist;
 
+  std::vector<KFFitInfo> copy_Vect_FitInfo;
+  copy_Vect_FitInfo = Vect_FitInfo;
+  Vect_FitInfo.clear();
+
   for(size_t i = 0; i < PionTracks_All.size(); ++i)
     {
       temp_chi2ndf = PionTracks_All[i].GetChi2() / static_cast<double>(PionTracks_All[i].GetNDF());
@@ -1683,6 +1803,7 @@ void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TV
         continue;
 
       PionTracks.emplace_back(PionTracks_All[i]);
+      Vect_FitInfo.emplace_back(copy_Vect_FitInfo[i]);
     }
 
   return;
@@ -2225,9 +2346,7 @@ void TDecayVertex<Out>::SiHitsFinder2(KFParticle& Track, int idSilicon, int stri
 
       widthStrip = widthStrip_Si1;
       lenghtSi   = lenghtSi_Si1;
-      restrict_actlenght = restrict_actlenght_Si1;
-      actlenghtX = actlenghtX_Si1;
-      actlenghtY = actlenghtY_Si1;
+
       sigma = sigma_Si1;
     }
 
@@ -2240,9 +2359,6 @@ void TDecayVertex<Out>::SiHitsFinder2(KFParticle& Track, int idSilicon, int stri
 
       widthStrip = widthStrip_Si2;
       lenghtSi   = lenghtSi_Si2;
-      restrict_actlenght = restrict_actlenght_Si2;
-      actlenghtX = actlenghtX_Si2;
-      actlenghtY = actlenghtY_Si2;
       sigma = sigma_Si2;
     }
 
@@ -2526,5 +2642,16 @@ void TDecayVertex<Out>::AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>
   DecayVertexRecons *= 1. / static_cast<double>(Vect_Centroids.size());
 }
 
+template<class Out>
+void TDecayVertex<Out>::TranslationZ_Target_System(double Target_PosZ)
+{
+  double Dist_to_TransZ = Target_PosZ - 25.; // Reference target PosZ = 25.
+  Zo_target += Dist_to_TransZ;
+  Zf_target += Dist_to_TransZ;
+/* 
+  Z_plane_Si1 += Dist_to_TransZ;
+  Z_plane_Si2 += Dist_to_TransZ;
+*/
+}
 
 template class TDecayVertex<MCAnaEventG4Sol>;
