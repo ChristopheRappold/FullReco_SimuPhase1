@@ -39,7 +39,7 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSim& I
 
   //det_build = new TBuildDetectorLayerPlane(Attributes,Attributes.beam_only);
   if(Attributes.TaskConfig.Task_ReStart)
-    det_build = new TBuildRestarter(Attributes);
+    det_build = new TBuildRestarter<TEOut>(Attributes);
   else
     det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
   //det_build = new TTestUnits(Attributes,"layerDAF");
@@ -152,7 +152,7 @@ int FullRecoTask<TEOut>::EventLoop(TEOut* RestartEvent, TEOut* OutTree)
 {
 
   REvent.Clear();
-  int return_build = (*dynamic_cast<TBuildRestarter*>(det_build))(RestartEvent,REvent,OutTree);
+  int return_build = (*dynamic_cast<TBuildRestarter<TEOut>*>(det_build))(RestartEvent,REvent,OutTree);
 
   if(return_build !=0)
     return -1;
