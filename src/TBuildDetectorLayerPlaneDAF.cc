@@ -9,6 +9,7 @@
 #include <vector>
 
 //#define DEBUG_BUILD
+//#define DEBUG_BUILD3
 
 using namespace std;
 
@@ -224,6 +225,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   RecoEvent.InteractionPoint[1] = event.InteractionPoint_Y;
   RecoEvent.InteractionPoint[2] = event.InteractionPoint_Z;
 
+  RecoEvent.PrimVtxRecons.SetXYZ(event.InteractionPoint_X, event.InteractionPoint_Y, event.InteractionPoint_Z);
+
   RecoEvent.DecayVertex[0] = event.DecayVertex_X;
   RecoEvent.DecayVertex[1] = event.DecayVertex_Y;
   RecoEvent.DecayVertex[2] = event.DecayVertex_Z;
@@ -256,6 +259,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
 
       InfoInit tempInit;
+      tempInit.charge = event.BeamCharges[index];
       tempInit.posX = event.InteractionPoint_X;
       tempInit.posY = event.InteractionPoint_Y;
       tempInit.posZ = event.InteractionPoint_Z;
@@ -292,6 +296,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
 
       InfoInit tempInit;
+      tempInit.charge = event.DaughterCharges[index];
       tempInit.posX = event.DecayVertex_X;
       tempInit.posY = event.DecayVertex_Y;
       tempInit.posZ = event.DecayVertex_Z;
@@ -514,12 +519,13 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   // void simulHitstoSignals(TTreeReaderArray<TG4Sol_Hit>* DetHits,
                   // std::vector<std::tuple<double,size_t>>& HitEnergyLayer)
                   const double EnergyThreshold = 0.001; // MeV
-#ifdef DEBUG_BUILD2
+#ifdef DEBUG_BUILD3
                   std::cout << "Silicon \n";
                   std::string tempName = orderDetName.find(TypeDet)->second;
                   std::cout << " name : " << tempName << "\n";
-                  std::cout << " LayerID :" << LayerID << "\n";
-                  std::cout << " Energy :" << hit.Energy << "\n";
+                  std::cout << " LayerID : " << LayerID << "\n";
+                  std::cout << " Energy : " << hit.Energy << "\n";
+                  std::cout << " PosZ : " << hit.HitPosZ << "\n";
 #endif
                   if(hit.Energy < EnergyThreshold)
                     continue;
@@ -562,6 +568,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   const double EnergyThreshold = 0.001; // MeV
 #ifdef DEBUG_BUILD
                   std::cout << "Silicon pad \n";
+                  std::cout << "SiliconID: " << TypeDet << "\n";
                   std::string tempName = orderDetName.find(TypeDet)->second;
                   std::cout << " name : " << tempName << "\n";
                   std::cout << " LayerID :" << LayerID << "\n";
@@ -576,6 +583,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                     it_SiHit->second += hit.Energy;
                   else
                     RecoEvent.Si_HitsEnergyLayer[idSi].insert(std::make_pair(LayerID, hit.Energy));
+
+                  //if(idSi == 4)
+                    //std::cout << "HitPosX : " << hit.HitPosX << "\tHitPosY : " << hit.HitPosY << std::endl;
                 }
               else if(IsPSCE(TypeDet))
                 {

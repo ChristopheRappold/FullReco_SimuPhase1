@@ -386,7 +386,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             continue;
           if(id_det >= G4Sol::Si1x && id_det <= G4Sol::Si2y)
             continue;
-          if(id_det >= G4Sol::Si1x_SD && id_det <= G4Sol::Si2y_SD)
+          if(id_det >= G4Sol::Si1x_SD && id_det <= G4Sol::Si2y_SD_pad)
             continue;
           if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
             ++n_Central;

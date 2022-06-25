@@ -67,8 +67,8 @@ struct MT
 struct Task
 {
   bool Task_ReStart = false;
-  bool Task_CheckField = true;
-  bool Task_PrimaryVtx = false;
+  bool Task_CheckField = false;
+  bool Task_PrimaryVtx = true;
   bool Task_FlatMCOutputML = false;
   bool Task_BayesFinder = false;
   bool Task_RiemannFinder = false;

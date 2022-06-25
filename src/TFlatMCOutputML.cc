@@ -251,21 +251,300 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
     }
 }
 
+DataML_Hyp::DataML_Hyp(const THyphiAttributes& att_, TTree* outT, TTree* outTs, TTree* outTb) : DataML(att_, outT, outTs, outTb)
+{
+  out_tree->Branch("Pattern", &Pattern, "Pattern/I");
+
+  out_tree->Branch("PDG", &PDG, "PDG/I");
+  out_tree->Branch("N_Mother", &N_Mother, "N_Mother/I");
+  out_tree->Branch("Chi2ndf", &Chi2ndf, "Chi2ndf/d");
+  out_tree->Branch("NDF", &NDF, "NDF/I");
+  out_tree->Branch("MomX", &MomX, "MomX/d");
+  out_tree->Branch("MomY", &MomY, "MomY/d");
+  out_tree->Branch("MomZ", &MomZ, "MomZ/d");
+  out_tree->Branch("E", &E, "E/d");
+  out_tree->Branch("PrimVtx_PosX", &PrimVtx_PosX, "PrimVtx_PosX/d");
+  out_tree->Branch("PrimVtx_PosY", &PrimVtx_PosY, "PrimVtx_PosY/d");
+  out_tree->Branch("PrimVtx_PosZ", &PrimVtx_PosZ, "PrimVtx_PosZ/d");
+  out_tree->Branch("DecayVtx_PosX", &DecayVtx_PosX, "DecayVtx_PosX/d");
+  out_tree->Branch("DecayVtx_PosY", &DecayVtx_PosY, "DecayVtx_PosY/d");
+  out_tree->Branch("DecayVtx_PosZ", &DecayVtx_PosZ, "DecayVtx_PosZ/d");
+  out_tree->Branch("Dist_RealReconsVtx_X", &Dist_RealReconsVtx_X, "Dist_RealReconsVtx_X/d");
+  out_tree->Branch("Dist_RealReconsVtx_Y", &Dist_RealReconsVtx_Y, "Dist_RealReconsVtx_Y/d");
+  out_tree->Branch("Dist_RealReconsVtx_Z", &Dist_RealReconsVtx_Z, "Dist_RealReconsVtx_Z/d");
+  out_tree->Branch("Dist_MotherPrimVtx", &Dist_MotherPrimVtx, "Dist_MotherPrimVtx/d");
+  out_tree->Branch("Angle_MotherPrimVtx", &Angle_MotherPrimVtx, "Angle_MotherPrimVtx/d");
+  out_tree->Branch("InvMass", &InvMass, "InvMass/d");
+  out_tree->Branch("ErrInvMass", &ErrInvMass, "ErrInvMass/d");
+  out_tree->Branch("ErrGetMass", &ErrGetMass, "ErrGetMass/I");
+  out_tree->Branch("LifeTime", &LifeTime, "LifeTime/d");
+  out_tree->Branch("ErrLifeTime", &ErrLifeTime, "ErrLifeTime/d");
+  out_tree->Branch("ErrGetLifeTime", &ErrGetLifeTime, "ErrGetLifeTime/I");
+  out_tree->Branch("Mother_IsFromHyp", &Mother_IsFromHyp, "Mother_IsFromHyp/I");
+
+  out_tree->Branch("Id_Fragment", &Id_Fragment, "Id_Fragment/I");
+  out_tree->Branch("MomX_Fragment", &MomX_Fragment, "MomX_Fragment/d");
+  out_tree->Branch("MomY_Fragment", &MomY_Fragment, "MomY_Fragment/d");
+  out_tree->Branch("MomZ_Fragment", &MomZ_Fragment, "MomZ_Fragment/d");
+  out_tree->Branch("E_Fragment", &E_Fragment, "E_Fragment/d");
+  out_tree->Branch("Chi2ndf_Fragment", &Chi2ndf_Fragment, "Chi2ndf_Fragment/d");
+  out_tree->Branch("NDF_Fragment", &NDF_Fragment, "NDF_Fragment/I");
+  out_tree->Branch("Pvalue_Fragment", &Pvalue_Fragment, "Pvalue_Fragment/d");
+  out_tree->Branch("Angle_MotherFragment", &Angle_MotherFragment, "Angle_MotherFragment/d");
+  out_tree->Branch("Fragment_IsFromHyp", &Fragment_IsFromHyp, "Fragment_IsFromHyp/I");
+
+  out_tree->Branch("Id_Pion", &Id_Pion, "Id_Pion/I");
+  out_tree->Branch("MomX_Pion", &MomX_Pion, "MomX_Pion/d");
+  out_tree->Branch("MomY_Pion", &MomY_Pion, "MomY_Pion/d");
+  out_tree->Branch("MomZ_Pion", &MomZ_Pion, "MomZ_Pion/d");
+  out_tree->Branch("E_Pion", &E_Pion, "E_Pion/d");
+  out_tree->Branch("Chi2ndf_Pion", &Chi2ndf_Pion, "Chi2ndf_Pion/d");
+  out_tree->Branch("NDF_Pion", &NDF_Pion, "NDF_Pion/I");
+  out_tree->Branch("Pvalue_Pion", &Pvalue_Pion, "Pvalue_Pion/d");
+  out_tree->Branch("Angle_MotherPion", &Angle_MotherPion, "Angle_MotherPion/d");
+  out_tree->Branch("NHitsMDC_Pion", &NHitsMDC_Pion, "NHitsMDC_Pion/I");
+  out_tree->Branch("NHitsMinifiber_Pion", &NHitsMinifiber_Pion, "NHitsMinifiber_Pion/I");
+  out_tree->Branch("N_Pion", &N_Pion, "N_Pion/I");
+  out_tree->Branch("Pion_IsFromHyp", &Pion_IsFromHyp, "Pion_IsFromHyp/I");
+
+  out_tree->Branch("Dist_Daughters", &Dist_Daughters, "Dist_Daughters/d");
+  out_tree->Branch("ArmPod_Qt", &ArmPod_Qt, "ArmPod_Qt/d");
+  out_tree->Branch("ArmPod_Alfa", &ArmPod_Alfa, "ArmPod_Alfa/d");
+
+
+
+  out_tree_signal->Branch("Pattern", &Pattern, "Pattern/I");
+
+  out_tree_signal->Branch("PDG", &PDG, "PDG/I");
+  out_tree_signal->Branch("N_Mother", &N_Mother, "N_Mother/I");
+  out_tree_signal->Branch("Chi2ndf", &Chi2ndf, "Chi2ndf/d");
+  out_tree_signal->Branch("NDF", &NDF, "NDF/I");
+  out_tree_signal->Branch("MomX", &MomX, "MomX/d");
+  out_tree_signal->Branch("MomY", &MomY, "MomY/d");
+  out_tree_signal->Branch("MomZ", &MomZ, "MomZ/d");
+  out_tree_signal->Branch("E", &E, "E/d");
+  out_tree_signal->Branch("PrimVtx_PosX", &PrimVtx_PosX, "PrimVtx_PosX/d");
+  out_tree_signal->Branch("PrimVtx_PosY", &PrimVtx_PosY, "PrimVtx_PosY/d");
+  out_tree_signal->Branch("PrimVtx_PosZ", &PrimVtx_PosZ, "PrimVtx_PosZ/d");
+  out_tree_signal->Branch("DecayVtx_PosX", &DecayVtx_PosX, "DecayVtx_PosX/d");
+  out_tree_signal->Branch("DecayVtx_PosY", &DecayVtx_PosY, "DecayVtx_PosY/d");
+  out_tree_signal->Branch("DecayVtx_PosZ", &DecayVtx_PosZ, "DecayVtx_PosZ/d");
+  out_tree_signal->Branch("Dist_RealReconsVtx_X", &Dist_RealReconsVtx_X, "Dist_RealReconsVtx_X/d");
+  out_tree_signal->Branch("Dist_RealReconsVtx_Y", &Dist_RealReconsVtx_Y, "Dist_RealReconsVtx_Y/d");
+  out_tree_signal->Branch("Dist_RealReconsVtx_Z", &Dist_RealReconsVtx_Z, "Dist_RealReconsVtx_Z/d");
+  out_tree_signal->Branch("Dist_MotherPrimVtx", &Dist_MotherPrimVtx, "Dist_MotherPrimVtx/d");
+  out_tree_signal->Branch("Angle_MotherPrimVtx", &Angle_MotherPrimVtx, "Angle_MotherPrimVtx/d");
+  out_tree_signal->Branch("InvMass", &InvMass, "InvMass/d");
+  out_tree_signal->Branch("ErrInvMass", &ErrInvMass, "ErrInvMass/d");
+  out_tree_signal->Branch("ErrGetMass", &ErrGetMass, "ErrGetMass/I");
+  out_tree_signal->Branch("LifeTime", &LifeTime, "LifeTime/d");
+  out_tree_signal->Branch("ErrLifeTime", &ErrLifeTime, "ErrLifeTime/d");
+  out_tree_signal->Branch("ErrGetLifeTime", &ErrGetLifeTime, "ErrGetLifeTime/I");
+  out_tree_signal->Branch("Mother_IsFromHyp", &Mother_IsFromHyp, "Mother_IsFromHyp/I");
+
+  out_tree_signal->Branch("Id_Fragment", &Id_Fragment, "Id_Fragment/I");
+  out_tree_signal->Branch("MomX_Fragment", &MomX_Fragment, "MomX_Fragment/d");
+  out_tree_signal->Branch("MomY_Fragment", &MomY_Fragment, "MomY_Fragment/d");
+  out_tree_signal->Branch("MomZ_Fragment", &MomZ_Fragment, "MomZ_Fragment/d");
+  out_tree_signal->Branch("E_Fragment", &E_Fragment, "E_Fragment/d");
+  out_tree_signal->Branch("Chi2ndf_Fragment", &Chi2ndf_Fragment, "Chi2ndf_Fragment/d");
+  out_tree_signal->Branch("NDF_Fragment", &NDF_Fragment, "NDF_Fragment/I");
+  out_tree_signal->Branch("Pvalue_Fragment", &Pvalue_Fragment, "Pvalue_Fragment/d");
+  out_tree_signal->Branch("Angle_MotherFragment", &Angle_MotherFragment, "Angle_MotherFragment/d");
+  out_tree_signal->Branch("Fragment_IsFromHyp", &Fragment_IsFromHyp, "Fragment_IsFromHyp/I");
+
+  out_tree_signal->Branch("Id_Pion", &Id_Pion, "Id_Pion/I");
+  out_tree_signal->Branch("MomX_Pion", &MomX_Pion, "MomX_Pion/d");
+  out_tree_signal->Branch("MomY_Pion", &MomY_Pion, "MomY_Pion/d");
+  out_tree_signal->Branch("MomZ_Pion", &MomZ_Pion, "MomZ_Pion/d");
+  out_tree_signal->Branch("E_Pion", &E_Pion, "E_Pion/d");
+  out_tree_signal->Branch("Chi2ndf_Pion", &Chi2ndf_Pion, "Chi2ndf_Pion/d");
+  out_tree_signal->Branch("NDF_Pion", &NDF_Pion, "NDF_Pion/I");
+  out_tree_signal->Branch("Pvalue_Pion", &Pvalue_Pion, "Pvalue_Pion/d");
+  out_tree_signal->Branch("Angle_MotherPion", &Angle_MotherPion, "Angle_MotherPion/d");
+  out_tree_signal->Branch("NHitsMDC_Pion", &NHitsMDC_Pion, "NHitsMDC_Pion/I");
+  out_tree_signal->Branch("NHitsMinifiber_Pion", &NHitsMinifiber_Pion, "NHitsMinifiber_Pion/I");
+  out_tree_signal->Branch("N_Pion", &N_Pion, "N_Pion/I");
+  out_tree_signal->Branch("Pion_IsFromHyp", &Pion_IsFromHyp, "Pion_IsFromHyp/I");
+
+  out_tree_signal->Branch("Dist_Daughters", &Dist_Daughters, "Dist_Daughters/d");
+  out_tree_signal->Branch("ArmPod_Qt", &ArmPod_Qt, "ArmPod_Qt/d");
+  out_tree_signal->Branch("ArmPod_Alfa", &ArmPod_Alfa, "ArmPod_Alfa/d");
+
+
+
+  out_tree_background->Branch("Pattern", &Pattern, "Pattern/I");
+
+  out_tree_background->Branch("PDG", &PDG, "PDG/I");
+  out_tree_background->Branch("N_Mother", &N_Mother, "N_Mother/I");
+  out_tree_background->Branch("Chi2ndf", &Chi2ndf, "Chi2ndf/d");
+  out_tree_background->Branch("NDF", &NDF, "NDF/I");
+  out_tree_background->Branch("MomX", &MomX, "MomX/d");
+  out_tree_background->Branch("MomY", &MomY, "MomY/d");
+  out_tree_background->Branch("MomZ", &MomZ, "MomZ/d");
+  out_tree_background->Branch("E", &E, "E/d");
+  out_tree_background->Branch("PrimVtx_PosX", &PrimVtx_PosX, "PrimVtx_PosX/d");
+  out_tree_background->Branch("PrimVtx_PosY", &PrimVtx_PosY, "PrimVtx_PosY/d");
+  out_tree_background->Branch("PrimVtx_PosZ", &PrimVtx_PosZ, "PrimVtx_PosZ/d");
+  out_tree_background->Branch("DecayVtx_PosX", &DecayVtx_PosX, "DecayVtx_PosX/d");
+  out_tree_background->Branch("DecayVtx_PosY", &DecayVtx_PosY, "DecayVtx_PosY/d");
+  out_tree_background->Branch("DecayVtx_PosZ", &DecayVtx_PosZ, "DecayVtx_PosZ/d");
+  out_tree_background->Branch("Dist_RealReconsVtx_X", &Dist_RealReconsVtx_X, "Dist_RealReconsVtx_X/d");
+  out_tree_background->Branch("Dist_RealReconsVtx_Y", &Dist_RealReconsVtx_Y, "Dist_RealReconsVtx_Y/d");
+  out_tree_background->Branch("Dist_RealReconsVtx_Z", &Dist_RealReconsVtx_Z, "Dist_RealReconsVtx_Z/d");
+  out_tree_background->Branch("Dist_MotherPrimVtx", &Dist_MotherPrimVtx, "Dist_MotherPrimVtx/d");
+  out_tree_background->Branch("Angle_MotherPrimVtx", &Angle_MotherPrimVtx, "Angle_MotherPrimVtx/d");
+  out_tree_background->Branch("InvMass", &InvMass, "InvMass/d");
+  out_tree_background->Branch("ErrInvMass", &ErrInvMass, "ErrInvMass/d");
+  out_tree_background->Branch("ErrGetMass", &ErrGetMass, "ErrGetMass/I");
+  out_tree_background->Branch("LifeTime", &LifeTime, "LifeTime/d");
+  out_tree_background->Branch("ErrLifeTime", &ErrLifeTime, "ErrLifeTime/d");
+  out_tree_background->Branch("ErrGetLifeTime", &ErrGetLifeTime, "ErrGetLifeTime/I");
+  out_tree_background->Branch("Mother_IsFromHyp", &Mother_IsFromHyp, "Mother_IsFromHyp/I");
+
+  out_tree_background->Branch("Id_Fragment", &Id_Fragment, "Id_Fragment/I");
+  out_tree_background->Branch("MomX_Fragment", &MomX_Fragment, "MomX_Fragment/d");
+  out_tree_background->Branch("MomY_Fragment", &MomY_Fragment, "MomY_Fragment/d");
+  out_tree_background->Branch("MomZ_Fragment", &MomZ_Fragment, "MomZ_Fragment/d");
+  out_tree_background->Branch("E_Fragment", &E_Fragment, "E_Fragment/d");
+  out_tree_background->Branch("Chi2ndf_Fragment", &Chi2ndf_Fragment, "Chi2ndf_Fragment/d");
+  out_tree_background->Branch("NDF_Fragment", &NDF_Fragment, "NDF_Fragment/I");
+  out_tree_background->Branch("Pvalue_Fragment", &Pvalue_Fragment, "Pvalue_Fragment/d");
+  out_tree_background->Branch("Angle_MotherFragment", &Angle_MotherFragment, "Angle_MotherFragment/d");
+  out_tree_background->Branch("Fragment_IsFromHyp", &Fragment_IsFromHyp, "Fragment_IsFromHyp/I");
+
+  out_tree_background->Branch("Id_Pion", &Id_Pion, "Id_Pion/I");
+  out_tree_background->Branch("MomX_Pion", &MomX_Pion, "MomX_Pion/d");
+  out_tree_background->Branch("MomY_Pion", &MomY_Pion, "MomY_Pion/d");
+  out_tree_background->Branch("MomZ_Pion", &MomZ_Pion, "MomZ_Pion/d");
+  out_tree_background->Branch("E_Pion", &E_Pion, "E_Pion/d");
+  out_tree_background->Branch("Chi2ndf_Pion", &Chi2ndf_Pion, "Chi2ndf_Pion/d");
+  out_tree_background->Branch("NDF_Pion", &NDF_Pion, "NDF_Pion/I");
+  out_tree_background->Branch("Pvalue_Pion", &Pvalue_Pion, "Pvalue_Pion/d");
+  out_tree_background->Branch("Angle_MotherPion", &Angle_MotherPion, "Angle_MotherPion/d");
+  out_tree_background->Branch("NHitsMDC_Pion", &NHitsMDC_Pion, "NHitsMDC_Pion/I");
+  out_tree_background->Branch("NHitsMinifiber_Pion", &NHitsMinifiber_Pion, "NHitsMinifiber_Pion/I");
+  out_tree_background->Branch("N_Pion", &N_Pion, "N_Pion/I");
+  out_tree_background->Branch("Pion_IsFromHyp", &Pion_IsFromHyp, "Pion_IsFromHyp/I");
+
+  out_tree_background->Branch("Dist_Daughters", &Dist_Daughters, "Dist_Daughters/d");
+  out_tree_background->Branch("ArmPod_Qt", &ArmPod_Qt, "ArmPod_Qt/d");
+  out_tree_background->Branch("ArmPod_Alfa", &ArmPod_Alfa, "ArmPod_Alfa/d");
+}
+
+void DataML_Hyp::FillEvent(FullRecoEvent& REvent)
+{
+  for(size_t i = 0; i < REvent.Hyp_Vect.size(); ++i)
+    {
+      //if(REvent.Hyp_Vect[i].Pattern != 4) //Save only KFParticle reconstructed mothers
+      //  continue;
+
+      if(std::isfinite(REvent.Hyp_Vect[i].Chi2ndf) == false)
+        continue;
+      if(std::isfinite(REvent.Hyp_Vect[i].Dist_Daughters) == false)
+        continue;
+      if(std::isfinite(REvent.Hyp_Vect[i].MomE_Fragment.Px()) == false)
+        continue;
+      
+
+      Pattern = REvent.Hyp_Vect[i].Pattern; 
+      
+      PDG  = REvent.Hyp_Vect[i].PDG;
+      N_Mother = REvent.Hyp_Vect[i].N_Mother;
+      Chi2ndf = REvent.Hyp_Vect[i].Chi2ndf;
+      NDF = REvent.Hyp_Vect[i].NDF;
+      MomX = REvent.Hyp_Vect[i].MomE.Px();
+      MomY = REvent.Hyp_Vect[i].MomE.Py();
+      MomZ = REvent.Hyp_Vect[i].MomE.Pz();
+      E = REvent.Hyp_Vect[i].MomE.E();
+      PrimVtx_PosX = REvent.Hyp_Vect[i].PrimVtx.X();
+      PrimVtx_PosY = REvent.Hyp_Vect[i].PrimVtx.Y();
+      PrimVtx_PosZ = REvent.Hyp_Vect[i].PrimVtx.Z();
+      DecayVtx_PosX = REvent.Hyp_Vect[i].DecayVtx.X();
+      DecayVtx_PosY = REvent.Hyp_Vect[i].DecayVtx.Y();
+      DecayVtx_PosZ = REvent.Hyp_Vect[i].DecayVtx.Z();
+      Dist_RealReconsVtx_X = REvent.Hyp_Vect[i].Dist_RealReconsVtx.X();
+      Dist_RealReconsVtx_Y = REvent.Hyp_Vect[i].Dist_RealReconsVtx.Y();
+      Dist_RealReconsVtx_Z = REvent.Hyp_Vect[i].Dist_RealReconsVtx.Z();
+      Dist_MotherPrimVtx = REvent.Hyp_Vect[i].Dist_MotherPrimVtx;
+      Angle_MotherPrimVtx = REvent.Hyp_Vect[i].Angle_MotherPrimVtx;
+      InvMass = REvent.Hyp_Vect[i].InvMass;
+      ErrInvMass = REvent.Hyp_Vect[i].ErrInvMass;
+      ErrGetMass = REvent.Hyp_Vect[i].ErrGetMass;
+      LifeTime = REvent.Hyp_Vect[i].LifeTime;
+      ErrLifeTime = REvent.Hyp_Vect[i].ErrLifeTime;
+      ErrGetLifeTime = REvent.Hyp_Vect[i].ErrGetLifeTime;
+      Mother_IsFromHyp = REvent.Hyp_Vect[i].Mother_IsFromHyp;
+
+      Id_Fragment = REvent.Hyp_Vect[i].Id_Fragment;
+      MomX_Fragment = REvent.Hyp_Vect[i].MomE_Fragment.Px();
+      MomY_Fragment = REvent.Hyp_Vect[i].MomE_Fragment.Py();
+      MomZ_Fragment = REvent.Hyp_Vect[i].MomE_Fragment.Pz();
+      E_Fragment = REvent.Hyp_Vect[i].MomE_Fragment.E();
+      Chi2ndf_Fragment = REvent.Hyp_Vect[i].Chi2ndf_Fragment;
+      NDF_Fragment = REvent.Hyp_Vect[i].NDF_Fragment;
+      Pvalue_Fragment = REvent.Hyp_Vect[i].Pvalue_Fragment;
+      Angle_MotherFragment = REvent.Hyp_Vect[i].Angle_MotherFragment;
+      Fragment_IsFromHyp = REvent.Hyp_Vect[i].Fragment_IsFromHyp;
+      
+      Id_Pion = REvent.Hyp_Vect[i].Id_Pion;
+      MomX_Pion = REvent.Hyp_Vect[i].MomE_Pion.Px();
+      MomY_Pion = REvent.Hyp_Vect[i].MomE_Pion.Py();
+      MomZ_Pion = REvent.Hyp_Vect[i].MomE_Pion.Pz();
+      E_Pion = REvent.Hyp_Vect[i].MomE_Pion.E();
+      Chi2ndf_Pion = REvent.Hyp_Vect[i].Chi2ndf_Pion;
+      NDF_Pion = REvent.Hyp_Vect[i].NDF_Pion;
+      Pvalue_Pion = REvent.Hyp_Vect[i].Pvalue_Pion;
+      Angle_MotherPion = REvent.Hyp_Vect[i].Angle_MotherPion;
+      NHitsMDC_Pion = REvent.Hyp_Vect[i].NHitsMDC_Pion;
+      NHitsMinifiber_Pion = REvent.Hyp_Vect[i].NHitsMinifiber_Pion;
+      N_Pion = REvent.Hyp_Vect[i].N_Pion;
+      Pion_IsFromHyp = REvent.Hyp_Vect[i].Pion_IsFromHyp;
+
+      Dist_Daughters = REvent.Hyp_Vect[i].Dist_Daughters;
+      ArmPod_Qt = REvent.Hyp_Vect[i].ArmPod_Qt;
+      ArmPod_Alfa = REvent.Hyp_Vect[i].ArmPod_Alfa;
+
+
+      out_tree->Fill();
+
+      if(SplitTree)
+        {
+          if(Mother_IsFromHyp == 1)
+            out_tree_signal->Fill();
+          else if(Mother_IsFromHyp == 0)
+            out_tree_background->Fill();
+        }
+    }
+}
+
+
 template<class Out>
 TFlatMCOutputML<Out>::TFlatMCOutputML(const THyphiAttributes& attribut)
     : TDataProcessInterface<Out>("FlatMCOutputML"), att(attribut), namefileFlat(att.FlatML_namefile)
 {
   f_flat = new TFile(namefileFlat, "RECREATE");
-  t_flat = new TTree("MCDataML_Tree", "Flat data event tracks");
+  t_flat = new TTree("MCDataML_Tree", "Flat data");
+  t_flatS = new TTree("MCDataML_TreeS", "Flat signal data");
+  t_flatB = new TTree("MCDataML_TreeB", "Flat background data");
 
   data_out = nullptr;
   if(att.DataML_Out == "DataML_momfit")
     data_out = new DataML_momfit(att, t_flat);
+  else if(att.DataML_Out == "DataML_Hyp")
+    data_out = new DataML_Hyp(att, t_flat, t_flatS, t_flatB);
+  else if(att.DataML_Out == "DataML_Hyp_Split")
+    {
+      data_out = new DataML_Hyp(att, t_flat, t_flatS, t_flatB);
+      SplitTree = true;
+    }
   else
     att._logger->error("FlatMC: selection of the data out for the ML study failed {}, check your config file !!",
                        att.DataML_Out);
 
-  t_flat->SetDirectory(f_flat);
+  t_flat ->SetDirectory(f_flat);
+  t_flatS->SetDirectory(f_flat);
+  t_flatB->SetDirectory(f_flat);
   // t_flat->AutoSave();
 
   att._logger->info("FlatMC : tree out set ");
@@ -276,6 +555,12 @@ TFlatMCOutputML<Out>::~TFlatMCOutputML()
 {
   f_flat->cd();
   t_flat->Write();
+
+  if(SplitTree)
+    {
+      t_flatS->Write();
+      t_flatB->Write();
+    }
   // f_flat->Write();
   f_flat->Close();
 

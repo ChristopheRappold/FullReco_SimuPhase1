@@ -168,7 +168,7 @@ class Ana_Hist
   Hist<TH1F> h_nEventsGhost_Si1 ;
   Hist<TH2F> h_nEventsGoodreconsGhost_Si1 ;
   Hist<TH2F> h_nEventsRealGoodrecons_Si1 ;
-  Hist<TH2F> h_nEventsRealRejectCuadrant_Si1 ;
+  Hist<TH2F> h_nEventsRealRejectPad_Si1 ;
 
 
   Hist<TH1F> h_HitMultiplicity_Si2 ;
@@ -181,7 +181,7 @@ class Ana_Hist
   Hist<TH1F> h_nEventsGhost_Si2 ;
   Hist<TH2F> h_nEventsGoodreconsGhost_Si2 ;
   Hist<TH2F> h_nEventsRealGoodrecons_Si2 ;
-  Hist<TH2F> h_nEventsRealRejectCuadrant_Si2 ;
+  Hist<TH2F> h_nEventsRealRejectPad_Si2 ;
 
   Hist<TH1F> h_MFCheck_Theta_MomSi1MomSi2 ;
   Hist<TH1F> h_MFCheck_Dist_MomSi1HitSi2 ;
@@ -201,6 +201,12 @@ class Ana_Hist
   Hist<TH2F> h_PosZBeamTracks ;
   Hist<TH2F> h_thetaTracks ;
   Hist<TH1F> h_thetaResol ;
+
+  Hist<TH1F> h_Acc_ThetaCandidates ;
+  Hist<TH1F> h_Acc_ThetaAllReal ;
+
+  Hist<TH2F> h_nCandidatesRealTracks ;
+  Hist<TH2F> h_nCandidatesRealTracks_IfRecons ;
 
   //Hist<TH1F> h_nHypTrackReal;
   Hist<TH1F> h_nHypernucleiTrack ;
@@ -344,7 +350,10 @@ class Ana_Hist
   Hist<TH1F> h_EffPosZ_postKF ;
   Hist<TH1F> h_EffPosZ_preKFPart ;
   Hist<TH1F> h_EffPosZ_postKFPart ;
-  
+
+  Hist<TH2F> h_EffPosZPosR_real ;
+  Hist<TH2F> h_EffPosZPosR_postKFPart ;
+
   Hist<TH2F> h_N_SiHits_ReconsTracks ;
   
 /*
