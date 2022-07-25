@@ -22,7 +22,7 @@ using namespace G4Sol;
 
 template <class Out>
 TPrimaryVertex<Out>::TPrimaryVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface("PrimaryVertexReco"), att(attribut), SiliconHitsSD_Si1(1), SiliconHitsSD_Si2(2),
+    : TDataProcessInterface<Out>("PrimaryVertexReco"), att(attribut), SiliconHitsSD_Si1(1), SiliconHitsSD_Si2(2),
         SiliconHitsSD_Si3(3), SiliconHitsSD_Si4(4)
 {
   TranslationZ_Target_System(att.Target_PositionZ);
@@ -36,7 +36,7 @@ template <class Out>
 void TPrimaryVertex<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
 template <class Out>
-ReturnRes::InfoM TPrimaryVertex<Out>::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+ReturnRes::InfoM TPrimaryVertex<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   int result_finder = Exec(RecoEvent, OutTree);
@@ -45,7 +45,7 @@ ReturnRes::InfoM TPrimaryVertex<Out>::operator()(FullRecoEvent& RecoEvent, MCAna
 }
 
 template <class Out>
-int TPrimaryVertex<Out>::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FinderPrimaryVertex(RecoEvent); }
+int TPrimaryVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FinderPrimaryVertex(RecoEvent); }
 
 template <class Out>
 ReturnRes::InfoM TPrimaryVertex<Out>::SoftExit(int result_full) {
