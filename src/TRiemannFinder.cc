@@ -1206,7 +1206,7 @@ void TRiemannFinder<Out>::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<
 		double r2 = r0*TMath::Cos(tempPhi-phi0) + TMath::Sqrt(delta);
 
 		if(r2 < 6. && r1 > 22.)
-		  MeanXY[iPhi] = {-1.,{-999.,-999.,-999.,-999.}};
+		  MeanXY[iPhi] = {-1,{-999.,-999.,-999.,-999.}};
 		else
 		  {
 		    bool whichR[2] = {false,false};
