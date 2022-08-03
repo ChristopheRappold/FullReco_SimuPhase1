@@ -30,6 +30,15 @@ struct DataSim
   AnaEvent_Metadata* previousMeta;
 };
 
+struct DataExp
+{
+  std::vector<std::string>* nameDet;
+  std::map<std::string, double>* expParameters;
+
+  AnaEvent_Metadata* previousMeta;
+};
+
+
 struct MT
 {
   enum MTtype : int

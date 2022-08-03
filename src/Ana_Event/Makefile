@@ -88,17 +88,21 @@ EventH_v14 = Ana_EventNew_v14.hh
 EventH_Com_v14 = THypernucleus.hh THyphiHitDet.hh THyphiTrack_v2.hh TMcParticle.hh
 EventH_v16 = Ana_EventNew_v16.hh
 EventH_Com_v16 = THypernucleus.hh THyphiHitDet.hh THyphiTrack_v3.hh TMcParticle.hh
+EventH_vData = Ana_EventNew_vData.hh
+EventH_Com_vData = THypernucleus.hh THyphiHitDet.hh THyphiTrack_v4.hh TMcParticle.hh TDataHit.hh
 MCEventH = MCAnaEvent.hh
-MCEventH_Com = TMcHit.hh TMcParticle.hh THyphiTrack_v3.hh
+MCEventH_Com = TMcHit.hh TMcParticle.hh THyphiTrack_v3.hh TDataHit.hh
 
 MCEventG4SolH = MCAnaEventG4Sol.hh AnaEvent_Metadata.hh
-MCEventG4SolH_Com = TMcHit.hh TMcParticle.hh THyphiTrack_v4.hh TTrackCand.hh THypernucleus.hh
+MCEventG4SolH_Com = TMcHit.hh TMcParticle.hh THyphiTrack_v4.hh TTrackCand.hh THypernucleus.hh TDataHit.hh
 
 
 EventSrc_v14 = $(patsubst %.hh,%.cc,$(EventH_v14))
 EventSrc_Com_v14 = $(patsubst %.hh,%.cc,$(EventH_Com_v14))
 EventSrc_v16 = $(patsubst %.hh,%.cc,$(EventH_v16))
 EventSrc_Com_v16 = $(patsubst %.hh,%.cc,$(EventH_Com_v16))
+EventSrc_vData = $(patsubst %.hh,%.cc,$(EventH_vData))
+EventSrc_Com_vData = $(patsubst %.hh,%.cc,$(EventH_Com_vData))
 
 MCEventSrc = $(patsubst %.hh,%.cc,$(MCEventH))
 MCEventSrc_Com = $(patsubst %.hh,%.cc,$(MCEventH_Com))
@@ -110,6 +114,7 @@ MCEventG4SolSrc_Com = $(patsubst %.hh,%.cc,$(MCEventG4SolH_Com))
 EventDict_Com = THypernucleus.$(DictObjSuf) THyphiSimpleHit.$(DictObjSuf) TTrackSimple.$(DictObjSuf) TMcParticle.$(DictObjSuf)
 EventDict_v14 = Ana_EventNew_v14.$(DictObjSuf)
 EventDict_v16 = Ana_EventNew_v16.$(DictObjSuf)
+EventDict_vData = Ana_EventNew_vData.$(DictObjSuf)
 
 MCEventDict = MCAnaEvent.$(DictObjSuf)
 MCEventG4SolDict = MCAnaEventG4Sol.$(DictObjSuf)
@@ -122,6 +127,9 @@ EventO_Com_v14 = $(patsubst %.hh,%.$(ObjSuf),$(EventH_Com_v14))
 EventO_v16 = $(patsubst %.hh,%.$(ObjSuf),$(EventH_v16))
 EventO_Com_v16 = $(patsubst %.hh,%.$(ObjSuf),$(EventH_Com_v16))
 
+EventO_vData = $(patsubst %.hh,%.$(ObjSuf),$(EventH_vData))
+EventO_Com_vData = $(patsubst %.hh,%.$(ObjSuf),$(EventH_Com_vData))
+
 MCEventO = $(patsubst %.hh,%.$(ObjSuf),$(MCEventH))
 MCEventO_Com = $(patsubst %.hh,%.$(ObjSuf),$(MCEventH_Com))
 
@@ -130,6 +138,7 @@ MCEventG4SolO_Com = $(patsubst %.hh,%.$(ObjSuf),$(MCEventG4SolH_Com))
 
 EventSo_v14 = libAna_Event_v14.$(DllSuf)
 EventSo_v16 = libAna_Event_v16.$(DllSuf)
+EventSo_vData = libAna_Event_vData.$(DllSuf)
 MCEventSo = libMCAnaEvent.$(DllSuf)
 MCEventG4SolSo = libMCAnaEventG4Sol.$(DllSuf)
 
@@ -138,11 +147,10 @@ EventSo_Commun_Name = libAna_Event
 all: libAna_Event 
 
 libAna_Event : $(MCEventG4SolSo) 
-	ln -sf $(EventSo_v16) $(EventSo_Commun_Name).$(DllSuf)
+	ln -sf $(EventSo_vData) $(EventSo_Commun_Name).$(DllSuf)
 ifeq ($(PLATFORM),macosx)
-	ln -sf $(EventSo_v16) $(EventSo_Commun_Name).$(MacDllSuf)
+	ln -sf $(EventSo_vData) $(EventSo_Commun_Name).$(MacDllSuf)
 endif
-
 
 $(EventSo_v14): $(EventO_v14) $(EventO_Com_v14) $(EventDict_v14) $(EventDict_Com_v14)
 # $(EventSo_v12): $(EventO_v12) $(EventO_Com_v12) $(EventDict_v12) $(EventDict_Com_v12)
@@ -180,7 +188,22 @@ endif
 #	ln -sf $(FromLibdir)/$(EventSo_v10) $(Bindir)/lib
 	@echo "---> $@ done"
 
-
+$(EventSo_vData): $(EventO_vData) $(EventO_Com_vData) $(EventDict_vData) $(EventDict_Com_vData)
+ifeq ($(PLATFORM),macosx)
+# We need to make both the .dylib and the .so
+	$(LD) $(SOFLAGS) $^ $(OutPutOpt) $@
+ifneq ($(subst $(MACOSX_MINOR),,1234),1234)
+ifeq ($(MACOSX_MINOR),4)
+	ln -sf $@ $(subst .$(DllSuf),.so,$@)
+else
+	$(LD) -bundle -undefined $(UNDEFOPT) $(LDFLAGS) $^ $(OutPutOpt) $(subst .$(DllSuf),.so,$@)
+endif
+endif
+else
+	$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS) $(LIBS)
+endif
+#	ln -sf $(FromLibdir)/$(EventSo_v10) $(Bindir)/lib
+	@echo "---> $@ done"
 
 $(MCEventSo): $(MCEventO) $(MCEventO_Com) $(MCEventDict)
 ifeq ($(PLATFORM),macosx)
@@ -234,6 +257,11 @@ $(EventDict_v14):
 $(EventDict_v16):
 	rm -f $*.*; \
 	    $(ROOTDICGEN) $*.cc -s $(EventSo_v16) $(EventH_v16) $(EventH_Com_v16) Ana_EventNew_v16_linkdef.h; \
+	    $(CXX) $(CXXFLAGS) -c $*.cc
+
+$(EventDict_vData):
+	rm -f $*.*; \
+	    $(ROOTDICGEN) $*.cc -s $(EventSo_vData) $(EventH_vData) $(EventH_Com_vData) Ana_EventNew_vData_linkdef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc
 
 $(MCEventDict):

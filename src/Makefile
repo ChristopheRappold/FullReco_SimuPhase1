@@ -71,10 +71,16 @@ LIB_PROFILING = #-L/home/christophe/Workspace/gperftools-2.4/lib -ltcmalloc #-lp
 DEPEND        = makedepend $(CXXFLAGS)
 
 #--------------------------------------------------------------------
-Sources = MainSimu.cc FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana_Hist.cc  
-Headers = $(patsubst %.cc,%.hh,$(Sources))
-Objects = $(patsubst %.cc,%.o,$(Sources))
+SourcesSimu = MainSimu.cc
+Objects_Simu = $(patsubst %.cc,%.o,$(SourcesSimu))
 
+SourcesData = MainData.cc  
+Objects_Data = $(patsubst %.cc,%.o,$(SourcesData))
+
+Sources_Comm = FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana_Hist.cc  
+Headers_Comm = $(patsubst %.cc,%.hh,$(Sources_Comm))
+Objects_Comm = $(patsubst %.cc,%.o,$(Sources_Comm))
+ 
 Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc #TFinderCM.cc
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
@@ -86,7 +92,7 @@ Objects_Proc_genfit_dep = $(patsubst %.cc,%.o,$(Sources_Proc_genfit_dep))
 Source_Proc_genfit_ZMQ_dep = FullRecoTaskZMQ.cc TKalmanFilter_DAF_ZMQ.cc
 Objects_Proc_genfit_ZMQ_dep = $(patsubst %.cc,%.o,$(Source_Proc_genfit_ZMQ_dep))
 
-CHK_SOURCES += $(Sources) $(Sources_Proc) $(Sources_Proc_genfit_dep) $(Sources_Proc_genfit_ZMQ_dep)
+CHK_SOURCES += $(Sources_Comm) $(Sources_Proc) $(Sources_Proc_genfit_dep) $(Sources_Proc_genfit_ZMQ_dep)
 CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 
 #Objects_Proc_old_genfit = $(patsubst %.cc,%.o,$(Sources_Proc_old_genfit))
@@ -95,10 +101,13 @@ CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 # MathObj = MathematicalTools.o
 # MathSo = libHyphiMathTools.$(DllSuf)
 
-all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainMonitor 
+all: print $(MathSo) libEventG4Sol.so libEventWASAUnpack.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainData $(Bindir)/MainMonitor 
 
-$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
+$(Bindir)/MainSimu: $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
+       $(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
+
+$(Bindir)/MainData: $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventWASAUnpack.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
+       $(CXX) $(CXXFLAGS) -o $(Bindir)/MainData $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS) 
 
 $(Bindir)/MainMonitor: MainMonitor.o FullRecoConfig.o
 	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
@@ -176,6 +185,21 @@ ifeq ($(ARCH),macosx)
 	ln -sf $(FromLibdir)/EventG4Sol/libEventG4Sol.$(MacDllSuf) $(Bindir)/lib/
 endif
 	@echo "---> $@ done"
+
+libEventWASAUnpack.so :
+       make -C EventWASAUnpack
+       ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack.$(DllSuf) $(Bindir)/lib/
+ifeq ($(ROOTVERSION),6)
+       ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack_rdict.pcm $(Bindir)/lib/
+endif
+ifeq ($(ARCH),macosx)
+       ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack.$(MacDllSuf) $(Bindir)/lib/
+endif
+       @echo "---> $@ done"
+
+
+
+
 
 libMCEvent.so :
 	make -C Ana_Event
@@ -262,7 +286,9 @@ check-syntax:
                 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(df).P; \
             rm -f $*.d
 
--include $(Sources:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(SourcesSimu:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(SourcesData:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(Sources_Comm:%.$(SrcSuf)=$(DEPDIR)/%.P)
 -include $(Sources_Proc:%.$(SrcSuf)=$(DEPDIR)/%.P)
 -include $(Sources_Proc_genfit_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)
 -include $(Sources_Proc_genfit_ZMQ_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)
