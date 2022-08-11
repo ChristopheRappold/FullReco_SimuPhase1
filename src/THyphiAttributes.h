@@ -22,18 +22,10 @@
 
 #include "sqlite_orm/sqlite_orm.h"
 
-struct DataSim
+struct DataSimExp
 {
   std::vector<std::string>* nameDet;
   std::map<std::string, double>* simParameters;
-
-  AnaEvent_Metadata* previousMeta;
-};
-
-struct DataExp
-{
-  std::vector<std::string>* nameDet;
-  std::map<std::string, double>* expParameters;
 
   AnaEvent_Metadata* previousMeta;
 };
@@ -310,12 +302,12 @@ class THyphiAttributes
   FairField* Field;
 
   const FullRecoConfig& Config;
-  const DataSim& InputPar;
+  const DataSimExp& InputPar;
 
   std::shared_ptr<spdlog::logger> _logger;
   
   THyphiAttributes() = delete;
-  THyphiAttributes(const FullRecoConfig& conf, const DataSim& InputParameters);
+  THyphiAttributes(const FullRecoConfig& conf, const DataSimExp& InputParameters);
   ~THyphiAttributes() = default;
 
   void SetOut(AttrOut& out) const;

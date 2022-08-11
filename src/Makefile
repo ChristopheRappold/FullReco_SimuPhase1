@@ -30,7 +30,7 @@ CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUI
 #CXXFLAGS     += -fsanitize=memory -fno-omit-frame-pointer
 #CXXFLAGS     += -fsanitize=undefined -fno-omit-frame-pointer
 #CXXFLAGS      += -fsanitize=leak -fsanitize-blacklist=$(shell root-config --etcdir)/lsan-root.supp
-LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./KFParticle/install/lib -L./FairBase -L.
+LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./EventWASAUnpack -L./KFParticle/install/lib -L./FairBase -L.
 
 LDFLAGS       = '-Wl,-rpath,$$ORIGIN/lib'
 SOFLAGS       = -shared
@@ -53,7 +53,8 @@ KFPARTICLEFLAGS = -I./KFParticle/install/include
 ORMFLAGS = -I./sqlite_orm/include
 
 CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
-LIBS         += $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lsqlite3
+LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3
+LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventWASAUnpack -lEventG4Sol -lTreePlayer -lHyphiFairBase -lAna_Event -lMCAnaEventG4Sol -lsqlite3
 
 GENFIT_LIB = -lgenfit2
 SPDLOG_LIB = -lspdlog
@@ -81,7 +82,7 @@ Sources_Comm = FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana_Hist.c
 Headers_Comm = $(patsubst %.cc,%.hh,$(Sources_Comm))
 Objects_Comm = $(patsubst %.cc,%.o,$(Sources_Comm))
  
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc #TFinderCM.cc
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBuildWASACalibrationLayerPlane.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc #TFinderCM.cc
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
@@ -104,13 +105,13 @@ CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 all: print $(MathSo) libEventG4Sol.so libEventWASAUnpack.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainData $(Bindir)/MainMonitor 
 
 $(Bindir)/MainSimu: $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
-       $(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_SIM) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
 
 $(Bindir)/MainData: $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventWASAUnpack.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
-       $(CXX) $(CXXFLAGS) -o $(Bindir)/MainData $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS) 
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainData $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_DATA) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS) 
 
 $(Bindir)/MainMonitor: MainMonitor.o FullRecoConfig.o
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS_SIM) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
 
 # $(Bindir)/BatchMerger: BatchMerger.o libAnaEventOut.so libAna_Event.so
 # 	$(CXX) $(CXXFLAGS) BatchMerger.o $(LIBS) $(LIB_MERGER) -o $(Bindir)/BatchMerger
@@ -187,25 +188,23 @@ endif
 	@echo "---> $@ done"
 
 libEventWASAUnpack.so :
-       make -C EventWASAUnpack
-       ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack.$(DllSuf) $(Bindir)/lib/
+	make -C EventWASAUnpack
+	ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack.$(DllSuf) $(Bindir)/lib/
 ifeq ($(ROOTVERSION),6)
-       ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack_rdict.pcm $(Bindir)/lib/
 endif
 ifeq ($(ARCH),macosx)
-       ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack.$(MacDllSuf) $(Bindir)/lib/
+	ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack.$(MacDllSuf) $(Bindir)/lib/
 endif
-       @echo "---> $@ done"
-
-
-
-
+	@echo "---> $@ done"
 
 libMCEvent.so :
 	make -C Ana_Event
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEventG4Sol.$(DllSuf) $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Ana_Event/libAna_WasaEvent.$(DllSuf) $(Bindir)/lib/
 ifeq ($(ROOTVERSION),6)
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEventG4Sol_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Ana_Event/libAna_WasaEvent_rdict.pcm $(Bindir)/lib/
 endif
 ifeq ($(ARCH),macosx)
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEvent.$(MacDllSuf) $(Bindir)/lib/
@@ -247,6 +246,7 @@ clean_all: clean
 	make -C EventG4Sol clean_all
 	make -C FairBase clean_all
 	make -C Ana_Event clean_all
+	make -C EventWASAUnpack clean_all
 print :
 	@echo "################################################################################"
 	@echo "#                                                                               "

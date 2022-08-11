@@ -13,6 +13,8 @@
 #include "EventG4Sol/TG4Sol_Event.hh"
 #include "EventG4Sol/TG4Sol_Hit.hh"
 
+#include "Ana_Event/Ana_WasaEvent.hh"
+
 //#include "MathematicalTools.hh"
 #include "Debug.hh"
 
@@ -224,6 +226,8 @@ public:
 #else
   ReturnRes::InfoM operator() (const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree);
 #endif
+
+ReturnRes::InfoM operator()(const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
 
 private :
   //int Exec(THyphiEvent_Phys_new *event,Ana_Event* OutTree);

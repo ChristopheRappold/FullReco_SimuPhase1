@@ -38,8 +38,10 @@ class FullRecoTask
 
 public :
   FullRecoTask() = delete;
-  FullRecoTask(const FullRecoConfig& config, const DataSim& In);
-  ~FullRecoTask();
+  FullRecoTask(const FullRecoConfig& config, const DataSimExp& In);
+
+ ~FullRecoTask();
+
   
   //int EventLoop(THypHi_Event *event,std::vector<TUTracker_Event*> *UTrackerEvents,Ana_Event* OutTree);
 
@@ -58,7 +60,7 @@ public :
 #ifdef ROOT6
   int EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree);
 #else
-  int EventLoop(EventWASAUnpack* UnpackEvent, TEOut* OutTree);
+  int EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree);
 #endif
 
 
@@ -66,6 +68,8 @@ public :
   void SetEventMetadata(AnaEvent_Metadata& metadata);
 
 private :
+
+  void Initialization();
 
   const THyphiAttributes Attributes;
 

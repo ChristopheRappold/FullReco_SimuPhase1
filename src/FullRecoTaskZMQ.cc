@@ -22,7 +22,7 @@ using namespace ZMQ;
 //   list_processMC.resize(0);
 // }
 
-FullRecoTaskZMQ::FullRecoTaskZMQ(const FullRecoConfig& conf, const DataSim& In) : Attributes(conf, In)
+FullRecoTaskZMQ::FullRecoTaskZMQ(const FullRecoConfig& conf, const DataSimExp& In) : Attributes(conf, In)
 {
   Attributes._logger->info(" *** > FullRecoTaskZMQ instance created | Reconstruction requested are :");
   // det_build = nullptr;

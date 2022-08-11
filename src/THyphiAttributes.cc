@@ -35,7 +35,7 @@
 //   Init_Para();
 // }
 
-THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& In)
+THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimExp& In)
     : Field(nullptr), Config(config), InputPar(In)
 {
   _logger = spdlog::get("Console");

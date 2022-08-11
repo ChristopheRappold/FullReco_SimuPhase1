@@ -36,7 +36,7 @@ Ana_WasaEvent::Ana_WasaEvent()
   ReducFactor = 1.;
 
   NtrackCand = 0;
-  Ntracks=0;
+  Ntrack=0;
   Nhyp=0;
 
   NUft = 0;
@@ -129,7 +129,7 @@ int Ana_WasaEvent::Setup()
   ReducFactor =1.;
 
   NtrackCand =0;
-  Ntracks=0;
+  Ntrack=0;
   Nhyp=0;
 
   NUft = 0;

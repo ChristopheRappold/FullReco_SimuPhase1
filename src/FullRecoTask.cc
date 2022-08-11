@@ -3,6 +3,7 @@
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "Ana_Event/Ana_WasaEvent.hh"
 #include "TBuildDetectorLayerPlaneDAF.h"
+#include "TBuildWASACalibrationLayerPlane.h"
 #include "TBuildRestarter.h"
 
 #include "TBayesFinder.h"
@@ -31,8 +32,9 @@
 // }
 
 
+
 template<class TEOut>
-FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSim& In):Attributes(config,In),REvent()
+FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp& In):Attributes(config,In),REvent()
 {
   Attributes._logger->info(" *** > FullRecoTask instance created | Reconstruction requested are :");
   det_build = nullptr;
@@ -169,12 +171,12 @@ template<class TEOut>
 int FullRecoTask<TEOut>::EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree)
 #else
 template<class TEOut>
-int FullRecoTask<TEOut>::EventLoop(EventWASAUnpack* UnpackEvent, TEOut* OutTree)
+int FullRecoTask<TEOut>::EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree)
 #endif
 {
 
   REvent.Clear();
-  int return_build = (*dynamic_cast<TBuildUnpack*>(det_build))(UnpackEvent,REvent,OutTree);
+  int return_build = (*dynamic_cast<TBuildWASACalibrationLayerPlane*>(det_build))(UnpackEvent,REvent,OutTree);
 
   if(return_build !=0)
     return -1;

@@ -16,7 +16,9 @@
 class THypernucleus;
 class THyphiHitDet;
 class THyphiTrack;
-class TDataHit;
+
+
+
 
 class Ana_WasaEvent : public TObject{
 public :
@@ -80,7 +82,7 @@ public :
   Int_t NtrackCand;
   TClonesArray* TrackCand; //->  
 
-  Int_t Ntracks;
+  Int_t Ntrack;
   TClonesArray* fTrack; //->
 
   Int_t Nhyp;

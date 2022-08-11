@@ -39,7 +39,7 @@ class FullRecoTaskZMQ
 
 public:
   FullRecoTaskZMQ() = delete;
-  FullRecoTaskZMQ(const FullRecoConfig& conf, const DataSim& In);
+  FullRecoTaskZMQ(const FullRecoConfig& conf, const DataSimExp& In);
   ~FullRecoTaskZMQ();
   
   int Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, const TG4Sol_Event& ev,

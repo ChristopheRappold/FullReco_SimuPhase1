@@ -1,4 +1,4 @@
-#include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "Ana_Hist.hh"
 #include "Debug.hh"
 #include "FullRecoConfig.hh"
@@ -38,7 +38,6 @@
 #include "spdlog/spdlog.h"
 
 using namespace std;
-
 
 int main(int argc, char** argv)
 {
@@ -129,11 +128,11 @@ int main(int argc, char** argv)
 
       TGeoManager::Import(nameGeo.c_str()); // FOR Kalman_DAF
 
-      TDatabasePDG::Instance()->AddParticle("deuteron", "deuteron", 1.875613, kTRUE, 0., 1. * 3., "Ions", 10000);
-      TDatabasePDG::Instance()->AddParticle("triton", "triton", 2.80892 /*2.80925*/, kTRUE, 0., 1. * 3., "Ions", 10001);
-      TDatabasePDG::Instance()->AddParticle("alpha", "alpha", 3.72738 /*3.727417*/, kTRUE, 0., 2. * 3., "Ions", 10002);
-      TDatabasePDG::Instance()->AddParticle("He3", "He3", 2.808392 /*2.80923*/, kTRUE, 0., 2. * 3., "Ions", 10003);
-      TDatabasePDG::Instance()->AddParticle("Li6", "Li6", 5.601518 /*5.6015194*/, kTRUE, 0., 3. * 3., "Ions", 10004);
+      TDatabasePDG::Instance()->AddParticle("deuteron", "deuteron", 1.875477 /*1.875613*/, kTRUE, 0., 1. * 3., "Ions", 10000);
+      TDatabasePDG::Instance()->AddParticle("triton", "triton", 2.807971/*2.80892*/ /*2.80925*/, kTRUE, 0., 1. * 3., "Ions", 10001);
+      TDatabasePDG::Instance()->AddParticle("alpha", "alpha", 3.726954 /*3.72738*/ /*3.727417*/, kTRUE, 0., 2. * 3., "Ions", 10002);
+      TDatabasePDG::Instance()->AddParticle("He3", "He3", 2.80746 /*2.80839*/ /*2.80923*/, kTRUE, 0., 2. * 3., "Ions", 10003);
+      TDatabasePDG::Instance()->AddParticle("Li6", "Li6", 5.601432 /*5.60152*/ /*5.6015194*/, kTRUE, 0., 3. * 3., "Ions", 10004);
       TDatabasePDG::Instance()->AddParticle("H3L", "H3L", 2.99114, kFALSE, 0., 1. * 3., "Ions", 20001);
       TDatabasePDG::Instance()->AddParticle("H4L", "H4L", 3.9225, kFALSE, 0., 1. * 3., "Ions", 20002);
       TDatabasePDG::Instance()->AddParticle("He5L", "He5L", 4.8399, kFALSE, 0., 2. * 3., "Ions", 20003);
@@ -141,17 +140,17 @@ int main(int argc, char** argv)
       TFile* offile = new TFile(name_out.c_str(), "RECREATE");
 
       TTree* Anatree            = 0;
-      MCAnaEventG4Sol* Anaevent = 0;
-      Anatree                   = new TTree("T", "MCAnaEventG4SolTree");
+      Ana_WasaEvent* Anaevent = 0;
+      Anatree                   = new TTree("T", "WASAUnpackTree");
       // Anatree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
       Anatree->SetAutoSave(100000000); // autosave when 100 Mbyte written
       // Anatree->SetAutoSave(50000000); // autosave when 50 Mbyte written
       // Anatree->SetMaxTreeSize(50000000); //1 GB
       Anatree->SetAutoFlush();
-      Anaevent = new MCAnaEventG4Sol();
+      Anaevent = new Ana_WasaEvent();
       // Anatree->Bronch("bAna_event","MCAnaEvent",&Anaevent, 32000,1);
-      MCAnaEventG4Sol::Class()->IgnoreTObjectStreamer();
-      TBranch* branch = Anatree->Branch("MCAnaEventG4Sol", &Anaevent, 32000, 2);
+      Ana_WasaEvent::Class()->IgnoreTObjectStreamer();
+      TBranch* branch = Anatree->Branch("Ana_WasaEvent", &Anaevent, 32000, 2);
       branch->SetAutoDelete(kFALSE);
       Anatree->BranchRef();
       Anatree->SetDirectory(offile);
@@ -162,15 +161,15 @@ int main(int argc, char** argv)
 
       TTree* InTree = nullptr;
       if(Restarting == false)
-	InTree        = input_file->Get<TTree>("G4Tree");
+	InTree        = input_file->Get<TTree>("WASAUnpackTree");
       else
 	InTree        = input_file->Get<TTree>("T");
 
       assert(InTree != nullptr);
 
       DataSimExp InputPar{nullptr, nullptr, nullptr};
-      InputPar.nameDet       = (std::vector<std::string>*)(input_file->Get("nameDet"));
-      InputPar.simParameters = (std::map<std::string, double>*)(input_file->Get("simParameters"));
+      InputPar.nameDet       = (std::vector<std::string>*)(input_file->Get("nameDet")); //Change! -> Remove
+      InputPar.simParameters = (std::map<std::string, double>*)(input_file->Get("simParameters"));  //Change! Define in attributes file?
       InputPar.previousMeta  = (AnaEvent_Metadata*)(input_file->Get("EventMetadata"));
 
       if(InputPar.nameDet == nullptr && InputPar.previousMeta == nullptr)
@@ -181,43 +180,33 @@ int main(int argc, char** argv)
         }
       if(InputPar.simParameters == nullptr && InputPar.previousMeta == nullptr)
         {
-          ConsoleLogger->error("E> Load simParameters not possible ! {}", fmt::ptr(input_file->Get("simParameters")));
+          ConsoleLogger->error("E> Load expParameters not possible ! {}", fmt::ptr(input_file->Get("expParameters")));
           ConsoleLogger->error("E> Load AnaEvent_Metadata not possible ! {}", fmt::ptr(input_file->Get("EventMetadata")));
           return -1;
         }
 
-      TG4Sol_Event* fEvent = nullptr;
-      MCAnaEventG4Sol* fEventRe = new MCAnaEventG4Sol();
+      EventWASAUnpack fEvent ;
+      Ana_WasaEvent* fEventRe = new Ana_WasaEvent(); //Change!
 
       if(Restarting == false)
-	InTree->SetBranchAddress("TG4Sol_Event", &fEvent);
-      else
-	InTree->SetBranchAddress("MCAnaEventG4Sol", &fEventRe);
+      {
+        InTree->SetBranchAddress("lmd_header",&fEvent.header);
+        InTree->SetBranchAddress("s4tq"      ,&fEvent.s4tq);
+        InTree->SetBranchAddress("s4mwdc"    ,&fEvent.s4mwdc);
+        InTree->SetBranchAddress("s4wfd"     ,&fEvent.s4wfd);
+        InTree->SetBranchAddress("s2tq1"     ,&fEvent.s2tq1);
+        InTree->SetBranchAddress("s2mdc"     ,&fEvent.s2mdc);
+        InTree->SetBranchAddress("s2wfd123"  ,&fEvent.s2wfd123);
+        InTree->SetBranchAddress("s2tq2"     ,&fEvent.s2tq2);
+        InTree->SetBranchAddress("s2wfd45"   ,&fEvent.s2wfd45);
+        InTree->SetBranchAddress("s2fiber"   ,&fEvent.s2fiber);
+        InTree->SetBranchAddress("s2csi"     ,&fEvent.s2csi);
+        InTree->SetBranchAddress("frstpc"    ,&fEvent.frstpc);
 
-#ifdef ROOT6
-      TTreeReader reader(InTree);
+          } //Change! -> Set all the branches (s4tq...)
+              else
+      	InTree->SetBranchAddress("Ana_WasaEvent", &fEventRe);
 
-      TTreeReaderValue<TG4Sol_Event> ReaderEvent(reader, "TG4Sol_Event");
-      std::vector<TTreeReaderArray<TG4Sol_Hit>*> AllHits;
-      for(auto name : *InputPar.nameDet)
-        AllHits.emplace_back(new TTreeReaderArray<TG4Sol_Hit>(reader, name.c_str()));
-#else
-      std::vector<TClonesArray*> AllHits;
-      if(Restarting == false)
-	{
-	  for(const auto& name : *InputPar.nameDet)
-	    {
-	      AllHits.emplace_back(new TClonesArray("TG4Sol_Hit", 20));
-	      InTree->SetBranchAddress(name.c_str(), &AllHits.back());
-	      AllHits.back()->SetName(name.c_str());
-	    }
-	}
-#endif
-
-#ifdef TREEPERF
-      TFile* f_in         = new TFile(name_In.c_str());
-      TTree* Chain_InTree = (TTree*)f_in->Get("HypHiMC_output_TREE");
-#endif
 
       Long64_t total_nentries_over_files = InTree->GetEntries();
       //int max_loop                       = 1;
@@ -255,7 +244,7 @@ int main(int argc, char** argv)
       //ListHisto.DebugHists();
       if(MT == false && ZMQ == false)
 	{
-	  FullRecoTask<MCAnaEventG4Sol> ReconstructionTask(config, InputPar);
+	  FullRecoTask<Ana_WasaEvent> ReconstructionTask(config, InputPar); //Change! -> Check
 	  
 	  ReconstructionTask.AttachHisto(&ListHisto);
 	  ConsoleLogger->info("Init done");
@@ -295,7 +284,7 @@ int main(int argc, char** argv)
 
 	      int toStop = 0;
 	      if(Restarting == false)
-		toStop = ReconstructionTask.EventLoop(*fEvent, AllHits, Anaevent);
+		toStop = ReconstructionTask.EventLoop(fEvent, Anaevent);
 	      else
 		toStop = ReconstructionTask.EventLoop(fEventRe, Anaevent);
 
@@ -306,35 +295,35 @@ int main(int argc, char** argv)
 
 	  ReconstructionTask.SetEventMetadata(metadata);
 	}
-      else if(MT==true && ZMQ==false)
-	{
+ //      else if(MT==true && ZMQ==false)
+	// {
 	  
-	  FullRecoTaskMT ReconstructionTaskMT(config, InputPar);
+	//   FullRecoTaskMT ReconstructionTaskMT(config, InputPar);
 	  
-	  ReconstructionTaskMT.AttachHisto(&ListHisto);
-	  ConsoleLogger->info("Init done");
-	  //-------------------------------------------------------
-	  // EVENT LOOP nentries
+	//   ReconstructionTaskMT.AttachHisto(&ListHisto);
+	//   ConsoleLogger->info("Init done");
+	//   //-------------------------------------------------------
+	//   // EVENT LOOP nentries
 	  
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
-	  ConsoleLogger->info("---------------------------------------------");
+	//   ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
+	//   ConsoleLogger->info("---------------------------------------------");
 
-	  int toStop = ReconstructionTaskMT.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
-	}
-      else if(ZMQ==true && MT==false)
-	{
-	  FullRecoTaskZMQ ReconstructionTaskZMQ(config, InputPar);
+	//   int toStop = ReconstructionTaskMT.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
+	// }
+ //      else if(ZMQ==true && MT==false)
+	// {
+	//   FullRecoTaskZMQ ReconstructionTaskZMQ(config, InputPar);
 	  
-	  ReconstructionTaskZMQ.AttachHisto(&ListHisto);
-	  ConsoleLogger->info("Init done");
-	  //-------------------------------------------------------
-	  // EVENT LOOP nentries
+	//   ReconstructionTaskZMQ.AttachHisto(&ListHisto);
+	//   ConsoleLogger->info("Init done");
+	//   //-------------------------------------------------------
+	//   // EVENT LOOP nentries
 	  
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
-	  ConsoleLogger->info("---------------------------------------------");
+	//   ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
+	//   ConsoleLogger->info("---------------------------------------------");
 
-	  int toStop = ReconstructionTaskZMQ.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
-	}
+	//   int toStop = ReconstructionTaskZMQ.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
+	// }
       else
 	{
 	  ConsoleLogger->warn("W> no run : MT? {} ZMQ? {}",MT,ZMQ);
@@ -403,14 +392,7 @@ int main(int argc, char** argv)
       Anaevent = NULL;
       ConsoleLogger->info("Anaevent deleted");
 
-      for(auto tempBranch : AllHits)
-	if(tempBranch != nullptr)
-	  {
-	    tempBranch->Delete();
-	    tempBranch = nullptr;
-	  }
-      ConsoleLogger->info("AllHits deleted");
-
+      
       additionalPDG->Delete();
       additionalPDG = nullptr;
 

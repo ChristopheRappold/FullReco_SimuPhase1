@@ -273,7 +273,7 @@ public:
   Float_t dT = -9999.;
   Float_t dE = -9999.;
 
-  TSciHit();
+  TSciHit() {};
 
   TSciHit(const TSciHit& M) = default;
   TSciHit& operator=(const TSciHit&) = default;

@@ -24,7 +24,7 @@ using namespace G4Sol;
 
 template <class Out>
 TPrimaryVertex<Out>::TPrimaryVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface("PrimaryVertexReco"), att(attribut), SiliconHitsSD_Si1(1), SiliconHitsSD_Si2(2),
+    : TDataProcessInterface<Out>("PrimaryVertexReco"), att(attribut), SiliconHitsSD_Si1(1), SiliconHitsSD_Si2(2),
         SiliconHitsSD_Si3(3), SiliconHitsSD_Si4(4)
 {
   TranslationZ_Target_System(att.Target_PositionZ);
