@@ -1,19 +1,12 @@
-#include "Ana_EventNew_vData.hh"
+#include "Ana_WasaEvent.hh"
 
 using namespace std;
 
-ClassImp(Ana_Event)
-
-TClonesArray *Ana_Event::gMC_Particle = 0;
-TClonesArray *Ana_Event::gfTrack = 0;
-TClonesArray *Ana_Event::gfHyp = 0;
+ClassImp(Ana_WasaEvent)
 
 
-Ana_Event::Ana_Event()
+Ana_WasaEvent::Ana_WasaEvent()
 {
-  if(!gMC_Particle) gMC_Particle = new TClonesArray("TMcParticle",30);
-  if(!gfTrack) gfTrack = new TClonesArray("THyphiTrack",20);
-  if(!gfHyp) gfHyp = new TClonesArray("THypernucleus",20);
 
   T0_COUNTER = new TClonesArray("TDataHit",20);
   UFT = new TClonesArray("TDataHit",20);
@@ -30,11 +23,17 @@ Ana_Event::Ana_Event()
   MWDC = new TClonesArray("TDataHit",20);
 
   TrackCand = new TClonesArray("TTrackCand",100);
+  fTrack = new TClonesArray("THyphiTrack",20);
+  fHyp = new TClonesArray("THypernucleus",20);
 
-  fMC_Particle = gMC_Particle;
-  fTrack = gfTrack;
-  fHyp = gfHyp;
 
+  trigger = 0;
+  Field = 0.;
+  ReducFactor = 1.;
+
+  NtrackCand = 0;
+  Ntracks=0;
+  Nhyp=0;
 
   NT0_counter = 0;
   NUft = 0;
@@ -50,25 +49,17 @@ Ana_Event::Ana_Event()
   NSci = 0;
   NMwdc = 0;
   
-  Field = 0.;
-  ReducFactor = 1.;
-  NtrackCand = 0;
-  Ntracks=0;
-  Nhyp=0;
-  trigger = 0;
-
   Setup();
 }
 
-Ana_Event::~Ana_Event()
+Ana_WasaEvent::~Ana_WasaEvent()
 {
   Clear();
   Reset();
 }
 
-void Ana_Event::Clear(Option_t *option)
+void Ana_WasaEvent::Clear(Option_t *option)
 {
-  fMC_Particle->Clear("C");
 
   T0_COUNTER->Clear("C");
   UFT->Clear("C");
@@ -91,12 +82,8 @@ void Ana_Event::Clear(Option_t *option)
   Setup();
 }
 
-void Ana_Event::Reset()
+void Ana_WasaEvent::Reset()
 {
-  delete gMC_Particle; gMC_Particle = 0;
-  delete gfTrack; gfTrack = 0;
-  delete gfHyp; gfHyp = 0;
-
   delete T0_COUNTER; T0_COUNTER = 0;
   delete UFT; UFT = 0;
   delete MFT; MFT = 0;
@@ -115,13 +102,19 @@ void Ana_Event::Reset()
   delete fTrack; fTrack = 0;
   delete fHyp; fHyp = 0;
 
-  delete fMC_Particle; fMC_Particle = 0;
 }
 
 
-int Ana_Event::Setup()
+int Ana_WasaEvent::Setup()
 {
-  Nmc=0;
+  
+  trigger = 0;
+  Field = 0;
+  ReducFactor =1.;
+
+  NtrackCand =0;
+  Ntracks=0;
+  Nhyp=0;
 
   NT0_counter = 0;
   NUft = 0;
@@ -137,31 +130,12 @@ int Ana_Event::Setup()
   NSci = 0;
   NMwdc = 0;
 
-  Field = 0;
-  ReducFactor =1.;
-  NtrackCand =0;
-  Ntracks=0;
-  Nhyp=0;
-  trigger = 0;
-
   return 0;
 }
 
-int Ana_Event::Add_MC(const TMcParticle& M)
-{
-   TClonesArray &MC_Particle_Ref = *fMC_Particle;
-   
-   new(MC_Particle_Ref[Nmc]) TMcParticle(M);
-   Nmc++;
-
-   int status=0;
-   
-   return status;
-   
-}
 
 /*
-int Ana_Event::Add_Hit(const THyphiHitDet& H,TString detector)
+int Ana_WasaEvent::Add_Hit(const THyphiHitDet& H,TString detector)
 {
 
   std::string funcname ="Add_Hit(const THyphiHitDet& H,TString detector) :  ";
@@ -200,7 +174,7 @@ int Ana_Event::Add_Hit(const THyphiHitDet& H,TString detector)
 }
 */
 
-int Ana_Event::Add_Track(const THyphiTrack& T)
+int Ana_WasaEvent::Add_Track(const THyphiTrack& T)
 {
    TClonesArray &Track_Ref = *fTrack;
    
@@ -213,7 +187,7 @@ int Ana_Event::Add_Track(const THyphiTrack& T)
    return status;
 }
 
-int Ana_Event::Add_Hyp(const THypernucleus& H)
+int Ana_WasaEvent::Add_Hyp(const THypernucleus& H)
 {
    TClonesArray &Hyp_Ref = *fHyp;
    

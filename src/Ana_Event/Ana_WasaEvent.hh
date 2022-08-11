@@ -1,5 +1,5 @@
-#ifndef Ana_Event_vData_h
-#define Ana_Event_vData_h
+#ifndef Ana_WasaEvent_h
+#define Ana_WasaEvent_h
 
 #include "TVector3.h"
 #include "TClonesArray.h"
@@ -8,7 +8,6 @@
 #include "TObject.h"
 #include "THypernucleus.hh"
 #include "THyphiHitDet.hh"
-#include "TMcParticle.hh"
 #include "THyphiTrack_v4.hh"
 #include "TTrackCand.hh"
 #include "TDataHit.hh"
@@ -16,33 +15,33 @@
 
 class THypernucleus;
 class THyphiHitDet;
-class TMcParticle;
 class THyphiTrack;
 class TDataHit;
 
-class Ana_Event : public TObject{
+class Ana_WasaEvent : public TObject{
 public :
 
-  Ana_Event();
-  ~Ana_Event();
+  Ana_WasaEvent();
+  ~Ana_WasaEvent();
   
   void Clear(Option_t *option ="");
   int Setup();
   static void Reset();
-  int Add_MC(const TMcParticle& M);
-  int Add_Hit(const THyphiHitDet& H,TString detector);
+  //int Add_Hit(const THyphiHitDet& H,TString detector);
   int Add_Track(const THyphiTrack& T);
   int Add_Hyp(const THypernucleus& H);
 
   Int_t trigger;
-
-  Int_t Nmc;
-  TClonesArray* fMC_Particle; //->
+  
+  Double32_t Field;
+  Double32_t ReducFactor;
 
   Int_t NT0_counter;
   Int_t NUft;
   Int_t NMft;
   Int_t NDft;
+
+  Int_t NFrstpc;
 
   Int_t NMdc;
   Int_t NCsi;
@@ -53,10 +52,13 @@ public :
   Int_t NSci;
   Int_t NMwdc;
 
+
   TClonesArray* T0_COUNTER; //->
   TClonesArray* UFT; //->
   TClonesArray* MFT; //->
   TClonesArray* DFT; //->
+
+  TClonesArray* FRSTPC;
 
   TClonesArray* MDC; //->
   TClonesArray* CSI; //->
@@ -76,12 +78,7 @@ public :
   Int_t Nhyp;
   TClonesArray* fHyp; //->
 
-
-  static TClonesArray* gMC_Particle; //!
-  static TClonesArray* gfTrack; //! 
-  static TClonesArray* gfHyp; //!
-
-  ClassDef(Ana_Event,17)
+  ClassDef(Ana_WasaEvent,1)
 };
 
 #endif
