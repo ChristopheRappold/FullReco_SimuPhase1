@@ -4,6 +4,8 @@
 #include <array>
 #include <TString.h>
 
+
+
 class LMDHeader : public TObject
 {
   public:
@@ -486,6 +488,27 @@ class S2CsI : public TObject
   void DrawADC(int ipc);
   ClassDef(S2CsI, 1);
 };
+
+
+struct EventWASAUnpack
+{
+  LMDHeader* header = nullptr;
+  S4TQ* s4tq = nullptr;
+  S4MWDC* s4mwdc = nullptr;
+  S4WFD* s4wfd = nullptr;
+  S2TQ1* s2tq1 = nullptr;
+  S2TQ2* s2tq2 = nullptr;
+  S2MDC* s2mdc = nullptr;
+  S2WFD123* s2wfd123 = nullptr;
+  S2WFD45* s2wfd45 = nullptr;
+  S2Fiber* s2fiber = nullptr;
+  S2CsI* s2csi = nullptr;
+  FRSTPC* frstpc = nullptr;
+};
+
+
+
+
 
 namespace rse {
   template <class T, class U>
