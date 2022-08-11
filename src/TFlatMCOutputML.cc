@@ -1,6 +1,7 @@
 #include "TFlatMCOutputML.h"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "ReturnRes.hh"
 
@@ -605,3 +606,4 @@ int TFlatMCOutputML<Out>::FlattenOut(FullRecoEvent& RecoEvent)
 }
 
 template class TFlatMCOutputML<MCAnaEventG4Sol>;
+template class TFlatMCOutputML<Ana_WasaEvent>;

@@ -1,6 +1,7 @@
 #include "TDecayVertex.h"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "ReturnRes.hh"
 
@@ -2655,3 +2656,4 @@ void TDecayVertex<Out>::TranslationZ_Target_System(double Target_PosZ)
 }
 
 template class TDecayVertex<MCAnaEventG4Sol>;
+template class TDecayVertex<Ana_WasaEvent>;

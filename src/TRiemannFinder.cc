@@ -1,6 +1,7 @@
 #include "TRiemannFinder.h"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
@@ -1991,3 +1992,4 @@ int TRiemannFinder<Out>::FinderTrack(FullRecoEvent& RecoEvent, std::vector<RTrac
 
 
 template class TRiemannFinder<MCAnaEventG4Sol>;
+template class TRiemannFinder<Ana_WasaEvent>;

@@ -1,5 +1,7 @@
 #include "TPrimaryVertex.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "ReturnRes.hh"
 
@@ -3148,3 +3150,4 @@ void TPrimaryVertex<Out>::nForwardTracksCounter(std::vector<std::vector<std::vec
 }
 
 template class TPrimaryVertex<MCAnaEventG4Sol>;
+template class TPrimaryVertex<Ana_WasaEvent>;

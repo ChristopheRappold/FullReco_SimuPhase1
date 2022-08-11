@@ -10,6 +10,8 @@
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 
+#include "Ana_Event/Ana_WasaEvent.hh"
+
 #include "Debug.hh"
 
 #include "TProfile.h"
@@ -130,6 +132,14 @@ public:
 #else
   ReturnRes::InfoM operator() (Out* event, FullRecoEvent& RecoEvent, Out* OutTree);
 #endif
+
+
+#ifdef ROOT6
+  ReturnRes::InfoM operator() (const Ana_WasaEvent& RestartEvent, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
+#else
+  ReturnRes::InfoM operator() (Ana_WasaEvent* event, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
+#endif
+
 
 private :
   //int Exec(THyphiEvent_Phys_new *event,Ana_Event* OutTree);

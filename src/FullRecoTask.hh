@@ -11,7 +11,9 @@
 #include "EventG4Sol/TG4Sol_Hit.hh"
 #include "Ana_Event/Ana_EventNew_v16.hh"
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "Ana_Event/AnaEvent_Metadata.hh"
+#include "EventWASAUnpack/WASAUnpackBranch.hh"
 
 #include "FullRecoEvent.hh"
 #include "TDataProcess.h"
@@ -36,8 +38,10 @@ class FullRecoTask
 
 public :
   FullRecoTask() = delete;
-  FullRecoTask(const FullRecoConfig& config, const DataSim& In);
-  ~FullRecoTask();
+  FullRecoTask(const FullRecoConfig& config, const DataSimExp& In);
+
+ ~FullRecoTask();
+
   
   //int EventLoop(THypHi_Event *event,std::vector<TUTracker_Event*> *UTrackerEvents,Ana_Event* OutTree);
 
@@ -53,10 +57,19 @@ public :
   int EventLoop(TEOut* RestartEvent, TEOut* OutTree);
 #endif
 
+#ifdef ROOT6
+  int EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree);
+#else
+  int EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree);
+#endif
+
+
   void AttachHisto(Ana_Hist* h);
   void SetEventMetadata(AnaEvent_Metadata& metadata);
 
 private :
+
+  void Initialization();
 
   const THyphiAttributes Attributes;
 

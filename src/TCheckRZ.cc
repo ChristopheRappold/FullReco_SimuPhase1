@@ -1,6 +1,7 @@
 #include "TCheckRZ.h"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
@@ -1132,3 +1133,4 @@ int TCheckRZ<Out>::FinderTrack(FullRecoEvent& RecoEvent)
 }
 
 template class TCheckRZ<MCAnaEventG4Sol>;
+template class TCheckRZ<Ana_WasaEvent>;
