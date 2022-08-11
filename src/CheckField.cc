@@ -1,6 +1,7 @@
 #include "CheckField.h"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "TGeoMedium.h"
@@ -201,3 +202,4 @@ int CheckField<Out>::Check()
 
 
 template class CheckField<MCAnaEventG4Sol>;
+template class CheckField<Ana_WasaEvent>;

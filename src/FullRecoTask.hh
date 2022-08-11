@@ -11,7 +11,9 @@
 #include "EventG4Sol/TG4Sol_Hit.hh"
 #include "Ana_Event/Ana_EventNew_v16.hh"
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "Ana_Event/AnaEvent_Metadata.hh"
+#include "EventWASAUnpack/WASAUnpackBranch.hh"
 
 #include "FullRecoEvent.hh"
 #include "TDataProcess.h"
@@ -52,6 +54,13 @@ public :
 #else
   int EventLoop(TEOut* RestartEvent, TEOut* OutTree);
 #endif
+
+#ifdef ROOT6
+  int EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree);
+#else
+  int EventLoop(EventWASAUnpack* UnpackEvent, TEOut* OutTree);
+#endif
+
 
   void AttachHisto(Ana_Hist* h);
   void SetEventMetadata(AnaEvent_Metadata& metadata);

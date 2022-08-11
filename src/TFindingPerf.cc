@@ -1,6 +1,7 @@
 #include "TFindingPerf.h"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
@@ -548,3 +549,4 @@ int TFindingPerf<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 }
 
 template class TFindingPerf<MCAnaEventG4Sol>;
+template class TFindingPerf<Ana_WasaEvent>;

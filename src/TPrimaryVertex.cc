@@ -1,5 +1,7 @@
 #include "TPrimaryVertex.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "ReturnRes.hh"
 
@@ -36,7 +38,7 @@ template <class Out>
 void TPrimaryVertex<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
 template <class Out>
-ReturnRes::InfoM TPrimaryVertex<Out>::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+ReturnRes::InfoM TPrimaryVertex<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   int result_finder = Exec(RecoEvent, OutTree);
@@ -45,7 +47,7 @@ ReturnRes::InfoM TPrimaryVertex<Out>::operator()(FullRecoEvent& RecoEvent, MCAna
 }
 
 template <class Out>
-int TPrimaryVertex<Out>::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FinderPrimaryVertex(RecoEvent); }
+int TPrimaryVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FinderPrimaryVertex(RecoEvent); }
 
 template <class Out>
 ReturnRes::InfoM TPrimaryVertex<Out>::SoftExit(int result_full) {
@@ -3148,3 +3150,4 @@ void TPrimaryVertex<Out>::nForwardTracksCounter(std::vector<std::vector<std::vec
 }
 
 template class TPrimaryVertex<MCAnaEventG4Sol>;
+template class TPrimaryVertex<Ana_WasaEvent>;

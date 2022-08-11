@@ -1,6 +1,7 @@
 #include "TKalmanFilter_DAF.h"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
 #include "StateOnPlane.h"
@@ -1299,3 +1300,4 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
 
 template class TKalmanFilter_DAF<MCAnaEventG4Sol>;
+template class TKalmanFilter_DAF<Ana_WasaEvent>;

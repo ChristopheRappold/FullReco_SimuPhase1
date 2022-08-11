@@ -1,6 +1,7 @@
 #include "TBayesFinder.h"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "ReturnRes.hh"
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
@@ -540,3 +541,4 @@ int TBayesFinder<Out>::FinderTrack(FullRecoEvent& RecoEvent)
 }
 
 template class TBayesFinder<MCAnaEventG4Sol>;
+template class TBayesFinder<Ana_WasaEvent>;

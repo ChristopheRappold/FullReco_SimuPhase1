@@ -1,6 +1,7 @@
 #include "FullRecoTask.hh"
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "TBuildDetectorLayerPlaneDAF.h"
 #include "TBuildRestarter.h"
 
@@ -163,6 +164,26 @@ int FullRecoTask<TEOut>::EventLoop(TEOut* RestartEvent, TEOut* OutTree)
 
 }
 
+#ifdef ROOT6
+template<class TEOut>
+int FullRecoTask<TEOut>::EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree)
+#else
+template<class TEOut>
+int FullRecoTask<TEOut>::EventLoop(EventWASAUnpack* UnpackEvent, TEOut* OutTree)
+#endif
+{
+
+  REvent.Clear();
+  int return_build = (*dynamic_cast<TBuildUnpack*>(det_build))(UnpackEvent,REvent,OutTree);
+
+  if(return_build !=0)
+    return -1;
+
+  int result_process = EventProcess(REvent,OutTree);
+
+  return result_process;
+
+}
 
 
 template<class TEOut>
@@ -183,3 +204,4 @@ int FullRecoTask<TEOut>::EventProcess(FullRecoEvent& RecoEvent,TEOut* OutTree)
 }
 
 template class FullRecoTask<MCAnaEventG4Sol>;
+template class FullRecoTask<Ana_WasaEvent>;
