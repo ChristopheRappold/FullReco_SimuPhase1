@@ -88,8 +88,8 @@ EventH_v14 = Ana_EventNew_v14.hh
 EventH_Com_v14 = THypernucleus.hh THyphiHitDet.hh THyphiTrack_v2.hh TMcParticle.hh
 EventH_v16 = Ana_EventNew_v16.hh
 EventH_Com_v16 = THypernucleus.hh THyphiHitDet.hh THyphiTrack_v3.hh TMcParticle.hh
-EventH_vData = Ana_EventNew_vData.hh
-EventH_Com_vData = THypernucleus.hh THyphiHitDet.hh THyphiTrack_v4.hh TMcParticle.hh TDataHit.hh
+EventH_Wasa = Ana_WasaEvent.hh AnaEvent_Metadata.hh
+EventH_Com_Wasa = THyphiTrack_v4.hh TTrackCand.hh THypernucleus.hh TDataHit.hh THyphiHitDet.hh
 MCEventH = MCAnaEvent.hh
 MCEventH_Com = TMcHit.hh TMcParticle.hh THyphiTrack_v3.hh TDataHit.hh
 
@@ -101,8 +101,8 @@ EventSrc_v14 = $(patsubst %.hh,%.cc,$(EventH_v14))
 EventSrc_Com_v14 = $(patsubst %.hh,%.cc,$(EventH_Com_v14))
 EventSrc_v16 = $(patsubst %.hh,%.cc,$(EventH_v16))
 EventSrc_Com_v16 = $(patsubst %.hh,%.cc,$(EventH_Com_v16))
-EventSrc_vData = $(patsubst %.hh,%.cc,$(EventH_vData))
-EventSrc_Com_vData = $(patsubst %.hh,%.cc,$(EventH_Com_vData))
+EventSrc_Wasa = $(patsubst %.hh,%.cc,$(EventH_Wasa))
+EventSrc_Com_Wasa = $(patsubst %.hh,%.cc,$(EventH_Com_Wasa))
 
 MCEventSrc = $(patsubst %.hh,%.cc,$(MCEventH))
 MCEventSrc_Com = $(patsubst %.hh,%.cc,$(MCEventH_Com))
@@ -114,7 +114,7 @@ MCEventG4SolSrc_Com = $(patsubst %.hh,%.cc,$(MCEventG4SolH_Com))
 EventDict_Com = THypernucleus.$(DictObjSuf) THyphiSimpleHit.$(DictObjSuf) TTrackSimple.$(DictObjSuf) TMcParticle.$(DictObjSuf)
 EventDict_v14 = Ana_EventNew_v14.$(DictObjSuf)
 EventDict_v16 = Ana_EventNew_v16.$(DictObjSuf)
-EventDict_vData = Ana_EventNew_vData.$(DictObjSuf)
+EventDict_Wasa = Ana_WasaEvent.$(DictObjSuf)
 
 MCEventDict = MCAnaEvent.$(DictObjSuf)
 MCEventG4SolDict = MCAnaEventG4Sol.$(DictObjSuf)
@@ -127,8 +127,8 @@ EventO_Com_v14 = $(patsubst %.hh,%.$(ObjSuf),$(EventH_Com_v14))
 EventO_v16 = $(patsubst %.hh,%.$(ObjSuf),$(EventH_v16))
 EventO_Com_v16 = $(patsubst %.hh,%.$(ObjSuf),$(EventH_Com_v16))
 
-EventO_vData = $(patsubst %.hh,%.$(ObjSuf),$(EventH_vData))
-EventO_Com_vData = $(patsubst %.hh,%.$(ObjSuf),$(EventH_Com_vData))
+EventO_Wasa = $(patsubst %.hh,%.$(ObjSuf),$(EventH_Wasa))
+EventO_Com_Wasa = $(patsubst %.hh,%.$(ObjSuf),$(EventH_Com_Wasa))
 
 MCEventO = $(patsubst %.hh,%.$(ObjSuf),$(MCEventH))
 MCEventO_Com = $(patsubst %.hh,%.$(ObjSuf),$(MCEventH_Com))
@@ -138,18 +138,18 @@ MCEventG4SolO_Com = $(patsubst %.hh,%.$(ObjSuf),$(MCEventG4SolH_Com))
 
 EventSo_v14 = libAna_Event_v14.$(DllSuf)
 EventSo_v16 = libAna_Event_v16.$(DllSuf)
-EventSo_vData = libAna_Event_vData.$(DllSuf)
+EventSo_Wasa = libAna_WasaEvent.$(DllSuf)
 MCEventSo = libMCAnaEvent.$(DllSuf)
 MCEventG4SolSo = libMCAnaEventG4Sol.$(DllSuf)
 
 EventSo_Commun_Name = libAna_Event
 
-all: libAna_Event 
+all: libAna_Event $(MCEventG4SolSo)
 
-libAna_Event : $(MCEventG4SolSo) 
-	ln -sf $(EventSo_vData) $(EventSo_Commun_Name).$(DllSuf)
+libAna_Event : $(EventSo_Wasa)
+	ln -sf $(EventSo_Wasa) $(EventSo_Commun_Name).$(DllSuf)
 ifeq ($(PLATFORM),macosx)
-	ln -sf $(EventSo_vData) $(EventSo_Commun_Name).$(MacDllSuf)
+	ln -sf $(EventSo_Wasa) $(EventSo_Commun_Name).$(MacDllSuf)
 endif
 
 $(EventSo_v14): $(EventO_v14) $(EventO_Com_v14) $(EventDict_v14) $(EventDict_Com_v14)
@@ -188,7 +188,7 @@ endif
 #	ln -sf $(FromLibdir)/$(EventSo_v10) $(Bindir)/lib
 	@echo "---> $@ done"
 
-$(EventSo_vData): $(EventO_vData) $(EventO_Com_vData) $(EventDict_vData) $(EventDict_Com_vData)
+$(EventSo_Wasa): $(EventO_Wasa) $(EventO_Com_Wasa) $(EventDict_Wasa)
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
 	$(LD) $(SOFLAGS) $^ $(OutPutOpt) $@
@@ -244,7 +244,7 @@ print :
 .$(SrcSuf).$(ObjSuf):
 	$(CXX) $(CXXFLAGS) -c $<
 
- .$(HeadSuf).$(DictObjSuf):
+.$(HeadSuf).$(DictObjSuf):
 	rm -f $*.$(DictpSuf).*; \
 	    $(ROOTDICGEN) $*.$(DictpSuf).cc $<; \
 	    $(CXX) $(CXXFLAGS) -c $*.$(DictpSuf).cc
@@ -259,9 +259,9 @@ $(EventDict_v16):
 	    $(ROOTDICGEN) $*.cc -s $(EventSo_v16) $(EventH_v16) $(EventH_Com_v16) Ana_EventNew_v16_linkdef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc
 
-$(EventDict_vData):
+$(EventDict_Wasa):
 	rm -f $*.*; \
-	    $(ROOTDICGEN) $*.cc -s $(EventSo_vData) $(EventH_vData) $(EventH_Com_vData) Ana_EventNew_vData_linkdef.h; \
+	    $(ROOTDICGEN) $*.cc -s $(EventSo_Wasa) $(EventH_Wasa) $(EventH_Com_Wasa) Ana_WasaEvent_linkdef.h; \
 	    $(CXX) $(CXXFLAGS) -c $*.cc
 
 $(MCEventDict):
