@@ -26,10 +26,7 @@ public :
   
   void Clear(Option_t *option ="");
   int Setup();
-  static void Reset();
-  //int Add_Hit(const THyphiHitDet& H,TString detector);
-  int Add_Track(const THyphiTrack& T);
-  int Add_Hyp(const THypernucleus& H);
+  void Reset();
 
   Int_t trigger;
 
