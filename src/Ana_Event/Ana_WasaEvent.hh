@@ -36,7 +36,6 @@ public :
   Double32_t Field;
   Double32_t ReducFactor;
 
-  Int_t NT0_counter;
   Int_t NUft;
   Int_t NMft;
   Int_t NDft;
@@ -45,6 +44,8 @@ public :
 
   Int_t NMdc;
   Int_t NCsi;
+
+  Int_t NT0_counter;
   Int_t NPsfe;
   Int_t NPsbe;
   Int_t NPsce;
@@ -52,22 +53,27 @@ public :
   Int_t NSci;
   Int_t NMwdc;
 
+  Int_t NWfd;
 
-  TClonesArray* T0_COUNTER; //->
+
   TClonesArray* UFT; //->
   TClonesArray* MFT; //->
   TClonesArray* DFT; //->
 
-  TClonesArray* FRSTPC;
+  TClonesArray* FRSTPC; //->
 
   TClonesArray* MDC; //->
   TClonesArray* CSI; //->
+
+  TClonesArray* T0_COUNTER; //->
   TClonesArray* PSFE; //->
   TClonesArray* PSBE; //->
   TClonesArray* PSCE; //->
 
   TClonesArray* SCI; //->
   TClonesArray* MWDC; //->
+
+  TClonesArray* WFD; //->
 
   Int_t NtrackCand;
   TClonesArray* TrackCand; //->  
