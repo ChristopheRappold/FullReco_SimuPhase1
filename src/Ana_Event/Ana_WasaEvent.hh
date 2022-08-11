@@ -32,7 +32,12 @@ public :
   int Add_Hyp(const THypernucleus& H);
 
   Int_t trigger;
-  
+
+  ULong64_t timestamp;
+
+  TString lmd_filename;
+  TString lmd_open_time;
+
   Double32_t Field;
   Double32_t ReducFactor;
 
