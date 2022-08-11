@@ -79,6 +79,14 @@ struct Task
   bool Task_KalmanDAF = true;
   bool Task_DecayVtx = false;
 
+  enum Task_Id
+  {
+    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKFLATMCOUTPUTML, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
+    TASKKALMANDAF, TASKDECAYVTX, NBTASKID
+  };
+
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+
   void Init(const FullRecoConfig& Config);
 };
 
@@ -179,12 +187,23 @@ inline auto InitStorage()
   return make_storage(
 		      "WasaFRSexp.sqlite",
 		      make_table(
-				 "AttrRunDone", make_column("HashId", &AttrOut::Hash), make_column("NameIn", &AttrOut::NameIn),
-				 make_column("NameOut", &AttrOut::NameOut), make_column("DateOfRun", &AttrOut::DateOfRun),
-				 make_column("Nb_CPU", &AttrOut::Nb_CPU), make_column("Nb_Fraction", &AttrOut::Nb_Fraction),
-				 make_column("NEvent", &AttrOut::NEvent), make_column("MT_RunType", &AttrOut::MT_RunType),
-				 make_column("MT_IsMain", &AttrOut::MT_IsMain), make_column("MT_NQueue", &AttrOut::MT_NQueue),
-				 make_column("MT_NBuilder", &AttrOut::MT_NBuilder), make_column("MT_NKalman", &AttrOut::MT_NKalman),
+				 "RunDone",
+				 make_column("HashId", &AttrOut::Hash),
+				 make_column("NameIn", &AttrOut::NameIn),
+				 make_column("NameOut", &AttrOut::NameOut),
+				 make_column("DateOfRun", &AttrOut::DateOfRun),
+				 make_column("Nb_CPU", &AttrOut::Nb_CPU),
+				 make_column("Nb_Fraction", &AttrOut::Nb_Fraction),
+				 make_column("NEvent", &AttrOut::NEvent)
+				 ),
+		      make_table(
+				 "RunMultiThread",
+				 make_column("HashId", &AttrOut::Hash),
+				 make_column("MT_RunType", &AttrOut::MT_RunType),
+				 make_column("MT_IsMain", &AttrOut::MT_IsMain),
+				 make_column("MT_NQueue", &AttrOut::MT_NQueue),
+				 make_column("MT_NBuilder", &AttrOut::MT_NBuilder),
+				 make_column("MT_NKalman", &AttrOut::MT_NKalman),
 				 make_column("MT_NMerger", &AttrOut::MT_NMerger),
 				 make_column("MT_add_initEvent", &AttrOut::MT_addr_initEvent),
 				 make_column("MT_add_frontBuilder", &AttrOut::MT_addr_frontBuilder),
@@ -194,7 +213,11 @@ inline auto InitStorage()
 				 make_column("MT_add_frontMerger", &AttrOut::MT_addr_frontMerger),
 				 make_column("MT_add_backEnd", &AttrOut::MT_addr_backEnd),
 				 make_column("MT_add_control", &AttrOut::MT_addr_control),
-				 make_column("MT_add_monitor", &AttrOut::MT_addr_monitor),
+				 make_column("MT_add_monitor", &AttrOut::MT_addr_monitor)
+				 ),
+		      make_table(
+				 "RunTask",
+				 make_column("HashId", &AttrOut::Hash),
 				 make_column("Task_CheckField", &AttrOut::Task_CheckField),
 				 make_column("Task_PrimaryVtx", &AttrOut::Task_PrimaryVtx),
 				 make_column("Task_FlatMCOutputML", &AttrOut::Task_FlatMCOutputML),
@@ -205,7 +228,12 @@ inline auto InitStorage()
 				 make_column("Task_CheckRZ", &AttrOut::Task_CheckRZ),
 				 make_column("Task_KalmanDAF", &AttrOut::Task_KalmanDAF),
 				 make_column("Task_DecayVtx", &AttrOut::Task_DecayVtx),
-				 make_column("Task_ReStart", &AttrOut::Task_ReStart), make_column("G4_simu", &AttrOut::G4_simu),
+				 make_column("Task_ReStart", &AttrOut::Task_ReStart)
+				 ),
+		      make_table(
+				 "RunAttrGeneral",
+				 make_column("HashId", &AttrOut::Hash),
+				 make_column("G4_simu", &AttrOut::G4_simu),
 				 make_column("G4_TimeResolution", &AttrOut::G4_TimeResolution),
 				 make_column("G4_GeoResolution", &AttrOut::G4_GeoResolution),
 				 make_column("back_tracking", &AttrOut::back_tracking),
@@ -214,23 +242,38 @@ inline auto InitStorage()
 				 make_column("Target_PositionZ", &AttrOut::Target_PositionZ),
 				 make_column("Target_Size", &AttrOut::Target_Size),
 				 make_column("Field_Strength", &AttrOut::Field_Strength),
-				 make_column("Wasa_Side", &AttrOut::Wasa_Side), make_column("Wasa_FieldMap", &AttrOut::Wasa_FieldMap),
+				 make_column("Wasa_Side", &AttrOut::Wasa_Side),
+				 make_column("Wasa_FieldMap", &AttrOut::Wasa_FieldMap),
 				 make_column("Wasa_FieldMapName", &AttrOut::Wasa_FieldMapName),
 				 make_column("name_GeoVolumes", &AttrOut::name_GeoVolumes),
-				 make_column("beam_only", &AttrOut::beam_only), make_column("Debug_DAF", &AttrOut::Debug_DAF),
+				 make_column("beam_only", &AttrOut::beam_only)
+				 ),
+		      make_table(
+				 "RunTaskAttr",
+				 make_column("HashId", &AttrOut::Hash),
+				 make_column("Debug_DAF", &AttrOut::Debug_DAF),
 				 make_column("DoNoMaterial", &AttrOut::DoNoMaterial),
 				 make_column("RZ_ChangeMiniFiber", &AttrOut::RZ_ChangeMiniFiber),
 				 make_column("RZ_MDCProlate", &AttrOut::RZ_MDCProlate),
 				 make_column("RZ_MDCWire2", &AttrOut::RZ_MDCWire2),
 				 make_column("RZ_MDCBiasCorr", &AttrOut::RZ_MDCBiasCorr),
-				 make_column("KF_Kalman", &AttrOut::KF_Kalman), make_column("KF_KalmanSqrt", &AttrOut::KF_KalmanSqrt),
-				 make_column("KF_KalmanRef", &AttrOut::KF_KalmanRef), make_column("KF_DAFRef", &AttrOut::KF_DAFRef),
-				 make_column("KF_DAF", &AttrOut::KF_DAF), make_column("KF_NbCentralCut", &AttrOut::KF_NbCentralCut),
+				 make_column("KF_Kalman", &AttrOut::KF_Kalman),
+				 make_column("KF_KalmanSqrt", &AttrOut::KF_KalmanSqrt),
+				 make_column("KF_KalmanRef", &AttrOut::KF_KalmanRef),
+				 make_column("KF_DAFRef", &AttrOut::KF_DAFRef),
+				 make_column("KF_DAF", &AttrOut::KF_DAF),
+				 make_column("KF_NbCentralCut", &AttrOut::KF_NbCentralCut),
 				 make_column("KF_MbMiniFiberCut", &AttrOut::KF_NbMiniFiberCut),
 				 make_column("FlatML_namefile", &AttrOut::FlatML_namefile),
 				 make_column("DataML_Out", &AttrOut::DataML_Out),
-				 make_column("RF_OutputEvents", &AttrOut::RF_OutputEvents),
-				 make_column("ConfigJson", &AttrOut::ConfigJson)));
+				 make_column("RF_OutputEvents", &AttrOut::RF_OutputEvents)
+				 ),
+		      make_table(
+				 "RunFullConfig",
+				 make_column("HashId", &AttrOut::Hash),
+				 make_column("ConfigJson", &AttrOut::ConfigJson)
+				 )
+		      );
 
 }
 

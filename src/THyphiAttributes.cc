@@ -18,6 +18,8 @@
 #include "TGeoMaterialInterface.h"
 #include "spdlog/spdlog.h"
 
+#include "boost/algorithm/string.hpp"
+
 //#define OLDGENFIT For Kalman_RK
 //#define OLD_FIELDMAP
 // THyphiAttributes::THyphiAttributes() : Field(nullptr), InputPar{nullptr, nullptr}
@@ -394,7 +396,6 @@ void Task::Init(const FullRecoConfig& Config)
     Task_PrimaryVtx = Config.Get<bool>("Task_PrimaryVtx");
   if(Config.IsAvailable("Task_FlatMCOutputML"))
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
-  ;
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
   if(Config.IsAvailable("Task_RiemannFinder"))
@@ -411,6 +412,45 @@ void Task::Init(const FullRecoConfig& Config)
     Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
   if(Config.IsAvailable("Task_ReStart"))
     Task_ReStart = Config.Get<bool>("Task_ReStart");
+
+
+  if(Config.IsAvailable("Task_Pipeline"))
+    {
+      Task_Order.clear();
+
+      std::string in(Config.Get<std::string>("Task_Pipeline"));
+      std::vector<std::string> pipeline;
+      boost::split(pipeline, in, boost::is_any_of("->"), boost::token_compress_on);
+
+      for(auto& s : pipeline)
+	boost::trim(s);
+
+      for(const auto& s : pipeline)
+	{
+	  if(s == "Task_CheckField")
+	    Task_Order.push_back(TASKCHECKFIELD);
+	  if(s == "Task_PrimaryVtx")
+	    Task_Order.push_back(TASKPRIMARYVTX);
+	  if(s == "Task_FlatMCOutputML")
+	    Task_Order.push_back(TASKFLATMCOUTPUTML);
+  	  if(s == "Task_BayesFinder")
+	    Task_Order.push_back(TASKBAYESFINDER);
+	  if(s == "Task_RiemannFinder")
+	    Task_Order.push_back(TASKRIEMANNFINDER);
+	  if(s == "Task_FindingPerf")
+	    Task_Order.push_back(TASKFINDINGPERF);
+	  if(s == "Task_FinderCM")
+	    Task_Order.push_back(TASKFINDERCM);
+	  if(s == "Task_CheckRZ")
+	    Task_Order.push_back(TASKCHECKRZ);
+	  if(s == "Task_KalmanDAF")
+	    Task_Order.push_back(TASKKALMANDAF);
+	  if(s == "Task_DecayVtx")
+	    Task_Order.push_back(TASKDECAYVTX);
+	  if(s == "Task_ReStart")
+	    Task_Order.push_back(TASKRESTART);
+	}
+    }
 }
 
 void THyphiAttributes::SetOut(AttrOut& out) const

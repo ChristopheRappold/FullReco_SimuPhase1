@@ -48,26 +48,76 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
   //det_build = new TTestUnits(Attributes,"layerDAF");
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
-  if(Attributes.TaskConfig.Task_CheckField)
-    list_processMC.emplace_back(new CheckField<TEOut>(Attributes));
-  if(Attributes.TaskConfig.Task_PrimaryVtx)
-    list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
-  if(Attributes.TaskConfig.Task_BayesFinder)
-    list_processMC.emplace_back(new TBayesFinder<TEOut>(Attributes));
-  if(Attributes.TaskConfig.Task_RiemannFinder)
-    list_processMC.emplace_back(new TRiemannFinder<TEOut>(Attributes));
-  //if(Attributes.TaskConfig.Task_FinderCM)
-  //  list_processMC.emplace_back(new TFinderCM(Attributes));
-  if(Attributes.TaskConfig.Task_FindingPerf)
-    list_processMC.emplace_back(new TFindingPerf<TEOut>(Attributes));
-  if(Attributes.TaskConfig.Task_CheckRZ)
-    list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
-  if(Attributes.TaskConfig.Task_KalmanDAF)
-    list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
-  if(Attributes.TaskConfig.Task_DecayVtx)
-    list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes));
-  if(Attributes.TaskConfig.Task_FlatMCOutputML)
-    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
+  // if(Attributes.TaskConfig.Task_CheckField)
+  //   list_processMC.emplace_back(new CheckField<TEOut>(Attributes));
+  // if(Attributes.TaskConfig.Task_PrimaryVtx)
+  //   list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
+  // if(Attributes.TaskConfig.Task_BayesFinder)
+  //   list_processMC.emplace_back(new TBayesFinder<TEOut>(Attributes));
+  // if(Attributes.TaskConfig.Task_RiemannFinder)
+  //   list_processMC.emplace_back(new TRiemannFinder<TEOut>(Attributes));
+  // //if(Attributes.TaskConfig.Task_FinderCM)
+  // //  list_processMC.emplace_back(new TFinderCM(Attributes));
+  // if(Attributes.TaskConfig.Task_FindingPerf)
+  //   list_processMC.emplace_back(new TFindingPerf<TEOut>(Attributes));
+  // if(Attributes.TaskConfig.Task_CheckRZ)
+  //   list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
+  // if(Attributes.TaskConfig.Task_KalmanDAF)
+  //   list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
+  // if(Attributes.TaskConfig.Task_DecayVtx)
+  //   list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes));
+  // if(Attributes.TaskConfig.Task_FlatMCOutputML)
+  //   list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
+
+
+  for(const auto& Tid : Attributes.TaskConfig.Task_Order)
+    {
+      switch(Tid)
+	{
+	case Task::TASKCHECKFIELD:
+	  if(Attributes.TaskConfig.Task_CheckField)
+	    list_processMC.emplace_back(new CheckField<TEOut>(Attributes));
+	  break;
+	case Task::TASKPRIMARYVTX:
+	  if(Attributes.TaskConfig.Task_PrimaryVtx)
+	    list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
+	  break;
+	case Task::TASKFLATMCOUTPUTML:
+	  if(Attributes.TaskConfig.Task_FlatMCOutputML)
+	    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
+	  break;
+	case Task::TASKBAYESFINDER:
+	  if(Attributes.TaskConfig.Task_BayesFinder)
+	    list_processMC.emplace_back(new TBayesFinder<TEOut>(Attributes));
+	  break;
+	case Task::TASKRIEMANNFINDER:
+	  if(Attributes.TaskConfig.Task_RiemannFinder)
+	    list_processMC.emplace_back(new TRiemannFinder<TEOut>(Attributes));
+	  break;
+	case Task::TASKFINDERCM:
+	  //if(Attributes.TaskConfig.Task_FinderCM)
+	  //  list_processMC.emplace_back(new TFinderCM(Attributes));
+	  break;
+	case Task::TASKFINDINGPERF:
+	  if(Attributes.TaskConfig.Task_FindingPerf)
+	    list_processMC.emplace_back(new TFindingPerf<TEOut>(Attributes));
+	  break;
+	case Task::TASKCHECKRZ:
+	  if(Attributes.TaskConfig.Task_CheckRZ)
+	    list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
+	case Task::TASKKALMANDAF:
+	  if(Attributes.TaskConfig.Task_KalmanDAF)
+	    list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
+	  break;
+	case Task::TASKDECAYVTX:
+	  if(Attributes.TaskConfig.Task_DecayVtx)
+	    list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes));
+	  break;
+	default:
+	  break;
+	}
+    }
+
 
   for(auto task : list_processMC)
     Attributes._logger->info(" -> Task : {}",task->signature);
