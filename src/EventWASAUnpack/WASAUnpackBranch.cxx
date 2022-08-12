@@ -184,7 +184,7 @@ void S4WFD::Init() {
 
 }
 
-void S4WFD::Draw(int ich) {
+void S4WFD::DrawWFD(int ich) {
   static std::shared_ptr<TCanvas> c;
   c.reset();
   c = std::make_shared<TCanvas>("c_s4wfd", Form("s4wfd123[%d]", ich), 700, 500);
@@ -341,7 +341,7 @@ S2WFD123::S2WFD123() : v1742(3, std::vector<std::vector<int16_t>>(36)), v1290n(1
   Init();
 }
 
-void S2WFD123::Draw(int imod, int ich) {
+void S2WFD123::DrawWFD(int imod, int ich) {
   static std::shared_ptr<TCanvas> c;
   c.reset();
   c = std::make_shared<TCanvas>("c_wfd123", Form("s2wfd123[%d][%d]", imod, ich), 700, 500);
@@ -522,7 +522,7 @@ void S2WFD45::Init() {
   rse::InitCArray(psfe_wfd_min_index, -1);
 }
 
-void S2WFD45::Draw(int imod, int ich) {
+void S2WFD45::DrawWFD(int imod, int ich) {
   static std::shared_ptr<TCanvas> c;
   c.reset();
   c = std::make_shared<TCanvas>("c_s2wfd45", Form("s2wfd45[%d][%d]", imod, ich), 700, 500);
@@ -632,7 +632,7 @@ void S2CsI::Init() {
   rse::InitCArray(all_ok, false);
 }
 
-void S2CsI::Draw(int ihit){
+void S2CsI::DrawHit(int ihit){
   static std::shared_ptr<TCanvas> c;
   c.reset();
   c = std::make_shared<TCanvas>("c_csi", "", 700, 500);

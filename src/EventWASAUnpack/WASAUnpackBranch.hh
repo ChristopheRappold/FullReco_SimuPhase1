@@ -194,7 +194,7 @@ class S4WFD : public TObject
   array2<Int_t, 4, 2> sc43_wfd_max_index;
   array2<Int_t, 4, 2> sc43_wfd_min_index;
 
-  void Draw(int ich);
+  void DrawWFD(int ich);
   void ShowWFDExistCh();
   ClassDef(S4WFD, 1);
 };
@@ -306,7 +306,7 @@ class S2WFD123 : public TObject
   array2<Int_t, 46, 2> psb_wfd_min;
   array2<Int_t, 46, 2> psb_wfd_max_index;
   array2<Int_t, 46, 2> psb_wfd_min_index;
-  void Draw(int imod, int ich);
+  void DrawWFD(int imod, int ich);
   void ShowWFDExistCh();
   ClassDef(S2WFD123, 1);
 };
@@ -395,7 +395,7 @@ class S2WFD45 : public TObject
   std::array<Int_t, 38> psbe_wfd_min;
   std::array<Int_t, 38> psbe_wfd_max_index;
   std::array<Int_t, 38> psbe_wfd_min_index;
-  void Draw(int imod, int ich);
+  void DrawWFD(int imod, int ich);
   void ShowWFDExistCh();
   ClassDef(S2WFD45, 1);
 };
@@ -484,7 +484,7 @@ class S2CsI : public TObject
   std::array<Bool_t, 2> all_ok;
   array2<Int_t, 2, 4> polarity;
   array2<Int_t, 2, 4> n_slave;
-  void Draw(int ihit);
+  void DrawHit(int ihit);
   void DrawADC(int ipc);
   ClassDef(S2CsI, 1);
 };
