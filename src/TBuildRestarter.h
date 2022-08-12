@@ -134,11 +134,11 @@ public:
 #endif
 
 
-#ifdef ROOT6
-  ReturnRes::InfoM operator() (const Ana_WasaEvent& RestartEvent, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
-#else
-  ReturnRes::InfoM operator() (Ana_WasaEvent* event, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
-#endif
+// #ifdef ROOT6
+//   ReturnRes::InfoM operator() (const Ana_WasaEvent& RestartEvent, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
+// #else
+//   ReturnRes::InfoM operator() (Ana_WasaEvent* event, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
+// #endif
 
 
 private :

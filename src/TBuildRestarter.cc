@@ -1191,6 +1191,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 }
 
 template class TBuildRestarter<MCAnaEventG4Sol>;
+template class TBuildRestarter<Ana_WasaEvent>;
 
 double restart::CloseDist(const TVector3& Xin, const TVector3& Xout, const TVector3& Pin, const TVector3& Pout)
 {

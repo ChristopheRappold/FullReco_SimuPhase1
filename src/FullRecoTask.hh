@@ -69,8 +69,6 @@ public :
 
 private :
 
-  void Initialization();
-
   const THyphiAttributes Attributes;
 
   FullRecoEvent REvent;
