@@ -201,10 +201,12 @@ endif
 libMCEvent.so :
 	make -C Ana_Event
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEventG4Sol.$(DllSuf) $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Ana_Event/libAna_Event.$(DllSuf) $(Bindir)/lib/
 	ln -sf $(FromLibdir)/Ana_Event/libAna_WasaEvent.$(DllSuf) $(Bindir)/lib/
 ifeq ($(ROOTVERSION),6)
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEventG4Sol_rdict.pcm $(Bindir)/lib/
 	ln -sf $(FromLibdir)/Ana_Event/libAna_WasaEvent_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Ana_Event/libAna_WasaEvent_rdict.pcm $(Bindir)/lib/libAna_Event_rdict.pcm
 endif
 ifeq ($(ARCH),macosx)
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEvent.$(MacDllSuf) $(Bindir)/lib/
