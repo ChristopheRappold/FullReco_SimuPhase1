@@ -116,6 +116,8 @@ template <typename T>
 struct HasMC_Particle <T, decltype((void) T::fMC_Particle, 0)> : std::true_type { };
 
 }
+
+
 template<typename Out>
 class TBuildRestarter final : public TDataBuilder
 {
@@ -133,13 +135,13 @@ public:
   ReturnRes::InfoM operator() (Out* event, FullRecoEvent& RecoEvent, Out* OutTree);
 #endif
 
-
+/*
 #ifdef ROOT6
   ReturnRes::InfoM operator() (const Ana_WasaEvent& RestartEvent, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
 #else
   ReturnRes::InfoM operator() (Ana_WasaEvent* event, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
 #endif
-
+*/
 
 private :
   //int Exec(THyphiEvent_Phys_new *event,Ana_Event* OutTree);
