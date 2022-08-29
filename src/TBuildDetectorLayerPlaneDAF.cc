@@ -73,6 +73,13 @@ ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& eve
   return SoftExit(result);
 }
 
+ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& event,
+                                                         const std::vector<TClonesArray*>& hits,
+                                                         FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree)
+{
+  return ReturnRes::BuildError;
+}
+
 #endif
 void TBuildDetectorLayerPlaneDAF::SelectHists() { LocalHisto.h_stats = AnaHisto->CloneAndRegister(AnaHisto->h_stats); }
 

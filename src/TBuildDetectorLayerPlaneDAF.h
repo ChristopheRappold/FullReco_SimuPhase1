@@ -227,7 +227,7 @@ public:
   ReturnRes::InfoM operator() (const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree);
 #endif
 
-ReturnRes::InfoM operator()(const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
+ReturnRes::InfoM operator()(const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree);
 
 private :
   //int Exec(THyphiEvent_Phys_new *event,Ana_Event* OutTree);

@@ -8,6 +8,7 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
+
 #pragma link C++ class LMDHeader+;
 #pragma link C++ class S4TQ+;
 #pragma link C++ class MWDCHit+;
@@ -27,4 +28,3 @@
 #pragma link C++ class S2CsI+;
 
 #endif
-
