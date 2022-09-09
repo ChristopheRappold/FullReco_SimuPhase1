@@ -130,7 +130,7 @@ private:
 
 public:
 
-  ParaManager *par = dynamic_cast<ParaManager*> (ParaManager::Instance());
+  std::unique_ptr<ParaManager> par;
 
 };
 
