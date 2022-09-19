@@ -150,15 +150,7 @@ ParaManager::ParaManager(const std::map<std::string,std::string>& ParamFiles){
 
 ParaManager::~ParaManager() {}
 
-/*ParaManager* ParaManager::Instance(){
 
-  if(fixInstance==0) {
-    fixInstance = new ParaManager();
-  }
-  return fixInstance;
-
-};
-*/
 
 bool ParaManager::InitMDCParameter()
 {
