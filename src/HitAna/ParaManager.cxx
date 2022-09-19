@@ -1,8 +1,8 @@
 #include "ParaManager.hh"
 
-ParaManager *fixInstance=0;
+//ParaManager *fixInstance=0;
 
-ParaManager::ParaManager(){
+ParaManager::ParaManager(const std::map<std::string,std::string>& ParamFiles){
 
   //  Flag  //////
   write_hist = true;
@@ -20,7 +20,7 @@ ParaManager::ParaManager(){
   cut_psbe_phi = 0.6;
 
   //  Field  //////
-  field_flag = true; // true : measuremnt field , false : constant field
+  field_flag = true; // true : measurement field , false : constant field
   field = 1; // Tesla
 
   //  WASA  //////
@@ -70,7 +70,7 @@ ParaManager::ParaManager(){
   fiber_mft2_step_x1 = 1.1; fiber_mft2_step_u1 = 1.1; fiber_mft2_step_v1 = 1.1;
   fiber_mft2_step_x2 = 1.1; fiber_mft2_step_u2 = 1.1; fiber_mft2_step_v2 = 1.1;
 
-  fiber_name_offset  = "setup/fiber_offset/fiber_offset.csv";
+  fiber_name_offset  = ParamFiles["fiber_offset_file"]; //"config/fiber_offset/fiber_offset.csv"; //Change!
   for(int i=0; i<7; ++i){
     for(int j=0; j<3; ++j){
       for(int k=0; k<384; ++k){
@@ -92,7 +92,7 @@ ParaManager::ParaManager(){
   psb_res_phi = 11; //mm
   psb_res_z   = 10; //mm
 
-  psb_name_time  = "setup/psb_param/psb_time.csv";
+  psb_name_time  = ParamFiles["psb_time_file"]; //Change!
   for(int i=0; i<46; ++i){
     psb_zpar[i] = 70;
     for(int j=0; j<2; ++j){
@@ -116,7 +116,7 @@ ParaManager::ParaManager(){
   //  T0  //////
   t0_tcut_min = -200000 ; t0_tcut_max = 20000;
   t0_pos_z = 100; //tmp
-  psb_name_time  = "setup/t0_param/t0_time.csv";
+  t0_name_time  = ParamFiles["t0_time_file"]; //"config/t0_param/t0_time.csv"; //Change!
   for(int i=0; i<28; ++i){
     for(int j=0; j<2; ++j){
       t0_off_time[i][j] = 0.;
@@ -150,7 +150,7 @@ ParaManager::ParaManager(){
 
 ParaManager::~ParaManager() {}
 
-ParaManager* ParaManager::Instance(){
+/*ParaManager* ParaManager::Instance(){
 
   if(fixInstance==0) {
     fixInstance = new ParaManager();
@@ -158,16 +158,16 @@ ParaManager* ParaManager::Instance(){
   return fixInstance;
 
 };
-
+*/
 
 bool ParaManager::InitMDCParameter()
 {
   if(mdc_init_done)
     return true;
 
-  mdc_name_map  = "./mapping/MDC_channelmap.csv";
-  mdc_name_phys = "./mapping/MDC_PhysicalMap.csv";
-  mdc_name_par  = "./mdc_driftparam/MDC_DriftParam.txt";
+  mdc_name_map  = ParamFiles["mdc_map_file"]; //"./mdc_mapping/MDC_channelmap.csv"; //Change!
+  mdc_name_phys = ParamFiles["mdc_phys_file"]; //"./mdc_mapping/MDC_PhysicalMap.csv"; //Change!
+  mdc_name_par  = ParamFiles["mdc_par_file"]; //"./mdc_driftparam/MDC_DriftParam.txt"; //Change!
 
   for(int ctdc_id=0; ctdc_id<16; ++ctdc_id){
     for(int ctdc_block=0; ctdc_block<8; ++ctdc_block){

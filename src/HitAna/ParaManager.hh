@@ -43,9 +43,9 @@ class ParaManager
 {
 
   public:
-  ParaManager();
+  ParaManager(const std::map<std::string,std::string>& ParamFiles);
   ~ParaManager();
-  static ParaManager* Instance();
+  //static ParaManager* Instance();
 
   //  Flag  //////
   bool write_hist;
