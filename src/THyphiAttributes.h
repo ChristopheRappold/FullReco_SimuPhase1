@@ -321,6 +321,8 @@ class THyphiAttributes
 
   std::string Hash;
 
+  std::map<std::string,std::string> map_ParamFiles;
+
   int Nb_CPU;
   int Nb_Fraction;
   int NEvent;

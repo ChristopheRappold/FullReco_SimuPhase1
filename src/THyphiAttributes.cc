@@ -166,6 +166,56 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   _logger->info(" *** > Loading Fieldmap ");
 
+if(Config.IsAvailable("CalibFile_MDCmap"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCmap");
+    map_ParamFiles.insert({"mdc_map_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_map_file","./calib/mdc_mapping/MDC_channelmap.csv"});
+
+if(Config.IsAvailable("CalibFile_MDCphys"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCphys");
+    map_ParamFiles.insert({"mdc_phys_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_phys_file","./calib/mdc_mapping/MDC_PhysicalMap.csv"});
+
+if(Config.IsAvailable("CalibFile_MDCpar"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCpar");
+    map_ParamFiles.insert({"mdc_par_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_par_file","./calib/mdc_driftparam/MDC_DriftParam.txt"});
+
+if(Config.IsAvailable("CalibFile_Fiberoffset"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_Fiberoffset");
+    map_ParamFiles.insert({"fiber_offset_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"fiber_offset_file","./calib/fiber_offset/fiber_offset.csv"});
+
+if(Config.IsAvailable("CalibFile_PSBtime"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_PSBtime");
+    map_ParamFiles.insert({"psb_time_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"psb_time_file","calib/psb_param/psb_time.csv"});
+
+if(Config.IsAvailable("CalibFile_T0time"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_T0time");
+    map_ParamFiles.insert({"t0_time_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"t0_time_file","./calib/t0_param/t0_time.csv"});
+
+
+
   if(Wasa_FieldMap)
     {
       double signDir = Wasa_Side ? 1.0 : -1.0;
