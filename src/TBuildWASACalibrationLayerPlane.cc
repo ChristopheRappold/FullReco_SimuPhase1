@@ -241,10 +241,10 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
 
       TVectorD hitCoords(2);
       hitCoords(0) = 0.;
-      hitCoords(1) = hit_PSB->GetZ() - shift[2];
+      hitCoords(1) = hit_PSB->GetZ() * 0.1; // mm to cm
       TMatrixDSym hitCov(2);
-      hitCov(0, 0)     = 0.1; // to be adjusted resolution_psce * resolution_psce;
-      hitCov(1, 1)     = 0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
+      hitCov(0, 0)     = TMath::Sq(par->psb_res_phi * 0.1);//0.1; // to be adjusted resolution_psce * resolution_psce;
+      hitCov(1, 1)     = TMath:Sq(par->psb_res_z   * 0.1);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSCE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
@@ -305,13 +305,19 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       TVector3 o(shift[0], shift[1], shift[2]);
       genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
 
-      TVectorD hitCoords(2);
-      hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // to be adjusted // phi ! be aware ! not u-dim
-      hitCoords(1) = gRandom->Uniform(6., 22.);     // to be adjusted   // r -> v dir
+      // TVectorD hitCoords(2);
+      // hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // to be adjusted // phi ! be aware ! not u-dim
+      // hitCoords(1) = gRandom->Uniform(6., 22.);     // to be adjusted   // r -> v dir
 
-      TMatrixDSym hitCov(2);
-      hitCov(0, 0)     = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
-      hitCov(1, 1)     = TMath::Sq(22. - 6.) / 12.;
+      // TMatrixDSym hitCov(2);
+      // hitCov(0, 0)     = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
+      // hitCov(1, 1)     = TMath::Sq(22. - 6.) / 12.;
+
+      TVectorD hitCoords(1);
+      hitCoords(0) = 0.;
+      TMatrixDSym hitCov(1);
+      hitCov(0, 0) = TMath::Sq(par->psfe_res_phi * 0.1); // mm to cm
+
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSFE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
@@ -372,13 +378,18 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       TVector3 o(shift[0], shift[1], shift[2]);
       genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
 
-      TVectorD hitCoords(2);
-      hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // to be adjusted // phi ! be aware ! not u-dim
-      hitCoords(1) = gRandom->Uniform(6., 22.);     // to be adjusted   // r -> v dir
+      // TVectorD hitCoords(2);
+      // hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // to be adjusted // phi ! be aware ! not u-dim
+      // hitCoords(1) = gRandom->Uniform(6., 22.);     // to be adjusted   // r -> v dir
 
-      TMatrixDSym hitCov(2);
-      hitCov(0, 0)     = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
-      hitCov(1, 1)     = TMath::Sq(22. - 6.) / 12.;
+      // TMatrixDSym hitCov(2);
+      // hitCov(0, 0)     = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
+      // hitCov(1, 1)     = TMath::Sq(22. - 6.) / 12.;
+      TVectorD hitCoords(1);
+      hitCoords(0) = 0.;
+      TMatrixDSym hitCov(1);
+      hitCov(0, 0) = pow(par->psfe_res_phi * mm2cm, 2); // must be corrected
+
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSBE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
@@ -490,7 +501,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
         double* edge1 = Hw1.GetTranslation();
         double* edge2 = Hw2.GetTranslation();
 
-        double dl = hit_MDC->GetDl();
+        double dl = hit_MDC->GetDl() * 0.1 ; // mm to cm
 
         double dlmax = 0;
         switch(MDCLayerID + 1)
@@ -541,7 +552,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
             hitCoords(5) = edge1[2];
           }
         TMatrixDSym hitCov(7);
-        hitCov(6, 6) = 0.1; // to be adjucted resolution_dl * resolution_dl;
+        hitCov(6, 6) = TMath::Sq(hit_MDC->GetRes()*0.1); // to be adjucted resolution_dl * resolution_dl;
         auto measurement =
             std::make_unique<genfit::WireMeasurement>(hitCoords, hitCov, G4Sol::MG01 + MDCLayerID, hitID, nullptr);
         dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setLeftRightResolution(1);
@@ -692,9 +703,9 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
               genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
 
               TVectorD hitCoords(1);
-              hitCoords(0) = u.Dot(TVector3(shift[0], shift[1], 0));
+              hitCoords(0) = FiberHitClCont[i][j][k]->GetPos()*0.1; //u.Dot(TVector3(shift[0], shift[1], 0));
               TMatrixDSym hitCov(1);
-              hitCov(0, 0) = 0.1; // to be adjusted resolution_fiber * resolution_fiber;
+              hitCov(0, 0) = TMath::Sq(FiberHitClCont[i][j][k]->GetRes()*0.1); // mm to cm // to be adjusted resolution_fiber * resolution_fiber;
               auto measurement =
                   std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, TypeDet[i][j], hitID, nullptr);
               dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
