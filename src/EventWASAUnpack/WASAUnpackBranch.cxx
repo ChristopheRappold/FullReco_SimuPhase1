@@ -632,7 +632,7 @@ void S2CsI::Init() {
   rse::InitCArray(all_ok, false);
 }
 
-oid S2CsI::DrawHist(int ihit){
+void S2CsI::DrawHist(int ihit){
   static std::shared_ptr<TCanvas> c;
   c.reset();
   c = std::make_shared<TCanvas>("c_csi", "", 700, 500);
