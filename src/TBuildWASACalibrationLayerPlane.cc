@@ -14,7 +14,7 @@ TBuildWASACalibrationLayerPlane::TBuildWASACalibrationLayerPlane(const THyphiAtt
 {
   att._logger->info("TBuildWASACalibrationLayerPlane::TBuildWASACalibrationLayerPlane");
 
-
+  par = std::make_unique<ParaManager>(att.map_ParamFiles);
 }
 
 TBuildWASACalibrationLayerPlane::~TBuildWASACalibrationLayerPlane() {}

@@ -30,6 +30,7 @@
 #include "TGeoElement.h"
 
 #include <sstream>
+#include <memory>
 
 #include "spdlog/spdlog.h"
 
@@ -130,8 +131,7 @@ private:
 
 public:
 
-  ParaManager *par = dynamic_cast<ParaManager*> (ParaManager::Instance());
-
+  std::unique_ptr<ParaManager> par;
 };
 
 #endif
