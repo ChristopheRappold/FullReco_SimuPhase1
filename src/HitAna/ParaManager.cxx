@@ -2,7 +2,7 @@
 
 //ParaManager *fixInstance=0;
 
-ParaManager::ParaManager(const std::map<std::string,std::string>& ParamFiles){
+ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& ParamFiles){
 
   //  Flag  //////
   write_hist = true;
@@ -70,7 +70,11 @@ ParaManager::ParaManager(const std::map<std::string,std::string>& ParamFiles){
   fiber_mft2_step_x1 = 1.1; fiber_mft2_step_u1 = 1.1; fiber_mft2_step_v1 = 1.1;
   fiber_mft2_step_x2 = 1.1; fiber_mft2_step_u2 = 1.1; fiber_mft2_step_v2 = 1.1;
 
-  fiber_name_offset  = ParamFiles["fiber_offset_file"]; //"config/fiber_offset/fiber_offset.csv"; //Change!
+  itr_ParamFiles = ParamFiles.find("fiber_offset_file");
+  if(itr_ParamFiles != ParamFiles.end())
+    fiber_name_offset  = itr_ParamFiles->second;
+
+  //fiber_name_offset  = ParamFiles["fiber_offset_file"]; //"config/fiber_offset/fiber_offset.csv";
   for(int i=0; i<7; ++i){
     for(int j=0; j<3; ++j){
       for(int k=0; k<384; ++k){
@@ -92,7 +96,10 @@ ParaManager::ParaManager(const std::map<std::string,std::string>& ParamFiles){
   psb_res_phi = 11; //mm
   psb_res_z   = 10; //mm
 
-  psb_name_time  = ParamFiles["psb_time_file"]; //Change!
+  itr_ParamFiles = ParamFiles.find("psb_time_file");
+  if(itr_ParamFiles != ParamFiles.end())
+    psb_name_time  = itr_ParamFiles->second;
+  
   for(int i=0; i<46; ++i){
     psb_zpar[i] = 70;
     for(int j=0; j<2; ++j){
@@ -116,7 +123,11 @@ ParaManager::ParaManager(const std::map<std::string,std::string>& ParamFiles){
   //  T0  //////
   t0_tcut_min = -200000 ; t0_tcut_max = 20000;
   t0_pos_z = 100; //tmp
-  t0_name_time  = ParamFiles["t0_time_file"]; //"config/t0_param/t0_time.csv"; //Change!
+
+  itr_ParamFiles = ParamFiles.find("t0_time_file");
+  if(itr_ParamFiles != ParamFiles.end())
+    t0_name_time  = itr_ParamFiles->second;
+
   for(int i=0; i<28; ++i){
     for(int j=0; j<2; ++j){
       t0_off_time[i][j] = 0.;
@@ -143,23 +154,30 @@ ParaManager::ParaManager(const std::map<std::string,std::string>& ParamFiles){
 
   mdc_res = 0.2;
 
-  InitMDCParameter();
-
+  InitMDCParameter(ParamFiles);
 
 }
+
 
 ParaManager::~ParaManager() {}
 
 
-
-bool ParaManager::InitMDCParameter()
+bool ParaManager::InitMDCParameter(const std::unordered_map<std::string,std::string>& ParamFilesMDC)
 {
   if(mdc_init_done)
     return true;
 
-  mdc_name_map  = ParamFiles["mdc_map_file"]; //"./mdc_mapping/MDC_channelmap.csv"; //Change!
-  mdc_name_phys = ParamFiles["mdc_phys_file"]; //"./mdc_mapping/MDC_PhysicalMap.csv"; //Change!
-  mdc_name_par  = ParamFiles["mdc_par_file"]; //"./mdc_driftparam/MDC_DriftParam.txt"; //Change!
+  itr_ParamFiles = ParamFilesMDC.find("mdc_map_file");
+  if(itr_ParamFiles != ParamFilesMDC.end())
+    mdc_name_map  = itr_ParamFiles->second;
+
+  itr_ParamFiles = ParamFilesMDC.find("mdc_phys_file");
+  if(itr_ParamFiles != ParamFilesMDC.end())
+    mdc_name_phys  = itr_ParamFiles->second;
+
+  itr_ParamFiles = ParamFilesMDC.find("mdc_par_file");
+  if(itr_ParamFiles != ParamFilesMDC.end())
+    mdc_name_par  = itr_ParamFiles->second;
 
   for(int ctdc_id=0; ctdc_id<16; ++ctdc_id){
     for(int ctdc_block=0; ctdc_block<8; ++ctdc_block){

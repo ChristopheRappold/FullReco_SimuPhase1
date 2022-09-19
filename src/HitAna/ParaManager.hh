@@ -3,6 +3,7 @@
 
 #include <string>
 #include <array>
+#include <unordered_map>
 
 struct InfoTDC
 {
@@ -43,7 +44,7 @@ class ParaManager
 {
 
   public:
-  ParaManager(const std::map<std::string,std::string>& ParamFiles);
+  ParaManager(const std::unordered_map<std::string,std::string>& ParamFiles);
   ~ParaManager();
   //static ParaManager* Instance();
 
@@ -172,11 +173,10 @@ class ParaManager
 
   double mdc_res;
 
-  bool InitMDCParameter();
+  bool InitMDCParameter(const std::unordered_map<std::string,std::string>& ParamFilesMDC);
   bool mdc_init_done = false;
 
-
-
+  std::unordered_map<std::string,std::string>::const_iterator itr_ParamFiles;
 
 };
 
