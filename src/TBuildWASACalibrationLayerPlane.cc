@@ -213,7 +213,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
           int t_d            = event.s2tq1->tdc_psb[i][1][i_d];
           int q_u            = event.s2tq1->qdc_psb[i][0];
           int q_d            = event.s2tq1->qdc_psb[i][1];
-          PSBHitAna* hit_ana = new PSBHitAna(i, t_u, t_d, q_u, q_d, par);
+          PSBHitAna* hit_ana = new PSBHitAna(i, t_u, t_d, q_u, q_d, par.get());
           PSBHitCont.emplace_back(hit_ana);
         }
     }
@@ -273,7 +273,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
           {
             int t_buf           = event.s2tq2->tdc_psfe[i][j];
             int q_buf           = event.s2tq2->qdc_psfe[i];
-            PSFEHitAna* hit_ana = new PSFEHitAna(i, t_buf, q_buf, par);
+            PSFEHitAna* hit_ana = new PSFEHitAna(i, t_buf, q_buf, par.get());
             PSFEHitCont.emplace_back(hit_ana);
           }
       }
@@ -339,7 +339,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
             {
               int t_buf           = event.s2tq2->tdc_psbe[i][j];
               int q_buf           = event.s2tq2->qdc_psbe[i];
-              PSBEHitAna* hit_ana = new PSBEHitAna(i, t_buf, q_buf, par);
+              PSBEHitAna* hit_ana = new PSBEHitAna(i, t_buf, q_buf, par.get());
               PSBEHitCont.emplace_back(hit_ana);
             }
         }
@@ -427,7 +427,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
           int t_d           = event.s2tq2->tdc_t0[i][1][i_d];
           int q_u           = event.s2tq2->qdc_t0[i][0];
           int q_d           = event.s2tq2->qdc_t0[i][1];
-          T0HitAna* hit_ana = new T0HitAna(i, t_u, t_d, q_u, q_d, par);
+          T0HitAna* hit_ana = new T0HitAna(i, t_u, t_d, q_u, q_d, par.get());
           T0HitCont.emplace_back(hit_ana);
         }
     }
@@ -449,7 +449,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     }
   for(int i = 0; i < (int)event.s2mdc->mdchit.size(); ++i)
     {
-      MDCHitAna* hit_ana = new MDCHitAna(event.s2mdc->mdchit[i], par, event.s2mdc->tref[0]);
+      MDCHitAna* hit_ana = new MDCHitAna(event.s2mdc->mdchit[i], par.get(), event.s2mdc->tref[0]);
       if(!hit_ana->IsValid())
         {
           delete hit_ana;
@@ -592,7 +592,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
 
   for(int i = 0; i < (int)event.s2fiber->fiberhit.size(); ++i)
     {
-      FiberHitAna* hit_ana = new FiberHitAna(event.s2fiber->fiberhit[i], par, t_r);
+      FiberHitAna* hit_ana = new FiberHitAna(event.s2fiber->fiberhit[i], par.get(), t_r);
       if(!hit_ana->IsValid())
         {
           delete hit_ana;
@@ -730,7 +730,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
         }
     }
 
-  std::vector<std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par);
+  std::vector<std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par.get());
   for(int i = 0; i < 7; ++i)
     {
       for(int j = 0; j < (int)FiberXUVCont[i].size(); ++j)
