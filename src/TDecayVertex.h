@@ -195,69 +195,69 @@ private:
   bool ifOnlyRealFragment = false;
 
   //Cut conditions on reconstructed fragments
-  int ifCut_MaxChi2ndf_FragmentTracks = 1;
+  bool ifCut_MaxChi2ndf_FragmentTracks = true;
   double MaxChi2ndf_FragmentTracks = 3.; //Change !
 
-  int ifCut_MinDist_FragmentTracksPrimVtx = 0;
+  bool ifCut_MinDist_FragmentTracksPrimVtx = false;
   double MinDist_FragmentTracksPrimVtx = 0.; //Change !
 
-  int ifCut_MinMomZ_FragmentTracks = 0;
+  bool ifCut_MinMomZ_FragmentTracks = false;
   double MinMomZ_FragmentTracks = 0.; //Change !
 
-  int ifCut_MaxTheta_FragmentTracks = 0;
+  bool ifCut_MaxTheta_FragmentTracks = false;
   double MaxTheta_FragmentTracks = 5; //Change !
   double MaxTheta_FragmentMDCTracks = 45; //Change !
 
 
   //Cut conditions on reconstructed pions
-  int ifCut_MaxChi2ndf_PionTracks = 1;
+  bool ifCut_MaxChi2ndf_PionTracks = true;
   double MaxChi2ndf_PionTracks = 3.; //Change !
 
-  int ifCut_MinDist_PionTracksPrimVtx = 0;
+  bool ifCut_MinDist_PionTracksPrimVtx = false;
   double MinDist_PionTracksPrimVtx = 0.05; //Change !
 
-  int ifCut_MinMomZ_PionTracks = 0;
+  bool ifCut_MinMomZ_PionTracks = false;
   double MinMomZ_PionTracks = 0.; //Change !
 
 
   //Cut conditions on reconstructed hypernuclei
-  int ifSet_ProductionVertex;
-  int ifSet_MassConstraint;
+  bool ifSet_ProductionVertex;
+  bool ifSet_MassConstraint;
 
   int KFPart_fConstructMethod = 2;
 
-  int ifCut_MaxClosedist_DaughterTracks = 0; 
+  bool ifCut_MaxClosedist_DaughterTracks = false; 
   double MaxClosedist_DaughterTracks = 10.; //Change !
 
-  int ifCut_MaxAngle_MotherFragment = 0;
+  bool ifCut_MaxAngle_MotherFragment = false;
   double MaxAngle_MotherFragment = 90.; //In degrees (º) Change !
 
-  int ifCut_MaxAngle_MotherPion = 0;
+  bool ifCut_MaxAngle_MotherPion = false;
   double MaxAngle_MotherPion = 90.; //In degrees (º) Change !
 
-  int ifCut_MaxChi2ndf = 0;
+  bool ifCut_MaxChi2ndf = false;
   double MaxChi2ndf = 7.; //Change !
 
-  int ifCut_MaxDist_MotherTrackPrimVtx = 0;
+  bool ifCut_MaxDist_MotherTrackPrimVtx = false;
   double MaxDist_MotherTrackPrimVtx = 10.; //Change !
 
-  int ifCut_MaxAngle_MotherTrackPrimVtx = 0;
+  bool ifCut_MaxAngle_MotherTrackPrimVtx = false;
   double MaxAngle_MotherTrackPrimVtx = 60.; //Change !
 
-  int ifCut_MaxPosZ_DecayVertex = 0;
+  bool ifCut_MaxPosZ_DecayVertex = false;
   double MaxPosZ_DecayVertex = 80.;
 
-  int ifCut_MinPosZ_DecayVertex = 0;
+  bool ifCut_MinPosZ_DecayVertex = false;
   double MinPosZ_DecayVertex = 10.;
 
-  int ifCut_ArmenterosPodolanski = 0;
+  bool ifCut_ArmenterosPodolanski = false;
 
 
   //Cut conditions on silicons hits from reconstructed tracks
-  int ifCut_MaxDist_SiHit = 1;
+  bool ifCut_MaxDist_SiHit = true;
   double MaxDist_SiHit = 0.05; //Change !
 
-  int ifCut_MinEnergyDeposition_SiHit = 1;
+  bool ifCut_MinEnergyDeposition_SiHit = true;
   double MinEnergyDeposition_SiHit = 0.1; //Change !
 
 

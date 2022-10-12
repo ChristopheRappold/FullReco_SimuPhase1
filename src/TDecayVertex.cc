@@ -481,8 +481,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   std::vector<KFParticle> RealMotherTracks_All;
   std::vector<std::tuple<size_t, size_t>> RefRealDaughtersTracks_All;
-  ifSet_ProductionVertex = 1;
-  ifSet_MassConstraint = 0;
+  ifSet_ProductionVertex = true;
+  ifSet_MassConstraint = false;
   MotherTracksRecons(FragmentTracks, RealPionTracks, pointer_PrimVtx_real, RealMotherTracks_All, RefRealDaughtersTracks_All);
 
   std::vector<KFParticle> RealMotherTracks;
@@ -650,8 +650,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   std::vector<KFParticle> CutMotherTracks_PrimVtx_All;
   std::vector<std::tuple<size_t, size_t>> RefCutDaughtersTracks_PrimVtx_All;
-  ifSet_ProductionVertex = 1;
-  ifSet_MassConstraint = 0;
+  ifSet_ProductionVertex = true;
+  ifSet_MassConstraint = false;
   MotherTracksRecons(FragmentTracks, CutPionTracks, pointer_PrimVtx, CutMotherTracks_PrimVtx_All, RefCutDaughtersTracks_PrimVtx_All);
 
   std::vector<KFParticle> CutMotherTracks_PrimVtx;
@@ -959,8 +959,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
   //Hypernucleus reconstruction
   std::vector<KFParticle> MotherTracks_All;
   std::vector<std::tuple<size_t, size_t>> RefDaughtersTracks_All;
-  ifSet_ProductionVertex = 0;
-  ifSet_MassConstraint = 0;
+  ifSet_ProductionVertex = false;
+  ifSet_MassConstraint = false;
   MotherTracksRecons(FragmentTracks, PionTracks, nullptr, MotherTracks_All, RefDaughtersTracks_All);
 
   std::vector<KFParticle> MotherTracks;
@@ -988,8 +988,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   std::vector<KFParticle> MotherTracks_PrimVtx_All;
   std::vector<std::tuple<size_t, size_t>> RefDaughtersTracks_PrimVtx_All;
-  ifSet_ProductionVertex = 1;
-  ifSet_MassConstraint = 0;
+  ifSet_ProductionVertex = true;
+  ifSet_MassConstraint = false;
   MotherTracksRecons(FragmentTracks, PionTracks, pointer_PrimVtx, MotherTracks_PrimVtx_All, RefDaughtersTracks_PrimVtx_All);
 
   std::vector<KFParticle> MotherTracks_PrimVtx;
@@ -1153,8 +1153,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
   
   std::vector<KFParticle> MotherTracks_PrimVtx_Mass_All;
   std::vector<std::tuple<size_t, size_t>> RefDaughtersTracks_PrimVtx_Mass_All;
-  ifSet_ProductionVertex = 1;
-  ifSet_MassConstraint = 1;
+  ifSet_ProductionVertex = true;
+  ifSet_MassConstraint = true;
   MotherTracksRecons(FragmentTracks, PionTracks, pointer_PrimVtx, MotherTracks_PrimVtx_Mass_All, RefDaughtersTracks_PrimVtx_Mass_All);
 
   std::vector<KFParticle> MotherTracks_PrimVtx_Mass;
@@ -1696,18 +1696,18 @@ void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks
   for(size_t i = 0; i < FragmentTracks_All.size(); ++i)
     {
       temp_chi2ndf = FragmentTracks_All[i].GetChi2() / static_cast<double>(FragmentTracks_All[i].GetNDF());
-      if( (ifCut_MaxChi2ndf_FragmentTracks == 1) && (temp_chi2ndf > MaxChi2ndf_FragmentTracks) )
+      if( ifCut_MaxChi2ndf_FragmentTracks && (temp_chi2ndf > MaxChi2ndf_FragmentTracks) )
         continue;
 
       ThetaDist_TrackPrimVtx(FragmentTracks_All[i], PrimVtxRecons, temp_theta, temp_dist);
-      if( (ifCut_MinDist_FragmentTracksPrimVtx == 1) && (temp_dist < MinDist_FragmentTracksPrimVtx) )
+      if( ifCut_MinDist_FragmentTracksPrimVtx && (temp_dist < MinDist_FragmentTracksPrimVtx) )
         continue;
 
-      if( (ifCut_MinMomZ_FragmentTracks == 1) && (FragmentTracks_All[i].GetPz() < MinMomZ_FragmentTracks) )
+      if( ifCut_MinMomZ_FragmentTracks && (FragmentTracks_All[i].GetPz() < MinMomZ_FragmentTracks) )
         continue;
 
       double theta_FragmentTracks = acos(FragmentTracks_All[i].GetPz() / FragmentTracks_All[i].GetP()) * 180. / M_PI;
-      if(ifCut_MaxTheta_FragmentTracks == 1)
+      if(ifCut_MaxTheta_FragmentTracks)
         if( ((recons_from_FRS_MDC == 1) && (theta_FragmentTracks > MaxTheta_FragmentTracks)) || ((recons_from_FRS_MDC == 2) && (theta_FragmentTracks > MaxTheta_FragmentMDCTracks)) )
           continue;
 
@@ -1793,14 +1793,14 @@ void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TV
   for(size_t i = 0; i < PionTracks_All.size(); ++i)
     {
       temp_chi2ndf = PionTracks_All[i].GetChi2() / static_cast<double>(PionTracks_All[i].GetNDF());
-      if( (ifCut_MaxChi2ndf_PionTracks == 1) && (temp_chi2ndf > MaxChi2ndf_PionTracks) )
+      if( ifCut_MaxChi2ndf_PionTracks && (temp_chi2ndf > MaxChi2ndf_PionTracks) )
         continue;
 
       ThetaDist_TrackPrimVtx(PionTracks_All[i], PrimVtxRecons, temp_theta, temp_dist);
-      if( (ifCut_MinDist_PionTracksPrimVtx == 1) && (temp_dist < MinDist_PionTracksPrimVtx) )
+      if( ifCut_MinDist_PionTracksPrimVtx && (temp_dist < MinDist_PionTracksPrimVtx) )
         continue;
 
-      if( (ifCut_MinMomZ_PionTracks == 1) && (PionTracks_All[i].GetPz() < MinMomZ_PionTracks) )
+      if( ifCut_MinMomZ_PionTracks && (PionTracks_All[i].GetPz() < MinMomZ_PionTracks) )
         continue;
 
       PionTracks.emplace_back(PionTracks_All[i]);
@@ -2062,10 +2062,10 @@ void TDecayVertex<Out>::MotherTracksRecons(std::vector<KFParticle>& FragmentTrac
           mother.SetConstructMethod(KFPart_fConstructMethod);
           mother.Construct(vDaughtersPointer, 2);
 
-          if( (ifSet_ProductionVertex == 1) && (pointer_PrimVtx != nullptr) )
+          if( ifSet_ProductionVertex && (pointer_PrimVtx != nullptr) )
             mother.SetProductionVertex(*pointer_PrimVtx);
 
-          if( ifSet_MassConstraint == 1)
+          if( ifSet_MassConstraint )
             mother.SetMassConstraint(Hyp_mass);
 
           mother.TransportToDecayVertex();
@@ -2111,10 +2111,10 @@ void TDecayVertex<Out>::MotherTracksRecons(std::vector<KFParticle>& FragmentTrac
           mother.Construct(vDaughtersPointer, 2);
           mother.SetField(fieldWASA);
 
-          if( (ifSet_ProductionVertex == 1) && (pointer_PrimVtx != nullptr) )
+          if( ifSet_ProductionVertex && (pointer_PrimVtx != nullptr) )
             mother.SetProductionVertex(*pointer_PrimVtx);
 
-          if( ifSet_MassConstraint == 1)
+          if( ifSet_MassConstraint )
             mother.SetMassConstraint(Hyp_mass);
 
           mother.TransportToDecayVertex();
@@ -2171,33 +2171,33 @@ void TDecayVertex<Out>::MotherSelector(std::vector<KFParticle>& MotherTracks_All
       std::tie(temp_id_fragment, temp_id_pion) = RefDaughtersTracks_All[i];
 
       CloseDist(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], Closedist_DaughterTracks, Centroid_DaughtersTracks);
-      if( (ifCut_MaxClosedist_DaughterTracks == 1) && (Closedist_DaughterTracks > MaxClosedist_DaughterTracks) )
+      if( ifCut_MaxClosedist_DaughterTracks && (Closedist_DaughterTracks > MaxClosedist_DaughterTracks) )
         continue;
 
       angle_MotherFragment = MotherTracks_All[i].GetAngle(FragmentTracks[temp_id_fragment]) * 180. / M_PI;
-      if( (ifCut_MaxAngle_MotherFragment == 1) && (angle_MotherFragment > MaxAngle_MotherFragment) )
+      if( ifCut_MaxAngle_MotherFragment && (angle_MotherFragment > MaxAngle_MotherFragment) )
         continue;
 
       angle_MotherPion = MotherTracks_All[i].GetAngle(PionTracks[temp_id_pion]) * 180. / M_PI;
-      if( (ifCut_MaxAngle_MotherPion == 1) && (angle_MotherPion > MaxAngle_MotherPion) )
+      if( ifCut_MaxAngle_MotherPion && (angle_MotherPion > MaxAngle_MotherPion) )
         continue;
 
       temp_chi2ndf = MotherTracks_All[i].GetChi2() / static_cast<double>(MotherTracks_All[i].GetNDF());
-      if( (ifCut_MaxChi2ndf == 1) && (temp_chi2ndf < MaxChi2ndf) )
+      if( ifCut_MaxChi2ndf && (temp_chi2ndf < MaxChi2ndf) )
         continue;
 
       ThetaDist_TrackPrimVtx(MotherTracks_All[i], PrimVtxRecons, Dist_MotherTrackPrimVtx, Angle_MotherTrackPrimVtx);
-      if( (ifCut_MaxDist_MotherTrackPrimVtx == 1) && (Dist_MotherTrackPrimVtx > MaxDist_MotherTrackPrimVtx) )
+      if( ifCut_MaxDist_MotherTrackPrimVtx && (Dist_MotherTrackPrimVtx > MaxDist_MotherTrackPrimVtx) )
         continue;
 
-      if( (ifCut_MaxAngle_MotherTrackPrimVtx == 1) && (Angle_MotherTrackPrimVtx > MaxAngle_MotherTrackPrimVtx))
+      if( ifCut_MaxAngle_MotherTrackPrimVtx && (Angle_MotherTrackPrimVtx > MaxAngle_MotherTrackPrimVtx))
         continue;
 
       PosZ_DecayVertex = MotherTracks_All[i].GetZ();
-      if( (ifCut_MaxPosZ_DecayVertex == 1) && (PosZ_DecayVertex > MaxPosZ_DecayVertex) )
+      if( ifCut_MaxPosZ_DecayVertex && (PosZ_DecayVertex > MaxPosZ_DecayVertex) )
         continue;
 
-      if( (ifCut_MinPosZ_DecayVertex == 1) && (PosZ_DecayVertex < MinPosZ_DecayVertex) )
+      if( ifCut_MinPosZ_DecayVertex && (PosZ_DecayVertex < MinPosZ_DecayVertex) )
         continue;
 
       MotherTracks_All[i].GetArmenterosPodolanski_FromMother(FragmentTracks[temp_id_fragment], PionTracks[temp_id_pion], armenterosQtAlfa);
@@ -2233,11 +2233,11 @@ void TDecayVertex<Out>::SiHitsFinder(KFParticle& Track, std::vector<std::vector<
 
   for(size_t i = 0; i < Hits_Si.size(); ++i)
     {
-      if((ifCut_MinEnergyDeposition_SiHit == 1) && (Hits_Si[i][0] < MinEnergyDeposition_SiHit))
+      if(ifCut_MinEnergyDeposition_SiHit && (Hits_Si[i][0] < MinEnergyDeposition_SiHit))
         continue;
 
       double temp_dist = std::sqrt(std::pow(Hits_Si[i][1] - Track.GetX(), 2.) + std::pow(Hits_Si[i][2] - Track.GetY(), 2.));
-      if((ifCut_MaxDist_SiHit == 1) && (temp_dist > MaxDist_SiHit))
+      if(ifCut_MaxDist_SiHit && (temp_dist > MaxDist_SiHit))
         continue;
 
       Track_Sihit.emplace_back(Hits_Si[i]);
@@ -2374,7 +2374,7 @@ void TDecayVertex<Out>::SiHitsFinder2(KFParticle& Track, int idSilicon, int stri
 
   for(size_t i = 0; i < Hits_Si.size(); ++i)
     {
-      if((ifCut_MinEnergyDeposition_SiHit == 1) && (get<0>(Hits_Si[i]) < MinEnergyDeposition_SiHit))
+      if(ifCut_MinEnergyDeposition_SiHit && (get<0>(Hits_Si[i]) < MinEnergyDeposition_SiHit))
         continue;
 
       double posHit = -50.;
@@ -2392,7 +2392,7 @@ void TDecayVertex<Out>::SiHitsFinder2(KFParticle& Track, int idSilicon, int stri
         }
 
       double temp_dist = std::abs(posHit - posTrack);
-      if((ifCut_MaxDist_SiHit == 1) && (temp_dist > MaxDist_SiHit))
+      if(ifCut_MaxDist_SiHit && (temp_dist > MaxDist_SiHit))
         continue;
 
       std::vector<double> temp_Sihit = {get<0>(Hits_Si[i]), posHit, sigma, Z_plane}; // (E, XorY, sigmaXorY, Z)
