@@ -14,6 +14,7 @@
 #include "TCheckRZ.h"
 #include "TFlatMCOutputML.h"
 #include "TPrimaryVertex.h"
+//#include "TPrimaryVertex_Si.h"
 #include "TDecayVertex.h"
 #include "TRiemannFinder.h"
 #include "TFindingPerf.h"
@@ -44,7 +45,7 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
   if(Attributes.TaskConfig.Task_ReStart)
     det_build = new TBuildRestarter<TEOut>(Attributes);
   else
-    det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
+    det_build = new TBuildDetectorLayerPlaneDAF(Attributes); //Change ?
   //det_build = new TTestUnits(Attributes,"layerDAF");
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
@@ -82,6 +83,10 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
 	  if(Attributes.TaskConfig.Task_PrimaryVtx)
 	    list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
 	  break;
+//  case Task::TASKPRIMARYVTX_SI:
+//    if(Attributes.TaskConfig.Task_PrimaryVtx_Si)
+//      list_processMC.emplace_back(new TPrimaryVertex_Si<TEOut>(Attributes));
+//    break;
 	case Task::TASKFLATMCOUTPUTML:
 	  if(Attributes.TaskConfig.Task_FlatMCOutputML)
 	    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));

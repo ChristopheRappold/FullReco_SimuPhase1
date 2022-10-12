@@ -34,6 +34,7 @@ enum StateHist : int
   SIMU,
   BUILDER,
   PRIMVTX,
+  PRIMVTX_SI,
   DECAYVTX,
   SIZEOF_STATEHIST
 };
@@ -262,7 +263,6 @@ class Ana_Hist
   Hist<TH2F> h_nCandidatesRealTracks ;
   Hist<TH2F> h_nCandidatesRealTracks_IfRecons ;
 
-  //Hist<TH1F> h_nHypTrackReal;
   Hist<TH1F> h_nHypernucleiTrack ;
   Hist<TH1F> h_fvalues ;
 
@@ -431,7 +431,7 @@ class Ana_Hist
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool DecayVtx = true);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool PrimVtx_Si = false, bool DecayVtx = true);
   ~Ana_Hist();
 
   int Write(TFile*);

@@ -22,7 +22,7 @@ Ana_Hist::~Ana_Hist()
 }
 
 /********************************************************************/
-Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu, bool Builder, bool PrimVtx, bool DecayVtx)
+Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu, bool Builder, bool PrimVtx, bool PrimVtx_Si, bool DecayVtx)
 {
   EnableState.resize(SIZEOF_STATEHIST);
   EnableState[DAF] = Daf;
@@ -34,6 +34,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
   EnableState[SIMU] = Simu;
   EnableState[BUILDER] = Builder;
   EnableState[PRIMVTX] = PrimVtx;
+  EnableState[PRIMVTX_SI] = PrimVtx_Si;
   EnableState[DECAYVTX] = DecayVtx;
 
 
@@ -480,8 +481,54 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistRegisteredByDir.insert(std::make_pair("Builder", std::make_tuple(HistReg,0)));
     }
 
+if(EnableState[PRIMVTX])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
 
-  if(EnableState[PRIMVTX])
+      h_nTrackCandidates.emplace_back(new TH2F("h_nTrackCandidates","h_nTrackCandidates", 400, 0, 400, 5, 0, 5));
+      HistReg.emplace_back(&h_nTrackCandidates.store);
+      h_DistanceBeamTracks.emplace_back(new TH2F("h_DistanceBeamTracks","h_DistanceBeamTracks", 10000, 0, 0.5, 3, 0, 3));
+      HistReg.emplace_back(&h_DistanceBeamTracks.store);
+      h_PosZBeamTracks.emplace_back(new TH2F("h_PosZBeamTracks","h_PosZBeamTracks", 1000, 22, 29, 3, 0, 3));
+      HistReg.emplace_back(&h_PosZBeamTracks.store);
+      h_thetaTracks.emplace_back(new TH2F("h_thetaTracks","h_thetaTracks", 1000, 0, 90, 3, 0, 3));
+      HistReg.emplace_back(&h_thetaTracks.store);
+
+      h_fvalues.emplace_back(new TH1F("h_fvalues", "h_fvalues", 2000, -0.5, 1.5));
+      HistReg.emplace_back(&h_fvalues.store);
+
+      h_InteractionPointDistance.emplace_back(new TH1F("h_InteractionPointDistance","h_InteractionPointDistance", 1000, 0, 1));
+      HistReg.emplace_back(&h_InteractionPointDistance.store);
+      h_InteractionPointDistanceX.emplace_back(new TH1F("h_InteractionPointDistanceX","h_InteractionPointDistanceX", 2000, -1, 1));
+      HistReg.emplace_back(&h_InteractionPointDistanceX.store);
+      h_InteractionPointDistanceY.emplace_back(new TH1F("h_InteractionPointDistanceY","h_InteractionPointDistanceY", 2000, -1, 1));
+      HistReg.emplace_back(&h_InteractionPointDistanceY.store);
+      h_InteractionPointDistanceZ.emplace_back(new TH1F("h_InteractionPointDistanceZ","h_InteractionPointDistanceZ", 2000, -1, 1));
+      HistReg.emplace_back(&h_InteractionPointDistanceZ.store);
+
+      h_InteractionPointDistanceX_pull.emplace_back(new TH1F("h_InteractionPointDistanceX_pull","h_InteractionPointDistanceX_pull", 2000, -5, 5));
+      HistReg.emplace_back(&h_InteractionPointDistanceX_pull.store);
+      h_InteractionPointDistanceY_pull.emplace_back(new TH1F("h_InteractionPointDistanceY_pull","h_InteractionPointDistanceY_pull", 2000, -5, 5));
+      HistReg.emplace_back(&h_InteractionPointDistanceY_pull.store);
+      h_InteractionPointDistanceZ_pull.emplace_back(new TH1F("h_InteractionPointDistanceZ_pull","h_InteractionPointDistanceZ_pull", 2000, -5, 5));
+      HistReg.emplace_back(&h_InteractionPointDistanceZ_pull.store);
+
+      h_CovarianceSigmaX.emplace_back(new TH1F("h_SqrtCovariance_SigmaX", "h_SqrtCovariance_SigmaX", 1000, 0, 0.1));
+      HistReg.emplace_back(&h_CovarianceSigmaX.store);
+      h_CovarianceSigmaY.emplace_back(new TH1F("h_SqrtCovariance_SigmaY", "h_SqrtCovariance_SigmaY", 1000, 0, 0.1));
+      HistReg.emplace_back(&h_CovarianceSigmaY.store);
+      h_CovarianceSigmaZ.emplace_back(new TH1F("h_SqrtCovariance_SigmaZ", "h_SqrtCovariance_SigmaZ", 2000, 0, 0.2));
+      HistReg.emplace_back(&h_CovarianceSigmaZ.store);
+
+      h_PrimStatus.emplace_back(new TH2F("PrimVtxStatus","PrimVtxStatus",20,0,20,20,0,20));
+      HistReg.emplace_back(&h_PrimStatus.store);
+      h_PrimVtxstats.emplace_back(new TH1F("PrimVtxstats", "PrimVtxstats", 10, 0, 10));
+      HistReg.emplace_back(&h_PrimVtxstats.store);
+       
+      HistRegisteredByDir.insert(std::make_pair("PrimaryVtx", std::make_tuple(HistReg,0)));
+    }
+
+  if(EnableState[PRIMVTX_SI])
     {
       std::vector<std::vector<TH1*>*> HistReg;
 
@@ -571,15 +618,11 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
 
       h_nCandidatesRealTracks.emplace_back(new TH2F("h_nCandidatesRealTracks","h_nCandidatesRealTracks", 100, 0, 100, 100, 0, 100));
       HistReg.emplace_back(&h_nCandidatesRealTracks.store);
-
       h_nCandidatesRealTracks_IfRecons.emplace_back(new TH2F("h_nCandidatesRealTracks_IfRecons","h_nCandidatesRealTracks_IfRecons", 100, 0, 100, 100, 0, 100));
       HistReg.emplace_back(&h_nCandidatesRealTracks_IfRecons.store);
 
-      //h_nHypTrackReal.emplace_back(new TH1F("h_nHypTrackReal", "h_nHypTrackReal", 3, 0, 3));
-      //HistReg.emplace_back(&h_nHypTrackReal.store);
       h_nHypernucleiTrack.emplace_back(new TH1F("h_nHypernucleiTrack", "h_nHypernucleiTrack", 9, 0, 9));
       HistReg.emplace_back(&h_nHypernucleiTrack.store);
-
       h_fvalues.emplace_back(new TH1F("h_fvalues", "h_fvalues", 2000, -0.5, 1.5));
       HistReg.emplace_back(&h_fvalues.store);
 
@@ -626,11 +669,10 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
 
       h_PrimStatus.emplace_back(new TH2F("PrimVtxStatus","PrimVtxStatus",20,0,20,20,0,20));
       HistReg.emplace_back(&h_PrimStatus.store);
-
       h_PrimVtxstats.emplace_back(new TH1F("PrimVtxstats", "PrimVtxstats", 10, 0, 10));
       HistReg.emplace_back(&h_PrimVtxstats.store);
        
-      HistRegisteredByDir.insert(std::make_pair("PrimaryVtx", std::make_tuple(HistReg,0)));
+      HistRegisteredByDir.insert(std::make_pair("PrimaryVtx_Si", std::make_tuple(HistReg,0)));
     }
 
   if(EnableState[DECAYVTX])
