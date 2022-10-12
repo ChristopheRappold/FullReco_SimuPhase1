@@ -30,6 +30,9 @@
 #include "SpacepointMeasurement.h"
 #include "spdlog/spdlog.h"
 
+#include "HitAna/FiberHitXUV.hh"
+//#include "HitAna/FiberTrackAna.hh"
+
 #include <cassert>
 
 class MomRef;
@@ -187,10 +190,9 @@ constexpr T EnumIter<T, args...>::values[];
     SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/,
     Si1x, Si1y, Si2x, Si2y,
     Si1x_SD, Si1y_SD, Si2x_SD, Si2y_SD,
-    MiniFiberD1_x1, MiniFiberD1_x1,MiniFiberD1_v1,
-    MiniFiberD1_x2, MiniFiberD1_x2,MiniFiberD1_v2,
-    FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x,
-    FiberD2_u, FiberD2_v, FiberD3_x, FiberD3_u, FiberD3_v, FiberD4_x, FiberD4_u, FiberD4_v,FiberD5_x, FiberD5_u, FiberD5_v,
+    MiniFiberD1_x1, MiniFiberD1_x1,MiniFiberD1_v1, MiniFiberD1_x2, MiniFiberD1_x2,MiniFiberD1_v2,
+    FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x, FiberD2_u, FiberD2_v,
+    FiberD3_x, FiberD3_u, FiberD3_v, FiberD4_x, FiberD4_u, FiberD4_v,FiberD5_x, FiberD5_u, FiberD5_v,
     PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07,
     MG08, MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/,
     FiberD1_xy,FiberD2_xy,FiberD3_xy,FiberD4_xy,FiberD5_xy,MiniFiberD1_xy,MiniFiberD2_xy,
@@ -678,6 +680,7 @@ public:
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 
+/*
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
   
   std::vector<std::vector<double> > Hits_Si1{};
@@ -689,7 +692,9 @@ public:
   std::vector<std::tuple<double, size_t> > HitsY_Si1{};
   std::vector<std::tuple<double, size_t> > HitsX_Si2{};
   std::vector<std::tuple<double, size_t> > HitsY_Si2{};
+*/
 
+  std::vector<std::vector<FiberHitXUV*> > FiberXUVCont;
 
   TLorentzVector Mother_MomE;
   std::array<double,3> InteractionPoint;

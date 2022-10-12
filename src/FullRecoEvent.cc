@@ -56,6 +56,7 @@ void FullRecoEvent::Clear(int toclean)
   //FragmentTracks.clear();
   //PionTracks.clear();
 
+/*
   Si_HitsEnergyLayer.clear();
   
   Hits_Si1.clear();
@@ -67,6 +68,9 @@ void FullRecoEvent::Clear(int toclean)
   HitsY_Si1.clear();
   HitsX_Si2.clear();
   HitsY_Si2.clear();
+*/
+
+  FiberXUVCont.clear();
 
   Mother_MomE.SetXYZM(0.,0.,0.,0.);
   InteractionPoint.fill(0.);
