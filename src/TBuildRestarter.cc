@@ -156,7 +156,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
       RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
       RecoEvent.ListHitsToTracks.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
       RecoEvent.OldListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
-      RecoEvent.Si_HitsEnergyLayer.resize(4);
+      //RecoEvent.Si_HitsEnergyLayer.resize(4);
 
       std::unique_ptr<genfit::AbsMeasurement> measurement = nullptr;
 
@@ -171,7 +171,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
       double resolution_psce   = 1.1; // 3.8/sqrt(12.)
       double resolution_psce_z = 1.0;
       double time_res          = 0.150; // ns
-
+/*
       for(size_t it_Si = 0; it_Si < event->NInSi; ++it_Si)
 	{
 
@@ -200,7 +200,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  else
 	    RecoEvent.Si_HitsEnergyLayer[idSi].insert(std::make_pair(SiHit.HitID, SiHit.Energy));
 	}
-
+*/
       att._logger->debug("NMC   : {} {}",event->Nmc,event->fMC_Particle->GetEntries());
       att._logger->debug("NPSCE : {} {}",event->NPsce,event->PSCE->GetEntries());
       att._logger->debug("NPSBE : {} {}",event->NPsbe,event->PSBE->GetEntries());

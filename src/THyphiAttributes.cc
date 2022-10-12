@@ -455,6 +455,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_CheckField = Config.Get<bool>("Task_CheckField");
   if(Config.IsAvailable("Task_PrimaryVtx"))
     Task_PrimaryVtx = Config.Get<bool>("Task_PrimaryVtx");
+  if(Config.IsAvailable("Task_PrimaryVtx_Si"))
+    Task_PrimaryVtx_Si = Config.Get<bool>("Task_PrimaryVtx_Si");
   if(Config.IsAvailable("Task_FlatMCOutputML"))
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
   if(Config.IsAvailable("Task_BayesFinder"))
@@ -492,6 +494,8 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKCHECKFIELD);
 	  if(s == "Task_PrimaryVtx")
 	    Task_Order.push_back(TASKPRIMARYVTX);
+    if(s == "Task_PrimaryVtx_Si")
+      Task_Order.push_back(TASKPRIMARYVTX_SI);
 	  if(s == "Task_FlatMCOutputML")
 	    Task_Order.push_back(TASKFLATMCOUTPUTML);
   	  if(s == "Task_BayesFinder")
@@ -544,6 +548,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Hash = Hash;
   out.RunTask.Task_CheckField      = TaskConfig.Task_CheckField;
   out.RunTask.Task_PrimaryVtx      = TaskConfig.Task_PrimaryVtx;
+  out.RunTask.Task_PrimaryVtx_Si   = TaskConfig.Task_PrimaryVtx_Si;
   out.RunTask.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
   out.RunTask.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
   out.RunTask.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;

@@ -71,6 +71,7 @@ struct Task
   bool Task_ReStart = false;
   bool Task_CheckField = false;
   bool Task_PrimaryVtx = true;
+  bool Task_PrimaryVtx_Si = false;
   bool Task_FlatMCOutputML = false;
   bool Task_BayesFinder = false;
   bool Task_RiemannFinder = false;
@@ -82,11 +83,11 @@ struct Task
 
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKFLATMCOUTPUTML, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
+    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
     TASKKALMANDAF, TASKDECAYVTX, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -136,6 +137,7 @@ struct RunTaskDef
 
   bool Task_CheckField;
   bool Task_PrimaryVtx;
+  bool Task_PrimaryVtx_Si;
   bool Task_FlatMCOutputML;
   bool Task_BayesFinder;
   bool Task_RiemannFinder;
@@ -251,7 +253,8 @@ inline auto InitStorage()
 				 "RunTask",
 				 make_column("HashId", &RunTaskDef::Hash),
 				 make_column("Task_CheckField", &RunTaskDef::Task_CheckField),
-				 make_column("Task_PrimaryVtx", &RunTaskDef::Task_PrimaryVtx),
+         make_column("Task_PrimaryVtx", &RunTaskDef::Task_PrimaryVtx),
+         make_column("Task_PrimaryVtx_Si", &RunTaskDef::Task_PrimaryVtx_Si),
 				 make_column("Task_FlatMCOutputML", &RunTaskDef::Task_FlatMCOutputML),
 				 make_column("Task_BayesFinder", &RunTaskDef::Task_BayesFinder),
 				 make_column("Task_RiemannFinder", &RunTaskDef::Task_RiemannFinder),
