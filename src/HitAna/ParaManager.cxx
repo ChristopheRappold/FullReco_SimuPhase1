@@ -45,7 +45,8 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   fiber_dft1_cut_d = 6.;
   fiber_dft2_cut_d = 6.;
 
-  fiber_tgt_pos_x = 0.;  fiber_tgt_pos_y  = 0.;   fiber_tgt_pos_z  = 1961.2;
+  fiber_tgt_pos_x = 0.;   fiber_tgt_pos_y  = 0.;   fiber_tgt_pos_z  = 1961.2;
+  fiber_tgt_size_x = 30.; fiber_tgt_size_y  = 30.; fiber_tgt_size_z  = 30.;
 
   fiber_mft1_pos_x = 0;  fiber_mft1_pos_y =   0;  fiber_mft1_pos_z = 2269.3;
   fiber_mft2_pos_x = 0;  fiber_mft2_pos_y =   0;  fiber_mft2_pos_z = 2309.3;
