@@ -107,7 +107,7 @@ mkdir build
 Then configure Genfit build with:
 ```sh
 cd build
-cmake ..
+cmake -DCMAKE_INSTALL_PREFIX=.. ../
 ```
 
 Genfit can be built:
