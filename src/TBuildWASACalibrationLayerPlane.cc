@@ -244,7 +244,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       hitCoords(1) = hit_PSB->GetZ() * 0.1; // mm to cm
       TMatrixDSym hitCov(2);
       hitCov(0, 0)     = TMath::Sq(par->psb_res_phi * 0.1);//0.1; // to be adjusted resolution_psce * resolution_psce;
-      hitCov(1, 1)     = TMath:Sq(par->psb_res_z   * 0.1);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
+      hitCov(1, 1)     = TMath::Sq(par->psb_res_z   * 0.1);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSCE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
