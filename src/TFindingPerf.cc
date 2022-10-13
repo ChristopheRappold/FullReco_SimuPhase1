@@ -305,26 +305,31 @@ int TFindingPerf<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
     att._logger->debug("{}",std::accumulate(nameT.begin(),nameT.end(),std::string(),std::plus<std::string>()));
 
   for(const auto& [idT, nT] : nameRealTracks)
-    for(const auto& nameT : nameTrackFound)
-      {
-	int dist = TPerf::Levenshtein_distance5(nameT,nT);
-	att._logger->debug("Dist Levenshtein : {} = {} / {}: {}",dist,std::accumulate(nameT.begin(),nameT.end(),std::string(),std::plus<std::string>()),idT,std::accumulate(nT.begin(),nT.end(),std::string(),std::plus<std::string>()));
+    {
+      int best_dist = 999;
+      for(const auto& nameT : nameTrackFound)
+	{
+	  int dist = TPerf::Levenshtein_distance5(nameT,nT);
+	  att._logger->debug("Dist Levenshtein : {} = {} / {}: {}",dist,std::accumulate(nameT.begin(),nameT.end(),std::string(),std::plus<std::string>()),idT,std::accumulate(nT.begin(),nT.end(),std::string(),std::plus<std::string>()));
 
-	int max_dist = TMath::Max(nameT.size(),nT.size());
-	if(dist >= max_dist)
-	  {
-	    att._logger->debug(" -> completely diff ! max {} dist {}",max_dist,dist);
-	    continue;
-	  }
-	double perC = 1. - dist / static_cast<double>(nT.size());
-	if(perC >= 0.9)
-	  att._logger->debug(" -> Found ! dist {} real {} % = {}",dist,nT.size(),perC);
-	else
-	  att._logger->debug(" -> Shared : dist {} real {} % = {}",dist,nT.size(),perC);
+	  int max_dist = TMath::Max(nameT.size(),nT.size());
+	  if(dist >= max_dist)
+	    {
+	      att._logger->debug(" -> completely diff ! max {} dist {}",max_dist,dist);
+	      continue;
+	    }
+	  double perC = 1. - dist / static_cast<double>(nT.size());
+	  if(perC >= 0.9)
+	    att._logger->debug(" -> Found ! dist {} real {} % = {}",dist,nT.size(),perC);
+	  else
+	    att._logger->debug(" -> Shared : dist {} real {} % = {}",dist,nT.size(),perC);
 
-	LocalHisto.h_PerfFinderLevenshtein->Fill(dist,nT.size());
-      }
+	  if(dist<=best_dist)
+	    best_dist = dist;
 
+	}
+      LocalHisto.h_PerfFinderLevenshtein->Fill(best_dist,nT.size());
+    }
 
 
   struct Results {
@@ -473,6 +478,11 @@ int TFindingPerf<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 	}
     }
   int n_realTracks = realTracks.size();
+  for(int n_i = 1;n_i<n_realTracks;++n_i)
+    LocalHisto.h_PerfFinder->Fill("TotalReal",n_i,n_realTracks);
+
+  LocalHisto.h_PerfFinder->Fill("TotalReal_dN",n_realTracks,n_realTracks);
+
   for(const auto& [idTrack,Res] : TrackSummary)
     {
       att._logger->debug("Stats : trackID {} / {}",idTrack, n_realTracks);
