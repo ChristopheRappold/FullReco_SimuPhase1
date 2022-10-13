@@ -31,7 +31,7 @@ class FullRecoTaskMT
 
 public:
   FullRecoTaskMT() = delete;
-  FullRecoTaskMT(const FullRecoConfig& conf, const DataSim& In);
+  FullRecoTaskMT(const FullRecoConfig& conf, const DataSimExp& In);
   ~FullRecoTaskMT();
   
   int Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, const TG4Sol_Event& ev,

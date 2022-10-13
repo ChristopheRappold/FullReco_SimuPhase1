@@ -100,6 +100,13 @@ enum SolDet : int
   MG17, /*56*/
   PSCE, /*57*/
   PSBE, /*58*/
+  FiberD1_xy,
+  FiberD2_xy,
+  FiberD3_xy,
+  FiberD4_xy,
+  FiberD5_xy,
+  MiniFiberD1_xy,
+  MiniFiberD2_xy,
   CDC_layer0, /*60*/
   CDC_layer1,
   CDC_layer2,
@@ -138,7 +145,9 @@ constexpr auto nameLiteralDet = {
     "FiberD5_x",           "FiberD5_u",      "FiberD5_v",           "PSFE",           "MG01",           "MG02",
     "MG03",                     "MG04",           "MG05",           "MG06",           "MG07",           "MG08",
     "MG09",                     "MG10",           "MG11",           "MG12",           "MG13",           "MG14",
-    "MG15",                     "MG16",           "MG17",           "PSCE",           "PSBE",           "CDC0",
+    "MG15",                     "MG16",           "MG17",           "PSCE",           "PSBE",
+    "FiberD1_xy", "FiberD2_xy","FiberD3_xy","FiberD4_xy","FiberD5_xy","MiniFiberD1_xy","MiniFiberD2_xy",
+    "CDC0",
     "CDC1",                     "CDC2",           "CDC3",           "CDC4",           "CDC5",           "CDC6",
     "CDC7",                     "CDC8",           "CDC9",          "CDC10",          "CDC11",          "CDC12",
     "CDC13",                   "CDC14",         "CDHBar",         "TrFwd0",         "TrFwd1",         "TrFwd2",
@@ -183,7 +192,9 @@ constexpr T EnumIter<T, args...>::values[];
     FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x,
     FiberD2_u, FiberD2_v, FiberD3_x, FiberD3_u, FiberD3_v, FiberD4_x, FiberD4_u, FiberD4_v,FiberD5_x, FiberD5_u, FiberD5_v,
     PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07,
-    MG08, MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/, CDC_layer0 /*4 - 26*/,
+    MG08, MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/,
+    FiberD1_xy,FiberD2_xy,FiberD3_xy,FiberD4_xy,FiberD5_xy,MiniFiberD1_xy,MiniFiberD2_xy,
+    CDC_layer0 /*4 - 26*/,
     CDC_layer1, CDC_layer2, CDC_layer3, CDC_layer4, CDC_layer5, CDC_layer6, CDC_layer7, CDC_layer8, CDC_layer9,
     CDC_layer10, CDC_layer11, CDC_layer12, CDC_layer13, CDC_layer14 /*18 - 40*/, CDHBar /*19 - 41*/, TrFwd0 /*20 - 42*/,
     TrFwd1, TrFwd2 /*22 - 43*/, RPC_l /*23 - 44*/, RPC_h /*24 - 45*/, FMF2Stop0 /*25 - 46*/, FMF2Stop1, FMF2Stop2>;
@@ -394,6 +405,7 @@ struct SimHit
 
 struct InfoInit
 {
+  int charge  = -999 ;
   double posX = -999.;
   double posY = -999.;
   double posZ = -999.;
@@ -541,6 +553,7 @@ struct Hyp
   Int_t PDG;
   Int_t N_Mother;
   Double32_t Chi2ndf;
+  Int_t NDF;
   TLorentzVector MomE;
   TVector3 PrimVtx;
   TVector3 DecayVtx;
@@ -553,22 +566,38 @@ struct Hyp
   Double32_t LifeTime;
   Double32_t ErrLifeTime;
   Int_t ErrGetLifeTime;
+  Int_t Mother_IsFromHyp;
 
   //Daughters:
   Int_t Id_Fragment;
   TLorentzVector MomE_Fragment;
+  Double32_t Chi2ndf_Fragment;
+  Int_t NDF_Fragment;
+  Double32_t Pvalue_Fragment;
   Double32_t Angle_MotherFragment;
   Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
 
   Int_t Id_Pion;
   TLorentzVector MomE_Pion;
   Double32_t Chi2ndf_Pion;
+  Int_t NDF_Pion;
+  Double32_t Pvalue_Pion;
   Double32_t Angle_MotherPion;
+  Int_t NHitsMDC_Pion;
+  Int_t NHitsMinifiber_Pion;
   Int_t N_Pion;
   Int_t Pion_IsFromHyp; // 0-> No; 1-> Yes
+
   Double32_t Dist_Daughters;
   Double32_t ArmPod_Qt;
   Double32_t ArmPod_Alfa;
+};
+
+struct KFFitInfo
+{
+  Double32_t Pvalue = -1.;
+  Int_t NHitsMDC = -1;
+  Int_t NHitsMinifiber = -1;
 };
 
 struct CandTrack
@@ -653,6 +682,8 @@ public:
   
   std::vector<std::vector<double> > Hits_Si1{};
   std::vector<std::vector<double> > Hits_Si2{};
+  std::vector<std::vector<double> > Hits_Si3{};
+  std::vector<std::vector<double> > Hits_Si4{};
   
   std::vector<std::tuple<double, size_t> > HitsX_Si1{};
   std::vector<std::tuple<double, size_t> > HitsY_Si1{};

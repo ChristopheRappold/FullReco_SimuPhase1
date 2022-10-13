@@ -10,6 +10,8 @@
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 
+#include "Ana_Event/Ana_WasaEvent.hh"
+
 #include "Debug.hh"
 
 #include "TProfile.h"
@@ -19,6 +21,7 @@
 #include "TGeoElement.h"
 
 #include <sstream>
+#include <type_traits>
 
 #include "spdlog/spdlog.h"
 
@@ -93,8 +96,29 @@ constexpr bool IsFiberM(G4Sol::SolDet idDet) {
 double CloseDist( const TVector3 & Xin, const TVector3 & Xout,
 		  const TVector3 & Pin, const TVector3 & Pout );
 
+
+// C++20 only
+// bool has_fMC_Particle(const auto &obj)
+// {
+//   if constexpr (requires {obj.fMC_Particle;})
+//     {
+//       return true;
+//     }
+//   else
+//       return false;
+// };
+
+
+template <typename T, typename = int>
+struct HasMC_Particle : std::false_type { };
+
+template <typename T>
+struct HasMC_Particle <T, decltype((void) T::fMC_Particle, 0)> : std::true_type { };
+
 }
 
+
+template<typename Out>
 class TBuildRestarter final : public TDataBuilder
 {
 
@@ -106,17 +130,25 @@ public:
   ~TBuildRestarter() final;
 
 #ifdef ROOT6
-  ReturnRes::InfoM operator() (const MCAnaEventG4Sol& RestartEvent, FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree);
+  ReturnRes::InfoM operator() (const Out& RestartEvent, FullRecoEvent& RecoEvent, Out* OutTree);
 #else
-  ReturnRes::InfoM operator() (MCAnaEventG4Sol* event, FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree);
+  ReturnRes::InfoM operator() (Out* event, FullRecoEvent& RecoEvent, Out* OutTree);
 #endif
+
+/*
+#ifdef ROOT6
+  ReturnRes::InfoM operator() (const Ana_WasaEvent& RestartEvent, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
+#else
+  ReturnRes::InfoM operator() (Ana_WasaEvent* event, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree) { }
+#endif
+*/
 
 private :
   //int Exec(THyphiEvent_Phys_new *event,Ana_Event* OutTree);
 #ifdef ROOT6
-  int Exec(const MCAnaEventG4Sol& RestartEvent, FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree);
+  int Exec(const Out& RestartEvent, FullRecoEvent& RecoEvent, Out* OutTree);
 #else
-  int Exec(MCAnaEventG4Sol* event, FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree);
+  int Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTree);
 #endif
 
   ReturnRes::InfoM SoftExit(int) final;

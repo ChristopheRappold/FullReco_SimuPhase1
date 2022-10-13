@@ -18,6 +18,8 @@
 #include "TGeoMaterialInterface.h"
 #include "spdlog/spdlog.h"
 
+#include "boost/algorithm/string.hpp"
+
 //#define OLDGENFIT For Kalman_RK
 //#define OLD_FIELDMAP
 // THyphiAttributes::THyphiAttributes() : Field(nullptr), InputPar{nullptr, nullptr}
@@ -35,7 +37,7 @@
 //   Init_Para();
 // }
 
-THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& In)
+THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimExp& In)
     : Field(nullptr), Config(config), InputPar(In)
 {
   _logger = spdlog::get("Console");
@@ -152,11 +154,67 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSim& 
   MTsetting.Init(Config);
 
   if(TaskConfig.Task_ReStart)
-    Reload_Para();
+    {
+      int res = Reload_Para();
+      if(res != 0)
+	_logger->info(" E> Reload config did not happen correctly ! ");
+      else
+	_logger->info(" *** > Reload config done ! ");
+    }
   else
     Init_Para();
 
   _logger->info(" *** > Loading Fieldmap ");
+
+if(Config.IsAvailable("CalibFile_MDCmap"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCmap");
+    map_ParamFiles.insert({"mdc_map_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_map_file","./calib/mdc_mapping/MDC_channelmap.csv"});
+
+if(Config.IsAvailable("CalibFile_MDCphys"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCphys");
+    map_ParamFiles.insert({"mdc_phys_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_phys_file","./calib/mdc_mapping/MDC_PhysicalMap.csv"});
+
+if(Config.IsAvailable("CalibFile_MDCpar"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCpar");
+    map_ParamFiles.insert({"mdc_par_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_par_file","./calib/mdc_driftparam/MDC_DriftParam.txt"});
+
+if(Config.IsAvailable("CalibFile_Fiberoffset"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_Fiberoffset");
+    map_ParamFiles.insert({"fiber_offset_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"fiber_offset_file","./calib/fiber_offset/fiber_offset.csv"});
+
+if(Config.IsAvailable("CalibFile_PSBtime"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_PSBtime");
+    map_ParamFiles.insert({"psb_time_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"psb_time_file","calib/psb_param/psb_time.csv"});
+
+if(Config.IsAvailable("CalibFile_T0time"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_T0time");
+    map_ParamFiles.insert({"t0_time_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"t0_time_file","./calib/t0_param/t0_time.csv"});
+
+
 
   if(Wasa_FieldMap)
     {
@@ -293,7 +351,8 @@ int THyphiAttributes::Reload_Para()
   auto storage = InitStorage();
   storage.sync_schema();
 
-  auto previousConfSel = storage.get_all<AttrOut>(sqlite_orm::where(sqlite_orm::is_equal(&AttrOut::Hash,Hash)));
+  auto previousConfSel = storage.get_all<RunAttrGeneralDef>(sqlite_orm::where(sqlite_orm::is_equal(&RunAttrGeneralDef::Hash,Hash)));
+
   if(previousConfSel.size()!=1)
     {
       _logger->info("Reload from database : could not found the proper previous configuration : {} : nb Entries {}",Hash,previousConfSel.size());
@@ -324,7 +383,11 @@ int THyphiAttributes::Reload_Para()
 	}
     }
 
-  int diffConf = Config.Reload(previousConf.ConfigJson);
+  auto previousFullConfSel = storage.get_all<RunFullConfigDef>(sqlite_orm::where(sqlite_orm::is_equal(&RunFullConfigDef::Hash,Hash)));
+
+  auto previousFullConf = previousFullConfSel.front();
+
+  int diffConf = Config.Reload(previousFullConf.ConfigJson);
   if(diffConf !=0)
     return -2;
 
@@ -394,7 +457,6 @@ void Task::Init(const FullRecoConfig& Config)
     Task_PrimaryVtx = Config.Get<bool>("Task_PrimaryVtx");
   if(Config.IsAvailable("Task_FlatMCOutputML"))
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
-  ;
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
   if(Config.IsAvailable("Task_RiemannFinder"))
@@ -411,86 +473,133 @@ void Task::Init(const FullRecoConfig& Config)
     Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
   if(Config.IsAvailable("Task_ReStart"))
     Task_ReStart = Config.Get<bool>("Task_ReStart");
+
+
+  if(Config.IsAvailable("Task_Pipeline"))
+    {
+      Task_Order.clear();
+
+      std::string in(Config.Get<std::string>("Task_Pipeline"));
+      std::vector<std::string> pipeline;
+      boost::split(pipeline, in, boost::is_any_of("->"), boost::token_compress_on);
+
+      for(auto& s : pipeline)
+	boost::trim(s);
+
+      for(const auto& s : pipeline)
+	{
+	  if(s == "Task_CheckField")
+	    Task_Order.push_back(TASKCHECKFIELD);
+	  if(s == "Task_PrimaryVtx")
+	    Task_Order.push_back(TASKPRIMARYVTX);
+	  if(s == "Task_FlatMCOutputML")
+	    Task_Order.push_back(TASKFLATMCOUTPUTML);
+  	  if(s == "Task_BayesFinder")
+	    Task_Order.push_back(TASKBAYESFINDER);
+	  if(s == "Task_RiemannFinder")
+	    Task_Order.push_back(TASKRIEMANNFINDER);
+	  if(s == "Task_FindingPerf")
+	    Task_Order.push_back(TASKFINDINGPERF);
+	  if(s == "Task_FinderCM")
+	    Task_Order.push_back(TASKFINDERCM);
+	  if(s == "Task_CheckRZ")
+	    Task_Order.push_back(TASKCHECKRZ);
+	  if(s == "Task_KalmanDAF")
+	    Task_Order.push_back(TASKKALMANDAF);
+	  if(s == "Task_DecayVtx")
+	    Task_Order.push_back(TASKDECAYVTX);
+	  if(s == "Task_ReStart")
+	    Task_Order.push_back(TASKRESTART);
+	}
+    }
 }
 
 void THyphiAttributes::SetOut(AttrOut& out) const
 {
-  out.NameIn    = NameIn;
-  out.NameOut   = NameOut;
-  out.DateOfRun = DateOfRun;
-  out.Hash      = Hash;
+  out.RunDone.Hash      = Hash;
+  out.RunDone.NameIn    = NameIn;
+  out.RunDone.NameOut   = NameOut;
+  out.RunDone.DateOfRun = DateOfRun;
+  out.RunDone.Nb_CPU               = Nb_CPU;
+  out.RunDone.Nb_Fraction          = Nb_Fraction;
+  out.RunDone.NEvent               = NEvent;
 
-  out.Nb_CPU               = Nb_CPU;
-  out.Nb_Fraction          = Nb_Fraction;
-  out.NEvent               = NEvent;
-  out.MT_RunType           = MTsetting.RunType;
-  out.MT_IsMain            = MTsetting.IsMain;
-  out.MT_NQueue            = MTsetting.NQueue;
-  out.MT_NBuilder          = MTsetting.NBuilder;
-  out.MT_NKalman           = MTsetting.NKalman;
-  out.MT_NMerger           = MTsetting.NMerger;
-  out.MT_addr_initEvent    = MTsetting.addr_initEvent;
-  out.MT_addr_frontBuilder = MTsetting.addr_frontBuilder;
-  out.MT_addr_backFitter   = MTsetting.addr_backFitter;
-  out.MT_addr_frontFitter  = MTsetting.addr_frontFitter;
-  out.MT_addr_backMerger   = MTsetting.addr_backMerger;
-  out.MT_addr_frontMerger  = MTsetting.addr_frontMerger;
-  out.MT_addr_backEnd      = MTsetting.addr_backEnd;
-  out.MT_addr_control      = MTsetting.addr_control;
-  out.MT_addr_monitor      = MTsetting.addr_monitor;
-  out.Task_CheckField      = TaskConfig.Task_CheckField;
-  out.Task_PrimaryVtx      = TaskConfig.Task_PrimaryVtx;
-  out.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
-  out.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
-  out.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;
-  out.Task_FinderCM        = TaskConfig.Task_FinderCM;
-  out.Task_FindingPerf     = TaskConfig.Task_FindingPerf;
-  out.Task_CheckRZ         = TaskConfig.Task_CheckRZ;
-  out.Task_KalmanDAF       = TaskConfig.Task_KalmanDAF;
-  out.Task_DecayVtx        = TaskConfig.Task_DecayVtx;
-  out.Task_ReStart         = TaskConfig.Task_ReStart;
-  out.G4_simu              = G4_simu;
-  out.G4_TimeResolution    = G4_TimeResolution;
-  out.G4_GeoResolution     = G4_GeoResolution;
-  out.back_tracking        = back_tracking;
-  out.Target_PositionX     = Target_PositionX;
-  out.Target_PositionY     = Target_PositionY;
-  out.Target_PositionZ     = Target_PositionZ;
-  out.Target_Size          = Target_Size;
-  out.Field_Strength       = Field_Strength;
-  out.Wasa_Side            = Wasa_Side;
-  out.Wasa_FieldMap        = Wasa_FieldMap;
-  out.Wasa_FieldMapName    = Wasa_FieldMapName;
+  out.RunMulti.Hash = Hash;
+  out.RunMulti.MT_RunType           = MTsetting.RunType;
+  out.RunMulti.MT_IsMain            = MTsetting.IsMain;
+  out.RunMulti.MT_NQueue            = MTsetting.NQueue;
+  out.RunMulti.MT_NBuilder          = MTsetting.NBuilder;
+  out.RunMulti.MT_NKalman           = MTsetting.NKalman;
+  out.RunMulti.MT_NMerger           = MTsetting.NMerger;
+  out.RunMulti.MT_addr_initEvent    = MTsetting.addr_initEvent;
+  out.RunMulti.MT_addr_frontBuilder = MTsetting.addr_frontBuilder;
+  out.RunMulti.MT_addr_backFitter   = MTsetting.addr_backFitter;
+  out.RunMulti.MT_addr_frontFitter  = MTsetting.addr_frontFitter;
+  out.RunMulti.MT_addr_backMerger   = MTsetting.addr_backMerger;
+  out.RunMulti.MT_addr_frontMerger  = MTsetting.addr_frontMerger;
+  out.RunMulti.MT_addr_backEnd      = MTsetting.addr_backEnd;
+  out.RunMulti.MT_addr_control      = MTsetting.addr_control;
+  out.RunMulti.MT_addr_monitor      = MTsetting.addr_monitor;
+
+  out.RunTask.Hash = Hash;
+  out.RunTask.Task_CheckField      = TaskConfig.Task_CheckField;
+  out.RunTask.Task_PrimaryVtx      = TaskConfig.Task_PrimaryVtx;
+  out.RunTask.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
+  out.RunTask.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
+  out.RunTask.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;
+  out.RunTask.Task_FinderCM        = TaskConfig.Task_FinderCM;
+  out.RunTask.Task_FindingPerf     = TaskConfig.Task_FindingPerf;
+  out.RunTask.Task_CheckRZ         = TaskConfig.Task_CheckRZ;
+  out.RunTask.Task_KalmanDAF       = TaskConfig.Task_KalmanDAF;
+  out.RunTask.Task_DecayVtx        = TaskConfig.Task_DecayVtx;
+  out.RunTask.Task_ReStart         = TaskConfig.Task_ReStart;
+
+  out.RunAttrGeneral.Hash = Hash;
+  out.RunAttrGeneral.G4_simu              = G4_simu;
+  out.RunAttrGeneral.G4_TimeResolution    = G4_TimeResolution;
+  out.RunAttrGeneral.G4_GeoResolution     = G4_GeoResolution;
+  out.RunAttrGeneral.back_tracking        = back_tracking;
+  out.RunAttrGeneral.Target_PositionX     = Target_PositionX;
+  out.RunAttrGeneral.Target_PositionY     = Target_PositionY;
+  out.RunAttrGeneral.Target_PositionZ     = Target_PositionZ;
+  out.RunAttrGeneral.Target_Size          = Target_Size;
+  out.RunAttrGeneral.Field_Strength       = Field_Strength;
+  out.RunAttrGeneral.Wasa_Side            = Wasa_Side;
+  out.RunAttrGeneral.Wasa_FieldMap        = Wasa_FieldMap;
+  out.RunAttrGeneral.Wasa_FieldMapName    = Wasa_FieldMapName;
 
   for(auto nameG : name_GeoVolumes)
     {
       for(size_t i = 0; i < nameG.length(); ++i)
-        out.name_GeoVolumes.push_back(nameG[i]);
-      out.name_GeoVolumes.push_back(';');
+        out.RunAttrGeneral.name_GeoVolumes.push_back(nameG[i]);
+      out.RunAttrGeneral.name_GeoVolumes.push_back(';');
     }
 
-  out.beam_only          = beam_only;
-  out.Debug_DAF          = Debug_DAF;
-  out.DoNoMaterial       = DoNoMaterial;
-  out.RZ_ChangeMiniFiber = RZ_ChangeMiniFiber;
-  out.RZ_MDCProlate      = RZ_MDCProlate;
-  out.RZ_MDCWire2        = RZ_MDCWire2;
-  out.RZ_MDCBiasCorr     = RZ_MDCBiasCorr;
-  out.KF_Kalman          = KF_Kalman;
-  out.KF_KalmanSqrt      = KF_KalmanSqrt;
-  out.KF_KalmanRef       = KF_KalmanRef;
-  out.KF_DAFRef          = KF_DAFRef;
-  out.KF_DAF             = KF_DAF;
-  out.KF_NbCentralCut    = KF_NbCentralCut;
-  out.KF_NbMiniFiberCut  = KF_NbMiniFiberCut;
-  out.FlatML_namefile    = FlatML_namefile;
-  out.DataML_Out         = DataML_Out;
-  out.RF_OutputEvents    = RF_OutputEvents;
+  out.RunAttrGeneral.beam_only          = beam_only;
 
+  out.RunTaskAttr.Hash = Hash;
+  out.RunTaskAttr.Debug_DAF          = Debug_DAF;
+  out.RunTaskAttr.DoNoMaterial       = DoNoMaterial;
+  out.RunTaskAttr.RZ_ChangeMiniFiber = RZ_ChangeMiniFiber;
+  out.RunTaskAttr.RZ_MDCProlate      = RZ_MDCProlate;
+  out.RunTaskAttr.RZ_MDCWire2        = RZ_MDCWire2;
+  out.RunTaskAttr.RZ_MDCBiasCorr     = RZ_MDCBiasCorr;
+  out.RunTaskAttr.KF_Kalman          = KF_Kalman;
+  out.RunTaskAttr.KF_KalmanSqrt      = KF_KalmanSqrt;
+  out.RunTaskAttr.KF_KalmanRef       = KF_KalmanRef;
+  out.RunTaskAttr.KF_DAFRef          = KF_DAFRef;
+  out.RunTaskAttr.KF_DAF             = KF_DAF;
+  out.RunTaskAttr.KF_NbCentralCut    = KF_NbCentralCut;
+  out.RunTaskAttr.KF_NbMiniFiberCut  = KF_NbMiniFiberCut;
+  out.RunTaskAttr.FlatML_namefile    = FlatML_namefile;
+  out.RunTaskAttr.DataML_Out         = DataML_Out;
+  out.RunTaskAttr.RF_OutputEvents    = RF_OutputEvents;
+
+  out.RunFullConfig.Hash = Hash;
   std::string tempCj;
   Config.Save(tempCj);
   for(size_t i = 0; i < tempCj.length(); ++i)
-    out.ConfigJson.push_back(tempCj[i]);
+    out.RunFullConfig.ConfigJson.push_back(tempCj[i]);
 }
 
 void THyphiAttributes::SaveToDatabase() const
@@ -500,8 +609,13 @@ void THyphiAttributes::SaveToDatabase() const
 
   AttrOut outA;
   SetOut(outA);
-  _logger->debug("ToDatabase : hash {} ", outA.Hash);
+  _logger->debug("ToDatabase : hash {} ", outA.RunDone.Hash);
   // storage.begin_transaction();
-  storage.insert(outA);
+  storage.insert(outA.RunDone);
+  storage.insert(outA.RunMulti);
+  storage.insert(outA.RunTask);
+  storage.insert(outA.RunAttrGeneral);
+  storage.insert(outA.RunTaskAttr);
+  storage.insert(outA.RunFullConfig);
   // storage.commit();
 }

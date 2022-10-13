@@ -60,6 +60,8 @@ void FullRecoEvent::Clear(int toclean)
   
   Hits_Si1.clear();
   Hits_Si2.clear();
+  Hits_Si3.clear();
+  Hits_Si4.clear();
   
   HitsX_Si1.clear();
   HitsY_Si1.clear();

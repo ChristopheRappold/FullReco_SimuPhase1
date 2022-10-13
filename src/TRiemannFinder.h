@@ -19,7 +19,9 @@
 #include "tricktrack/RiemannFit.h"
 
 
-typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
+//typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
+template<class Out>
+using TDataProcessInterface = TDataProcess<FullRecoEvent,Out>;
 
 using RPhiHit = tricktrack::FKDPoint<double, 3>;
 
@@ -49,7 +51,8 @@ struct RTrack {
 };
 
 
-class TRiemannFinder final :  public TDataProcessInterface
+template<class Out>
+class TRiemannFinder final :  public TDataProcessInterface<Out>
 {
   public :
   const THyphiAttributes& att;
@@ -59,9 +62,9 @@ class TRiemannFinder final :  public TDataProcessInterface
 
   //int Init(Ana_Hist* h);
   void InitMT() final;
-  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
+  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,Out* OutTree) override;
  private:
-  int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) override;
+  int Exec(FullRecoEvent& RecoEvent,Out* OutTree) override;
 
   ReturnRes::InfoM SoftExit(int) override;
   void SelectHists() final;

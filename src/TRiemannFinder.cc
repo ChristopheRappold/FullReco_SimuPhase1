@@ -1,5 +1,7 @@
 #include "TRiemannFinder.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
@@ -16,7 +18,8 @@
 using namespace std;
 using namespace G4Sol;
 
-TRiemannFinder::TRiemannFinder(const THyphiAttributes& attribut) : TDataProcessInterface("RiemannFinder"), att(attribut)
+template<class Out>
+TRiemannFinder<Out>::TRiemannFinder(const THyphiAttributes& attribut) : TDataProcessInterface<Out>("RiemannFinder"), att(attribut)
 {
 
   OutputEvents = att.RF_OutputEvents;
@@ -66,7 +69,8 @@ TRiemannFinder::TRiemannFinder(const THyphiAttributes& attribut) : TDataProcessI
   att._logger->info("RiemannFinder : tree out set ");
 }
 
-TRiemannFinder::~TRiemannFinder()
+template<class Out>
+TRiemannFinder<Out>::~TRiemannFinder()
 {
   if(OutputEvents)
     {
@@ -85,9 +89,11 @@ TRiemannFinder::~TRiemannFinder()
       //res_h.time.resize(1,1);
 }
 
-void TRiemannFinder::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template<class Out>
+void TRiemannFinder<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TRiemannFinder::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+ReturnRes::InfoM TRiemannFinder<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   int result_finder = Exec(RecoEvent, OutTree);
@@ -95,7 +101,8 @@ ReturnRes::InfoM TRiemannFinder::operator()(FullRecoEvent& RecoEvent, MCAnaEvent
   return SoftExit(result_finder);
 }
 
-int TRiemannFinder::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+int TRiemannFinder<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   std::vector<RTrack> newTracksCand;
@@ -140,18 +147,21 @@ int TRiemannFinder::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
   return res;
 }
 
-ReturnRes::InfoM TRiemannFinder::SoftExit(int result_full) { return ReturnRes::Fine; }
+template<class Out>
+ReturnRes::InfoM TRiemannFinder<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
 
-void TRiemannFinder::SelectHists()
+template<class Out>
+void TRiemannFinder<Out>::SelectHists()
 {
-  LocalHisto.h_RiemannChi2         = AnaHisto->CloneAndRegister(AnaHisto->h_RiemannChi2);
-  LocalHisto.h_RiemannResidus = AnaHisto->CloneAndRegister(AnaHisto->h_RiemannResidus);
+  LocalHisto.h_RiemannChi2         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RiemannChi2);
+  LocalHisto.h_RiemannResidus = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RiemannResidus);
 
 
 
 }
 
-int TRiemannFinder::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree,
+template<class Out>
+int TRiemannFinder<Out>::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree,
                                  std::vector<RPhiHit>& TempHits)
 {
   int ntrack          = -1;
@@ -438,7 +448,8 @@ int TRiemannFinder::BuildKDTree(const FullRecoEvent& RecoEvent, tricktrack::FKDT
   return 0;
 }
 
-void TRiemannFinder::BuildTrackCand(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree,
+template<class Out>
+void TRiemannFinder<Out>::BuildTrackCand(const FullRecoEvent& RecoEvent, tricktrack::FKDTree<RPhiHit, double, 3>& KDtree,
                                     const std::vector<RPhiHit>& TempHits, std::vector<RTrack>& newTracksCand)
 {
 
@@ -843,7 +854,8 @@ void TRiemannFinder::BuildTrackCand(const FullRecoEvent& RecoEvent, tricktrack::
     }
 }
 
-void TRiemannFinder::AddStereoWire(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
+template<class Out>
+void TRiemannFinder<Out>::AddStereoWire(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
 {
 
   auto f_propagWire = [](const TVector3& w1, const TVector3& w2, TVector3& Pos) {
@@ -1081,7 +1093,8 @@ void TRiemannFinder::AddStereoWire(const FullRecoEvent& RecoEvent, std::vector<R
     }
 }
 
-void TRiemannFinder::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
+template<class Out>
+void TRiemannFinder<Out>::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
 {
 #ifdef DEBUG_RIEMANNFINDER
   att._logger->debug("Add Endcap : {}", TempHitPSBE.size());
@@ -1194,7 +1207,7 @@ void TRiemannFinder::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrac
 		double r2 = r0*TMath::Cos(tempPhi-phi0) + TMath::Sqrt(delta);
 
 		if(r2 < 6. && r1 > 22.)
-		  MeanXY[iPhi] = {-1.,{-999.,-999.,-999.,-999.}};
+		  MeanXY[iPhi] = {-1,{-999.,-999.,-999.,-999.}};
 		else
 		  {
 		    bool whichR[2] = {false,false};
@@ -1353,7 +1366,8 @@ void TRiemannFinder::AddEndCap(const FullRecoEvent& RecoEvent, std::vector<RTrac
     }
 }
 
-void TRiemannFinder::AddOtherMDC(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
+template<class Out>
+void TRiemannFinder<Out>::AddOtherMDC(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
 {
   att._logger->debug("AddOtherMDC :");
   for(int id_det = G4Sol::MG01; id_det <= G4Sol::MG17; ++id_det)
@@ -1432,7 +1446,8 @@ void TRiemannFinder::AddOtherMDC(const FullRecoEvent& RecoEvent, std::vector<RTr
     }
 }
 
-void TRiemannFinder::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
+template<class Out>
+void TRiemannFinder<Out>::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
 {
   std::unordered_map<int, int> donePSCE;
   std::unordered_map<int, int> reverseIdPSCE;
@@ -1602,7 +1617,8 @@ void TRiemannFinder::AddOtherPSCE(const FullRecoEvent& RecoEvent, std::vector<RT
     }
 }
 
-void TRiemannFinder::SortAndPosZ(std::vector<RTrack>& newTracksCand)
+template<class Out>
+void TRiemannFinder<Out>::SortAndPosZ(std::vector<RTrack>& newTracksCand)
 {
 
   for(auto& trackC : newTracksCand)
@@ -1665,7 +1681,8 @@ void TRiemannFinder::SortAndPosZ(std::vector<RTrack>& newTracksCand)
     }
 }
 
-void TRiemannFinder::FitterRiemann(std::vector<RTrack>& newTracksCand)
+template<class Out>
+void TRiemannFinder<Out>::FitterRiemann(std::vector<RTrack>& newTracksCand)
 {
 
   for(auto& trackC : newTracksCand)
@@ -1741,7 +1758,8 @@ void TRiemannFinder::FitterRiemann(std::vector<RTrack>& newTracksCand)
     }
 }
 
-int TRiemannFinder::FinderTrack(FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
+template<class Out>
+int TRiemannFinder<Out>::FinderTrack(FullRecoEvent& RecoEvent, std::vector<RTrack>& newTracksCand)
 {
 
   tricktrack::FKDTree<RPhiHit, double, 3> KDtree;
@@ -1971,3 +1989,7 @@ int TRiemannFinder::FinderTrack(FullRecoEvent& RecoEvent, std::vector<RTrack>& n
     }
   return 0;
 }
+
+
+template class TRiemannFinder<MCAnaEventG4Sol>;
+template class TRiemannFinder<Ana_WasaEvent>;
