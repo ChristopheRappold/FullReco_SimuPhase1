@@ -248,8 +248,7 @@ int main(int argc, char** argv)
       config.Add("Start_Event", Start_event);
       config.Add("Stop_Event", Stop_event);
 
-      Ana_Hist ListHisto(true /*DAF_Debug*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Hough*/,
-                         true);
+      Ana_Hist ListHisto(true /*DAF*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Riemann*/,true /*Hough*/, true /*Simu*/, true /*Builder*/);
 
       AnaEvent_Metadata metadata;
       //ListHisto.DebugHists();

@@ -407,7 +407,10 @@ class Ana_Hist
   Hist<TH2F> h_EffPosZPosR_postKFPart ;
 
   Hist<TH2F> h_N_SiHits_ReconsTracks ;
-  
+
+  Hist<TH2F> h_ResidualFiberX;
+  Hist<TH2F> h_ResidualFiberY;
+
 /*
   Hist<TH1F> h_N_Si_MotherTracks ;
 
