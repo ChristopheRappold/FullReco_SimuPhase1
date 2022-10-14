@@ -72,7 +72,7 @@ struct Task
   bool Task_CheckField = false;
   bool Task_PrimaryVtx = true;
   bool Task_FlatMCOutputML = false;
-  bool Task_CheckFiberTack = false;
+  bool Task_CheckFiberTrack = false;
   bool Task_BayesFinder = false;
   bool Task_RiemannFinder = false;
   bool Task_FinderCM = false;
@@ -137,6 +137,7 @@ struct RunTaskDef
   bool Task_CheckField;
   bool Task_PrimaryVtx;
   bool Task_FlatMCOutputML;
+  bool Task_CheckFiberTrack;
   bool Task_BayesFinder;
   bool Task_RiemannFinder;
   bool Task_FinderCM;

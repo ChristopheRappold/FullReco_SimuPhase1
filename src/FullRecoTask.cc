@@ -11,6 +11,7 @@
 #include "TFindingPerf.h"
 #include "TKalmanFilter_DAF.h"
 #include "CheckField.h"
+#include "TCheckFiberTrack.h"
 #include "TCheckRZ.h"
 #include "TFlatMCOutputML.h"
 #include "TPrimaryVertex.h"
@@ -90,6 +91,10 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
 	case Task::TASKFLATMCOUTPUTML:
 	  if(Attributes.TaskConfig.Task_FlatMCOutputML)
 	    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
+	  break;
+	case Task::TASKCHECKFIBERTRACK:
+	  if(Attributes.TaskConfig.Task_CheckFiberTrack)
+	    list_processMC.emplace_back(new TCheckFiberTrack<TEOut>(Attributes));
 	  break;
 	case Task::TASKBAYESFINDER:
 	  if(Attributes.TaskConfig.Task_BayesFinder)
