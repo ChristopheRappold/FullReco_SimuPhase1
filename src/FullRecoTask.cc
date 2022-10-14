@@ -44,7 +44,12 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
   if(Attributes.TaskConfig.Task_ReStart)
     det_build = new TBuildRestarter<TEOut>(Attributes);
   else
-    det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
+    {
+      if constexpr(recotask::HasMC_Particle<TEOut>::value == true)
+	det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
+      else
+	det_build = new TBuildWASACalibrationLayerPlane(Attributes);
+    }
   //det_build = new TTestUnits(Attributes,"layerDAF");
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );

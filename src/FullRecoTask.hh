@@ -32,6 +32,18 @@ class FullRecoEvent;
 class Ana_Hist;
 class FullRecoConfig;
 
+namespace recotask {
+
+  template <typename T, typename = int>
+  struct HasMC_Particle : std::false_type { };
+
+  template <typename T>
+  struct HasMC_Particle <T, decltype((void) T::fMC_Particle, 0)> : std::true_type { };
+
+
+};
+
+
 template<class TEOut>
 class FullRecoTask
 {
