@@ -269,9 +269,15 @@ if(Config.IsAvailable("CalibFile_T0time"))
   assert(vac != nullptr);
   gGeoManager->GetVolume("PSCE")->SetMedium(vac);
   gGeoManager->GetVolume("PSFE")->SetMedium(vac);
-  gGeoManager->GetVolume("HypHI_RPC_l_log")->SetMedium(vac);
-  gGeoManager->GetVolume("HypHI_RPC_h_log")->SetMedium(vac);
-  gGeoManager->GetVolume("FMF2_log")->SetMedium(vac);
+  auto vol = gGeoManager->GetVolume("HypHI_RPC_l_log");
+  if(vol != nullptr)
+    vol->SetMedium(vac);
+  vol = gGeoManager->GetVolume("HypHI_RPC_h_log");
+  if(vol!=nullptr)
+    vol->SetMedium(vac);
+  vol = gGeoManager->GetVolume("FMF2_log");
+  if(vol!=nullptr)
+    vol->SetMedium(vac);
   //  for(auto name : name_GeoVolumes)
   //    {
   //      TGeoVolume* vol = gGeoManager->GetVolume(name.c_str());

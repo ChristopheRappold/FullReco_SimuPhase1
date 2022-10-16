@@ -129,9 +129,10 @@ private:
 
   LocalHists LocalHisto;
 
-public:
-
   std::unique_ptr<ParaManager> par;
+
+  int offsetGeoNameID_MDC = 0;
+  int offsetGeoNameID_PSCE = 0;
 
 };
 
