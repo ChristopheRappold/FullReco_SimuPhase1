@@ -15,16 +15,6 @@ FiberTrackAna::FiberTrackAna(std::vector<FiberHitXUV*> &cont, ParaManager *par){
   SetResidual();
 }
 
-FiberTrackAna::FiberTrackAna(std::vector<FiberHitXUV*> &cont, std::unique_ptr<ParaManager> par){
-  Tracking(cont);
-  _xtgt = _x + _a*par->fiber_tgt_pos_z;
-  _ytgt = _y + _b*par->fiber_tgt_pos_z;
-  for(int i=0; i<(int)cont.size(); ++i){
-    _cont_xuv.emplace_back(cont[i]);
-  }
-  SetResidual();
-}
-
 FiberTrackAna::~FiberTrackAna() {}
 
 

@@ -9,7 +9,6 @@ class FiberTrackAna
 {
   public:
     FiberTrackAna(std::vector<FiberHitXUV*> &cont, ParaManager *par);
-    FiberTrackAna(std::vector<FiberHitXUV*> &cont, std::unique_ptr<ParaManager> par);
     ~FiberTrackAna();
     double GetX(){    return _x   ;};
     double GetY(){    return _y   ;};
