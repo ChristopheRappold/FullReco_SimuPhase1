@@ -42,8 +42,6 @@ public :
 
  ~FullRecoTask();
 
-  
-  //int EventLoop(THypHi_Event *event,std::vector<TUTracker_Event*> *UTrackerEvents,Ana_Event* OutTree);
 
 #ifdef ROOT6
   int EventLoop(const TG4Sol_Event& ev, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits, TEOut* OutTree);
@@ -73,7 +71,6 @@ private :
 
   FullRecoEvent REvent;
   Ana_Hist* AnaHisto;
-
   TDataBuilder* det_build;
 
   std::list<TDataProcess<FullRecoEvent,TEOut>*> list_processMC;
