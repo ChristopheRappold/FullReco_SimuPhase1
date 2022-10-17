@@ -9,7 +9,7 @@
 #include <vector>
 
 //#define DEBUG_BUILD
-//#define DEBUG_BUILD3
+//#define DEBUG_BUILD2
 
 using namespace std;
 
@@ -53,6 +53,25 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
             }
         }
     }
+  
+  std::string volMDCfirst = gGeoManager->GetVolume("INNER")->GetNode(0)->GetVolume()->GetName();
+  if(volMDCfirst == "MD01")
+    offsetGeoNameID_MDC = 0;
+  if(volMDCfirst == "SOL")
+    offsetGeoNameID_MDC = 1;
+
+  auto listNodes = gGeoManager->GetVolume("INNER")->GetNodes();
+  int index_lastMDC = -1, index_firstPSCE = -1;
+  for(int i=0;i<listNodes->GetEntries();++i)
+    {
+      std::string tempName(listNodes->At(i)->GetName());
+      if(tempName == "MDC17_1")
+	index_lastMDC = i;
+      if(tempName == "PSCE_1")
+	index_firstPSCE = i;
+    }
+  offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC;
+  
 }
 
 TBuildDetectorLayerPlaneDAF::~TBuildDetectorLayerPlaneDAF() {}
@@ -622,9 +641,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   std::cout << "HitPosX : " << hit.HitPosX << std::endl;
                   std::cout << "HitPosY : " << hit.HitPosY << std::endl;
                   std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
-                  gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 4 + LayerID - 1)->Print();
+                  gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1)->Print();
                   gGeoManager->GetVolume("INNER")
-                      ->GetNode(TypeDet - G4Sol::MG01 + 4 + LayerID - 1)
+                      ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1)
                       ->GetMatrix()
                       ->Print();
                   gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
@@ -633,7 +652,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
 #endif
                   TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")
-                                       ->GetNode(TypeDet - G4Sol::MG01 + 4 + LayerID - 1)
+                                       ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1)
                                        ->GetMatrix();                                       // PSCE
                   TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNNER
                   TGeoMatrix* g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
@@ -1085,13 +1104,13 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       motherName = "MiniFiberD1_log_0";
                       break;
                     case G4Sol::MiniFiberD1_x2:
-                      motherName = "MiniFiberD1_log_0";
+                      motherName = "MiniFiberD2_log_0";
                       break;
                     case G4Sol::MiniFiberD1_u2:
-                      motherName = "MiniFiberD1_log_0";
+                      motherName = "MiniFiberD2_log_0";
                       break;
                     case G4Sol::MiniFiberD1_v2:
-                      motherName = "MiniFiberD1_log_0";
+                      motherName = "MiniFiberD2_log_0";
                       break;
                     default:
                       std::cerr << "something wrong" << std::endl;
@@ -1185,37 +1204,37 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   std::cout << "wire" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
                   std::cout << "name : " << tmpName << std::endl;
-                  std::cout << "LayerID : " << LayerID << std::endl;
+                  std::cout << "LayerID : " << LayerID <<" : "<< TypeDet - G4Sol::MG01 + 1 <<std::endl;
                   std::cout << "HitPosX : " << hit.HitPosX << std::endl;
                   std::cout << "HitPosY : " << hit.HitPosY << std::endl;
                   std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
                   gGeoManager->GetVolume("INNER")
-                      ->GetNode(TypeDet - G4Sol::MG01 + 1)
-                      ->GetVolume()
-                      ->GetNode(LayerID - 1)
-                      ->Print();
+		    ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)
+		    ->GetVolume()
+		    ->GetNode(LayerID - 1)
+		    ->Print();
                   gGeoManager->GetVolume("INNER")
-                      ->GetNode(TypeDet - G4Sol::MG01 + 1)
+		    ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)
                       ->GetVolume()
                       ->GetNode(LayerID - 1)
                       ->GetMatrix()
                       ->Print();
-                  gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->Print();
-                  gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetMatrix()->Print();
+                  gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)->Print();
+                  gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)->GetMatrix()->Print();
                   gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
                   gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
                   gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
                   gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
 #endif
                   TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")
-                                       ->GetNode(TypeDet - G4Sol::MG01 + 1)
-                                       ->GetVolume()
+		                              ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)
+		                              ->GetVolume()
                                        ->GetNode(LayerID - 1)
                                        ->GetMatrix(); // ME, MG
                   TGeoShape* tempShape =
-                      gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetVolume()->GetShape();
+		    gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)->GetVolume()->GetShape();
                   TGeoMatrix* g2 =
-                      gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + 1)->GetMatrix(); // MD
+		    gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)->GetMatrix(); // MD
                   TGeoMatrix* g3 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();             // INNER
                   TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();             // MFLD
                   TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);

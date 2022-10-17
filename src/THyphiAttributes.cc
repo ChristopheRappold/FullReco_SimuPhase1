@@ -268,9 +268,15 @@ if(Config.IsAvailable("CalibFile_T0time"))
   assert(vac != nullptr);
   gGeoManager->GetVolume("PSCE")->SetMedium(vac);
   gGeoManager->GetVolume("PSFE")->SetMedium(vac);
-  gGeoManager->GetVolume("HypHI_RPC_l_log")->SetMedium(vac);
-  gGeoManager->GetVolume("HypHI_RPC_h_log")->SetMedium(vac);
-  gGeoManager->GetVolume("FMF2_log")->SetMedium(vac);
+  auto vol = gGeoManager->GetVolume("HypHI_RPC_l_log");
+  if(vol != nullptr)
+    vol->SetMedium(vac);
+  vol = gGeoManager->GetVolume("HypHI_RPC_h_log");
+  if(vol!=nullptr)
+    vol->SetMedium(vac);
+  vol = gGeoManager->GetVolume("FMF2_log");
+  if(vol!=nullptr)
+    vol->SetMedium(vac);
   //  for(auto name : name_GeoVolumes)
   //    {
   //      TGeoVolume* vol = gGeoManager->GetVolume(name.c_str());
@@ -505,6 +511,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_PrimaryVtx_Si = Config.Get<bool>("Task_PrimaryVtx_Si");
   if(Config.IsAvailable("Task_FlatMCOutputML"))
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
+  if(Config.IsAvailable("Task_CheckFiberTrack"))
+    Task_CheckFiberTrack = Config.Get<bool>("Task_CheckFiberTrack");
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
   if(Config.IsAvailable("Task_RiemannFinder"))
@@ -544,6 +552,8 @@ void Task::Init(const FullRecoConfig& Config)
       Task_Order.push_back(TASKPRIMARYVTX_SI);
 	  if(s == "Task_FlatMCOutputML")
 	    Task_Order.push_back(TASKFLATMCOUTPUTML);
+	  if(s == "Task_CheckFiberTrack")
+	    Task_Order.push_back(TASKCHECKFIBERTRACK);
   	  if(s == "Task_BayesFinder")
 	    Task_Order.push_back(TASKBAYESFINDER);
 	  if(s == "Task_RiemannFinder")

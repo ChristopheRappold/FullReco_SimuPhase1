@@ -250,6 +250,8 @@ private:
   std::unordered_map<int,int> orderDetectors;
   std::unordered_map<int,std::string> orderDetName;
   PDG_fromName pid_fromName;
+  int offsetGeoNameID_MDC = 0;
+  int offsetGeoNameID_PSCE = 0;
   struct LocalHists
   {
     TH1I* h_stats;

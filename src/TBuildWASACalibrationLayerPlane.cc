@@ -16,6 +16,25 @@ TBuildWASACalibrationLayerPlane::TBuildWASACalibrationLayerPlane(const THyphiAtt
   att._logger->info("TBuildWASACalibrationLayerPlane::TBuildWASACalibrationLayerPlane");
 
   par = std::make_unique<ParaManager>(att.map_ParamFiles);
+
+  std::string volMDCfirst = gGeoManager->GetVolume("INNER")->GetNode(0)->GetVolume()->GetName();
+  if(volMDCfirst == "MD01")
+    offsetGeoNameID_MDC = 0;
+  if(volMDCfirst == "SOL")
+    offsetGeoNameID_MDC = 1;
+
+  auto listNodes = gGeoManager->GetVolume("INNER")->GetNodes();
+  int index_lastMDC = -1, index_firstPSCE = -1;
+  for(int i=0;i<listNodes->GetEntries();++i)
+    {
+      std::string tempName(listNodes->At(i)->GetName());
+      if(tempName == "MDC17_1")
+	index_lastMDC = i;
+      if(tempName == "PSCE_1")
+	index_firstPSCE = i;
+    }
+  offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC + 17;
+
 }
 
 TBuildWASACalibrationLayerPlane::~TBuildWASACalibrationLayerPlane() {}
@@ -219,7 +238,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   for(const auto& hit_PSB : PSBHitCont)
     {
       int hitID      = hit_PSB->GetSeg();
-      TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")->GetNode(21 + hitID)->GetMatrix(); // PSCE
+      TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")->GetNode(offsetGeoNameID_PSCE + hitID)->GetMatrix(); // PSCE
       TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();           // INNNER
       TGeoMatrix* g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();           // MFLD
       TGeoHMatrix H1(*g1), H2(*g2), H3(*g3);
@@ -474,10 +493,10 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
         int hitID = hit_MDC->GetWir();
 
         TGeoMatrix* g1 =
-            gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + 1)->GetVolume()->GetNode(hitID)->GetMatrix(); // ME,
+            gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + offsetGeoNameID_MDC)->GetVolume()->GetNode(hitID)->GetMatrix(); // ME,
                                                                                                                 // MG
-        TGeoShape* tempShape = gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + 1)->GetVolume()->GetShape();
-        TGeoMatrix* g2       = gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + 1)->GetMatrix(); // MD
+        TGeoShape* tempShape = gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + offsetGeoNameID_MDC)->GetVolume()->GetShape();
+        TGeoMatrix* g2       = gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + offsetGeoNameID_MDC)->GetMatrix(); // MD
         TGeoMatrix* g3       = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();               // INNER
         TGeoMatrix* g4       = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();               // MFLD
         TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);

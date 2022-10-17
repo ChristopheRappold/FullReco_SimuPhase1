@@ -11,6 +11,7 @@
 #include "TFindingPerf.h"
 #include "TKalmanFilter_DAF.h"
 #include "CheckField.h"
+#include "TCheckFiberTrack.h"
 #include "TCheckRZ.h"
 #include "TFlatMCOutputML.h"
 #include "TPrimaryVertex.h"
@@ -45,7 +46,12 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
   if(Attributes.TaskConfig.Task_ReStart)
     det_build = new TBuildRestarter<TEOut>(Attributes);
   else
-    det_build = new TBuildDetectorLayerPlaneDAF(Attributes); //Change ?
+    {
+      if constexpr(recotask::HasMC_Particle<TEOut>::value == true)
+        det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
+      else
+        det_build = new TBuildWASACalibrationLayerPlane(Attributes);
+    }
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
   // if(Attributes.TaskConfig.Task_CheckField)
@@ -73,53 +79,57 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
   for(const auto& Tid : Attributes.TaskConfig.Task_Order)
     {
       switch(Tid)
-      	{
-        	case Task::TASKCHECKFIELD:
-        	  if(Attributes.TaskConfig.Task_CheckField)
-        	    list_processMC.emplace_back(new CheckField<TEOut>(Attributes));
-        	  break;
-        	case Task::TASKPRIMARYVTX:
-        	  if(Attributes.TaskConfig.Task_PrimaryVtx)
-        	    list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
-        	  break;
-        //  case Task::TASKPRIMARYVTX_SI:
-        //    if(Attributes.TaskConfig.Task_PrimaryVtx_Si)
-        //      list_processMC.emplace_back(new TPrimaryVertex_Si<TEOut>(Attributes));
-        //    break;
-        	case Task::TASKFLATMCOUTPUTML:
-        	  if(Attributes.TaskConfig.Task_FlatMCOutputML)
-        	    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
-        	  break;
-        	case Task::TASKBAYESFINDER:
-        	  if(Attributes.TaskConfig.Task_BayesFinder)
-        	    list_processMC.emplace_back(new TBayesFinder<TEOut>(Attributes));
-        	  break;
-        	case Task::TASKRIEMANNFINDER:
-        	  if(Attributes.TaskConfig.Task_RiemannFinder)
-        	    list_processMC.emplace_back(new TRiemannFinder<TEOut>(Attributes));
-        	  break;
-        	case Task::TASKFINDERCM:
-        	  //if(Attributes.TaskConfig.Task_FinderCM)
-        	  //  list_processMC.emplace_back(new TFinderCM(Attributes));
-        	  break;
-        	case Task::TASKFINDINGPERF:
-        	  if(Attributes.TaskConfig.Task_FindingPerf)
-        	    list_processMC.emplace_back(new TFindingPerf<TEOut>(Attributes));
-        	  break;
-        	case Task::TASKCHECKRZ:
-        	  if(Attributes.TaskConfig.Task_CheckRZ)
-        	    list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
-        	case Task::TASKKALMANDAF:
-        	  if(Attributes.TaskConfig.Task_KalmanDAF)
-        	    list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
-        	  break;
-        	case Task::TASKDECAYVTX:
-        	  if(Attributes.TaskConfig.Task_DecayVtx)
-        	    list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes));
-        	  break;
-        	default:
-        	  break;
-      	}
+        {
+          case Task::TASKCHECKFIELD:
+            if(Attributes.TaskConfig.Task_CheckField)
+              list_processMC.emplace_back(new CheckField<TEOut>(Attributes));
+            break;
+          case Task::TASKPRIMARYVTX:
+            if(Attributes.TaskConfig.Task_PrimaryVtx)
+              list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
+            break;
+          //  case Task::TASKPRIMARYVTX_SI:
+          //    if(Attributes.TaskConfig.Task_PrimaryVtx_Si)
+          //      list_processMC.emplace_back(new TPrimaryVertex_Si<TEOut>(Attributes));
+          //    break;
+          case Task::TASKFLATMCOUTPUTML:
+            if(Attributes.TaskConfig.Task_FlatMCOutputML)
+              list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
+            break;
+          case Task::TASKCHECKFIBERTRACK:
+            if(Attributes.TaskConfig.Task_CheckFiberTrack)
+              list_processMC.emplace_back(new TCheckFiberTrack<TEOut>(Attributes));
+            break;
+          case Task::TASKBAYESFINDER:
+            if(Attributes.TaskConfig.Task_BayesFinder)
+              list_processMC.emplace_back(new TBayesFinder<TEOut>(Attributes));
+            break;
+          case Task::TASKRIEMANNFINDER:
+            if(Attributes.TaskConfig.Task_RiemannFinder)
+              list_processMC.emplace_back(new TRiemannFinder<TEOut>(Attributes));
+            break;
+          case Task::TASKFINDERCM:
+            //if(Attributes.TaskConfig.Task_FinderCM)
+            //  list_processMC.emplace_back(new TFinderCM(Attributes));
+            break;
+          case Task::TASKFINDINGPERF:
+            if(Attributes.TaskConfig.Task_FindingPerf)
+              list_processMC.emplace_back(new TFindingPerf<TEOut>(Attributes));
+            break;
+          case Task::TASKCHECKRZ:
+            if(Attributes.TaskConfig.Task_CheckRZ)
+              list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
+          case Task::TASKKALMANDAF:
+            if(Attributes.TaskConfig.Task_KalmanDAF)
+              list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
+            break;
+          case Task::TASKDECAYVTX:
+            if(Attributes.TaskConfig.Task_DecayVtx)
+              list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes));
+            break;
+          default:
+            break;
+        }
     }
 
   for(auto task : list_processMC)

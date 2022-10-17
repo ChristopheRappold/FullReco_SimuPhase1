@@ -12,6 +12,8 @@ DataML_momfit::DataML_momfit(const THyphiAttributes& att_, TTree* outT) : DataML
 {
   out_tree->Branch("b_tx", &b_tx, "b_tx/F");
   out_tree->Branch("b_ty", &b_ty, "b_ty/F");
+  out_tree->Branch("b_ptnx", &b_ptnx, "b_ptnx/F");
+  out_tree->Branch("b_ptny", &b_ptny, "b_ptny/F");
   out_tree->Branch("b_vx", &b_vx, "b_vx/F");
   out_tree->Branch("b_vy", &b_vy, "b_vy/F");
   out_tree->Branch("b_vz", &b_vz, "b_vz/F");
@@ -25,6 +27,8 @@ DataML_momfit::DataML_momfit(const THyphiAttributes& att_, TTree* outT) : DataML
 
   out_tree->Branch("a_tx", &a_tx, "a_tx/F");
   out_tree->Branch("a_ty", &a_ty, "a_ty/F");
+  out_tree->Branch("a_ptnx", &a_ptnx, "a_ptnx/F");
+  out_tree->Branch("a_ptny", &a_ptny, "a_ptny/F");
   out_tree->Branch("a_vx", &a_vx, "a_vx/F");
   out_tree->Branch("a_vy", &a_vy, "a_vy/F");
   out_tree->Branch("a_vz", &a_vz, "a_vz/F");
@@ -36,8 +40,11 @@ DataML_momfit::DataML_momfit(const THyphiAttributes& att_, TTree* outT) : DataML
   out_tree->Branch("a_phi", &a_phi, "a_phi/F");
   out_tree->Branch("a_theta", &a_theta, "a_theta/F");
 
+  out_tree->Branch("Dphi",&Dphi, "Dphi/F");
   out_tree->Branch("poq", &poq, "poq/F");
   out_tree->Branch("qop", &qop, "qop/F");
+  out_tree->Branch("ptoq", &ptoq, "ptoq/F");
+  out_tree->Branch("qopt", &qopt, "qopt/F");
   out_tree->Branch("tof", &tof, "tof/F");
   out_tree->Branch("psce_psbe", &psce_psbe, "psce_psbe/I");
   out_tree->Branch("psb_z", &psb_z, "psb_z/F");
@@ -174,6 +181,10 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
       b_vz = it_hitBeforeSim.momZ / temp_mom;
 
       b_pt    = TMath::Sqrt(TMath::Sq(it_hitBeforeSim.momX) + TMath::Sq(it_hitBeforeSim.momY));
+
+      a_ptnx  = it_hitBeforeSim.momX / b_pt;
+      a_ptny  = it_hitBeforeSim.momY / b_pt;
+
       b_phi   = TMath::ATan2(it_hitBeforeSim.momY, it_hitBeforeSim.momX);
       b_theta = TMath::ASin(b_pt / temp_mom);
 
@@ -203,6 +214,9 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
       a_vz = it_hitAfterSim.momZ / temp_mom;
 
       a_pt    = TMath::Sqrt(TMath::Sq(it_hitAfterSim.momX) + TMath::Sq(it_hitAfterSim.momY));
+      a_ptnx  = it_hitAfterSim.momX / a_pt;
+      a_ptny  = it_hitAfterSim.momY / a_pt;
+      
       a_phi   = TMath::ATan2(it_hitAfterSim.momY, it_hitAfterSim.momX);
       a_theta = TMath::ASin(a_pt / temp_mom);
 
@@ -227,11 +241,14 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
       // std::get<1>(id_psb));
 
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(temp_pdg);
-      double charge     = PDG_particle->Charge() / 3.;
+      double charge     = PDG_particle->Charge() / 3.;       
       q                 = charge;
       pdg               = temp_pdg;
+      Dphi              = (b_phi-a_phi)*TMath::RadToDeg() + 360.*((b_phi-a_phi)<-TMath::Pi()) - 360.*((b_phi-a_phi)>TMath::Pi());
       poq               = mom[0] / charge;
+      ptoq              = b_pt / charge;
       qop               = 1. / poq;
+      qopt              = 1. /ptoq;
 
       out_tree->Fill();
 
@@ -239,11 +256,13 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
       att._logger->debug("filled");
 #endif
 
-      b_tx = 0., b_ty = 0., b_vx = 0., b_vy = 0., b_vz = 0., b_x = 0., b_y = 0., b_z = 0., b_pt = 0., b_phi = 0.,
+      b_tx = 0.; b_ty = 0.; b_ptnx = 0.; b_ptny = 0.; b_vx = 0.; b_vy = 0.; b_vz = 0.; b_x = 0.; b_y = 0.; b_z = 0.; b_pt = 0.; b_phi = 0.;
       b_theta = 0.;
-      a_tx = 0., a_ty = 0., a_vx = 0., a_vy = 0., a_vz = 0., a_x = 0., a_y = 0., a_z = 0., a_pt = 0., a_phi = 0.,
+      a_tx = 0.; a_ty = 0.; a_ptnx = 0.; a_ptny = 0.; a_vx = 0.; a_vy = 0.; a_vz = 0.; a_x = 0.; a_y = 0.; a_z = 0.; a_pt = 0.; a_phi = 0.;
       a_theta = 0.;
-      poq = 0., qop = 0.;
+      Dphi = 0.;
+      poq = 0.; qop = 0.;
+      ptoq = 0.; qopt = 0.;
       q         = 0.;
       tof       = 0.;
       psb_z     = 0.;

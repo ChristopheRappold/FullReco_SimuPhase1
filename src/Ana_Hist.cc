@@ -361,6 +361,20 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistRegisteredByDir.insert(std::make_pair("RiemannFinder", std::make_tuple(HistReg,0)));
     }
 
+  if(EnableState[SIMU])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
+
+      h_ResidualFiberX.emplace_back(new TH2F("h_ResidualFiberX","h_ResidualFiberX",20,0,20,500,-10,10));
+      HistReg.emplace_back(&h_ResidualFiberX.store);
+
+      h_ResidualFiberY.emplace_back(new TH2F("h_ResidualFiberY","h_ResidualFiberY",20,0,20,500,-10,10));
+      HistReg.emplace_back(&h_ResidualFiberY.store);
+
+      HistRegisteredByDir.insert(std::make_pair("Simu", std::make_tuple(HistReg,0)));
+    }
+
+
   if(EnableState[BUILDER])
     {
       std::vector<std::vector<TH1*>*> HistReg;
