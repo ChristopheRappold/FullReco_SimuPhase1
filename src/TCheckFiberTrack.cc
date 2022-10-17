@@ -92,6 +92,40 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
       else if(id_FirstFiberV)
 	id_FirstFiber = G4Sol::FiberD3_v;
 
+      if(id_FirstFiber == -1)
+	{
+#ifdef DEBUG_FIBERTRACK
+	  att._logger->debug("E> should have fiber D3 hit ! ");
+
+	  auto printW = [](const auto a, const int width) -> std::string {
+	    std::stringstream ss;
+	    ss << std::fixed << std::right;
+	    ss.fill(' ');    // fill space around displayed #
+	    ss.width(width); // set  width around displayed #
+	    ss << a;
+	    return ss.str();
+	  };
+
+	  std::vector<std::stringstream> s1(it_trackInfo.second.size() / 20 + 1);
+          std::vector<std::stringstream> s2(it_trackInfo.second.size() / 20 + 1);
+          std::vector<std::stringstream> s3(it_trackInfo.second.size() / 20 + 1);
+          for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+            {
+              s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
+              s2[i / 20] << printW(i, 6) << ", ";
+              s3[i / 20] << printW(it_trackInfo.second[i].pdg, 6) << ", ";
+            }
+          for(size_t i = 0; i < s1.size(); ++i)
+            {
+              att._logger->debug("Det  :{}", s1[i].str());
+              att._logger->debug("idDet:{}", s2[i].str());
+              att._logger->debug("stat :{}", s3[i].str());
+            }
+#endif
+
+	  continue;
+	}
+
       std::array<double,6> LineParams = {it_ListHitsSim->second[id_FirstFiber][0].hitX,
 					 it_ListHitsSim->second[id_FirstFiber][0].hitY,
 					 it_ListHitsSim->second[id_FirstFiber][0].hitZ,
@@ -128,7 +162,7 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 	    {
 	      f_line(LineParams, it_ListHitsSim->second[id_det][0].hitZ, hitExp);
 	      LocalHisto.h_ResidualFiberX->Fill(G4Sol::nameLiteralDet.begin()[id_det], hitExp[0] - it_ListHitsSim->second[id_det][0].hitX,1.);
-	      LocalHisto.h_ResidualFiberY->Fill(G4Sol::nameLiteralDet.begin()[id_det], hitExp[0] - it_ListHitsSim->second[id_det][0].hitX,1.);
+	      LocalHisto.h_ResidualFiberY->Fill(G4Sol::nameLiteralDet.begin()[id_det], hitExp[1] - it_ListHitsSim->second[id_det][0].hitY,1.);
 	    }
 
 	}
