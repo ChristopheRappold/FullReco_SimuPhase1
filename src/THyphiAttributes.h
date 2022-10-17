@@ -18,6 +18,7 @@
 #include "FairBase/WasaSolenoidFieldMap.h"
 
 #include "Ana_Event/AnaEvent_Metadata.hh"
+//#include "EventWASAUnpack/TFRSParameter.h"
 
 #include "spdlog/logger.h"
 
@@ -25,10 +26,10 @@
 
 struct DataSimExp
 {
-  std::vector<std::string>* nameDet;
+  std::vector<std::string>* nameDet;  
   std::map<std::string, double>* simParameters;
 
-  AnaEvent_Metadata* previousMeta;
+  AnaEvent_Metadata* simexpMetadata;
 };
 
 
@@ -326,6 +327,7 @@ class THyphiAttributes
   std::string Hash;
 
   std::unordered_map<std::string,std::string> map_ParamFiles;
+  //std::unordered_map<std::string,std::string> Unpack_map_ParamFiles;
 
   int Nb_CPU;
   int Nb_Fraction;
