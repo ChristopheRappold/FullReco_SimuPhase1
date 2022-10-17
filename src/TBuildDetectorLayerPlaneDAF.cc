@@ -63,12 +63,12 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
   for(int i=0;i<listNodes->GetEntries();++i)
     {
       std::string tempName(listNodes->At(i)->GetName());
-      if(tempName == "MDC17_1")
+      if(tempName == "MD17_1")
 	index_lastMDC = i;
       if(tempName == "PSCE_1")
 	index_firstPSCE = i;
     }
-  offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC;
+  offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC -1;
   
 }
 
@@ -615,11 +615,11 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                 }
               else if(IsPSCE(TypeDet))
                 {
-#ifdef DEBUG_BUILD2
+		  //#ifdef DEBUG_BUILD2
                   std::cout << "PSC" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
                   std::cout << "name : " << tmpName << std::endl;
-                  std::cout << "LayerID : " << LayerID << std::endl;
+                  std::cout << "LayerID : " << LayerID <<" : " <<TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1<<std::endl;
                   std::cout << "HitPosX : " << hit.HitPosX << std::endl;
                   std::cout << "HitPosY : " << hit.HitPosY << std::endl;
                   std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
@@ -632,7 +632,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
                   gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
                   gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
-#endif
+		  //#endif
                   TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")
                                        ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1)
                                        ->GetMatrix();                                       // PSCE
