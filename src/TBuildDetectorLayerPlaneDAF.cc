@@ -615,7 +615,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                 }
               else if(IsPSCE(TypeDet))
                 {
-#ifdef DEBUG_BUILD2
+		  //#ifdef DEBUG_BUILD2
                   std::cout << "PSC" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
                   std::cout << "name : " << tmpName << std::endl;
@@ -632,7 +632,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
                   gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
                   gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
-#endif
+		  //#endif
                   TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")
                                        ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1)
                                        ->GetMatrix();                                       // PSCE
