@@ -3,9 +3,10 @@
 #include "Debug.hh"
 #include "FullRecoConfig.hh"
 #include "FullRecoTask.hh"
-#include "FullRecoTaskMT.hh"
-#include "FullRecoTaskZMQ.hh"
+//#include "FullRecoTaskMT.hh"
+//#include "FullRecoTaskZMQ.hh"
 #include "KFParticle.h"
+#include "TBuildDetectorLayerPlaneDAF.h"
 
 
 //#include "TApplication.h"
@@ -171,15 +172,15 @@ int main(int argc, char** argv)
       DataSimExp InputPar{nullptr, nullptr, nullptr};
       InputPar.nameDet       = (std::vector<std::string>*)(input_file->Get("nameDet"));
       InputPar.simParameters = (std::map<std::string, double>*)(input_file->Get("simParameters"));
-      InputPar.previousMeta  = (AnaEvent_Metadata*)(input_file->Get("EventMetadata"));
+      InputPar.simexpMetadata  = (AnaEvent_Metadata*)(input_file->Get("EventMetadata"));
 
-      if(InputPar.nameDet == nullptr && InputPar.previousMeta == nullptr)
+      if(InputPar.nameDet == nullptr && InputPar.simexpMetadata == nullptr)
         {
           ConsoleLogger->error("E> Load nameDet not possible ! {}", fmt::ptr(input_file->Get("nameDet")));
           ConsoleLogger->error("E> Load AnaEvent_Metadata not possible ! {}", fmt::ptr(input_file->Get("EventMetadata")));
           return -1;
         }
-      if(InputPar.simParameters == nullptr && InputPar.previousMeta == nullptr)
+      if(InputPar.simParameters == nullptr && InputPar.simexpMetadata == nullptr)
         {
           ConsoleLogger->error("E> Load simParameters not possible ! {}", fmt::ptr(input_file->Get("simParameters")));
           ConsoleLogger->error("E> Load AnaEvent_Metadata not possible ! {}", fmt::ptr(input_file->Get("EventMetadata")));
@@ -248,14 +249,24 @@ int main(int argc, char** argv)
       config.Add("Start_Event", Start_event);
       config.Add("Stop_Event", Stop_event);
 
-      Ana_Hist ListHisto(true /*DAF_Debug*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Hough*/,
-                         true);
+      Ana_Hist ListHisto(true /*Daf*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Riemann*/, false /*Hough*/,
+                            true /*Simu*/, true /*Builder*/, true /*PrimVtx*/, false /*PrimVtx_Si*/, true /*DecayVtx*/);
 
       AnaEvent_Metadata metadata;
       //ListHisto.DebugHists();
       if(MT == false && ZMQ == false)
 	{
-	  FullRecoTask<MCAnaEventG4Sol> ReconstructionTask(config, InputPar);
+    TDataBuilder* det_build = nullptr;
+    Ana_Hist* AnaHisto = nullptr;
+
+    if(Restarting == false)
+      det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
+    else
+      det_build = new TBuildRestarter<MCAnaEventG4Sol>(Attributes);
+
+    FullRecoTask<MCAnaEventG4Sol> ReconstructionTask(det_build, AnaHisto, config, InputPar); //Change! -> Check if works
+
+	  //FullRecoTask<MCAnaEventG4Sol> ReconstructionTask(config, InputPar);
 	  
 	  ReconstructionTask.AttachHisto(&ListHisto);
 	  ConsoleLogger->info("Init done");
@@ -306,7 +317,7 @@ int main(int argc, char** argv)
 
 	  ReconstructionTask.SetEventMetadata(metadata);
 	}
-      else if(MT==true && ZMQ==false)
+/*      else if(MT==true && ZMQ==false)
 	{
 	  
 	  FullRecoTaskMT ReconstructionTaskMT(config, InputPar);
@@ -335,6 +346,7 @@ int main(int argc, char** argv)
 
 	  int toStop = ReconstructionTaskZMQ.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
 	}
+  */
       else
 	{
 	  ConsoleLogger->warn("W> no run : MT? {} ZMQ? {}",MT,ZMQ);
