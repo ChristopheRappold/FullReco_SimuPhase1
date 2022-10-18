@@ -411,6 +411,9 @@ class Ana_Hist
   Hist<TH2F> h_ResidualFiberX;
   Hist<TH2F> h_ResidualFiberY;
 
+  Hist<TH2F> h_ResidualFiberX_Angle[11][2];
+  Hist<TH2F> h_ResidualFiberY_Angle[11][2];
+
 /*
   Hist<TH1F> h_N_Si_MotherTracks ;
 
