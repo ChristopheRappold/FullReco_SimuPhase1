@@ -82,6 +82,14 @@ constexpr bool IsPSBE(G4Sol::SolDet idDet) {
     return false;
   };
 };
+constexpr bool IsPSFE(G4Sol::SolDet idDet) {
+  switch (idDet) {
+  case G4Sol::PSFE :
+    return true;
+  default:
+    return false;
+  };
+};
 
 constexpr bool IsSilicon(G4Sol::SolDet idDet) {
   switch (idDet) {
