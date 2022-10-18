@@ -127,9 +127,9 @@ constexpr bool IsFiberU_Vetoed(G4Sol::SolDet idDet) {
   case G4Sol::FiberD2_x : ;
   case G4Sol::FiberD2_u : ;
   case G4Sol::FiberD2_v : ;
-  case G4Sol::FiberD3_x : ;
-  case G4Sol::FiberD3_u : ;
-  case G4Sol::FiberD3_v : ;
+    //case G4Sol::FiberD3_x : ;
+    //case G4Sol::FiberD3_u : ;
+    //case G4Sol::FiberD3_v : ;
     return true;
   default:
     return false;
