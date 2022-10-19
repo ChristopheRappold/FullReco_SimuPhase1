@@ -28,12 +28,12 @@ TBuildWASACalibrationLayerPlane::TBuildWASACalibrationLayerPlane(const THyphiAtt
   for(int i=0;i<listNodes->GetEntries();++i)
     {
       std::string tempName(listNodes->At(i)->GetName());
-      if(tempName == "MDC17_1")
+      if(tempName == "MD17_1")
 	index_lastMDC = i;
       if(tempName == "PSCE_1")
 	index_firstPSCE = i;
     }
-  offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC + 17;
+  offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC + 17 -1;
 
 }
 
