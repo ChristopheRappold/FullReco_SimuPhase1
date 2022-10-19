@@ -257,102 +257,88 @@ int main(int argc, char** argv)
       AnaEvent_Metadata metadata;
       //ListHisto.DebugHists();
       if(MT == false && ZMQ == false)
-	{
-    TDataBuilder* det_build = nullptr;
-    Ana_Hist* AnaHisto = nullptr;
+        {
+          FullRecoTask<MCAnaEventG4Sol> ReconstructionTask(config, InputPar);
 
-    if(Restarting == false)
-      det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
-    else
-      det_build = new TBuildRestarter<MCAnaEventG4Sol>(Attributes);
-
-    FullRecoTask<MCAnaEventG4Sol> ReconstructionTask(det_build, AnaHisto, config, InputPar); //Change! -> Check if works
-
-	  //FullRecoTask<MCAnaEventG4Sol> ReconstructionTask(config, InputPar);
+          ReconstructionTask.AttachHisto(&ListHisto);
+          ConsoleLogger->info("Init done");
+          //-------------------------------------------------------
+          // EVENT LOOP nentries
+          TTimeStamp stamp;
+          
+          ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
+          ConsoleLogger->info("---------------------------------------------");
+          
+          Long64_t for_display = 0;
+          Long64_t timing      = 0;
+          // reader.SetEntriesRange(Start_event,Stop_event);
 	  
-	  ReconstructionTask.AttachHisto(&ListHisto);
-	  ConsoleLogger->info("Init done");
-	  //-------------------------------------------------------
-	  // EVENT LOOP nentries
-	  TTimeStamp stamp;
-	  
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
-	  ConsoleLogger->info("---------------------------------------------");
-	  
-	  Long64_t for_display = 0;
-	  Long64_t timing      = 0;
-	  // reader.SetEntriesRange(Start_event,Stop_event);
-	  
-	  for(Long64_t i = Start_event; i < Stop_event; ++i)
-	    {
-	      InTree->GetEntry(i);
+          for(Long64_t i = Start_event; i < Stop_event; ++i)
+            {
+              InTree->GetEntry(i);
+              Long64_t iEvent = i;
 
-	      // while(reader.Next())
-	      //{
-	      Long64_t iEvent = i; // reader.GetCurrentEntry();
+              ++total_nentries;
+              Anaevent->Clear();
 
-	      ++total_nentries;
-	      Anaevent->Clear();
+              if(iEvent % 10000 == 0)
+                ConsoleLogger->info("Processing Event# {} / {} | {} %", iEvent, Stop_event,
+                      (double)iEvent / (double)(Stop_event - Start_event) * 100);
 
-	      if(iEvent % 10000 == 0)
-		ConsoleLogger->info("Processing Event# {} / {} | {} %", iEvent, Stop_event,
-				    (double)iEvent / (double)(Stop_event - Start_event) * 100);
+              if((int)((double)iEvent / (double)(Stop_event - Start_event) * 4) == timing)
+                {
+                  ConsoleLogger->info("Progress : {} %",
+                          (int)((double)iEvent / (double)(Stop_event - Start_event) * 100.));
+                  ++timing;
+                }
 
-	      if((int)((double)iEvent / (double)(Stop_event - Start_event) * 4) == timing)
-		{
-		  ConsoleLogger->info("Progress : {} %",
-				      (int)((double)iEvent / (double)(Stop_event - Start_event) * 100.));
-		  ++timing;
-		}
-	      // auto event = ReaderEvent.Get();
+              int toStop = 0;
+              if(Restarting == false)
+                toStop = ReconstructionTask.EventLoop(*fEvent, AllHits, Anaevent);
+              else
+                toStop = ReconstructionTask.EventLoop(fEventRe, Anaevent);
 
-	      int toStop = 0;
-	      if(Restarting == false)
-		toStop = ReconstructionTask.EventLoop(*fEvent, AllHits, Anaevent);
-	      else
-		toStop = ReconstructionTask.EventLoop(fEventRe, Anaevent);
+              nb += Anatree->Fill();
+              ++for_display;
+              Anaevent->Clear();
+            }
 
-	      nb += Anatree->Fill();
-	      ++for_display;
-	      Anaevent->Clear();
-	    }
+          ReconstructionTask.SetEventMetadata(metadata);
+        }
+/*
+      else if(MT==true && ZMQ==false)
+        {
+          FullRecoTaskMT ReconstructionTaskMT(config, InputPar);
+          
+          ReconstructionTaskMT.AttachHisto(&ListHisto);
+          ConsoleLogger->info("Init done");
+          //-------------------------------------------------------
+          // EVENT LOOP nentries
+          
+          ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
+          ConsoleLogger->info("---------------------------------------------");
 
-	  ReconstructionTask.SetEventMetadata(metadata);
-	}
-/*      else if(MT==true && ZMQ==false)
-	{
-	  
-	  FullRecoTaskMT ReconstructionTaskMT(config, InputPar);
-	  
-	  ReconstructionTaskMT.AttachHisto(&ListHisto);
-	  ConsoleLogger->info("Init done");
-	  //-------------------------------------------------------
-	  // EVENT LOOP nentries
-	  
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
-	  ConsoleLogger->info("---------------------------------------------");
+          int toStop = ReconstructionTaskMT.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
+        }
 
-	  int toStop = ReconstructionTaskMT.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
-	}
       else if(ZMQ==true && MT==false)
-	{
-	  FullRecoTaskZMQ ReconstructionTaskZMQ(config, InputPar);
-	  
-	  ReconstructionTaskZMQ.AttachHisto(&ListHisto);
-	  ConsoleLogger->info("Init done");
-	  //-------------------------------------------------------
-	  // EVENT LOOP nentries
-	  
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
-	  ConsoleLogger->info("---------------------------------------------");
+        {
+          FullRecoTaskZMQ ReconstructionTaskZMQ(config, InputPar);
+          
+          ReconstructionTaskZMQ.AttachHisto(&ListHisto);
+          ConsoleLogger->info("Init done");
+          //-------------------------------------------------------
+          // EVENT LOOP nentries
+          
+          ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
+          ConsoleLogger->info("---------------------------------------------");
 
-	  int toStop = ReconstructionTaskZMQ.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
-	}
-  */
+          int toStop = ReconstructionTaskZMQ.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
+        }
+*/
       else
-	{
-	  ConsoleLogger->warn("W> no run : MT? {} ZMQ? {}",MT,ZMQ);
-	}
+        ConsoleLogger->warn("W> no run : MT? {} ZMQ? {}",MT,ZMQ);
+	
       offile = Anatree->GetCurrentFile();
       offile->cd();
       Anatree->Write();

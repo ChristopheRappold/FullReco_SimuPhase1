@@ -1,5 +1,4 @@
 #include "Ana_Event/Ana_WasaEvent.hh"
-//#include "EventWASAUnpack/TFRSParameter.h"
 #include "Ana_Hist.hh"
 #include "Debug.hh"
 #include "FullRecoConfig.hh"
@@ -215,15 +214,7 @@ int main(int argc, char** argv)
 
       if(MT == false && ZMQ == false)
         {
-          TDataBuilder* det_build = nullptr;
-          Ana_Hist* AnaHisto = nullptr;
-
-          if(Restarting == false)
-            det_build = new TBuildWASACalibrationLayerPlane(Attributes);
-          else
-            det_build = new TBuildRestarter<Ana_WasaEvent>(Attributes);
-
-          FullRecoTask<Ana_WasaEvent> ReconstructionTask(det_build, AnaHisto, config, InputPar); //Change! -> Check if works
+          FullRecoTask<Ana_WasaEvent> ReconstructionTask(config, InputPar);
           
           ReconstructionTask.AttachHisto(&ListHisto);
           ConsoleLogger->info("Init done");
