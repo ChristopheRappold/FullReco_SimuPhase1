@@ -10,13 +10,12 @@ class UnpackMetadata : public TObject
   public:
   UnpackMetadata();
   ~UnpackMetadata();
-  void Init();
-  
+
   uint RunNumber = 9999;
   uint FirstFile = 9999;
   uint LastFile = 9999;
-  uint EventTotal = 0;
-  uint EventUnpacked = 0;
+  uint NumEventTotal = 0;
+  uint NumEventUnpacked = 0;
 
   std::string SetupFiber = "";
   std::string ChannelMapT0 = "";

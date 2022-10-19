@@ -26,32 +26,7 @@ ClassImp(UnpackMetadata);
 
 
 ////// ---- UnpackMetadata ---- ////
-UnpackMetadata::UnpackMetadata() { Init(); }
-
-void UnpackMetadata::Init()
-  {
-    RunNumber = 9999;
-    FirstFile = 9999;
-    LastFile = 9999;
-    EventTotal = 0;
-    EventUnpacked = 0;
-
-    SetupFiber = "";
-    ChannelMapT0 = "";
-    ChannelMapPSFE = "";
-    ChannelMapPSBE = "";
-    SetupPSB = "";
-    DtDxTableMWDC = "";
-    CellOffsetS4WFD1 = "";
-    CellOffsetS2WFD1 = "";
-    CellOffsetS2WFD2 = "";
-    CellOffsetS2WFD3 = "";
-    CellOffsetS2WFD4 = "";
-    CellOffsetS2WFD5 = "";
-    ChannelMapMDC = "";
-    PhysicalMapMDC = "";
-    DriftParamMDC = "";
-  }
+UnpackMetadata::UnpackMetadata() {}
 
 UnpackMetadata::~UnpackMetadata() {}
 
