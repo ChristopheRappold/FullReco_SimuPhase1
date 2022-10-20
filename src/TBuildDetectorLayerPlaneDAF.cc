@@ -1127,19 +1127,19 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       break;
                     case G4Sol::MiniFiberD1_x2: {
                       volumeName = "MiniFiberD1_log_x2";
-                      motherName = "MiniFiberD1_log_0";
+                      motherName = "MiniFiberD2_log_0";
                       i_fiber = 4;
                       i_lay   = 0; } ;
                       break;
                     case G4Sol::MiniFiberD1_u2: {
                       volumeName = "MiniFiberD1_log_u2";
-                      motherName = "MiniFiberD1_log_0";
+                      motherName = "MiniFiberD2_log_0";
                       i_fiber = 4;
                       i_lay   = 1; } ;
                       break;
                     case G4Sol::MiniFiberD1_v2: {
                       volumeName = "MiniFiberD1_log_v2";
-                      motherName = "MiniFiberD1_log_0";
+                      motherName = "MiniFiberD2_log_0";
                       i_fiber = 4;
                       i_lay   = 2; } ;
                       break;
