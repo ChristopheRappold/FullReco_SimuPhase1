@@ -18,7 +18,15 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
   att._logger->info("TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF");
 
   par = std::make_unique<ParaManager>(att.map_ParamFiles);
-
+/*
+  att.FiberXUV_cutd[0] = par->fiber_uft1_cut_d;
+  att.FiberXUV_cutd[1] = par->fiber_uft2_cut_d;
+  att.FiberXUV_cutd[2] = par->fiber_uft3_cut_d;
+  att.FiberXUV_cutd[3] = par->fiber_mft_cut_d;
+  att.FiberXUV_cutd[4] = par->fiber_mft_cut_d;
+  att.FiberXUV_cutd[5] = par->fiber_dft1_cut_d;
+  att.FiberXUV_cutd[6] = par->fiber_dft2_cut_d;
+*/
   std::vector<std::string> tempName = {"HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
     "TR1_log","TR2_log","Si1_Strip_log_x", "Si1_Strip_log_y", "Si2_Strip_log_x", "Si2_Strip_log_y",
     "SD1_Strip_log_u", "SD1_Strip_log_v", "SD2_Strip_log_u", "SD2_Strip_log_v",
@@ -617,7 +625,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                     //std::cout << "HitPosX : " << hit.HitPosX << "\tHitPosY : " << hit.HitPosY << std::endl;
                 }
 */
-
+/*
               std::vector< std::vector< std::vector<FiberHitAna*> > > FiberHitCont;
               std::vector< std::vector< std::vector<FiberHitAna*> > > FiberHitClCont;
               for(int i=0; i<7; ++i)
@@ -630,7 +638,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   FiberHitCont.emplace_back(buf_vv);
                   FiberHitClCont.emplace_back(buf_vv);
                 }
-
+*/
               if(IsPSCE(TypeDet))
                 {
 #ifdef DEBUG_BUILD2
@@ -802,8 +810,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                 }
               else if(IsFiberU(TypeDet))
                 {
-                  if(IsFiberU_Vetoed(TypeDet))
-                    continue;
+                  //if(IsFiberU_Vetoed(TypeDet))
+                  //  continue;
                   string volumeName;
                   string motherName;
                   int i_fiber;
@@ -910,118 +918,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       std::cerr << "something wrong" << std::endl;
                       break;
                     }
-/*
-                  string motherName;
-                  switch(TypeDet)
-                    {
-                    case G4Sol::FiberD1_x:
-                      motherName = "FiberD1_log_0";
-                      break;
-                    case G4Sol::FiberD1_u:
-                      motherName = "FiberD1_log_0";
-                      break;
-                    case G4Sol::FiberD1_v:
-                      motherName = "FiberD1_log_0";
-                      break;
-                    case G4Sol::FiberD2_x:
-                      motherName = "FiberD2_log_0";
-                      break;
-                    case G4Sol::FiberD2_u:
-                      motherName = "FiberD2_log_0";
-                      break;
-                    case G4Sol::FiberD2_v:
-                      motherName = "FiberD2_log_0";
-                      break;
-                    case G4Sol::FiberD3_x:
-                      motherName = "FiberD3_log_0";
-                      break;
-                    case G4Sol::FiberD3_u:
-                      motherName = "FiberD3_log_0";
-                      break;
-                    case G4Sol::FiberD3_v:
-                      motherName = "FiberD3_log_0";
-                      break;
-                    case G4Sol::FiberD4_x:
-                      motherName = "FiberD4_log_0";
-                      break;
-                    case G4Sol::FiberD4_u:
-                      motherName = "FiberD4_log_0";
-                      break;
-                    case G4Sol::FiberD4_v:
-                      motherName = "FiberD4_log_0";
-                      break;
-                    case G4Sol::FiberD5_x:
-                      motherName = "FiberD5_log_0";
-                      break;
-                    case G4Sol::FiberD5_u:
-                      motherName = "FiberD5_log_0";
-                      break;
-                    case G4Sol::FiberD5_v:
-                      motherName = "FiberD5_log_0";
-                      break;
-                    // case G4Sol::MiniFiberD1_x1 :  motherName = "MiniFiberD1_log_0"; break;
-                    // case G4Sol::MiniFiberD1_u1 :  motherName = "MiniFiberD1_log_0"; break;
-                    // case G4Sol::MiniFiberD1_v1 :  motherName = "MiniFiberD1_log_0"; break;
-                    // case G4Sol::MiniFiberD1_x2 :  motherName = "MiniFiberD1_log_0"; break;
-                    // case G4Sol::MiniFiberD1_u2 :  motherName = "MiniFiberD1_log_0"; break;
-                    // case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
-                    default:
-                      std::cerr << "something wrong" << std::endl;
-                      break;
-                    }
-                  int i_fiber;
-                  switch(TypeDet)
-                    {
-                    case G4Sol::FiberD1_x:
-                      i_fiber = 0;
-                      break;
-                    case G4Sol::FiberD1_u:
-                      i_fiber = 0;
-                      break;
-                    case G4Sol::FiberD1_v:
-                      i_fiber = 0;
-                      break;
-                    case G4Sol::FiberD2_x:
-                      i_fiber = 1;
-                      break;
-                    case G4Sol::FiberD2_u:
-                      i_fiber = 1;
-                      break;
-                    case G4Sol::FiberD2_v:
-                      i_fiber = 1;
-                      break;
-                    case G4Sol::FiberD3_x:
-                      i_fiber = 2;
-                      break;
-                    case G4Sol::FiberD3_u:
-                      i_fiber = 2;
-                      break;
-                    case G4Sol::FiberD3_v:
-                      i_fiber = 2;
-                      break;
-                    case G4Sol::FiberD4_x:
-                      i_fiber = 5;
-                      break;
-                    case G4Sol::FiberD4_u:
-                      i_fiber = 5;
-                      break;
-                    case G4Sol::FiberD4_v:
-                      i_fiber = 5;
-                      break;
-                    case G4Sol::FiberD5_x:
-                      i_fiber = 6;
-                      break;
-                    case G4Sol::FiberD5_u:
-                      i_fiber = 6;
-                      break;
-                    case G4Sol::FiberD5_v:
-                      i_fiber = 6;
-                      break;
-                    default:
-                      std::cerr << "something wrong" << std::endl;
-                      break;
-                    }
-*/
+
 #ifdef DEBUG_BUILD2
                   std::cout << "fiber" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
@@ -1147,33 +1044,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       std::cerr << "something wrong" << std::endl;
                       break;
                     }
-/*
-                  string motherName;
-                  switch(TypeDet)
-                    {
-                    case G4Sol::MiniFiberD1_x1:
-                      motherName = "MiniFiberD1_log_0";
-                      break;
-                    case G4Sol::MiniFiberD1_u1:
-                      motherName = "MiniFiberD1_log_0";
-                      break;
-                    case G4Sol::MiniFiberD1_v1:
-                      motherName = "MiniFiberD1_log_0";
-                      break;
-                    case G4Sol::MiniFiberD1_x2:
-                      motherName = "MiniFiberD2_log_0";
-                      break;
-                    case G4Sol::MiniFiberD1_u2:
-                      motherName = "MiniFiberD2_log_0";
-                      break;
-                    case G4Sol::MiniFiberD1_v2:
-                      motherName = "MiniFiberD2_log_0";
-                      break;
-                    default:
-                      std::cerr << "something wrong" << std::endl;
-                      break;
-                    }
-*/
+
 #ifdef DEBUG_BUILD2
                   std::cout << "fiberM" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;

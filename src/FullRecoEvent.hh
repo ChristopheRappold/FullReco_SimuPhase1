@@ -694,7 +694,7 @@ public:
   std::vector<std::tuple<double, size_t> > HitsY_Si2{};
 */
 
-  std::vector<std::vector<FiberHitXUV*> > FiberXUVCont;
+  std::vector<std::vector<FiberHitXUV*> > FiberXUVCont; //Remove!
 
   TLorentzVector Mother_MomE;
   std::array<double,3> InteractionPoint;
