@@ -74,6 +74,7 @@ struct Task
   bool Task_PrimaryVtx = true;
   bool Task_PrimaryVtx_Si = false;
   bool Task_FlatMCOutputML = false;
+  bool Task_CheckFiberXUV = false;
   bool Task_CheckFiberTrack = false;
   bool Task_BayesFinder = false;
   bool Task_RiemannFinder = false;
@@ -84,11 +85,11 @@ struct Task
   bool Task_DecayVtx = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
+    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
     TASKKALMANDAF, TASKDECAYVTX, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -140,6 +141,7 @@ struct RunTaskDef
   bool Task_PrimaryVtx;
   bool Task_PrimaryVtx_Si;
   bool Task_FlatMCOutputML;
+  bool Task_CheckFiberXUV;
   bool Task_CheckFiberTrack;
   bool Task_BayesFinder;
   bool Task_RiemannFinder;
@@ -374,6 +376,8 @@ class THyphiAttributes
 
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
+
+  std::vector<double> FiberXUV_cutd;
 
   std::string StudyCase;
 

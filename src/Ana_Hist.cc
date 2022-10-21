@@ -365,6 +365,22 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
     {
       std::vector<std::vector<TH1*>*> HistReg;
 
+      TString nameTempFib[] = {"UFT1", "UFT2", "UFT3", "MFT1", "MFT2", "DFT1", "DFT2"};
+
+      for(size_t i = 0; i < 7; ++i)
+        {
+          h_ResidualFiberHitX[i].emplace_back(new TH1F("h_ResidualFiberHitX_"+nameTempFib[i],"h_ResidualFiberHitX_"+nameTempFib[i], 2000,-10,10));
+          HistReg.emplace_back(&h_ResidualFiberHitX[i].store);
+          h_ResidualFiberHitY[i].emplace_back(new TH1F("h_ResidualFiberHitY_"+nameTempFib[i],"h_ResidualFiberHitY_"+nameTempFib[i], 2000,-10,10));
+          HistReg.emplace_back(&h_ResidualFiberHitY[i].store);
+          h_ResidualFiberHitXY[i].emplace_back(new TH2F("h_ResidualFiberHitXY_"+nameTempFib[i],"h_ResidualFiberHitXY_"+nameTempFib[i], 2000,-10,10, 2000,-10,10));
+          HistReg.emplace_back(&h_ResidualFiberHitXY[i].store);
+          h_ResidualFiberHitX_Angle[i].emplace_back(new TH2F("h_ResidualFiberHitX_Angle_"+nameTempFib[i],"h_ResidualFiberHitX_Angle_"+nameTempFib[i],180,0.,90, 2000,-10,10));
+          HistReg.emplace_back(&h_ResidualFiberHitX_Angle[i].store);
+          h_ResidualFiberHitY_Angle[i].emplace_back(new TH2F("h_ResidualFiberHitY_Angle_"+nameTempFib[i],"h_ResidualFiberHitY_Angle_"+nameTempFib[i],180,0.,90, 2000,-10,10));
+          HistReg.emplace_back(&h_ResidualFiberHitY_Angle[i].store);
+        }
+
       h_ResidualFiberX.emplace_back(new TH2F("h_ResidualFiberX","h_ResidualFiberX",20,0,20,1000,-1,1));
       HistReg.emplace_back(&h_ResidualFiberX.store);
 

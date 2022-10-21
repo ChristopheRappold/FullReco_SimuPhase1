@@ -408,6 +408,14 @@ class Ana_Hist
 
   Hist<TH2F> h_N_SiHits_ReconsTracks ;
 
+  // CheckFiberXUV
+  Hist<TH1F> h_ResidualFiberHitX[7];
+  Hist<TH1F> h_ResidualFiberHitY[7];
+  Hist<TH2F> h_ResidualFiberHitXY[7];
+  Hist<TH2F> h_ResidualFiberHitX_Angle[7];
+  Hist<TH2F> h_ResidualFiberHitY_Angle[7];
+
+  // CheckFiberTrack
   Hist<TH2F> h_ResidualFiberX;
   Hist<TH2F> h_ResidualFiberY;
 
