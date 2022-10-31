@@ -625,20 +625,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                     //std::cout << "HitPosX : " << hit.HitPosX << "\tHitPosY : " << hit.HitPosY << std::endl;
                 }
 */
-/*
-              std::vector< std::vector< std::vector<FiberHitAna*> > > FiberHitCont;
-              std::vector< std::vector< std::vector<FiberHitAna*> > > FiberHitClCont;
-              for(int i=0; i<7; ++i)
-                {
-                  std::vector<FiberHitAna*> buf_v;
-                  std::vector< std::vector<FiberHitAna*> > buf_vv;
-                  for(int j=0; j<3; ++j)
-                    buf_vv.emplace_back(buf_v);
-
-                  FiberHitCont.emplace_back(buf_vv);
-                  FiberHitClCont.emplace_back(buf_vv);
-                }
-*/
               if(IsPSCE(TypeDet))
                 {
 #ifdef DEBUG_BUILD2
@@ -908,12 +894,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       i_fiber = 6;
                       i_lay   = 2; } ;
                       break;
-                    // case G4Sol::MiniFiberD1_x1 :  volumeName = "MiniFiberD1_log_x1"; break;
-                    // case G4Sol::MiniFiberD1_u1 :  volumeName = "MiniFiberD1_log_u1"; break;
-                    // case G4Sol::MiniFiberD1_v1 :  volumeName = "MiniFiberD1_log_v1"; break;
-                    // case G4Sol::MiniFiberD1_x2 :  volumeName = "MiniFiberD1_log_x2"; break;
-                    // case G4Sol::MiniFiberD1_u2 :  volumeName = "MiniFiberD1_log_u2"; break;
-                    // case G4Sol::MiniFiberD1_v2 :  volumeName = "MiniFiberD1_log_v2"; break;
                     default:
                       std::cerr << "something wrong" << std::endl;
                       break;
@@ -989,12 +969,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
-/*
-                  //Change !
-                  FiberHitAna *hit_ana = new FiberHitAna(s2fiber->fiberhit[i], par, t_r);
-                  if(hit_ana->IsValid())
-                    FiberHitCont[i_fiber][i_lay].emplace_back(hit_ana);
-*/
                 }
               else if(IsFiberM(TypeDet))
                 {
@@ -1071,14 +1045,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix()->Print();
 #endif
                   TGeoMatrix* g1 =
-                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // fiber core
+                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // minifiber core
                   TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
                                        ->GetNode(motherName.c_str())
                                        ->GetVolume()
                                        ->GetNode((volumeName + "_0").c_str())
-                                       ->GetMatrix(); // fiber layer
+                                       ->GetMatrix(); // minifiber layer
                   TGeoMatrix* g3 =
-                      gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // fiber station
+                      gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // minifiber station
                   TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();     // MFLD
                   TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
                   TGeoHMatrix H = H2 * H1;
@@ -1367,12 +1341,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
         }
     }
 
-/*
-  //Change !
-  FiberAnalyzer *fiberana = new FiberAnalyzer();
-  FiberHitClCont = fiberana->Clusterize(FiberHitCont);
-  RecoEvent.FiberXUVCont = fiberana->FindHit(FiberHitClCont, par);
-*/
 
   OutTree->Field       = att.Field_Strength;
 

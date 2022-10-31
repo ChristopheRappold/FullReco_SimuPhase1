@@ -366,19 +366,42 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       std::vector<std::vector<TH1*>*> HistReg;
 
       TString nameTempFib[] = {"UFT1", "UFT2", "UFT3", "MFT1", "MFT2", "DFT1", "DFT2"};
+      std::vector<int> res_binfactor = {1, 1, 1, 1, 1, 4, 4};
 
       for(size_t i = 0; i < 7; ++i)
         {
-          h_ResidualFiberHitX[i].emplace_back(new TH1F("h_ResidualFiberHitX_"+nameTempFib[i],"h_ResidualFiberHitX_"+nameTempFib[i], 2000,-10,10));
+          h_ResidualFiberHitX[i].emplace_back(new TH1F("h_ResidualFiberHitX_"+nameTempFib[i],"h_ResidualFiberHitX_"+nameTempFib[i], 200*res_binfactor[i],-0.3,0.3));
           HistReg.emplace_back(&h_ResidualFiberHitX[i].store);
-          h_ResidualFiberHitY[i].emplace_back(new TH1F("h_ResidualFiberHitY_"+nameTempFib[i],"h_ResidualFiberHitY_"+nameTempFib[i], 2000,-10,10));
+          h_ResidualFiberHitY[i].emplace_back(new TH1F("h_ResidualFiberHitY_"+nameTempFib[i],"h_ResidualFiberHitY_"+nameTempFib[i], 200*res_binfactor[i],-0.3,0.3));
           HistReg.emplace_back(&h_ResidualFiberHitY[i].store);
-          h_ResidualFiberHitXY[i].emplace_back(new TH2F("h_ResidualFiberHitXY_"+nameTempFib[i],"h_ResidualFiberHitXY_"+nameTempFib[i], 2000,-10,10, 2000,-10,10));
+          h_ResidualFiberHitR[i].emplace_back(new TH1F("h_ResidualFiberHitR_"+nameTempFib[i],"h_ResidualFiberHitR_"+nameTempFib[i], 100*res_binfactor[i], 0.,0.3));
+          HistReg.emplace_back(&h_ResidualFiberHitR[i].store);
+          h_ResidualFiberHitXY[i].emplace_back(new TH2F("h_ResidualFiberHitXY_"+nameTempFib[i],"h_ResidualFiberHitXY_"+nameTempFib[i], 200*res_binfactor[i],-0.3,0.3, 200*res_binfactor[i],-0.3,0.3));
           HistReg.emplace_back(&h_ResidualFiberHitXY[i].store);
-          h_ResidualFiberHitX_Angle[i].emplace_back(new TH2F("h_ResidualFiberHitX_Angle_"+nameTempFib[i],"h_ResidualFiberHitX_Angle_"+nameTempFib[i],180,0.,90, 2000,-10,10));
+          h_ResidualFiberHitX_Angle[i].emplace_back(new TH2F("h_ResidualFiberHitX_Angle_"+nameTempFib[i],"h_ResidualFiberHitX_Angle_"+nameTempFib[i],80,0.,40., 200*res_binfactor[i],-0.3,0.3));
           HistReg.emplace_back(&h_ResidualFiberHitX_Angle[i].store);
-          h_ResidualFiberHitY_Angle[i].emplace_back(new TH2F("h_ResidualFiberHitY_Angle_"+nameTempFib[i],"h_ResidualFiberHitY_Angle_"+nameTempFib[i],180,0.,90, 2000,-10,10));
+          h_ResidualFiberHitY_Angle[i].emplace_back(new TH2F("h_ResidualFiberHitY_Angle_"+nameTempFib[i],"h_ResidualFiberHitY_Angle_"+nameTempFib[i],80,0.,40., 200*res_binfactor[i],-0.3,0.3));
           HistReg.emplace_back(&h_ResidualFiberHitY_Angle[i].store);
+          h_ResidualFiberHitX_HitX[i].emplace_back(new TH2F("h_ResidualFiberHitX_HitX_"+nameTempFib[i],"h_ResidualFiberHitX_HitX_"+nameTempFib[i],40,-10,10, 200,-0.3,0.3));
+          HistReg.emplace_back(&h_ResidualFiberHitX_HitX[i].store);
+          h_ResidualFiberHitY_HitY[i].emplace_back(new TH2F("h_ResidualFiberHitY_HitY_"+nameTempFib[i],"h_ResidualFiberHitY_HitY_"+nameTempFib[i],40,-10,10, 200,-0.3,0.3));
+          HistReg.emplace_back(&h_ResidualFiberHitY_HitY[i].store);
+          h_ResidualFiberHitR_Angle[i].emplace_back(new TH2F("h_ResidualFiberHitR_Angle_"+nameTempFib[i],"h_ResidualFiberHitR_Angle_"+nameTempFib[i],80,0.,40., 100*res_binfactor[i], 0.,0.3));
+          HistReg.emplace_back(&h_ResidualFiberHitR_Angle[i].store);
+          h_EfficiencyFiberHit[i].emplace_back(new TH1F("h_EfficiencyFiberHit_"+nameTempFib[i],"h_EfficiencyFiberHit_"+nameTempFib[i],2,0,2));
+          HistReg.emplace_back(&h_EfficiencyFiberHit[i].store);
+          h_ResidualSingleFiberHitX[i].emplace_back(new TH1F("h_ResidualSingleFiberHitX_"+nameTempFib[i],"h_ResidualSingleFiberHitX_"+nameTempFib[i], 200*res_binfactor[i],-0.3,0.3));
+          HistReg.emplace_back(&h_ResidualSingleFiberHitX[i].store);
+          h_ResidualSingleFiberHitY[i].emplace_back(new TH1F("h_ResidualSingleFiberHitY_"+nameTempFib[i],"h_ResidualSingleFiberHitY_"+nameTempFib[i], 200*res_binfactor[i],-0.3,0.3));
+          HistReg.emplace_back(&h_ResidualSingleFiberHitY[i].store);
+          h_ResidualSingleFiberHitR[i].emplace_back(new TH1F("h_ResidualSingleFiberHitR_"+nameTempFib[i],"h_ResidualSingleFiberHitR_"+nameTempFib[i], 100*res_binfactor[i], 0.,0.3));
+          HistReg.emplace_back(&h_ResidualSingleFiberHitR[i].store);
+          h_ResidualSingleFiberHitX_Angle[i].emplace_back(new TH2F("h_ResidualSingleFiberHitX_Angle_"+nameTempFib[i],"h_ResidualSingleFiberHitX_Angle_"+nameTempFib[i],80,0.,40., 200*res_binfactor[i],-0.3,0.3));
+          HistReg.emplace_back(&h_ResidualSingleFiberHitX_Angle[i].store);
+          h_ResidualSingleFiberHitY_Angle[i].emplace_back(new TH2F("h_ResidualSingleFiberHitY_Angle_"+nameTempFib[i],"h_ResidualSingleFiberHitY_Angle_"+nameTempFib[i],80,0.,40., 200*res_binfactor[i],-0.3,0.3));
+          HistReg.emplace_back(&h_ResidualSingleFiberHitY_Angle[i].store);
+          h_ResidualSingleFiberHitR_Angle[i].emplace_back(new TH2F("h_ResidualSingleFiberHitR_Angle_"+nameTempFib[i],"h_ResidualSingleFiberHitR_Angle_"+nameTempFib[i],80,0.,40., 100*res_binfactor[i], 0.,0.3));
+          HistReg.emplace_back(&h_ResidualSingleFiberHitR_Angle[i].store);
         }
 
       h_ResidualFiberX.emplace_back(new TH2F("h_ResidualFiberX","h_ResidualFiberX",20,0,20,1000,-1,1));

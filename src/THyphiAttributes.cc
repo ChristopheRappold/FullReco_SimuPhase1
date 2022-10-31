@@ -513,6 +513,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_PrimaryVtx_Si = Config.Get<bool>("Task_PrimaryVtx_Si");
   if(Config.IsAvailable("Task_FlatMCOutputML"))
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
+  if(Config.IsAvailable("Task_CheckFiberXUV"))
+    Task_CheckFiberXUV = Config.Get<bool>("Task_CheckFiberXUV");
   if(Config.IsAvailable("Task_CheckFiberTrack"))
     Task_CheckFiberTrack = Config.Get<bool>("Task_CheckFiberTrack");
   if(Config.IsAvailable("Task_BayesFinder"))
@@ -554,6 +556,8 @@ void Task::Init(const FullRecoConfig& Config)
       Task_Order.push_back(TASKPRIMARYVTX_SI);
 	  if(s == "Task_FlatMCOutputML")
 	    Task_Order.push_back(TASKFLATMCOUTPUTML);
+    if(s == "Task_CheckFiberXUV")
+      Task_Order.push_back(TASKCHECKFIBERXUV);
 	  if(s == "Task_CheckFiberTrack")
 	    Task_Order.push_back(TASKCHECKFIBERTRACK);
   	  if(s == "Task_BayesFinder")

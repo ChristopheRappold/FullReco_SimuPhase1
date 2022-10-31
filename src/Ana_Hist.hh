@@ -411,9 +411,20 @@ class Ana_Hist
   // CheckFiberXUV
   Hist<TH1F> h_ResidualFiberHitX[7];
   Hist<TH1F> h_ResidualFiberHitY[7];
+  Hist<TH1F> h_ResidualFiberHitR[7];
   Hist<TH2F> h_ResidualFiberHitXY[7];
   Hist<TH2F> h_ResidualFiberHitX_Angle[7];
   Hist<TH2F> h_ResidualFiberHitY_Angle[7];
+  Hist<TH2F> h_ResidualFiberHitX_HitX[7];
+  Hist<TH2F> h_ResidualFiberHitY_HitY[7];
+  Hist<TH2F> h_ResidualFiberHitR_Angle[7];
+  Hist<TH1F> h_EfficiencyFiberHit[7];
+  Hist<TH1F> h_ResidualSingleFiberHitX[7];
+  Hist<TH1F> h_ResidualSingleFiberHitY[7];
+  Hist<TH1F> h_ResidualSingleFiberHitR[7];
+  Hist<TH2F> h_ResidualSingleFiberHitX_Angle[7];
+  Hist<TH2F> h_ResidualSingleFiberHitY_Angle[7];
+  Hist<TH2F> h_ResidualSingleFiberHitR_Angle[7];
 
   // CheckFiberTrack
   Hist<TH2F> h_ResidualFiberX;
