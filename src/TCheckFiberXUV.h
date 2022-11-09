@@ -16,6 +16,8 @@
 //#include "TH2I.h"
 #include "TVector2.h"
 #include "TMath.h"
+#include "TRandom3.h"
+#include "TLinearFitter.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -50,11 +52,27 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
   void SelectHists() final;
   int CheckHitXUV(const FullRecoEvent& RecoEvent);
 
-  void FindHitXUV(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+  void FindHitXUV_v1(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                      const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
+
+  void FindHitXUV_v2(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
                     const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
 
-  void FindSingleHitXUVId(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
-                            const std::vector<genfit::AbsMeasurement*>& hitv, int id_det, int id_track);
+  void FindHitXUV_v3(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                    const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
+
+  void FindSingleHitXUVId_v1(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                              const std::vector<genfit::AbsMeasurement*>& hitv, int id_det, int id_track);
+
+  void FindSingleHitXUVId_v2(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                              const std::vector<genfit::AbsMeasurement*>& hitv, int id_det, int id_track);
+
+  void FindSingleHitXUVId_v3(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                              const std::vector<genfit::AbsMeasurement*>& hitv, int id_det, int id_track);
+
+  double FindHitReal_dvalue(double hitx, double hitu, double hitv, int id_det);
+
+  double d_function(int id_det, double hitx, double hity);
 
   std::vector<genfit::AbsMeasurement*> Clusterize(const std::vector<std::unique_ptr<genfit::AbsMeasurement>>& hit);
   std::vector<genfit::AbsMeasurement*> Clusterize(const std::vector<genfit::AbsMeasurement*>& hit);
@@ -63,13 +81,30 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
   std::vector<std::vector<TVector2> >                              vect_HitXY = {{}, {}, {}, {}, {}, {}, {}};
   std::vector<std::vector<std::tuple<TVector2, int> > >            vect_SingleHitXYId = {{}, {}, {}, {}, {}, {}, {}};
   std::vector<std::vector<std::tuple<double, double, double> > >   vect_CombHit = {{}, {}, {}, {}, {}, {}, {}};
+  std::vector<std::vector<std::tuple<double, double, double> > >   vect_SingleCombHit = {{}, {}, {}, {}, {}, {}, {}};
   std::vector<std::vector<std::tuple<TVector2, double, int> > >    vect_realHitXYAngId = {{}, {}, {}, {}, {}, {}, {}};
   std::vector<std::unordered_map<int,std::tuple<std::vector<size_t>,std::vector<size_t>,std::vector<size_t> > > > vect_realCombIdHit = {};
 
-  std::vector<double> cut_d = {};
+
+  //std::vector<double> cut_d = {0.4, 0.4, 2., 0.4, 0.4, 0.6, 0.6}; //in cm
+  //std::vector<double> cut_d = {0.4, 0.4, 0.8, 0.4, 0.4, 0.6, 0.6}; //in cm
+  std::vector<double> cut_d = {1., 1., 2., 2., 2., 1., 1.}; //in cm
+  std::vector<double> cut_diff_d = {1., 1., 2., 2., 2., 1., 1.}; //in cm
 
   double fiber_resolution = 0.015; // in cm
   double fiber_width = 0.11; // in cm
+
+  double Zpos_target = 196.12; // in cm
+  std::vector<double> Zpos_Fiber = {154.77, 171.17, 199.67, 226.93, 230.93, 396.00, 405.63}; //in cm
+
+  std::vector< std::tuple<double, double, double> > param_d_funct1 = // d_offset, d_proportional, phi_offset
+               {std::make_tuple(0.,     0.,   0.), // UFT1
+                std::make_tuple(0.,     0.,   0.), // UFT2
+                std::make_tuple(0.,    2.3,  10.), // UFT3
+                std::make_tuple(0., -0.113, -30.), // MFT1
+                std::make_tuple(0., -0.109,  30.), // MFT2
+                std::make_tuple(0.,  0.047, -12.), // DFT1
+                std::make_tuple(0.,  0.046,   5.)}; // DFT2
 
   std::vector<int> id_detector = {G4Sol::FiberD1_x, G4Sol::FiberD2_x, G4Sol::FiberD3_x,
                                           G4Sol::MiniFiberD1_x1, G4Sol::MiniFiberD1_x2,
@@ -86,24 +121,52 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
 
   int id_mid[7] = {1, 1, 1, 1, 2, 1, 1};
 
+  bool ifcut_MFTtheta_UFT3 = false;
+  double maxMFTtheta = 18.;
+  double minMFTtheta = 8.;
+
+  TVector2 realIP;
+  double randIPXY = 0.01; // in cm
+
+  TRandom3* rand;
+
+  //TLinearFitter *lf = new TLinearFitter(2);
+  //lf->SetFormula("1 ++ x ++ y ++ xy");
+  //lf->StoreData(kFALSE);
+
   struct LocalHists
   {
     TH1F* h_ResidualFiberHitX[7];
     TH1F* h_ResidualFiberHitY[7];
     TH1F* h_ResidualFiberHitR[7];
     TH2F* h_ResidualFiberHitXY[7];
-    TH2F* h_ResidualFiberHitX_Angle[7];
-    TH2F* h_ResidualFiberHitY_Angle[7];
+    TH2F* h_ResidualFiberHitX_Theta[7];
+    TH2F* h_ResidualFiberHitY_Theta[7];
     TH2F* h_ResidualFiberHitX_HitX[7];
     TH2F* h_ResidualFiberHitY_HitY[7];
-    TH2F* h_ResidualFiberHitR_Angle[7];
-    TH1F* h_EfficiencyFiberHit[7];
+    TH2F* h_ResidualFiberHitR_Theta[7];
     TH1F* h_ResidualSingleFiberHitX[7];
     TH1F* h_ResidualSingleFiberHitY[7];
     TH1F* h_ResidualSingleFiberHitR[7];
-    TH2F* h_ResidualSingleFiberHitX_Angle[7];
-    TH2F* h_ResidualSingleFiberHitY_Angle[7];
-    TH2F* h_ResidualSingleFiberHitR_Angle[7];
+    TH2F* h_ResidualSingleFiberHitX_Theta[7];
+    TH2F* h_ResidualSingleFiberHitY_Theta[7];
+    TH2F* h_ResidualSingleFiberHitR_Theta[7];
+    TH1F* h_EfficiencyFiberHit[7];
+    TH2F* h_EfficiencyFiberHit_Theta[7];
+    TH1F* h_EfficiencySingleFiberHit[7];
+    TH2F* h_EfficiencySingleFiberHit_Theta[7];
+    TH2F* h_NumFiberHit_GoodReco[7];
+    TH2F* h_NumFiberHit_Ghost[7];
+    TH1F* h_FiberHit_dvalue[7];
+    TH1F* h_FiberHitSingle_dvalue[7];
+    TH1F* h_FiberHitReal_dvalue[7];
+    TH2F* h_FiberHitReal_dvalue_Theta[7];
+    TH2F* h_FiberHitReal_dvalue_Theta03_Phi[7];
+    TH2F* h_FiberHitReal_dvalue_Theta310_Phi[7];
+    TH2F* h_FiberHitReal_dvalue_Theta1020_Phi[7];
+    TH2F* h_FiberHitReal_dvalue_HitX[7];
+    TH2F* h_FiberHitReal_dvalue_HitY[7];
+    TH2F* h_FiberHitReal_dvalue_dfunction[7];
   };
   LocalHists LocalHisto;
 };

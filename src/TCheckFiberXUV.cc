@@ -17,7 +17,8 @@
 //#include <list>
 
 //#define DEBUG_FIBERXUV
-//#define SINGLE_FIBERXUV
+#define SINGLE_FIBERXUV
+#define DFUNCTION_FIBERXUV
 
 using namespace std;
 using namespace G4Sol;
@@ -25,7 +26,7 @@ using namespace G4Sol;
 template<class Out>
 TCheckFiberXUV<Out>::TCheckFiberXUV(const THyphiAttributes& attribut) : TDataProcessInterface<Out>("CheckFiberXUV"), att(attribut)
 {
-	cut_d = att.FiberXUV_cutd;
+  rand = new TRandom3();
 }
 
 template<class Out>
@@ -58,30 +59,48 @@ ReturnRes::InfoM TCheckFiberXUV<Out>::SoftExit(int result_full) { return ReturnR
 template<class Out>
 void TCheckFiberXUV<Out>::SelectHists()
 {
-  for(size_t i = 0; i < 7; ++i)
+  for(size_t i = 2; i < 7; ++i)
 	  {
-	  	LocalHisto.h_ResidualFiberHitX[i]       			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitX[i]);
-	  	LocalHisto.h_ResidualFiberHitY[i]       			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitY[i]);
-	  	LocalHisto.h_ResidualFiberHitR[i]       			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitR[i]);
-	  	LocalHisto.h_ResidualFiberHitXY[i]      			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitXY[i]);
-	  	LocalHisto.h_ResidualFiberHitX_Angle[i] 			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitX_Angle[i]);
-	  	LocalHisto.h_ResidualFiberHitY_Angle[i] 			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitY_Angle[i]);
-	  	LocalHisto.h_ResidualFiberHitX_HitX[i] 		  	= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitX_HitX[i]);
-	  	LocalHisto.h_ResidualFiberHitY_HitY[i] 		  	= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitY_HitY[i]);
-	  	LocalHisto.h_ResidualFiberHitR_Angle[i]				= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitR_Angle[i]);
-	  	LocalHisto.h_EfficiencyFiberHit[i]      			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencyFiberHit[i]);
-	  	LocalHisto.h_ResidualSingleFiberHitX[i]       = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitX[i]);
-	  	LocalHisto.h_ResidualSingleFiberHitY[i]       = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitY[i]);
-	  	LocalHisto.h_ResidualSingleFiberHitR[i]       = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitR[i]);
-	  	LocalHisto.h_ResidualSingleFiberHitX_Angle[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitX_Angle[i]);
-	  	LocalHisto.h_ResidualSingleFiberHitY_Angle[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitY_Angle[i]);
-	  	LocalHisto.h_ResidualSingleFiberHitR_Angle[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitR_Angle[i]);
+	  	LocalHisto.h_ResidualFiberHitX[i]       					= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitX[i]);
+	  	LocalHisto.h_ResidualFiberHitY[i]       					= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitY[i]);
+	  	LocalHisto.h_ResidualFiberHitR[i]     		  			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitR[i]);
+	  	LocalHisto.h_ResidualFiberHitXY[i]		      			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitXY[i]);
+	  	LocalHisto.h_ResidualFiberHitX_Theta[i]			 			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitX_Theta[i]);
+	  	LocalHisto.h_ResidualFiberHitY_Theta[i] 					= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitY_Theta[i]);
+	  	LocalHisto.h_ResidualFiberHitX_HitX[i] 				  	= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitX_HitX[i]);
+	  	LocalHisto.h_ResidualFiberHitY_HitY[i]		 		  	= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitY_HitY[i]);
+	  	LocalHisto.h_ResidualFiberHitR_Theta[i]						= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitR_Theta[i]);
+	  	LocalHisto.h_ResidualSingleFiberHitX[i]			      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitX[i]);
+	  	LocalHisto.h_ResidualSingleFiberHitY[i]     		  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitY[i]);
+	  	LocalHisto.h_ResidualSingleFiberHitR[i]			      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitR[i]);
+	  	LocalHisto.h_ResidualSingleFiberHitX_Theta[i]			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitX_Theta[i]);
+	  	LocalHisto.h_ResidualSingleFiberHitY_Theta[i] 		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitY_Theta[i]);
+	  	LocalHisto.h_ResidualSingleFiberHitR_Theta[i] 		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitR_Theta[i]);
+	  	LocalHisto.h_EfficiencyFiberHit[i]      					= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencyFiberHit[i]);
+	  	LocalHisto.h_EfficiencyFiberHit_Theta[i]    			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencyFiberHit_Theta[i]);
+	  	LocalHisto.h_EfficiencySingleFiberHit[i]      		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencySingleFiberHit[i]);
+	  	LocalHisto.h_EfficiencySingleFiberHit_Theta[i]    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencySingleFiberHit_Theta[i]);
+	  	LocalHisto.h_NumFiberHit_GoodReco[i]		      		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_NumFiberHit_GoodReco[i]);
+	  	LocalHisto.h_NumFiberHit_Ghost[i]      		  			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_NumFiberHit_Ghost[i]);
+	  	LocalHisto.h_FiberHit_dvalue[i]      				  	  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHit_dvalue[i]);
+	  	LocalHisto.h_FiberHitSingle_dvalue[i]		      	  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitSingle_dvalue[i]);
+	  	LocalHisto.h_FiberHitReal_dvalue[i]      		  		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue[i]);
+	  	LocalHisto.h_FiberHitReal_dvalue_Theta[i]     		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_Theta[i]);
+	  	LocalHisto.h_FiberHitReal_dvalue_Theta03_Phi[i]   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_Theta03_Phi[i]);
+	  	LocalHisto.h_FiberHitReal_dvalue_Theta310_Phi[i]  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_Theta310_Phi[i]);
+	  	LocalHisto.h_FiberHitReal_dvalue_Theta1020_Phi[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_Theta1020_Phi[i]);
+	  	LocalHisto.h_FiberHitReal_dvalue_HitX[i]      		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_HitX[i]);
+	  	LocalHisto.h_FiberHitReal_dvalue_HitY[i]      		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_HitY[i]);
+	  	LocalHisto.h_FiberHitReal_dvalue_dfunction[i]     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_dfunction[i]);
 	  }
 }
 
 template<class Out>
 int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 {
+	realIP.Set(rand->Uniform(RecoEvent.InteractionPoint[0] - randIPXY, RecoEvent.InteractionPoint[0] + randIPXY),
+							rand->Uniform(RecoEvent.InteractionPoint[1] - randIPXY, RecoEvent.InteractionPoint[1] + randIPXY));
+
 	//Get 3-fiber correct combination & real hit position
   for(int i_det = 0; i_det < id_detector.size(); ++i_det)
 	  {
@@ -118,7 +137,8 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 									tmp_hit_x += vpos_x[0];
 									++counter_x;
 									tmp_idhit_x.emplace_back(j);
-									//std::cout << "ListHits x index j: " << j << "\n";
+									//std::cout << "id_track: " << id_track << "\t ListHits x index j: " << j << "\n";
+									//std::cout << "id_track: " << id_track << "\t vpos_x[0]: " << vpos_x[0] <<  "\n";
 								}
 						}
 
@@ -130,7 +150,8 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 									tmp_hit_u += vpos_u[0];
 									++counter_u;
 									tmp_idhit_u.emplace_back(j);
-									//std::cout << "ListHits u index j: " << j << "\n";
+									//std::cout << "id_track: " << id_track << "\t ListHits u index j: " << j << "\n";
+									//std::cout << "id_track: " << id_track << "\t vpos_u[0]: " << vpos_u[0] <<  "\n";
 								}
 						}
 
@@ -142,23 +163,24 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 									tmp_hit_v += vpos_v[0];
 									++counter_v;
 									tmp_idhit_v.emplace_back(j);
-									//std::cout << "ListHits v index j: " << j << "\n";
+									//std::cout << "id_track: " << id_track << "\t ListHits v index j: " << j << "\n";
+									//std::cout << "id_track: " << id_track << "\t vpos_v[0]: " << vpos_v[0] <<  "\n";
 								}
 						}
 
 					if((counter_x == 0) || (counter_u == 0) || (counter_v == 0))
 						continue;
 
-					tmp_hit_x /= counter_x;
-					tmp_hit_u /= counter_u;
-					tmp_hit_v /= counter_v;
+					tmp_hit_x /= static_cast<double>(counter_x);
+					tmp_hit_u /= static_cast<double>(counter_u);
+					tmp_hit_v /= static_cast<double>(counter_v);
 
-					vect_realCombHit[i_det].emplace_back(std::make_tuple(tmp_hit_x, tmp_hit_u, tmp_hit_v));
-					vect_realCombIdHit[i_det].insert(std::make_pair(id_track, std::make_tuple(tmp_idhit_x, tmp_idhit_u, tmp_idhit_v)));
+					//std::cout << "hitX: " << tmp_hit_x << "\t hitU: " << tmp_hit_u << "\t hitV: " << tmp_hit_v << "\n";
+					//std::cout << "id_track: " << id_track <<"\t tmp_idhit_u.size(): " << tmp_idhit_u.size() << "\n";
 
 		  		std::vector<SimHit> it_tmpFiber = it_track.second[i+imid];
-			    if(it_tmpFiber[0].momZ < 0.)
-			      continue;
+			    //if(it_tmpFiber[0].momZ < 0.)
+			   //  continue;
 
 			    double meanPosX = 0.;
 			    double meanPosY = 0.;
@@ -173,13 +195,37 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 
 		      meanPosX /= energy;
 		      meanPosY /= energy;
-
+/* To select different MFT areas
+		      if(meanPosX > 0.)
+		      	continue;
+		      if(meanPosY > std::fabs(std::tan(30. * M_PI / 180.) * meanPosX))
+		      	continue;
+*/
 	  			TVector2 tmp_realHitXY(meanPosX, meanPosY);
 
 			    double theta = TMath::ATan2( std::sqrt(it_tmpFiber[0].momX * it_tmpFiber[0].momX + it_tmpFiber[0].momY * it_tmpFiber[0].momY), 
 			    															it_tmpFiber[0].momZ) * 180. / M_PI;
 
+			    double phi = TMath::ATan2( it_tmpFiber[0].momY , it_tmpFiber[0].momX )  * 180. / M_PI;;
+
+					vect_realCombHit[i_det].emplace_back(std::make_tuple(tmp_hit_x, tmp_hit_u, tmp_hit_v));
+					vect_realCombIdHit[i_det].insert(std::make_pair(id_track, std::make_tuple(tmp_idhit_x, tmp_idhit_u, tmp_idhit_v)));
 	  			vect_realHitXYAngId[i_det].emplace_back(std::make_tuple(tmp_realHitXY, theta, id_track));
+
+  				double tmp_dvalue = FindHitReal_dvalue(tmp_hit_x, tmp_hit_u, tmp_hit_v, i_det);
+				  LocalHisto.h_FiberHitReal_dvalue_Theta[i_det]->Fill(theta, tmp_dvalue, 1.);
+				  LocalHisto.h_FiberHitReal_dvalue_HitX[i_det] ->Fill(meanPosX, tmp_dvalue, 1.);
+				  LocalHisto.h_FiberHitReal_dvalue_HitY[i_det] ->Fill(meanPosY, tmp_dvalue, 1.);
+
+				  double d_funct = d_function(i_det, meanPosX, meanPosY);
+				  LocalHisto.h_FiberHitReal_dvalue_dfunction[i_det]->Fill(d_funct, tmp_dvalue, 1.);
+
+				  if((0. <= theta ) && (theta < 3.))
+				  	LocalHisto.h_FiberHitReal_dvalue_Theta03_Phi[i_det]->Fill(phi, tmp_dvalue, 1.);
+				  else if((3. <= theta ) && (theta < 10.))
+				  	LocalHisto.h_FiberHitReal_dvalue_Theta310_Phi[i_det]->Fill(phi, tmp_dvalue, 1.);
+				  else if((10. <= theta ) && (theta < 20.))
+				  	LocalHisto.h_FiberHitReal_dvalue_Theta1020_Phi[i_det]->Fill(phi, tmp_dvalue, 1.);
 		  	}
 		}
 
@@ -203,7 +249,7 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 		  std::cout << "Before FindHitXUV()\n";
 #endif
 
-	  	FindHitXUV(hitx, hitu, hitv, i_det);
+	  	FindHitXUV_v2(hitx, hitu, hitv, i_det);
 
 #ifdef SINGLE_FIBERXUV
 	#ifdef DEBUG_FIBERXUV
@@ -218,27 +264,25 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 		  		std::vector<genfit::AbsMeasurement*> single_hitu = {};
 		  		std::vector<genfit::AbsMeasurement*> single_hitv = {};
 
-#ifdef DEBUG_FIBERXUV
-		  		std::cout << "(std::get<0>(it_CombHit.second)).size(): " << (std::get<0>(it_CombHit.second)).size() << "\n";
-		  		std::cout << "(std::get<1>(it_CombHit.second)).size(): " << (std::get<1>(it_CombHit.second)).size() << "\n";
+		  		//std::cout << "(std::get<0>(it_CombHit.second)).size(): " << (std::get<0>(it_CombHit.second)).size() << "\n";
+		  		//std::cout << "(std::get<1>(it_CombHit.second)).size(): " << (std::get<1>(it_CombHit.second)).size() << "\n";
 		  		//std::cout << "(std::get<2>(it_CombHit.second)).size(): " << (std::get<2>(it_CombHit.second)).size() << "\n";
 
-		  		std::cout << "RecoEvent.ListHits[i].size(): "   << RecoEvent.ListHits[i].size() << "\n";
-		  		std::cout << "RecoEvent.ListHits[i+1].size(): " << RecoEvent.ListHits[i+1].size() << "\n";
+		  		//std::cout << "RecoEvent.ListHits[i].size(): "   << RecoEvent.ListHits[i].size() << "\n";
+		  		//std::cout << "RecoEvent.ListHits[i+1].size(): " << RecoEvent.ListHits[i+1].size() << "\n";
 		  		//std::cout << "RecoEvent.ListHits[i+2].size(): " << RecoEvent.ListHits[i+2].size() << "\n";
-#endif
 
 		  		for(size_t j = 0; j < (std::get<0>(it_CombHit.second)).size(); ++j)
 		  		{
-		  			std::cout << "Inside x loop: j = " << j << "\n";
-			  		std::cout << "std::get<0>(it_CombHit.second)[j]: " << std::get<0>(it_CombHit.second)[j] << "\n";
+		  			//std::cout << "Inside x loop: j = " << j << "\n";
+			  		//std::cout << "std::get<0>(it_CombHit.second)[j]: " << std::get<0>(it_CombHit.second)[j] << "\n";
 						single_hitx.emplace_back(RecoEvent.ListHits[i][(std::get<0>(it_CombHit.second))[j]]->clone());
 		  		}
 
 		  		for(size_t j = 0; j < (std::get<1>(it_CombHit.second)).size(); ++j)
 		  		{
-		  			std::cout << "Inside u loop: j = " << j << "\n";
-			  		std::cout << "std::get<1>(it_CombHit.second)[j]: " << std::get<1>(it_CombHit.second)[j] << "\n";
+		  			//std::cout << "Inside u loop: i_det: " <<  i_det << "\t id_track: " << id_track << "\t j = " << j << "\n";
+			  		//std::cout << "std::get<1>(it_CombHit.second)[j]: " << std::get<1>(it_CombHit.second)[j] << "\n";
 						single_hitu.emplace_back(RecoEvent.ListHits[i+1][(std::get<1>(it_CombHit.second))[j]]->clone());
 		  		}
 
@@ -253,9 +297,8 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 		  		std::vector<genfit::AbsMeasurement*> cluster_single_hitu = Clusterize(single_hitu);
 		  		std::vector<genfit::AbsMeasurement*> cluster_single_hitv = Clusterize(single_hitv);
 
-		  		FindSingleHitXUVId(cluster_single_hitx, cluster_single_hitu, cluster_single_hitv, i_det, id_track);
+		  		FindSingleHitXUVId_v2(cluster_single_hitx, cluster_single_hitu, cluster_single_hitv, i_det, id_track);
 		  	}
-
 #endif
 
 	  }
@@ -271,12 +314,9 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 #endif
 
 	//Compare real-recons hits
-	for(size_t i_det = 0; i_det < id_detector.size(); ++i_det)
+	for(size_t i_det = 2; i_det < id_detector.size(); ++i_det)
 		{
-
-#ifdef DEBUG_FIBERXUV
-			std::cout << "Fiber: " << i_det << "  NumRealHit: " << vect_realHitXYAngId[i_det].size() << "   NumRecoHit: " << vect_HitXY[i_det].size() << "\n";
-#endif
+			//std::cout << "Fiber: " << i_det << "  NumRealHit: " << vect_realHitXYAngId[i_det].size() << "   NumRecoHit: " << vect_HitXY[i_det].size() << "\n";
 
 			for(size_t j = 0; j < vect_realHitXYAngId[i_det].size(); ++j)
 				{
@@ -295,23 +335,26 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 								}
 						}
 
+					if((i_det == 2) && ifcut_MFTtheta_UFT3 &&
+						((std::get<1>(vect_realHitXYAngId[i_det][j]) < minMFTtheta) || (std::get<1>(vect_realHitXYAngId[i_det][j]) > maxMFTtheta)))
+							continue;
+
 					TVector2 resHit = std::get<0>(vect_realHitXYAngId[i_det][j]) - vect_HitXY[i_det][closest_i];
 
 		      LocalHisto.h_ResidualFiberHitX[i_det]      ->Fill(resHit.X(), 1.);
 		      LocalHisto.h_ResidualFiberHitY[i_det]      ->Fill(resHit.Y(), 1.);
 		      LocalHisto.h_ResidualFiberHitR[i_det]      ->Fill(resHit.Mod(), 1.);
 		      LocalHisto.h_ResidualFiberHitXY[i_det]     ->Fill(resHit.X(), resHit.Y(), 1.);
-		      LocalHisto.h_ResidualFiberHitX_Angle[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resHit.X(), 1.);
-		      LocalHisto.h_ResidualFiberHitY_Angle[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resHit.Y(), 1.);
+		      LocalHisto.h_ResidualFiberHitX_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resHit.X(), 1.);
+		      LocalHisto.h_ResidualFiberHitY_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resHit.Y(), 1.);
 		      LocalHisto.h_ResidualFiberHitX_HitX[i_det] ->Fill(std::get<0>(vect_realHitXYAngId[i_det][j]).X(), resHit.X(), 1.);
 		      LocalHisto.h_ResidualFiberHitY_HitY[i_det] ->Fill(std::get<0>(vect_realHitXYAngId[i_det][j]).Y(), resHit.Y(), 1.);
-		      LocalHisto.h_ResidualFiberHitR_Angle[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resHit.Mod(), 1.);
+		      LocalHisto.h_ResidualFiberHitR_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resHit.Mod(), 1.);
 				}
 
 			vect_HitXY[i_det].clear();
 
 #ifdef SINGLE_FIBERXUV
-
 			for(size_t i = 0; i < vect_SingleHitXYId[i_det].size(); ++i)
 				{
 					const int id_track = std::get<1>(vect_SingleHitXYId[i_det][i]);
@@ -322,40 +365,131 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 								continue;
 
 							TVector2 resSingleHit = std::get<0>(vect_realHitXYAngId[i_det][j]) - std::get<0>(vect_SingleHitXYId[i_det][i]);
-
+/*
+							if(resSingleHit.X() > fiber_width || resSingleHit.Y() > fiber_width)
+								{
+									std::cout << "RealSingX: " << (std::get<0>(vect_realHitXYAngId[i_det][j])).X() <<
+																"\t RecoSingX: " << (std::get<0>(vect_SingleHitXYId[i_det][i])).X() << "\n";
+									std::cout << "RealSingY: " << (std::get<0>(vect_realHitXYAngId[i_det][j])).Y() <<
+																"\t RecoSingY: " << (std::get<0>(vect_SingleHitXYId[i_det][i])).Y() << "\n";
+								}
+*/
 							LocalHisto.h_ResidualSingleFiberHitX[i_det]      ->Fill(resSingleHit.X(), 1.);
 				      LocalHisto.h_ResidualSingleFiberHitY[i_det]      ->Fill(resSingleHit.Y(), 1.);
 				      LocalHisto.h_ResidualSingleFiberHitR[i_det]      ->Fill(resSingleHit.Mod(), 1.);
-				      LocalHisto.h_ResidualSingleFiberHitX_Angle[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resSingleHit.X(), 1.);
-				      LocalHisto.h_ResidualSingleFiberHitY_Angle[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resSingleHit.Y(), 1.);
-				      LocalHisto.h_ResidualSingleFiberHitR_Angle[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resSingleHit.Mod(), 1.);
+				      LocalHisto.h_ResidualSingleFiberHitX_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resSingleHit.X(), 1.);
+				      LocalHisto.h_ResidualSingleFiberHitY_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resSingleHit.Y(), 1.);
+				      LocalHisto.h_ResidualSingleFiberHitR_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][j]), resSingleHit.Mod(), 1.);
 						}
 				}
 
 			vect_SingleHitXYId[i_det].clear();
-
 #endif
 
-			vect_realHitXYAngId[i_det].clear();
+			vect_realCombIdHit[i_det].clear();
+
+/*
+			if(vect_realCombHit[i_det].size() == 2)
+				{
+					int i = id_detector[i_det];
+				  std::vector<genfit::AbsMeasurement*> hitx = Clusterize(RecoEvent.ListHits[i]);
+				  std::vector<genfit::AbsMeasurement*> hitu = Clusterize(RecoEvent.ListHits[i+1]);
+				  std::vector<genfit::AbsMeasurement*> hitv = Clusterize(RecoEvent.ListHits[i+2]);
+
+					std::cout << "i_det: " << i_det << "\n";
+
+		      for(size_t j = 0; j < RecoEvent.ListHits[i].size(); ++j)
+			      std::cout << "ListHitsX: " << (RecoEvent.ListHits[i][j]->getRawHitCoords())[0] << "\n";
+
+		      for(size_t j = 0; j < hitx.size(); ++j)
+			      std::cout << "ClusHitsX: " << (hitx[j]->getRawHitCoords())[0] << "\n";
+
+		      for(size_t j = 0; j < RecoEvent.ListHits[i+1].size(); ++j)
+			      std::cout << "ListHitsU: " << (RecoEvent.ListHits[i+1][j]->getRawHitCoords())[0] << "\n";
+
+		      for(size_t j = 0; j < hitu.size(); ++j)
+			      std::cout << "ClusHitsU: " << (hitu[j]->getRawHitCoords())[0] << "\n";
+
+		      for(size_t j = 0; j < RecoEvent.ListHits[i+2].size(); ++j)
+			      std::cout << "ListHitsV: " << (RecoEvent.ListHits[i+2][j]->getRawHitCoords())[0] << "\n";
+
+		      for(size_t j = 0; j < hitv.size(); ++j)
+			      std::cout << "ClusHitsV: " << (hitv[j]->getRawHitCoords())[0] << "\n";
+
+
+					for(size_t i = 0; i < vect_realCombHit[i_det].size(); ++i)
+						std::cout << "RealX: " << std::get<0>(vect_realCombHit[i_det][i]) << "\t RealU: " << std::get<1>(vect_realCombHit[i_det][i])
+										<< "\t RealV: " << std::get<2>(vect_realCombHit[i_det][i]) << "\n";
+
+					for(size_t i = 0; i < vect_CombHit[i_det].size(); ++i)
+						std::cout << "RecoX: " << std::get<0>(vect_CombHit[i_det][i]) << "\t RecoU: " << std::get<1>(vect_CombHit[i_det][i])
+										<< "\t RecoV: " << std::get<2>(vect_CombHit[i_det][i]) << "\n";
+				}
+*/
+
+			int n_correct = 0;
+		  std::set<int> flag_used;
+		  std::set<int> flag_used_Single;
 
 			for(size_t i = 0; i < vect_realCombHit[i_det].size(); ++i)
 				{
 					LocalHisto.h_EfficiencyFiberHit[i_det]->Fill(0., 1.);
+					LocalHisto.h_EfficiencyFiberHit[i_det]->Fill(2.*vect_realCombHit[i_det].size(), 1.);
+					LocalHisto.h_EfficiencyFiberHit_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][i]), "All", 1.);
 
 					for(size_t j = 0; j < vect_CombHit[i_det].size(); ++j)
 						{
+							if(flag_used.size()>0 && flag_used.find(j)!=flag_used.end())
+								continue;
+
 							double res_x = std::fabs(std::get<0>(vect_realCombHit[i_det][i]) - std::get<0>(vect_CombHit[i_det][j]));
 							double res_u = std::fabs(std::get<1>(vect_realCombHit[i_det][i]) - std::get<1>(vect_CombHit[i_det][j]));
 							double res_v = std::fabs(std::get<2>(vect_realCombHit[i_det][i]) - std::get<2>(vect_CombHit[i_det][j]));
 
 							if((res_x < fiber_width) && (res_u < fiber_width) && (res_v < fiber_width))
-							{
-								LocalHisto.h_EfficiencyFiberHit[i_det]->Fill(1., 1.);
-								break;
-							}
+								{
+									LocalHisto.h_EfficiencyFiberHit[i_det]->Fill(1., 1.);
+									LocalHisto.h_EfficiencyFiberHit[i_det]->Fill(2.*vect_realCombHit[i_det].size() + 1., 1.);
+									LocalHisto.h_EfficiencyFiberHit_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][i]), "Acc", 1.);
+									++n_correct;
+									flag_used.insert(j);
+									break;
+								}
 						}
+
+					LocalHisto.h_EfficiencySingleFiberHit[i_det]->Fill(0., 1.);
+					LocalHisto.h_EfficiencySingleFiberHit[i_det]->Fill(2.*vect_realCombHit[i_det].size(), 1.);
+					LocalHisto.h_EfficiencySingleFiberHit_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][i]), "All", 1.);
+
+					for(size_t j = 0; j < vect_SingleCombHit[i_det].size(); ++j)
+						{
+							if(flag_used_Single.size()>0 && flag_used_Single.find(j)!=flag_used_Single.end())
+								continue;
+
+							double res_x = std::fabs(std::get<0>(vect_realCombHit[i_det][i]) - std::get<0>(vect_SingleCombHit[i_det][j]));
+							double res_u = std::fabs(std::get<1>(vect_realCombHit[i_det][i]) - std::get<1>(vect_SingleCombHit[i_det][j]));
+							double res_v = std::fabs(std::get<2>(vect_realCombHit[i_det][i]) - std::get<2>(vect_SingleCombHit[i_det][j]));
+
+							if((res_x < fiber_width) && (res_u < fiber_width) && (res_v < fiber_width))
+								{
+									LocalHisto.h_EfficiencySingleFiberHit[i_det]->Fill(1., 1.);
+									LocalHisto.h_EfficiencySingleFiberHit[i_det]->Fill(2.*vect_realCombHit[i_det].size() + 1., 1.);
+									LocalHisto.h_EfficiencySingleFiberHit_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][i]), "Acc", 1.);
+									flag_used_Single.insert(j);
+									break;
+								}
+						}
+
 				}
 
+			//std::cout << "i_det: " << i_det << "\t vect_realCombHit[i_det].size(): " << vect_realCombHit[i_det].size() << "\t n_correct: " << n_correct << "\n";
+			//std::cout << "i_det: " << i_det << "\t Not_correct: " << vect_realCombHit[i_det].size() - n_correct << "\n";
+			int nghosts = vect_CombHit[i_det].size() - n_correct;
+
+			LocalHisto.h_NumFiberHit_GoodReco[i_det]->Fill(vect_realCombHit[i_det].size(), n_correct, 1.);
+			LocalHisto.h_NumFiberHit_Ghost[i_det]   ->Fill(vect_realCombHit[i_det].size(), nghosts, 1.);
+
+			vect_realHitXYAngId[i_det].clear();
 			vect_realCombHit[i_det].clear();
 			vect_CombHit[i_det].clear();
 		}
@@ -369,10 +503,10 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 
 
 template<class Out>
-void TCheckFiberXUV<Out>::FindHitXUV(const std::vector<genfit::AbsMeasurement*>& hitx,
-																			const std::vector<genfit::AbsMeasurement*>& hitu,
-																			const std::vector<genfit::AbsMeasurement*>& hitv,
-																				int id_det)
+void TCheckFiberXUV<Out>::FindHitXUV_v1(const std::vector<genfit::AbsMeasurement*>& hitx,
+																					const std::vector<genfit::AbsMeasurement*>& hitu,
+																					const std::vector<genfit::AbsMeasurement*>& hitv,
+																						int id_det)
 {
   std::set<int> flag_x;
   std::set<int> flag_u;
@@ -387,92 +521,362 @@ void TCheckFiberXUV<Out>::FindHitXUV(const std::vector<genfit::AbsMeasurement*>&
 	double ang_u = ang[id_det][id_mid[id_det]] * M_PI / 180.;
 
 	for(int i = 0; i < nx ; ++i)
-	{
-		if(flag_x.size()>0 && flag_x.find(i)!=flag_x.end())
-			continue;
+		{
+			if(flag_x.size()>0 && flag_x.find(i)!=flag_x.end())
+				continue;
 
-		TVectorD& vpos_x = hitx[i]->getRawHitCoords();
-		double pos_x = vpos_x[0];
+			TVectorD& vpos_x = hitx[i]->getRawHitCoords();
+			double pos_x = vpos_x[0];
 
-	  double hit_xu_x = pos_x;
-	  double hit_xu_y = 999.;
-	  double hit_xv_y = -999.;
+		  double hit_xu_x = pos_x;
+		  double hit_xu_y = 999.;
+		  double hit_xv_y = -999.;
 
-	  double tmp_hit_u;
-	  double tmp_hit_v;
+		  double hit_u = -999.;
+		  double hit_v = -999.;
 
-	  int used_j = -999;
-	  int used_k = -999;
+		  int used_j = -999;
+		  int used_k = -999;
 
-	  for(int j = 0; j < nu ; ++j)
-		  {
-        if(flag_u.size()>0 && flag_u.find(j)!=flag_u.end())
-        	continue;
-				
-				TVectorD& vpos_u = hitu[j]->getRawHitCoords();
-				double pos_u = vpos_u[0];
-				tmp_hit_u = pos_u;
-				pos_u = pos_u / std::cos(ang_u);
+		  for(int j = 0; j < nu ; ++j)
+			  {
+	        if(flag_u.size()>0 && flag_u.find(j)!=flag_u.end())
+	        	continue;
+					
+					TVectorD& vpos_u = hitu[j]->getRawHitCoords();
+					double pos_u = vpos_u[0];
+					double tmp_hit_u = pos_u;
+					pos_u = pos_u / std::cos(ang_u);
 
-				double tmp_hit_xu_y = 999.;
-				if(ang_u>0.)
-					tmp_hit_xu_y = -std::tan((M_PI/2. - ang_u))*pos_x + std::tan((M_PI/2. -ang_u))*pos_u;
-				else
-					tmp_hit_xu_y =  std::tan((M_PI/2. + ang_u))*pos_x - std::tan((M_PI/2. +ang_u))*pos_u;
+					double tmp_hit_xu_y = 999.;
+					if(ang_u>0.)
+						tmp_hit_xu_y = -std::tan((M_PI/2. - ang_u))*pos_x + std::tan((M_PI/2. -ang_u))*pos_u;
+					else
+						tmp_hit_xu_y =  std::tan((M_PI/2. + ang_u))*pos_x - std::tan((M_PI/2. +ang_u))*pos_u;
 
-        for(int k = 0; k < nv; ++k)
-        	{
-          	if(flag_v.size()>0 && flag_v.find(k)!=flag_v.end())
-          		continue;
+	        for(int k = 0; k < nv; ++k)
+	        	{
+	          	if(flag_v.size()>0 && flag_v.find(k)!=flag_v.end())
+	          		continue;
 
-          	TVectorD& vpos_v = hitv[k]->getRawHitCoords();
-						double pos_v = vpos_v[0];
-						tmp_hit_v = pos_v;
-					  pos_v = pos_v / std::cos(ang_u);
+	          	TVectorD& vpos_v = hitv[k]->getRawHitCoords();
+							double pos_v = vpos_v[0];
+							double tmp_hit_v = pos_v;
+						  pos_v = pos_v / std::cos(ang_u);
 
-					  double tmp_hit_xv_y = -999.;
-					  if(ang_u>0)
-					  	tmp_hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
-					  else
-					  	tmp_hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
+						  double tmp_hit_xv_y = -999.;
+						  if(ang_u>0)
+						  	tmp_hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
+						  else
+						  	tmp_hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
 
-					  if(std::fabs(hit_xu_y-hit_xv_y) > std::fabs(tmp_hit_xu_y-tmp_hit_xv_y))
-						  {
-		            hit_xu_y = tmp_hit_xu_y;
-		            hit_xv_y = tmp_hit_xv_y;
-		            used_j = j;
-		            used_k = k;
-						  }
-	  			}
-  		}
+						  if(std::fabs(hit_xu_y-hit_xv_y) > std::fabs(tmp_hit_xu_y-tmp_hit_xv_y))
+							  {
+			            hit_xu_y = tmp_hit_xu_y;
+			            hit_xv_y = tmp_hit_xv_y;
+			            hit_u = tmp_hit_u;
+			            hit_v = tmp_hit_v;
+			            used_j = j;
+			            used_k = k;
+							  }
+		  			}
+	  		}
 
-		if((std::fabs(hit_xu_y-999.)<1.)||(std::fabs(hit_xv_y+999.)<1.))
-			continue;
-		if(std::fabs(hit_xu_y-hit_xv_y) > cut_d[id_det])
-			continue;
+			if((std::fabs(hit_xu_y-999.)<1.)||(std::fabs(hit_xv_y+999.)<1.))
+				continue;
 
-	  double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*std::tan(ang_u/2.);
-	  double buf_y = (hit_xu_y+hit_xv_y)/2.;
+			if(std::fabs(hit_xu_y-hit_xv_y) > cut_d[id_det])
+				continue;
 
-	  TVector2 tmp_hitxy(buf_x, buf_y);
-	  vect_HitXY[id_det].emplace_back(tmp_hitxy);
+			LocalHisto.h_FiberHit_dvalue[id_det]->Fill(hit_xu_y-hit_xv_y, 1.);
 
-	  vect_CombHit[id_det].emplace_back(std::make_tuple(pos_x, tmp_hit_u, tmp_hit_v));
+		  double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*std::tan(ang_u/2.);
+		  double buf_y = (hit_xu_y+hit_xv_y)/2.;
 
-	  flag_x.insert(i);
-	  flag_u.insert(used_j);
-	  flag_v.insert(used_k);
-	}
+		  TVector2 tmp_hitxy(buf_x, buf_y);
+		  vect_HitXY[id_det].emplace_back(tmp_hitxy);
+
+		  vect_CombHit[id_det].emplace_back(std::make_tuple(pos_x, hit_u, hit_v));
+
+		  flag_x.insert(i);
+		  flag_u.insert(used_j);
+		  flag_v.insert(used_k);
+		}
 
 	return;
 }
 
 
 template<class Out>
-void TCheckFiberXUV<Out>::FindSingleHitXUVId(const std::vector<genfit::AbsMeasurement*>& hitx,
-																							const std::vector<genfit::AbsMeasurement*>& hitu,
-																							const std::vector<genfit::AbsMeasurement*>& hitv,
-																								int id_det, int id_track)
+double TCheckFiberXUV<Out>::FindHitReal_dvalue(double hitx, double hitu, double hitv, int id_det)
+{
+	double ang_u = ang[id_det][id_mid[id_det]] * M_PI / 180.;
+
+	double pos_x = hitx;
+  double hit_xu_y = 999.;
+  double hit_xv_y = -999.;
+
+	double pos_u = hitu;
+	pos_u = pos_u / std::cos(ang_u);
+
+	if(ang_u>0.)
+		hit_xu_y = -std::tan((M_PI/2. - ang_u))*pos_x + std::tan((M_PI/2. -ang_u))*pos_u;
+	else
+		hit_xu_y =  std::tan((M_PI/2. + ang_u))*pos_x - std::tan((M_PI/2. +ang_u))*pos_u;
+
+	double pos_v = hitv;
+  pos_v = pos_v / std::cos(ang_u);
+
+  if(ang_u>0)
+  	hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
+  else
+  	hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
+
+  //std::cout << "Real_dvalue: " << std::fabs(hit_xu_y-hit_xv_y) << "\n";
+	LocalHisto.h_FiberHitReal_dvalue[id_det]->Fill(hit_xu_y-hit_xv_y, 1.);
+
+	return hit_xu_y-hit_xv_y;
+}
+
+
+
+template<class Out>
+void TCheckFiberXUV<Out>::FindHitXUV_v2(const std::vector<genfit::AbsMeasurement*>& hitx,
+																					const std::vector<genfit::AbsMeasurement*>& hitu,
+																					const std::vector<genfit::AbsMeasurement*>& hitv,
+																						int id_det)
+{
+  std::set<int> flag_x;
+  std::set<int> flag_u;
+  std::set<int> flag_v;
+
+  int nx = hitx.size();
+  int nu = hitu.size();
+  int nv = hitv.size();
+	if((nx==0)||(nu==0)||(nv==0))
+		return;
+
+	double ang_u = ang[id_det][id_mid[id_det]] * M_PI / 180.;
+
+	while(true)
+		{
+			double hit_xu_x = -999.;
+		  double hit_xu_y =  999.;
+		  double hit_xv_y = -999.;
+
+		  double hit_u = -999.;
+		  double hit_v = -999.;
+
+		  int used_i = -999;
+		  int used_j = -999;
+		  int used_k = -999;
+
+			for(int i = 0; i < nx ; ++i)
+				{
+					if(flag_x.size()>0 && flag_x.find(i)!=flag_x.end())
+						continue;
+
+					TVectorD& vpos_x = hitx[i]->getRawHitCoords();
+					double pos_x = vpos_x[0];
+
+				  for(int j = 0; j < nu ; ++j)
+					  {
+			        if(flag_u.size()>0 && flag_u.find(j)!=flag_u.end())
+			        	continue;
+							
+							TVectorD& vpos_u = hitu[j]->getRawHitCoords();
+							double pos_u = vpos_u[0];
+							double tmp_hit_u = pos_u;
+							pos_u = pos_u / std::cos(ang_u);
+
+							double tmp_hit_xu_y = 999.;
+							if(ang_u>0.)
+								tmp_hit_xu_y = -std::tan((M_PI/2. - ang_u))*pos_x + std::tan((M_PI/2. -ang_u))*pos_u;
+							else
+								tmp_hit_xu_y =  std::tan((M_PI/2. + ang_u))*pos_x - std::tan((M_PI/2. +ang_u))*pos_u;
+
+			        for(int k = 0; k < nv; ++k)
+			        	{
+			          	if(flag_v.size()>0 && flag_v.find(k)!=flag_v.end())
+			          		continue;
+
+			          	TVectorD& vpos_v = hitv[k]->getRawHitCoords();
+									double pos_v = vpos_v[0];
+									double tmp_hit_v = pos_v;
+								  pos_v = pos_v / std::cos(ang_u);
+
+								  double tmp_hit_xv_y = -999.;
+								  if(ang_u>0)
+								  	tmp_hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
+								  else
+								  	tmp_hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
+
+								  if(std::fabs(hit_xu_y-hit_xv_y) > std::fabs(tmp_hit_xu_y-tmp_hit_xv_y))
+									  {
+									  	hit_xu_x = pos_x;	
+					            hit_xu_y = tmp_hit_xu_y;
+					            hit_xv_y = tmp_hit_xv_y;
+					            hit_u = tmp_hit_u;
+					            hit_v = tmp_hit_v;
+					            used_i = i;
+					            used_j = j;
+					            used_k = k;
+									  }
+				  			}
+			  		}
+			  }
+
+				if( (std::fabs(hit_xu_x+999.) < 1.) || (std::fabs(hit_xu_y-999.) < 1.) || (std::fabs(hit_xv_y+999.) < 1.) )
+					break;
+
+				if(std::fabs(hit_xu_y-hit_xv_y) > cut_d[id_det])
+					break;
+
+				LocalHisto.h_FiberHit_dvalue[id_det]->Fill(hit_xu_y-hit_xv_y, 1.);
+
+			  double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*std::tan(ang_u/2.);
+			  double buf_y = (hit_xu_y+hit_xv_y)/2.;
+
+			  TVector2 tmp_hitxy(buf_x, buf_y);
+			  vect_HitXY[id_det].emplace_back(tmp_hitxy);
+
+			  vect_CombHit[id_det].emplace_back(std::make_tuple(hit_xu_x, hit_u, hit_v));
+
+			  flag_x.insert(used_i);
+			  flag_u.insert(used_j);
+			  flag_v.insert(used_k);	
+		}
+
+	return;
+}
+
+
+template<class Out>
+void TCheckFiberXUV<Out>::FindHitXUV_v3(const std::vector<genfit::AbsMeasurement*>& hitx,
+																					const std::vector<genfit::AbsMeasurement*>& hitu,
+																					const std::vector<genfit::AbsMeasurement*>& hitv,
+																						int id_det)
+{
+  std::set<int> flag_x;
+  std::set<int> flag_u;
+  std::set<int> flag_v;
+
+  int nx = hitx.size();
+  int nu = hitu.size();
+  int nv = hitv.size();
+	if((nx==0)||(nu==0)||(nv==0))
+		return;
+
+	double ang_u = ang[id_det][id_mid[id_det]] * M_PI / 180.;
+
+	while(true)
+		{
+			double hit_xu_x = -999.;
+		  double hit_xu_y =  999.;
+		  double hit_xv_y = -999.;
+
+		  double diff_d = 999.;
+
+		  double hit_u = -999.;
+		  double hit_v = -999.;
+
+		  int used_i = -999;
+		  int used_j = -999;
+		  int used_k = -999;
+
+			for(int i = 0; i < nx ; ++i)
+				{
+					if(flag_x.size()>0 && flag_x.find(i)!=flag_x.end())
+						continue;
+
+					TVectorD& vpos_x = hitx[i]->getRawHitCoords();
+					double pos_x = vpos_x[0];
+
+				  for(int j = 0; j < nu ; ++j)
+					  {
+			        if(flag_u.size()>0 && flag_u.find(j)!=flag_u.end())
+			        	continue;
+							
+							TVectorD& vpos_u = hitu[j]->getRawHitCoords();
+							double pos_u = vpos_u[0];
+							double tmp_hit_u = pos_u;
+							pos_u = pos_u / std::cos(ang_u);
+
+							double tmp_hit_xu_y = 999.;
+							if(ang_u>0.)
+								tmp_hit_xu_y = -std::tan((M_PI/2. - ang_u))*pos_x + std::tan((M_PI/2. -ang_u))*pos_u;
+							else
+								tmp_hit_xu_y =  std::tan((M_PI/2. + ang_u))*pos_x - std::tan((M_PI/2. +ang_u))*pos_u;
+
+			        for(int k = 0; k < nv; ++k)
+			        	{
+			          	if(flag_v.size()>0 && flag_v.find(k)!=flag_v.end())
+			          		continue;
+
+			          	TVectorD& vpos_v = hitv[k]->getRawHitCoords();
+									double pos_v = vpos_v[0];
+									double tmp_hit_v = pos_v;
+								  pos_v = pos_v / std::cos(ang_u);
+
+								  double tmp_hit_xv_y = -999.;
+								  if(ang_u>0)
+								  	tmp_hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
+								  else
+								  	tmp_hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
+
+								  double tmp_x = pos_x + (tmp_hit_xu_y-tmp_hit_xv_y)/2.*std::tan(ang_u/2.);
+								  double tmp_y = (tmp_hit_xu_y+tmp_hit_xv_y)/2.;
+
+								  double tmp_d = tmp_hit_xu_y-tmp_hit_xv_y;
+								  double expected_d = d_function(id_det, tmp_x, tmp_y);
+								  double tmp_diff_d = std::fabs(tmp_d - expected_d);
+
+								  if(std::fabs(hit_xu_y-hit_xv_y) > std::fabs(tmp_hit_xu_y-tmp_hit_xv_y))
+									  {
+									  	diff_d = tmp_diff_d;
+									  	hit_xu_x = pos_x;	
+					            hit_xu_y = tmp_hit_xu_y;
+					            hit_xv_y = tmp_hit_xv_y;
+					            hit_u = tmp_hit_u;
+					            hit_v = tmp_hit_v;
+					            used_i = i;
+					            used_j = j;
+					            used_k = k;
+									  }
+				  			}
+			  		}
+			  }
+
+				if( (std::fabs(hit_xu_x+999.) < 1.) || (std::fabs(hit_xu_y-999.) < 1.) || (std::fabs(hit_xv_y+999.) < 1.) )
+					break;
+
+				if(diff_d > cut_diff_d[id_det])
+					break;
+
+				LocalHisto.h_FiberHit_dvalue[id_det]->Fill(hit_xu_y-hit_xv_y, 1.);
+
+			  double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*std::tan(ang_u/2.);
+			  double buf_y = (hit_xu_y+hit_xv_y)/2.;
+
+			  TVector2 tmp_hitxy(buf_x, buf_y);
+			  vect_HitXY[id_det].emplace_back(tmp_hitxy);
+
+			  vect_CombHit[id_det].emplace_back(std::make_tuple(hit_xu_x, hit_u, hit_v));
+
+			  flag_x.insert(used_i);
+			  flag_u.insert(used_j);
+			  flag_v.insert(used_k);	
+		}
+
+	return;
+}
+
+
+template<class Out>
+void TCheckFiberXUV<Out>::FindSingleHitXUVId_v1(const std::vector<genfit::AbsMeasurement*>& hitx,
+																									const std::vector<genfit::AbsMeasurement*>& hitu,
+																									const std::vector<genfit::AbsMeasurement*>& hitv,
+																										int id_det, int id_track)
 {
   std::set<int> flag_x;
   std::set<int> flag_u;
@@ -498,6 +902,9 @@ void TCheckFiberXUV<Out>::FindSingleHitXUVId(const std::vector<genfit::AbsMeasur
 	  double hit_xu_y = 999.;
 	  double hit_xv_y = -999.;
 
+		double hit_u = -999.;
+		double hit_v = -999.;
+
 	  int used_j = -999;
 	  int used_k = -999;
 
@@ -508,6 +915,7 @@ void TCheckFiberXUV<Out>::FindSingleHitXUVId(const std::vector<genfit::AbsMeasur
 				
 				TVectorD& vpos_u = hitu[j]->getRawHitCoords();
 				double pos_u = vpos_u[0];
+				double tmp_hit_u = pos_u;
 				pos_u = pos_u / std::cos(ang_u);
 
 				double tmp_hit_xu_y = 999.;
@@ -523,6 +931,7 @@ void TCheckFiberXUV<Out>::FindSingleHitXUVId(const std::vector<genfit::AbsMeasur
 
           	TVectorD& vpos_v = hitv[k]->getRawHitCoords();
 						double pos_v = vpos_v[0];
+						double tmp_hit_v = pos_v;
 					  pos_v = pos_v / std::cos(ang_u);
 
 					  double tmp_hit_xv_y = -999.;
@@ -535,6 +944,8 @@ void TCheckFiberXUV<Out>::FindSingleHitXUVId(const std::vector<genfit::AbsMeasur
 						  {
 		            hit_xu_y = tmp_hit_xu_y;
 		            hit_xv_y = tmp_hit_xv_y;
+		            hit_u = tmp_hit_u;
+		            hit_v = tmp_hit_v;
 		            used_j = j;
 		            used_k = k;
 						  }
@@ -543,8 +954,11 @@ void TCheckFiberXUV<Out>::FindSingleHitXUVId(const std::vector<genfit::AbsMeasur
 
 		if((std::fabs(hit_xu_y-999.)<1.)||(std::fabs(hit_xv_y+999.)<1.))
 			continue;
+
 		if(std::fabs(hit_xu_y-hit_xv_y) > cut_d[id_det])
 			continue;
+
+		LocalHisto.h_FiberHitSingle_dvalue[id_det]->Fill(hit_xu_y-hit_xv_y, 1.);
 
 	  double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*std::tan(ang_u/2.);
 	  double buf_y = (hit_xu_y+hit_xv_y)/2.;
@@ -552,10 +966,245 @@ void TCheckFiberXUV<Out>::FindSingleHitXUVId(const std::vector<genfit::AbsMeasur
 	  TVector2 tmp_hitxy(buf_x, buf_y);
 	  vect_SingleHitXYId[id_det].emplace_back(std::make_tuple(tmp_hitxy, id_track));
 
+		vect_SingleCombHit[id_det].emplace_back(std::make_tuple(hit_xu_x, hit_u, hit_v));
+
 	  flag_x.insert(i);
 	  flag_u.insert(used_j);
 	  flag_v.insert(used_k);
 	}
+
+	return;
+}
+
+
+template<class Out>
+void TCheckFiberXUV<Out>::FindSingleHitXUVId_v2(const std::vector<genfit::AbsMeasurement*>& hitx,
+																									const std::vector<genfit::AbsMeasurement*>& hitu,
+																									const std::vector<genfit::AbsMeasurement*>& hitv,
+																										int id_det, int id_track)
+{
+  std::set<int> flag_x;
+  std::set<int> flag_u;
+  std::set<int> flag_v;
+
+  int nx = hitx.size();
+  int nu = hitu.size();
+  int nv = hitv.size();
+	if((nx==0)||(nu==0)||(nv==0))
+		return;
+
+	double ang_u = ang[id_det][id_mid[id_det]] * M_PI / 180.;
+
+	while(true)
+		{
+			double hit_xu_x = -999.;
+		  double hit_xu_y =  999.;
+		  double hit_xv_y = -999.;
+
+			double hit_u = -999.;
+			double hit_v = -999.;
+
+		  int used_i = -999;
+		  int used_j = -999;
+		  int used_k = -999;
+
+			for(int i = 0; i < nx ; ++i)
+				{
+					if(flag_x.size()>0 && flag_x.find(i)!=flag_x.end())
+						continue;
+
+					TVectorD& vpos_x = hitx[i]->getRawHitCoords();
+					double pos_x = vpos_x[0];
+
+				  for(int j = 0; j < nu ; ++j)
+					  {
+			        if(flag_u.size()>0 && flag_u.find(j)!=flag_u.end())
+			        	continue;
+							
+							TVectorD& vpos_u = hitu[j]->getRawHitCoords();
+							double pos_u = vpos_u[0];
+							double tmp_hit_u = pos_u;
+							pos_u = pos_u / std::cos(ang_u);
+
+							double tmp_hit_xu_y = 999.;
+							if(ang_u>0.)
+								tmp_hit_xu_y = -std::tan((M_PI/2. - ang_u))*pos_x + std::tan((M_PI/2. -ang_u))*pos_u;
+							else
+								tmp_hit_xu_y =  std::tan((M_PI/2. + ang_u))*pos_x - std::tan((M_PI/2. +ang_u))*pos_u;
+
+			        for(int k = 0; k < nv; ++k)
+			        	{
+			          	if(flag_v.size()>0 && flag_v.find(k)!=flag_v.end())
+			          		continue;
+
+			          	TVectorD& vpos_v = hitv[k]->getRawHitCoords();
+									double pos_v = vpos_v[0];
+									double tmp_hit_v = pos_v;
+								  pos_v = pos_v / std::cos(ang_u);
+
+								  double tmp_hit_xv_y = -999.;
+								  if(ang_u>0)
+								  	tmp_hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
+								  else
+								  	tmp_hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
+
+								  if(std::fabs(hit_xu_y-hit_xv_y) > std::fabs(tmp_hit_xu_y-tmp_hit_xv_y))
+									  {
+									  	hit_xu_x = pos_x;	
+					            hit_xu_y = tmp_hit_xu_y;
+					            hit_xv_y = tmp_hit_xv_y;
+					            hit_u = tmp_hit_u;
+					            hit_v = tmp_hit_v;
+					            used_i = i;
+					            used_j = j;
+					            used_k = k;
+									  }
+				  			}
+			  		}
+			  }
+
+				if( (std::fabs(hit_xu_x+999.) < 1.) || (std::fabs(hit_xu_y-999.) < 1.) || (std::fabs(hit_xv_y+999.) < 1.) )
+					break;
+
+				if(std::fabs(hit_xu_y-hit_xv_y) > cut_d[id_det])
+					break;
+
+				LocalHisto.h_FiberHitSingle_dvalue[id_det]->Fill(hit_xu_y-hit_xv_y, 1.);
+
+			  double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*std::tan(ang_u/2.);
+			  double buf_y = (hit_xu_y+hit_xv_y)/2.;
+
+			  TVector2 tmp_hitxy(buf_x, buf_y);
+	  		vect_SingleHitXYId[id_det].emplace_back(std::make_tuple(tmp_hitxy, id_track));
+
+	  		vect_SingleCombHit[id_det].emplace_back(std::make_tuple(hit_xu_x, hit_u, hit_v));
+
+			  flag_x.insert(used_i);
+			  flag_u.insert(used_j);
+			  flag_v.insert(used_k);	
+		}
+
+	return;
+}
+
+
+template<class Out>
+void TCheckFiberXUV<Out>::FindSingleHitXUVId_v3(const std::vector<genfit::AbsMeasurement*>& hitx,
+																									const std::vector<genfit::AbsMeasurement*>& hitu,
+																									const std::vector<genfit::AbsMeasurement*>& hitv,
+																										int id_det, int id_track)
+{
+  std::set<int> flag_x;
+  std::set<int> flag_u;
+  std::set<int> flag_v;
+
+  int nx = hitx.size();
+  int nu = hitu.size();
+  int nv = hitv.size();
+	if((nx==0)||(nu==0)||(nv==0))
+		return;
+
+	double ang_u = ang[id_det][id_mid[id_det]] * M_PI / 180.;
+
+	while(true)
+		{
+			double hit_xu_x = -999.;
+		  double hit_xu_y =  999.;
+		  double hit_xv_y = -999.;
+
+		  double diff_d = 999.;
+
+			double hit_u = -999.;
+			double hit_v = -999.;
+
+		  int used_i = -999;
+		  int used_j = -999;
+		  int used_k = -999;
+
+			for(int i = 0; i < nx ; ++i)
+				{
+					if(flag_x.size()>0 && flag_x.find(i)!=flag_x.end())
+						continue;
+
+					TVectorD& vpos_x = hitx[i]->getRawHitCoords();
+					double pos_x = vpos_x[0];
+
+				  for(int j = 0; j < nu ; ++j)
+					  {
+			        if(flag_u.size()>0 && flag_u.find(j)!=flag_u.end())
+			        	continue;
+							
+							TVectorD& vpos_u = hitu[j]->getRawHitCoords();
+							double pos_u = vpos_u[0];
+							double tmp_hit_u = pos_u;
+							pos_u = pos_u / std::cos(ang_u);
+
+							double tmp_hit_xu_y = 999.;
+							if(ang_u>0.)
+								tmp_hit_xu_y = -std::tan((M_PI/2. - ang_u))*pos_x + std::tan((M_PI/2. -ang_u))*pos_u;
+							else
+								tmp_hit_xu_y =  std::tan((M_PI/2. + ang_u))*pos_x - std::tan((M_PI/2. +ang_u))*pos_u;
+
+			        for(int k = 0; k < nv; ++k)
+			        	{
+			          	if(flag_v.size()>0 && flag_v.find(k)!=flag_v.end())
+			          		continue;
+
+			          	TVectorD& vpos_v = hitv[k]->getRawHitCoords();
+									double pos_v = vpos_v[0];
+									double tmp_hit_v = pos_v;
+								  pos_v = pos_v / std::cos(ang_u);
+
+								  double tmp_hit_xv_y = -999.;
+								  if(ang_u>0)
+								  	tmp_hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
+								  else
+								  	tmp_hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
+
+								  double tmp_x = pos_x + (tmp_hit_xu_y-tmp_hit_xv_y)/2.*std::tan(ang_u/2.);
+								  double tmp_y = (tmp_hit_xu_y+tmp_hit_xv_y)/2.;
+
+								  double tmp_d = tmp_hit_xu_y-tmp_hit_xv_y;
+								  double expected_d = d_function(id_det, tmp_x, tmp_y);
+								  double tmp_diff_d = std::fabs(tmp_d - expected_d);
+
+
+								  if(diff_d > tmp_diff_d)
+									  {
+									  	diff_d = tmp_diff_d;
+									  	hit_xu_x = pos_x;	
+					            hit_xu_y = tmp_hit_xu_y;
+					            hit_xv_y = tmp_hit_xv_y;
+					            hit_u = tmp_hit_u;
+					            hit_v = tmp_hit_v;
+					            used_i = i;
+					            used_j = j;
+					            used_k = k;
+									  }
+				  			}
+			  		}
+			  }
+
+				if( (std::fabs(hit_xu_x+999.) < 1.) || (std::fabs(hit_xu_y-999.) < 1.) || (std::fabs(hit_xv_y+999.) < 1.) )
+					break;
+
+				if(diff_d > cut_diff_d[id_det])
+					break;
+
+				LocalHisto.h_FiberHitSingle_dvalue[id_det]->Fill(hit_xu_y-hit_xv_y, 1.);
+
+			  double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*std::tan(ang_u/2.);
+			  double buf_y = (hit_xu_y+hit_xv_y)/2.;
+
+			  TVector2 tmp_hitxy(buf_x, buf_y);
+	  		vect_SingleHitXYId[id_det].emplace_back(std::make_tuple(tmp_hitxy, id_track));
+
+	  		vect_SingleCombHit[id_det].emplace_back(std::make_tuple(hit_xu_x, hit_u, hit_v));
+
+			  flag_x.insert(used_i);
+			  flag_u.insert(used_j);
+			  flag_v.insert(used_k);	
+		}
 
 	return;
 }
@@ -583,6 +1232,7 @@ std::vector<genfit::AbsMeasurement*> TCheckFiberXUV<Out>::Clusterize(const std::
 			double edge_left  = pos_cluster;
 			double edge_right = pos_cluster;
 			size_t size_cluster = 1;
+	    //std::cout << "PrePos: " << vpos[0] << "\n";
 
       for(size_t j = i+1; j < hit_cluster.size(); ++j)
 	      {
@@ -591,29 +1241,28 @@ std::vector<genfit::AbsMeasurement*> TCheckFiberXUV<Out>::Clusterize(const std::
 
           TVectorD& tmp_vpos = hit_cluster[j]->getRawHitCoords();
 
-	        if(((pos_cluster-tmp_vpos[0])>0.) && std::fabs(edge_left - tmp_vpos[0])<0.0826)
+	        if(((pos_cluster-tmp_vpos[0])>0.) && std::fabs(edge_left-tmp_vpos[0])<0.0826)
 	          {
-	          	double tmp_pos_cluster = (pos_cluster * size_cluster + tmp_vpos[0]) / (size_cluster + 1);
-	          	pos_cluster = tmp_pos_cluster;
-
+	          	pos_cluster = (pos_cluster * size_cluster + tmp_vpos[0]) / static_cast<double>(size_cluster + 1);
 	            flag_used.insert(j);
 	            edge_left = tmp_vpos[0];
 	            ++size_cluster;
 	            j=i;
+	            //std::cout << "PrePos: " << tmp_vpos[0] << "\n";
 	          }
           else if(((tmp_vpos[0]-pos_cluster)>0.) && std::fabs(tmp_vpos[0]-edge_right)<0.0826)
 	          {
-	          	double tmp_pos_cluster = (pos_cluster * size_cluster + tmp_vpos[0]) / (size_cluster + 1);
-	          	pos_cluster = tmp_pos_cluster;
-
+	          	pos_cluster = (pos_cluster * size_cluster + tmp_vpos[0]) / static_cast<double>(size_cluster + 1);
 	            flag_used.insert(j);
 	            edge_right = tmp_vpos[0];
 	            ++size_cluster;
 	            j=i;
+	            //std::cout << "PrePos: " << tmp_vpos[0] << "\n";
 	          }
 	      }
 
 			vpos[0] = pos_cluster;
+	    //std::cout << "PostPos: " << pos_cluster << "\t vpos[0]: " << vpos[0] << "\n";
       hit_cluster[i]->setRawHitCoords(vpos);
 	  }
 
@@ -626,6 +1275,9 @@ std::vector<genfit::AbsMeasurement*> TCheckFiberXUV<Out>::Clusterize(const std::
 		    }
   	}
 
+  //for(size_t i = 0; i < hit_cluster.size(); ++i)
+  	//std::cout << "Vect_PostPos: " << (hit_cluster[i]->getRawHitCoords())[0] << "\n";
+  //std::cout << "Presize: " << hit.size() << "\t Postsize: " << hit_cluster.size() << "\n";
 	return hit_cluster;
 }
 
@@ -696,6 +1348,22 @@ std::vector<genfit::AbsMeasurement*> TCheckFiberXUV<Out>::Clusterize(const std::
   	}
 
 	return hit_cluster;
+}
+
+
+template<class Out>
+double TCheckFiberXUV<Out>::d_function(int id_det, double hitx, double hity)
+{
+	double x = hitx - realIP.X();
+	double y = hity - realIP.Y();
+	double z = Zpos_Fiber[id_det] - Zpos_target;
+
+	double theta = TMath::ATan2( std::sqrt(x * x + y * y), z);
+	double phi = TMath::ATan2( y , x );
+
+	double d = std::get<0>(param_d_funct1[id_det]) +
+								std::get<1>(param_d_funct1[id_det]) * std::tan(theta) * std::cos(phi + std::get<2>(param_d_funct1[id_det]) * M_PI / 180.); //d_function_1
+	return d;
 }
 
 template class TCheckFiberXUV<MCAnaEventG4Sol>;

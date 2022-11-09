@@ -377,8 +377,6 @@ class THyphiAttributes
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
 
-  std::vector<double> FiberXUV_cutd;
-
   std::string StudyCase;
 
   std::string FlatML_namefile;

@@ -84,8 +84,6 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   RF_OutputEvents = false;
 
-  FiberXUV_cutd = {4., 4., 20., 4., 4., 6., 6.};
-
   TaskConfig.Init(Config);
 
   if(Config.IsAvailable("G4_simu"))
