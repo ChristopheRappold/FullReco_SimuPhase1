@@ -14,6 +14,10 @@
 #include "EventG4Sol/TG4Sol_Hit.hh"
 
 #include "Ana_Event/Ana_WasaEvent.hh"
+#include "HitAna/FiberAnalyzer.hh"
+#include "HitAna/FiberHitAna.hh"
+#include "HitAna/FiberHitXUV.hh"
+#include "HitAna/FiberTrackAna.hh"
 
 //#include "MathematicalTools.hh"
 #include "Debug.hh"
@@ -182,9 +186,9 @@ constexpr bool IsFiberM(G4Sol::SolDet idDet) {
     case G4Sol::MiniFiberD1_x2 : ;
     case G4Sol::MiniFiberD1_u2 : ;
     case G4Sol::MiniFiberD1_v2 : ;
-                                 return true;
+      return true;
     default:
-                                 return false;
+      return false;
   };
 };
 
@@ -260,7 +264,13 @@ private:
   {
     TH1I* h_stats;
   };
+  
   LocalHists LocalHisto;
+
+public:
+
+  std::unique_ptr<ParaManager> par;
+
 };
 
 #endif

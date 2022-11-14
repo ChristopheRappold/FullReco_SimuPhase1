@@ -22,7 +22,15 @@ ClassImp(S2Fiber);
 ClassImp(CsIHit);
 ClassImp(S2CsI);
 ClassImp(LMDHeader);
+ClassImp(UnpackMetadata);
 
+
+////// ---- UnpackMetadata ---- ////
+UnpackMetadata::UnpackMetadata() {}
+
+UnpackMetadata::~UnpackMetadata() {}
+
+////// ---- LMDHeader ---- ////
 LMDHeader::LMDHeader() : lmd_filename(""), lmd_open_time("") {}
 
 LMDHeader::~LMDHeader() {}

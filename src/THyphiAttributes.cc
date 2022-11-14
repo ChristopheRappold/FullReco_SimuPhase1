@@ -215,7 +215,6 @@ if(Config.IsAvailable("CalibFile_T0time"))
     map_ParamFiles.insert({"t0_time_file","./calib/t0_param/t0_time.csv"});
 
 
-
   if(Wasa_FieldMap)
     {
       double signDir = Wasa_Side ? 1.0 : -1.0;
@@ -347,12 +346,59 @@ int THyphiAttributes::Init_Para()
     }
   name_GeoVolumes.push_back("Total");
 
+/*
+  std::string upk_setupfiber = InputPar.simexpMetadata->Unpack_SetupFiber;
+  Unpack_map_ParamFiles["upk_setupfiber"] = upk_setupfiber;
+
+  std::string upk_channelmapt0 = InputPar.simexpMetadata->Unpack_ChannelMapT0;
+  Unpack_map_ParamFiles["upk_channelmapt0"] = upk_channelmapt0;
+
+  std::string upk_channelmappsfe = InputPar.simexpMetadata->Unpack_ChannelMapPSFE;
+  Unpack_map_ParamFiles["upk_channelmappsfe"] = upk_channelmappsfe;
+
+  std::string upk_channelmappsbe = InputPar.simexpMetadata->Unpack_ChannelMapPSBE;
+  Unpack_map_ParamFiles["upk_channelmappsbe"] = upk_channelmappsbe;
+
+  std::string upk_setuppsb = InputPar.simexpMetadata->Unpack_SetupPSB;
+  Unpack_map_ParamFiles["upk_setuppsb"] = upk_setuppsb;
+
+  std::string upk_dtdxtablemwdc = InputPar.simexpMetadata->Unpack_DtDxTableMWDC;
+  Unpack_map_ParamFiles["upk_dtdxtablemwdc"] = upk_dtdxtablemwdc;
+
+  std::string upk_celloffsets4wfd1 = InputPar.simexpMetadata->Unpack_CellOffsetS4WFD1;
+  Unpack_map_ParamFiles["upk_celloffsets4wfd1"] = upk_celloffsets4wfd1;
+
+  std::string upk_celloffsets2wfd1 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD1;
+  Unpack_map_ParamFiles["upk_celloffsets2wfd1"] = upk_celloffsets2wfd1;
+
+  std::string upk_celloffsets2wfd2 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD2;
+  Unpack_map_ParamFiles["upk_celloffsets2wfd2"] = upk_celloffsets2wfd2;
+
+  std::string upk_celloffsets2wfd3 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD3;
+  Unpack_map_ParamFiles["upk_celloffsets2wfd3"] = upk_celloffsets2wfd3;
+
+  std::string upk_celloffsets2wfd4 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD4;
+  Unpack_map_ParamFiles["upk_celloffsets2wfd4"] = upk_celloffsets2wfd4;
+
+  std::string upk_celloffsets2wfd5 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD5;
+  Unpack_map_ParamFiles["upk_celloffsets2wfd5"] = upk_celloffsets2wfd5;
+
+  std::string upk_channelmapmdc = InputPar.simexpMetadata->Unpack_ChannelMapMDC;
+  Unpack_map_ParamFiles["upk_channelmapmdc"] = upk_channelmapmdc;
+
+  std::string upk_physicalmapmdc = InputPar.simexpMetadata->Unpack_PhysicalMapMDC;
+  Unpack_map_ParamFiles["upk_physicalmapmdc"] = upk_physicalmapmdc;
+
+  std::string upk_driftparammdc = InputPar.simexpMetadata->Unpack_PhysicalMapMDC;
+  Unpack_map_ParamFiles["upk_driftparammdc"] = upk_driftparammdc;
+*/
+
   return 0;
 }
 
 int THyphiAttributes::Reload_Para()
 {
-  std::string Hash(InputPar.previousMeta->Hash);
+  std::string Hash(InputPar.simexpMetadata->Hash);
 
   auto storage = InitStorage();
   storage.sync_schema();
@@ -461,8 +507,12 @@ void Task::Init(const FullRecoConfig& Config)
     Task_CheckField = Config.Get<bool>("Task_CheckField");
   if(Config.IsAvailable("Task_PrimaryVtx"))
     Task_PrimaryVtx = Config.Get<bool>("Task_PrimaryVtx");
+  if(Config.IsAvailable("Task_PrimaryVtx_Si"))
+    Task_PrimaryVtx_Si = Config.Get<bool>("Task_PrimaryVtx_Si");
   if(Config.IsAvailable("Task_FlatMCOutputML"))
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
+  if(Config.IsAvailable("Task_CheckFiberXUV"))
+    Task_CheckFiberXUV = Config.Get<bool>("Task_CheckFiberXUV");
   if(Config.IsAvailable("Task_CheckFiberTrack"))
     Task_CheckFiberTrack = Config.Get<bool>("Task_CheckFiberTrack");
   if(Config.IsAvailable("Task_BayesFinder"))
@@ -500,8 +550,12 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKCHECKFIELD);
 	  if(s == "Task_PrimaryVtx")
 	    Task_Order.push_back(TASKPRIMARYVTX);
+    if(s == "Task_PrimaryVtx_Si")
+      Task_Order.push_back(TASKPRIMARYVTX_SI);
 	  if(s == "Task_FlatMCOutputML")
 	    Task_Order.push_back(TASKFLATMCOUTPUTML);
+    if(s == "Task_CheckFiberXUV")
+      Task_Order.push_back(TASKCHECKFIBERXUV);
 	  if(s == "Task_CheckFiberTrack")
 	    Task_Order.push_back(TASKCHECKFIBERTRACK);
   	  if(s == "Task_BayesFinder")
@@ -554,6 +608,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Hash = Hash;
   out.RunTask.Task_CheckField      = TaskConfig.Task_CheckField;
   out.RunTask.Task_PrimaryVtx      = TaskConfig.Task_PrimaryVtx;
+  out.RunTask.Task_PrimaryVtx_Si   = TaskConfig.Task_PrimaryVtx_Si;
   out.RunTask.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
   out.RunTask.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
   out.RunTask.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;

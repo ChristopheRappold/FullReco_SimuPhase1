@@ -18,6 +18,7 @@
 #include "FairBase/WasaSolenoidFieldMap.h"
 
 #include "Ana_Event/AnaEvent_Metadata.hh"
+//#include "EventWASAUnpack/TFRSParameter.h"
 
 #include "spdlog/logger.h"
 
@@ -25,10 +26,10 @@
 
 struct DataSimExp
 {
-  std::vector<std::string>* nameDet;
+  std::vector<std::string>* nameDet;  
   std::map<std::string, double>* simParameters;
 
-  AnaEvent_Metadata* previousMeta;
+  AnaEvent_Metadata* simexpMetadata;
 };
 
 
@@ -71,7 +72,9 @@ struct Task
   bool Task_ReStart = false;
   bool Task_CheckField = false;
   bool Task_PrimaryVtx = true;
+  bool Task_PrimaryVtx_Si = false;
   bool Task_FlatMCOutputML = false;
+  bool Task_CheckFiberXUV = false;
   bool Task_CheckFiberTrack = false;
   bool Task_BayesFinder = false;
   bool Task_RiemannFinder = false;
@@ -82,11 +85,11 @@ struct Task
   bool Task_DecayVtx = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKFLATMCOUTPUTML, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
+    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
     TASKKALMANDAF, TASKDECAYVTX, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -136,7 +139,9 @@ struct RunTaskDef
 
   bool Task_CheckField;
   bool Task_PrimaryVtx;
+  bool Task_PrimaryVtx_Si;
   bool Task_FlatMCOutputML;
+  bool Task_CheckFiberXUV;
   bool Task_CheckFiberTrack;
   bool Task_BayesFinder;
   bool Task_RiemannFinder;
@@ -252,7 +257,8 @@ inline auto InitStorage()
 				 "RunTask",
 				 make_column("HashId", &RunTaskDef::Hash),
 				 make_column("Task_CheckField", &RunTaskDef::Task_CheckField),
-				 make_column("Task_PrimaryVtx", &RunTaskDef::Task_PrimaryVtx),
+         make_column("Task_PrimaryVtx", &RunTaskDef::Task_PrimaryVtx),
+         make_column("Task_PrimaryVtx_Si", &RunTaskDef::Task_PrimaryVtx_Si),
 				 make_column("Task_FlatMCOutputML", &RunTaskDef::Task_FlatMCOutputML),
 				 make_column("Task_BayesFinder", &RunTaskDef::Task_BayesFinder),
 				 make_column("Task_RiemannFinder", &RunTaskDef::Task_RiemannFinder),
@@ -324,6 +330,7 @@ class THyphiAttributes
   std::string Hash;
 
   std::unordered_map<std::string,std::string> map_ParamFiles;
+  //std::unordered_map<std::string,std::string> Unpack_map_ParamFiles;
 
   int Nb_CPU;
   int Nb_Fraction;

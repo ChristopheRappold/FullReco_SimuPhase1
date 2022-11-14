@@ -34,6 +34,7 @@ enum StateHist : int
   SIMU,
   BUILDER,
   PRIMVTX,
+  PRIMVTX_SI,
   DECAYVTX,
   SIZEOF_STATEHIST
 };
@@ -262,7 +263,6 @@ class Ana_Hist
   Hist<TH2F> h_nCandidatesRealTracks ;
   Hist<TH2F> h_nCandidatesRealTracks_IfRecons ;
 
-  //Hist<TH1F> h_nHypTrackReal;
   Hist<TH1F> h_nHypernucleiTrack ;
   Hist<TH1F> h_fvalues ;
 
@@ -408,6 +408,45 @@ class Ana_Hist
 
   Hist<TH2F> h_N_SiHits_ReconsTracks ;
 
+  // CheckFiberXUV
+  Hist<TH1F> h_ResidualFiberHitX[7];
+  Hist<TH1F> h_ResidualFiberHitY[7];
+  Hist<TH1F> h_ResidualFiberHitR[7];
+  Hist<TH2F> h_ResidualFiberHitXY[7];
+  Hist<TH2F> h_ResidualFiberHitX_Theta[7];
+  Hist<TH2F> h_ResidualFiberHitY_Theta[7];
+  Hist<TH2F> h_ResidualFiberHitX_HitX[7];
+  Hist<TH2F> h_ResidualFiberHitY_HitY[7];
+  Hist<TH2F> h_ResidualFiberHitR_Theta[7];
+  Hist<TH1F> h_ResidualSingleFiberHitX[7];
+  Hist<TH1F> h_ResidualSingleFiberHitY[7];
+  Hist<TH1F> h_ResidualSingleFiberHitR[7];
+  Hist<TH2F> h_ResidualSingleFiberHitX_Theta[7];
+  Hist<TH2F> h_ResidualSingleFiberHitY_Theta[7];
+  Hist<TH2F> h_ResidualSingleFiberHitR_Theta[7];
+  Hist<TH2F> h_EfficiencyFiberHit;
+  Hist<TH2F> h_EfficiencySingleFiberHit;
+  Hist<TH2F> h_EfficiencyFiberHit_Theta[7];
+  Hist<TH2F> h_EfficiencyFiberHit_dvalue[7];
+  Hist<TH2F> h_EfficiencyFiberHit_mult[7];
+  Hist<TH2F> h_EfficiencySingleFiberHit_Theta[7];
+  Hist<TH2F> h_EfficiencySingleFiberHit_dvalue[7];
+  Hist<TH2F> h_NumFiberHit_GoodReco[7];
+  Hist<TH2F> h_NumFiberHit_Ghost[7];
+  Hist<TH1F> h_FiberHit_dvalue[7];
+  Hist<TH1F> h_FiberHitSingle_dvalue[7];
+  Hist<TH1F> h_FiberHitReal_dvalue[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_Theta[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_Theta03_Phi[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_Theta310_Phi[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_Theta1020_Phi[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_HitX[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_HitY[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_PosX[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_dfunction[7];
+  Hist<TH1F> h_FiberHit_Residualdvalue[7];
+
+  // CheckFiberTrack
   Hist<TH2F> h_ResidualFiberX;
   Hist<TH2F> h_ResidualFiberY;
 
@@ -437,7 +476,7 @@ class Ana_Hist
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool DecayVtx = true);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool PrimVtx_Si = false, bool DecayVtx = true);
   ~Ana_Hist();
 
   int Write(TFile*);

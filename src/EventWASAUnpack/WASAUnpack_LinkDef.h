@@ -1,5 +1,5 @@
 // ----------------------------------------------------------
-// Definition of the linkdef for ROOT dictionnary generation
+// Definition of the linkdef for ROOT dictionary generation
 // Created by C.Rappold (c.rappold@gsi.de)
 //-----------------------------------------------------------
 
@@ -9,6 +9,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
+#pragma link C++ class UnpackMetadata+;
 #pragma link C++ class LMDHeader+;
 #pragma link C++ class S4TQ+;
 #pragma link C++ class MWDCHit+;

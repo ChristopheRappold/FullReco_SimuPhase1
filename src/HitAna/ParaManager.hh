@@ -84,6 +84,7 @@ class ParaManager
   double fiber_dft2_cut_d;
 
   double fiber_tgt_pos_x;   double fiber_tgt_pos_y;   double fiber_tgt_pos_z;
+  double fiber_tgt_size_x;  double fiber_tgt_size_y;  double fiber_tgt_size_z;
 
   double fiber_mft1_pos_x;  double fiber_mft1_pos_y;  double fiber_mft1_pos_z;
   double fiber_mft2_pos_x;  double fiber_mft2_pos_y;  double fiber_mft2_pos_z;

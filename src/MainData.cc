@@ -3,8 +3,8 @@
 #include "Debug.hh"
 #include "FullRecoConfig.hh"
 #include "FullRecoTask.hh"
-#include "FullRecoTaskMT.hh"
-#include "FullRecoTaskZMQ.hh"
+//#include "FullRecoTaskMT.hh"
+//#include "FullRecoTaskZMQ.hh"
 #include "KFParticle.h"
 
 
@@ -60,19 +60,21 @@ int main(int argc, char** argv)
       bool Restarting = config.IsAvailable("Task_ReStart") ? config.Get<bool>("Task_ReStart") : false;
 
       if(config.IsAvailable("LocalOutput_Suffix"))
-	{
-	  std::string file_base_name = name_out.substr(0,name_out.find_last_of('.'));
-	  file_base_name += config.Get<std::string>("LocalOutput_Suffix");
-	  file_base_name += ".root";
-	  name_out = file_base_name;
-	}
+        {
+          std::string file_base_name = name_out.substr(0,name_out.find_last_of('.'));
+          file_base_name += config.Get<std::string>("LocalOutput_Suffix");
+          file_base_name += ".root";
+          name_out = file_base_name;
+        }
+
       bool MT = config.IsAvailable("MultiThreading");
       bool ZMQ = config.IsAvailable("ZeroMQ");
       if(MT || ZMQ)
-	{
-	  //ROOT::EnableThreadSafety();
-	  //ROOT::EnableImplicitMT();
-	}
+        {
+          //ROOT::EnableThreadSafety();
+          //ROOT::EnableImplicitMT();
+        }
+
       auto sink1 = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
       sink1->set_pattern("[%^%l%$] %v");
       auto ConsoleLogger = std::make_shared<spdlog::logger>("Console", sink1);
@@ -108,13 +110,6 @@ int main(int argc, char** argv)
       std::string file_base_name = name_out.substr(name_out.find_last_of('/') + 1);
       ConsoleLogger->info("name in : {} / name out : {}", name_in, name_out);
 
-      //  std::cout<<"name in :"<<name_in<<" / name out :"<<name_out<<std::endl;
-
-      // TFile *sourcefile = new TFile (name_out_source.c_str(),"RECREATE");
-
-      // sourcefile->Close();
-      // delete sourcefile;
-
       /*******************************************************************/
 
       TStopwatch timer;
@@ -126,7 +121,7 @@ int main(int argc, char** argv)
       Long64_t Start_event = 0;
       Long64_t Stop_event = 0;
 
-      TGeoManager::Import(nameGeo.c_str()); // FOR Kalman_DAF
+      TGeoManager::Import(nameGeo.c_str()); // For Kalman_DAF
 
       TDatabasePDG::Instance()->AddParticle("deuteron", "deuteron", 1.875477 /*1.875613*/, kTRUE, 0., 1. * 3., "Ions", 10000);
       TDatabasePDG::Instance()->AddParticle("triton", "triton", 2.807971/*2.80892*/ /*2.80925*/, kTRUE, 0., 1. * 3., "Ions", 10001);
@@ -139,16 +134,15 @@ int main(int argc, char** argv)
 
       TFile* offile = new TFile(name_out.c_str(), "RECREATE");
 
-      TTree* Anatree            = 0;
+      TTree* Anatree          = 0;
       Ana_WasaEvent* Anaevent = 0;
-      Anatree                   = new TTree("T", "WASAUnpackTree");
+      Anatree                 = new TTree("T", "WASAUnpackTree");
       // Anatree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
       Anatree->SetAutoSave(100000000); // autosave when 100 Mbyte written
       // Anatree->SetAutoSave(50000000); // autosave when 50 Mbyte written
       // Anatree->SetMaxTreeSize(50000000); //1 GB
       Anatree->SetAutoFlush();
       Anaevent = new Ana_WasaEvent();
-      // Anatree->Bronch("bAna_event","MCAnaEvent",&Anaevent, 32000,1);
       Ana_WasaEvent::Class()->IgnoreTObjectStreamer();
       TBranch* branch = Anatree->Branch("Ana_WasaEvent", &Anaevent, 32000, 2);
       branch->SetAutoDelete(kFALSE);
@@ -161,55 +155,44 @@ int main(int argc, char** argv)
 
       TTree* InTree = nullptr;
       if(Restarting == false)
-	InTree        = input_file->Get<TTree>("WASAUnpackTree");
+        InTree        = input_file->Get<TTree>("WASAUnpackTree");
       else
-	InTree        = input_file->Get<TTree>("T");
+        InTree        = input_file->Get<TTree>("T");
 
       assert(InTree != nullptr);
 
       DataSimExp InputPar{nullptr, nullptr, nullptr};
-      InputPar.nameDet       = (std::vector<std::string>*)(input_file->Get("nameDet")); //Change! -> Remove
-      InputPar.simParameters = (std::map<std::string, double>*)(input_file->Get("simParameters"));  //Change! Define in attributes file?
-      InputPar.previousMeta  = (AnaEvent_Metadata*)(input_file->Get("EventMetadata"));
-
-      if(InputPar.nameDet == nullptr && InputPar.previousMeta == nullptr)
+      //InputPar.simexpMetadata  = (AnaEvent_Metadata*)(input_file->Get("EventMetadata"));
+/*
+      if(InputPar.simexpMetadata == nullptr)
         {
-          ConsoleLogger->error("E> Load nameDet not possible ! {}", fmt::ptr(input_file->Get("nameDet")));
           ConsoleLogger->error("E> Load AnaEvent_Metadata not possible ! {}", fmt::ptr(input_file->Get("EventMetadata")));
           return -1;
         }
-      if(InputPar.simParameters == nullptr && InputPar.previousMeta == nullptr)
-        {
-          ConsoleLogger->error("E> Load expParameters not possible ! {}", fmt::ptr(input_file->Get("expParameters")));
-          ConsoleLogger->error("E> Load AnaEvent_Metadata not possible ! {}", fmt::ptr(input_file->Get("EventMetadata")));
-          return -1;
-        }
-
+*/
       EventWASAUnpack fEvent ;
-      Ana_WasaEvent* fEventRe = new Ana_WasaEvent(); //Change!
+      Ana_WasaEvent* fEventRe = new Ana_WasaEvent();
 
       if(Restarting == false)
-      {
-        InTree->SetBranchAddress("lmd_header",&fEvent.header);
-        InTree->SetBranchAddress("s4tq"      ,&fEvent.s4tq);
-        InTree->SetBranchAddress("s4mwdc"    ,&fEvent.s4mwdc);
-        InTree->SetBranchAddress("s4wfd"     ,&fEvent.s4wfd);
-        InTree->SetBranchAddress("s2tq1"     ,&fEvent.s2tq1);
-        InTree->SetBranchAddress("s2mdc"     ,&fEvent.s2mdc);
-        InTree->SetBranchAddress("s2wfd123"  ,&fEvent.s2wfd123);
-        InTree->SetBranchAddress("s2tq2"     ,&fEvent.s2tq2);
-        InTree->SetBranchAddress("s2wfd45"   ,&fEvent.s2wfd45);
-        InTree->SetBranchAddress("s2fiber"   ,&fEvent.s2fiber);
-        InTree->SetBranchAddress("s2csi"     ,&fEvent.s2csi);
-        InTree->SetBranchAddress("frstpc"    ,&fEvent.frstpc);
-
-          } //Change! -> Set all the branches (s4tq...)
-              else
+        {
+          InTree->SetBranchAddress("lmd_header",&fEvent.header);
+          InTree->SetBranchAddress("s4tq"      ,&fEvent.s4tq);
+          InTree->SetBranchAddress("s4mwdc"    ,&fEvent.s4mwdc);
+          InTree->SetBranchAddress("s4wfd"     ,&fEvent.s4wfd);
+          InTree->SetBranchAddress("s2tq1"     ,&fEvent.s2tq1);
+          InTree->SetBranchAddress("s2mdc"     ,&fEvent.s2mdc);
+          InTree->SetBranchAddress("s2wfd123"  ,&fEvent.s2wfd123);
+          InTree->SetBranchAddress("s2tq2"     ,&fEvent.s2tq2);
+          InTree->SetBranchAddress("s2wfd45"   ,&fEvent.s2wfd45);
+          InTree->SetBranchAddress("s2fiber"   ,&fEvent.s2fiber);
+          InTree->SetBranchAddress("s2csi"     ,&fEvent.s2csi);
+          InTree->SetBranchAddress("frstpc"    ,&fEvent.frstpc);
+        }
+      else
       	InTree->SetBranchAddress("Ana_WasaEvent", &fEventRe);
 
 
       Long64_t total_nentries_over_files = InTree->GetEntries();
-      //int max_loop                       = 1;
 
       Start_event = Start;
       Stop_event  = Nb_event != -1 ? Nb_event + Start : total_nentries_over_files;
@@ -219,121 +202,72 @@ int main(int argc, char** argv)
       if(Start_event > total_nentries_over_files)
         Start_event = total_nentries_over_files;
 
-      // std::list<std::string> Option;
-      // std::list<std::string> ToDo;
-      // TString cpu_string("CPU");
-      // cpu_string+=Nb_CPU;
-      // Option.push_back(cpu_string.Data());
-      // TString fra_string("Fraction");
-      // fra_string+=Nb_fraction;
-      // Option.push_back(fra_string.Data());
-      // TString nevent_string("Event");
-      // nevent_string+=Stop_event-Start_event;
-      // Option.push_back(nevent_string.Data());
-      // //Option.push_back("NoMaterial");
-      // Option.push_back("Debug_DAF");
 
       config.Add("Nb_Event", Stop_event - Start_event);
       config.Add("Start_Event", Start_event);
       config.Add("Stop_Event", Stop_event);
 
-      Ana_Hist ListHisto(true /*DAF_Debug*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Hough*/,
-                         true);
+      Ana_Hist ListHisto(true /*Daf*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Riemann*/, false /*Hough*/,
+                            false /*Simu*/, true /*Builder*/, true /*PrimVtx*/, false /*PrimVtx_Si*/, true /*DecayVtx*/);
 
       AnaEvent_Metadata metadata;
-      //ListHisto.DebugHists();
+
       if(MT == false && ZMQ == false)
-	{
-	  FullRecoTask<Ana_WasaEvent> ReconstructionTask(config, InputPar); //Change! -> Check
-	  
-	  ReconstructionTask.AttachHisto(&ListHisto);
-	  ConsoleLogger->info("Init done");
-	  //-------------------------------------------------------
-	  // EVENT LOOP nentries
-	  TTimeStamp stamp;
-	  
-	  ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
-	  ConsoleLogger->info("---------------------------------------------");
-	  
-	  Long64_t for_display = 0;
-	  Long64_t timing      = 0;
-	  // reader.SetEntriesRange(Start_event,Stop_event);
-	  
-	  for(Long64_t i = Start_event; i < Stop_event; ++i)
-	    {
-	      InTree->GetEntry(i);
+        {
+          FullRecoTask<Ana_WasaEvent> ReconstructionTask(config, InputPar);
+          
+          ReconstructionTask.AttachHisto(&ListHisto);
+          ConsoleLogger->info("Init done");
+          //-------------------------------------------------------
+          // EVENT LOOP nentries
+          TTimeStamp stamp;
+          
+          ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
+          ConsoleLogger->info("---------------------------------------------");
+          
+          Long64_t for_display = 0;
+          Long64_t timing      = 0;
+          // reader.SetEntriesRange(Start_event,Stop_event);
+          
+          for(Long64_t i = Start_event; i < Stop_event; ++i)
+            {
+              InTree->GetEntry(i);
+              Long64_t iEvent = i; // reader.GetCurrentEntry();
 
-	      // while(reader.Next())
-	      //{
-	      Long64_t iEvent = i; // reader.GetCurrentEntry();
+              ++total_nentries;
+              Anaevent->Clear();
 
-	      ++total_nentries;
-	      Anaevent->Clear();
+              if(iEvent % 10000 == 0)
+                ConsoleLogger->info("Processing Event# {} / {} | {} %", iEvent, Stop_event, (double)iEvent / (double)(Stop_event - Start_event) * 100);
 
-	      if(iEvent % 10000 == 0)
-		ConsoleLogger->info("Processing Event# {} / {} | {} %", iEvent, Stop_event,
-				    (double)iEvent / (double)(Stop_event - Start_event) * 100);
+              if((int)((double)iEvent / (double)(Stop_event - Start_event) * 4) == timing)
+                {
+                  ConsoleLogger->info("Progress : {} %",
+                  (int)((double)iEvent / (double)(Stop_event - Start_event) * 100.));
+                  ++timing;
+                }
 
-	      if((int)((double)iEvent / (double)(Stop_event - Start_event) * 4) == timing)
-		{
-		  ConsoleLogger->info("Progress : {} %",
-				      (int)((double)iEvent / (double)(Stop_event - Start_event) * 100.));
-		  ++timing;
-		}
-	      // auto event = ReaderEvent.Get();
+              int toStop = 0;
+              if(Restarting == false)
+                toStop = ReconstructionTask.EventLoop(fEvent, Anaevent);
+              else
+                toStop = ReconstructionTask.EventLoop(fEventRe, Anaevent);
 
-	      int toStop = 0;
-	      if(Restarting == false)
-		toStop = ReconstructionTask.EventLoop(fEvent, Anaevent);
-	      else
-		toStop = ReconstructionTask.EventLoop(fEventRe, Anaevent);
+              nb += Anatree->Fill();
+              ++for_display;
+              Anaevent->Clear();
+            }
 
-	      nb += Anatree->Fill();
-	      ++for_display;
-	      Anaevent->Clear();
-	    }
+          ReconstructionTask.SetEventMetadata(metadata);
+        }
 
-	  ReconstructionTask.SetEventMetadata(metadata);
-	}
- //      else if(MT==true && ZMQ==false)
-	// {
-	  
-	//   FullRecoTaskMT ReconstructionTaskMT(config, InputPar);
-	  
-	//   ReconstructionTaskMT.AttachHisto(&ListHisto);
-	//   ConsoleLogger->info("Init done");
-	//   //-------------------------------------------------------
-	//   // EVENT LOOP nentries
-	  
-	//   ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
-	//   ConsoleLogger->info("---------------------------------------------");
-
-	//   int toStop = ReconstructionTaskMT.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
-	// }
- //      else if(ZMQ==true && MT==false)
-	// {
-	//   FullRecoTaskZMQ ReconstructionTaskZMQ(config, InputPar);
-	  
-	//   ReconstructionTaskZMQ.AttachHisto(&ListHisto);
-	//   ConsoleLogger->info("Init done");
-	//   //-------------------------------------------------------
-	//   // EVENT LOOP nentries
-	  
-	//   ConsoleLogger->info("Start = {} Stop= {}", Start_event, Stop_event);
-	//   ConsoleLogger->info("---------------------------------------------");
-
-	//   int toStop = ReconstructionTaskZMQ.Run(Start_event, Stop_event, InTree, *fEvent, AllHits, Anatree, Anaevent);
-	// }
       else
-	{
-	  ConsoleLogger->warn("W> no run : MT? {} ZMQ? {}",MT,ZMQ);
-	}
+        ConsoleLogger->warn("W> no run : MT? {} ZMQ? {}",MT,ZMQ);
+
       offile = Anatree->GetCurrentFile();
       offile->cd();
       Anatree->Write();
       ConsoleLogger->info("Tree Filled");
-      // ListHisto.Write(offile_hist);
-      //ListHisto.DebugHists();
       ListHisto.Write(offile);
 
       ConsoleLogger->info("Histo Written");
@@ -366,16 +300,12 @@ int main(int argc, char** argv)
             finish = true;
         }
       offile->WriteObjectAny(additionalPDG, additionalPDG->Class(), "additionalPDG");
-      // additionalPDG->Write();
-
       ConsoleLogger->info("Additional PDG data written");
 
       offile->WriteTObject(&metadata,"EventMetadata");
-
       ConsoleLogger->info("Event metadata written");
 
       offile->Close();
-      // offile_hist->Close();
       ConsoleLogger->info("Histo File Closed");
 
 #ifdef TREEPERF
@@ -402,7 +332,6 @@ int main(int argc, char** argv)
 #endif
       /***************************************************************/
       timer.Stop();
-      // delete AnaOutTree;
 
       Float_t mbytes = 0.000001 * nb;
       Double_t rtime = timer.RealTime();
@@ -412,16 +341,6 @@ int main(int argc, char** argv)
       ConsoleLogger->info("RealTime= {} seconds, CpuTime= {} seconds", rtime, ctime);
       ConsoleLogger->info("You read {} Mbytes/Realtime seconds", mbytes / rtime);
       ConsoleLogger->info("You read {} Mbytes/Cputime seconds", mbytes / ctime);
-
-      // Saving histograms
-
-      // AnaOutTree->Write(AnaOutTree->name_outfile);
-
-      // delete Anaevent;
-      // Anatree->Reset();
-      // delete Anatree;
-
-      // delete app;
 
       return 0;
     }

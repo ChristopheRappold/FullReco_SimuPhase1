@@ -602,6 +602,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   // Fiber ana //////////////////////////////////
   std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitCont;
   std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitClCont;
+
   for(int i = 0; i < 7; ++i)
     {
       std::vector<FiberHitAna*> buf_v;
@@ -643,6 +644,10 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
 
   FiberAnalyzer* fiberana = new FiberAnalyzer();
   FiberHitClCont          = fiberana->Clusterize(FiberHitCont);
+  std::vector<std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par.get());
+  
+  RecoEvent.FiberXUVCont  = FiberXUVCont;
+
 
   int TypeDet[7][3] = {{G4Sol::FiberD1_x, G4Sol::FiberD1_u, G4Sol::FiberD1_v},
                        {G4Sol::FiberD2_x, G4Sol::FiberD2_u, G4Sol::FiberD2_v},
@@ -758,7 +763,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
         }
     }
 
-  std::vector<std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par.get());
   for(int i = 0; i < 7; ++i)
     {
       for(int j = 0; j < (int)FiberXUVCont[i].size(); ++j)
