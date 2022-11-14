@@ -9,6 +9,8 @@
 #include "ReturnRes.hh"
 #include "StateOnPlane.h"
 
+#include "TVector3.h"
+
 #include <numeric>
 #include <set>
 #include <sstream>
@@ -62,6 +64,9 @@ void TCheckFiberTrack<Out>::SelectHists()
 	LocalHisto.h_ResidualFiberX_Angle[i][j] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberX_Angle[i][j]);
 	LocalHisto.h_ResidualFiberY_Angle[i][j] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberY_Angle[i][j]);
       }
+  LocalHisto.h_ResidualFiberDzDphi = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberDzDphi);
+  LocalHisto.h_ResidualFiberDzDtheta = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberDzDtheta);
+
 }
 
 template<class Out>
@@ -117,8 +122,8 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
       bool id_FirstFiberU = it_ListHitsSim->second[G4Sol::FiberD3_u].size() > 0 ;
       bool id_FirstFiberV = it_ListHitsSim->second[G4Sol::FiberD3_v].size() > 0 ;
 
-      std::list<int> id_dets = {G4Sol::MiniFiberD1_x1,  G4Sol::MiniFiberD1_u1,  G4Sol::MiniFiberD1_v1,  G4Sol::MiniFiberD1_x2,  G4Sol::MiniFiberD1_u2,  G4Sol::MiniFiberD1_v2, G4Sol::PSFE, G4Sol::PSCE, G4Sol::PSBE};
-      
+      std::list<int> id_dets = {G4Sol::MiniFiberD1_x1,  G4Sol::MiniFiberD1_u1,  G4Sol::MiniFiberD1_v1,  G4Sol::MiniFiberD1_x2,  G4Sol::MiniFiberD1_u2,  G4Sol::MiniFiberD1_v2, G4Sol::PSFE, G4Sol::PSCE, G4Sol::PSBE, G4Sol::FiberD4_x, G4Sol::FiberD4_u, G4Sol::FiberD4_v, G4Sol::FiberD5_x, G4Sol::FiberD5_u, G4Sol::FiberD5_v};
+
       int id_FirstFiber = -1;
       if(id_FirstFiberX)
 	{
@@ -173,8 +178,9 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
       };
 
       double theta = TMath::ATan2(TMath::Sqrt(TMath::Sq(LineParams[3])+TMath::Sq(LineParams[4])),LineParams[5])*TMath::RadToDeg();
-      
+
       std::array<double, 3> hitExp = {0.,0.,0.};
+      TVector3 beforeV(LineParams[3],LineParams[4],LineParams[5]), afterV;
       for(int id_det : id_dets)
 	{
 	  //att._logger->debug(" det: {} : size {} / condition : {}",G4Sol::nameLiteralDet.begin()[id_det], it_ListHitsSim->second[id_det].size(), id_det < id_FirstFiber);
@@ -207,6 +213,13 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 
 	      LocalHisto.h_ResidualFiberX_Angle[temp_i][temp_j]->Fill(theta, (hitExp[0] - it_ListHitsSim->second[id_det][0].hitX),1.);
 	      LocalHisto.h_ResidualFiberY_Angle[temp_i][temp_j]->Fill(theta, (hitExp[1] - it_ListHitsSim->second[id_det][0].hitY),1.);
+
+	      afterV.SetXYZ(it_ListHitsSim->second[id_det][0].momX,it_ListHitsSim->second[id_det][0].momY,it_ListHitsSim->second[id_det][0].momZ);
+	      double Dphi = (afterV.Phi() - beforeV.Phi())*TMath::RadToDeg();
+	      double Dtheta = (afterV.Theta() - beforeV.Theta())*TMath::RadToDeg();
+	      LocalHisto.h_ResidualFiberDzDphi->Fill(it_ListHitsSim->second[id_det][0].hitZ-LineParams[2], Dphi);
+	      LocalHisto.h_ResidualFiberDzDtheta->Fill(it_ListHitsSim->second[id_det][0].hitZ-LineParams[2], Dtheta);
+
 	    }
 
 	}

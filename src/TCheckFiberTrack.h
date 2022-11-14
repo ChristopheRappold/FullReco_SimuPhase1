@@ -51,6 +51,8 @@ class TCheckFiberTrack final :  public TDataProcessInterface<Out>
     TH2F* h_ResidualFiberY;
     TH2F* h_ResidualFiberX_Angle[11][2];
     TH2F* h_ResidualFiberY_Angle[11][2];
+    TH2F* h_ResidualFiberDzDphi;
+    TH2F* h_ResidualFiberDzDtheta;
   };
   LocalHists LocalHisto;
 };
