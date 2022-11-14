@@ -1,5 +1,7 @@
 #include "TBayesFinder.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "ReturnRes.hh"
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
@@ -24,7 +26,8 @@ using namespace BayesFind;
 
 #define DEBUG_BAYES
 
-TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterface("bayes_finder"),att(attribut),ME( 17, std::vector<TGeoNodeMatrix*>()),LayerGeo(17, std::vector<DataLayer>())
+template<class Out>
+TBayesFinder<Out>::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterface<Out>("bayes_finder"),att(attribut),ME( 17, std::vector<TGeoNodeMatrix*>()),LayerGeo(17, std::vector<DataLayer>())
 {
   for(auto it : *gGeoManager->GetListOfVolumes() )
     {
@@ -141,14 +144,17 @@ TBayesFinder::TBayesFinder(const THyphiAttributes& attribut):TDataProcessInterfa
     
   
 }
-
-TBayesFinder::~TBayesFinder()
+template<class Out>
+TBayesFinder<Out>::~TBayesFinder()
 {
 
 }
-void TBayesFinder::InitMT() {att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TBayesFinder::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
+template<class Out>
+void TBayesFinder<Out>::InitMT() {att._logger->error("E> Not supposed to be multithreaded !"); }
+
+template<class Out>
+ReturnRes::InfoM TBayesFinder<Out>::operator() (FullRecoEvent& RecoEvent,Out* OutTree)
 {
 
   int result_finder = Exec(RecoEvent,OutTree);
@@ -156,38 +162,42 @@ ReturnRes::InfoM TBayesFinder::operator() (FullRecoEvent& RecoEvent,MCAnaEventG4
   return SoftExit(result_finder);
 }
 
-int TBayesFinder::Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree)
+template<class Out>
+int TBayesFinder<Out>::Exec(FullRecoEvent& RecoEvent,Out* OutTree)
 {
   return FinderTrack(RecoEvent);
   
 }
 
-ReturnRes::InfoM TBayesFinder::SoftExit(int result_full)
+template<class Out>
+ReturnRes::InfoM TBayesFinder<Out>::SoftExit(int result_full)
 {
   return ReturnRes::Fine;
 }
 
-void TBayesFinder::SelectHists()
+template<class Out>
+void TBayesFinder<Out>::SelectHists()
 {
-    LocalHisto.h_xy          = AnaHisto->CloneAndRegister(AnaHisto->h_xy);
-    LocalHisto.h_PxPy        = AnaHisto->CloneAndRegister(AnaHisto->h_PxPy);
-    LocalHisto.h_xy_extrap   = AnaHisto->CloneAndRegister(AnaHisto->h_xy_extrap);
-    LocalHisto.h_PxPy_extrap = AnaHisto->CloneAndRegister(AnaHisto->h_PxPy_extrap);
-    LocalHisto.h_TrackFindingStat = AnaHisto->CloneAndRegister(AnaHisto->h_TrackFindingStat);
+    LocalHisto.h_xy          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_xy);
+    LocalHisto.h_PxPy        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PxPy);
+    LocalHisto.h_xy_extrap   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_xy_extrap);
+    LocalHisto.h_PxPy_extrap = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PxPy_extrap);
+    LocalHisto.h_TrackFindingStat = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_TrackFindingStat);
   for(int i=0;i<3;++i)
-    LocalHisto.h_SolenoidGeo[i]         = AnaHisto->CloneAndRegister(AnaHisto->h_SolenoidGeo[i]);
+    LocalHisto.h_SolenoidGeo[i]         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_SolenoidGeo[i]);
 }
 
 
-int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
+template<class Out>
+int TBayesFinder<Out>::FinderTrack(FullRecoEvent& RecoEvent)
 {
   int index_ell = 0;
   for(double radius : radiusCDC)
     if(index_ell<17)
       {
-	att._logger->error("GEO: {} {}",fmt::ptr(AnaHisto->geoSolenoid[index_ell]), radius);
-	AnaHisto->geoSolenoid[index_ell] = new TEllipse(0,0,radius);
-	AnaHisto->geoSolenoid[index_ell]->SetFillStyle(2);
+	att._logger->error("GEO: {} {}",fmt::ptr(this->AnaHisto->geoSolenoid[index_ell]), radius);
+	this->AnaHisto->geoSolenoid[index_ell] = new TEllipse(0,0,radius);
+	this->AnaHisto->geoSolenoid[index_ell]->SetFillStyle(2);
 	++index_ell;
       }
 
@@ -529,3 +539,6 @@ int TBayesFinder::FinderTrack(FullRecoEvent& RecoEvent)
   
   return 0;
 }
+
+template class TBayesFinder<MCAnaEventG4Sol>;
+template class TBayesFinder<Ana_WasaEvent>;

@@ -13,6 +13,8 @@
 #include "EventG4Sol/TG4Sol_Event.hh"
 #include "EventG4Sol/TG4Sol_Hit.hh"
 
+#include "Ana_Event/Ana_WasaEvent.hh"
+
 //#include "MathematicalTools.hh"
 #include "Debug.hh"
 
@@ -80,6 +82,14 @@ constexpr bool IsPSBE(G4Sol::SolDet idDet) {
     return false;
   };
 };
+constexpr bool IsPSFE(G4Sol::SolDet idDet) {
+  switch (idDet) {
+  case G4Sol::PSFE :
+    return true;
+  default:
+    return false;
+  };
+};
 
 constexpr bool IsSilicon(G4Sol::SolDet idDet) {
   switch (idDet) {
@@ -125,9 +135,9 @@ constexpr bool IsFiberU_Vetoed(G4Sol::SolDet idDet) {
   case G4Sol::FiberD2_x : ;
   case G4Sol::FiberD2_u : ;
   case G4Sol::FiberD2_v : ;
-  case G4Sol::FiberD3_x : ;
-  case G4Sol::FiberD3_u : ;
-  case G4Sol::FiberD3_v : ;
+    //case G4Sol::FiberD3_x : ;
+    //case G4Sol::FiberD3_u : ;
+    //case G4Sol::FiberD3_v : ;
     return true;
   default:
     return false;
@@ -225,6 +235,8 @@ public:
   ReturnRes::InfoM operator() (const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree);
 #endif
 
+ReturnRes::InfoM operator()(const TG4Sol_Event& event, const std::vector<TClonesArray*>& hits, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree);
+
 private :
   //int Exec(THyphiEvent_Phys_new *event,Ana_Event* OutTree);
 #ifdef ROOT6
@@ -242,6 +254,8 @@ private:
   std::unordered_map<int,int> orderDetectors;
   std::unordered_map<int,std::string> orderDetName;
   PDG_fromName pid_fromName;
+  int offsetGeoNameID_MDC = 0;
+  int offsetGeoNameID_PSCE = 0;
   struct LocalHists
   {
     TH1I* h_stats;

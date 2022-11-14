@@ -30,7 +30,7 @@ CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUI
 #CXXFLAGS     += -fsanitize=memory -fno-omit-frame-pointer
 #CXXFLAGS     += -fsanitize=undefined -fno-omit-frame-pointer
 #CXXFLAGS      += -fsanitize=leak -fsanitize-blacklist=$(shell root-config --etcdir)/lsan-root.supp
-LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./KFParticle/install/lib -L./FairBase -L.
+LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./EventWASAUnpack -L./HitAna -L./KFParticle/install/lib -L./FairBase -L.
 
 LDFLAGS       = '-Wl,-rpath,$$ORIGIN/lib'
 SOFLAGS       = -shared
@@ -53,7 +53,8 @@ KFPARTICLEFLAGS = -I./KFParticle/install/include
 ORMFLAGS = -I./sqlite_orm/include
 
 CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
-LIBS         += $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lsqlite3
+LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3
+LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventWASAUnpack -lHitAna -lEventG4Sol -lTreePlayer -lHyphiFairBase -lAna_Event -lMCAnaEventG4Sol -lsqlite3
 
 GENFIT_LIB = -lgenfit2
 SPDLOG_LIB = -lspdlog
@@ -71,11 +72,17 @@ LIB_PROFILING = #-L/home/christophe/Workspace/gperftools-2.4/lib -ltcmalloc #-lp
 DEPEND        = makedepend $(CXXFLAGS)
 
 #--------------------------------------------------------------------
-Sources = MainSimu.cc FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana_Hist.cc  
-Headers = $(patsubst %.cc,%.hh,$(Sources))
-Objects = $(patsubst %.cc,%.o,$(Sources))
+SourcesSimu = MainSimu.cc
+Objects_Simu = $(patsubst %.cc,%.o,$(SourcesSimu))
 
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc #TFinderCM.cc
+SourcesData = MainData.cc  
+Objects_Data = $(patsubst %.cc,%.o,$(SourcesData))
+
+Sources_Comm = FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana_Hist.cc  
+Headers_Comm = $(patsubst %.cc,%.hh,$(Sources_Comm))
+Objects_Comm = $(patsubst %.cc,%.o,$(Sources_Comm))
+ 
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBuildWASACalibrationLayerPlane.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc TCheckFiberTrack.cc #TFinderCM.cc
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
@@ -86,7 +93,7 @@ Objects_Proc_genfit_dep = $(patsubst %.cc,%.o,$(Sources_Proc_genfit_dep))
 Source_Proc_genfit_ZMQ_dep = FullRecoTaskZMQ.cc TKalmanFilter_DAF_ZMQ.cc
 Objects_Proc_genfit_ZMQ_dep = $(patsubst %.cc,%.o,$(Source_Proc_genfit_ZMQ_dep))
 
-CHK_SOURCES += $(Sources) $(Sources_Proc) $(Sources_Proc_genfit_dep) $(Sources_Proc_genfit_ZMQ_dep)
+CHK_SOURCES += $(Sources_Comm) $(Sources_Proc) $(Sources_Proc_genfit_dep) $(Sources_Proc_genfit_ZMQ_dep)
 CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 
 #Objects_Proc_old_genfit = $(patsubst %.cc,%.o,$(Sources_Proc_old_genfit))
@@ -95,13 +102,16 @@ CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 # MathObj = MathematicalTools.o
 # MathSo = libHyphiMathTools.$(DllSuf)
 
-all: print $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainMonitor 
+all: print $(MathSo) libEventG4Sol.so libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainData $(Bindir)/MainMonitor 
 
-$(Bindir)/MainSimu: $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
+$(Bindir)/MainSimu: $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_SIM) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
+
+$(Bindir)/MainData: $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainData $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_DATA) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS) 
 
 $(Bindir)/MainMonitor: MainMonitor.o FullRecoConfig.o
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS_SIM) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
 
 # $(Bindir)/BatchMerger: BatchMerger.o libAnaEventOut.so libAna_Event.so
 # 	$(CXX) $(CXXFLAGS) BatchMerger.o $(LIBS) $(LIB_MERGER) -o $(Bindir)/BatchMerger
@@ -177,11 +187,37 @@ ifeq ($(ARCH),macosx)
 endif
 	@echo "---> $@ done"
 
+libEventWASAUnpack.so :
+	make -C EventWASAUnpack
+	ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack.$(DllSuf) $(Bindir)/lib/
+ifeq ($(ROOTVERSION),6)
+	ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack_rdict.pcm $(Bindir)/lib/
+endif
+ifeq ($(ARCH),macosx)
+	ln -sf $(FromLibdir)/EventWASAUnpack/libEventWASAUnpack.$(MacDllSuf) $(Bindir)/lib/
+endif
+	@echo "---> $@ done"
+
+libHitAna.so :
+	make -C HitAna
+	ln -sf $(FromLibdir)/HitAna/libHitAna.$(DllSuf) $(Bindir)/lib/
+ifeq ($(ROOTVERSION),6)
+	ln -sf $(FromLibdir)/HitAna/libHitAna_rdict.pcm $(Bindir)/lib/
+endif
+ifeq ($(ARCH),macosx)
+	ln -sf $(FromLibdir)/HitAna/libHitAna.$(MacDllSuf) $(Bindir)/lib/
+endif
+	@echo "---> $@ done"
+
 libMCEvent.so :
 	make -C Ana_Event
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEventG4Sol.$(DllSuf) $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Ana_Event/libAna_Event.$(DllSuf) $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Ana_Event/libAna_WasaEvent.$(DllSuf) $(Bindir)/lib/
 ifeq ($(ROOTVERSION),6)
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEventG4Sol_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Ana_Event/libAna_WasaEvent_rdict.pcm $(Bindir)/lib/
+	ln -sf $(FromLibdir)/Ana_Event/libAna_WasaEvent_rdict.pcm $(Bindir)/lib/libAna_Event_rdict.pcm
 endif
 ifeq ($(ARCH),macosx)
 	ln -sf $(FromLibdir)/Ana_Event/libMCAnaEvent.$(MacDllSuf) $(Bindir)/lib/
@@ -223,6 +259,8 @@ clean_all: clean
 	make -C EventG4Sol clean_all
 	make -C FairBase clean_all
 	make -C Ana_Event clean_all
+	make -C EventWASAUnpack clean_all
+	make -C HitAna clean_all
 print :
 	@echo "################################################################################"
 	@echo "#                                                                               "
@@ -262,7 +300,9 @@ check-syntax:
                 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(df).P; \
             rm -f $*.d
 
--include $(Sources:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(SourcesSimu:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(SourcesData:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(Sources_Comm:%.$(SrcSuf)=$(DEPDIR)/%.P)
 -include $(Sources_Proc:%.$(SrcSuf)=$(DEPDIR)/%.P)
 -include $(Sources_Proc_genfit_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)
 -include $(Sources_Proc_genfit_ZMQ_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)

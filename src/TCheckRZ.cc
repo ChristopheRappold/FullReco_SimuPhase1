@@ -1,5 +1,7 @@
 #include "TCheckRZ.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
@@ -15,7 +17,8 @@
 using namespace std;
 using namespace G4Sol;
 
-TCheckRZ::TCheckRZ(const THyphiAttributes& attribut) : TDataProcessInterface("Check_R_Z"), att(attribut)
+template<class Out>
+TCheckRZ<Out>::TCheckRZ(const THyphiAttributes& attribut) : TDataProcessInterface<Out>("Check_R_Z"), att(attribut)
 {
   ChangeMiniFiber = att.RZ_ChangeMiniFiber;
 
@@ -39,11 +42,14 @@ TCheckRZ::TCheckRZ(const THyphiAttributes& attribut) : TDataProcessInterface("Ch
   //   }
 }
 
-TCheckRZ::~TCheckRZ() {}
+template<class Out>
+TCheckRZ<Out>::~TCheckRZ() {}
 
-void TCheckRZ::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template<class Out>
+void TCheckRZ<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TCheckRZ::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+ReturnRes::InfoM TCheckRZ<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   int result_finder = Exec(RecoEvent, OutTree);
@@ -51,25 +57,29 @@ ReturnRes::InfoM TCheckRZ::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol*
   return SoftExit(result_finder);
 }
 
-int TCheckRZ::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) { return FinderTrack(RecoEvent); }
+template<class Out>
+int TCheckRZ<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FinderTrack(RecoEvent); }
 
-ReturnRes::InfoM TCheckRZ::SoftExit(int result_full) { return ReturnRes::Fine; }
+template<class Out>
+ReturnRes::InfoM TCheckRZ<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
 
-void TCheckRZ::SelectHists()
+template<class Out>
+void TCheckRZ<Out>::SelectHists()
 {
 
-  LocalHisto.h_RZStats      = AnaHisto->CloneAndRegister(AnaHisto->h_RZStats);
-  LocalHisto.h_RZ           = AnaHisto->CloneAndRegister(AnaHisto->h_RZ);
-  LocalHisto.h_XYfit_miniF  = AnaHisto->CloneAndRegister(AnaHisto->h_XYfit_miniF);
-  LocalHisto.h_RZfit_mom    = AnaHisto->CloneAndRegister(AnaHisto->h_RZfit_mom);
-  LocalHisto.h_RZfit_Chi2   = AnaHisto->CloneAndRegister(AnaHisto->h_RZfit_Chi2);
-  LocalHisto.h_MDC_Z_residu = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_Z_residu);
-  LocalHisto.h_MDC_R_residu = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_R_residu);
-  LocalHisto.h_MDC_Z_pull   = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_Z_pull);
-  LocalHisto.h_MDC_R_pull   = AnaHisto->CloneAndRegister(AnaHisto->h_MDC_R_pull);
+  LocalHisto.h_RZStats      = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RZStats);
+  LocalHisto.h_RZ           = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RZ);
+  LocalHisto.h_XYfit_miniF  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_XYfit_miniF);
+  LocalHisto.h_RZfit_mom    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RZfit_mom);
+  LocalHisto.h_RZfit_Chi2   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_RZfit_Chi2);
+  LocalHisto.h_MDC_Z_residu = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MDC_Z_residu);
+  LocalHisto.h_MDC_R_residu = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MDC_R_residu);
+  LocalHisto.h_MDC_Z_pull   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MDC_Z_pull);
+  LocalHisto.h_MDC_R_pull   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_MDC_R_pull);
 }
 
-int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
+template<class Out>
+int TCheckRZ<Out>::FinderTrack(FullRecoEvent& RecoEvent)
 {
 
   // auto printW = [](const auto a, const int width) -> std::string {
@@ -1121,3 +1131,6 @@ int TCheckRZ::FinderTrack(FullRecoEvent& RecoEvent)
 
   return 0;
 }
+
+template class TCheckRZ<MCAnaEventG4Sol>;
+template class TCheckRZ<Ana_WasaEvent>;

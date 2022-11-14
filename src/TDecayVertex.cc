@@ -1,5 +1,7 @@
 #include "TDecayVertex.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "ReturnRes.hh"
 
@@ -20,23 +22,28 @@
 using namespace std;
 using namespace G4Sol;
 
-TDecayVertex::TDecayVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface("DecayVertexReco"), att(attribut), fieldWASA(att.Field)
+template <class Out>
+TDecayVertex<Out>::TDecayVertex(const THyphiAttributes& attribut)
+    : TDataProcessInterface<Out>("DecayVertexReco"), att(attribut), fieldWASA(att.Field)
   {
     TranslationZ_Target_System(att.Target_PositionZ);
   }
 
-TDecayVertex::~TDecayVertex() {}
+template <class Out>
+TDecayVertex<Out>::~TDecayVertex() {}
 
-void TDecayVertex::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template <class Out>
+void TDecayVertex<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TDecayVertex::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template <class Out>
+ReturnRes::InfoM TDecayVertex<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
   int result_finder = Exec(RecoEvent, OutTree);
   return SoftExit(result_finder);
 }
 
-int TDecayVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) 
+template <class Out>
+int TDecayVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 {
   int res_finder = FinderDecayVertex(RecoEvent); 
 
@@ -100,7 +107,8 @@ int TDecayVertex::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
   return res_finder;
 }
 
-ReturnRes::InfoM TDecayVertex::SoftExit(int result_full) {
+template <class Out>
+ReturnRes::InfoM TDecayVertex<Out>::SoftExit(int result_full) {
   
   if(result_full == -1)
     {
@@ -158,148 +166,150 @@ ReturnRes::InfoM TDecayVertex::SoftExit(int result_full) {
 
 
 
-void TDecayVertex::SelectHists()
+template <class Out>
+void TDecayVertex<Out>::SelectHists()
 {
-  LocalHisto.h_P_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_P_fragments);
-  LocalHisto.h_Pt_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_fragments);
-  LocalHisto.h_Pz_fragments = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_fragments);
-  LocalHisto.h_Dist_FragmentTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_FragmentTrackPrimVtx);
+  LocalHisto.h_P_fragments = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_P_fragments);
+  LocalHisto.h_Pt_fragments = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pt_fragments);
+  LocalHisto.h_Pz_fragments = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pz_fragments);
+  LocalHisto.h_Dist_FragmentTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_FragmentTrackPrimVtx);
 
-  LocalHisto.h_P_pions = AnaHisto->CloneAndRegister(AnaHisto->h_P_pions);
-  LocalHisto.h_Pt_pions = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_pions);
-  LocalHisto.h_Pz_pions = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_pions);
-  LocalHisto.h_Chi2ndf_pions = AnaHisto->CloneAndRegister(AnaHisto->h_Chi2ndf_pions);
+  LocalHisto.h_P_pions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_P_pions);
+  LocalHisto.h_Pt_pions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pt_pions);
+  LocalHisto.h_Pz_pions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pz_pions);
+  LocalHisto.h_Chi2ndf_pions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Chi2ndf_pions);
 
-  LocalHisto.h_Pt_cutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pt_cutpions);
-  LocalHisto.h_Pz_cutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Pz_cutpions);
+  LocalHisto.h_Pt_cutpions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pt_cutpions);
+  LocalHisto.h_Pz_cutpions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Pz_cutpions);
 
-  LocalHisto.h_Nrealpions = AnaHisto->CloneAndRegister(AnaHisto->h_Nrealpions);
-  LocalHisto.h_Ncutpions = AnaHisto->CloneAndRegister(AnaHisto->h_Ncutpions);
-  LocalHisto.h_Npions = AnaHisto->CloneAndRegister(AnaHisto->h_Npions);
-
-
-  LocalHisto.h_Closedist_Distance = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_Distance);
-  LocalHisto.h_Closedist_PosZ = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_PosZ);
-  LocalHisto.h_Dist_DecayTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_DecayTrackPrimVtx);
-
-  LocalHisto.h_Closedist_cutDistance = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_cutDistance);
-  LocalHisto.h_Closedist_cutPosZ = AnaHisto->CloneAndRegister(AnaHisto->h_Closedist_cutPosZ);
-  LocalHisto.h_Dist_cutDecayTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_cutDecayTrackPrimVtx);
+  LocalHisto.h_Nrealpions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Nrealpions);
+  LocalHisto.h_Ncutpions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Ncutpions);
+  LocalHisto.h_Npions = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Npions);
 
 
-  LocalHisto.h_DecayVertexDistance = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance);
-  LocalHisto.h_DecayVertexDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX);
-  LocalHisto.h_DecayVertexDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY);
-  LocalHisto.h_DecayVertexDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ);
+  LocalHisto.h_Closedist_Distance = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Closedist_Distance);
+  LocalHisto.h_Closedist_PosZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Closedist_PosZ);
+  LocalHisto.h_Dist_DecayTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_DecayTrackPrimVtx);
 
-  LocalHisto.h_DecayVertexDistance_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_centroid);
-  LocalHisto.h_DecayVertexDistanceX_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_centroid);
-  LocalHisto.h_DecayVertexDistanceY_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_centroid);
-  LocalHisto.h_DecayVertexDistanceZ_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_centroid);
+  LocalHisto.h_Closedist_cutDistance = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Closedist_cutDistance);
+  LocalHisto.h_Closedist_cutPosZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Closedist_cutPosZ);
+  LocalHisto.h_Dist_cutDecayTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_cutDecayTrackPrimVtx);
 
-  LocalHisto.h_DecayVertexDistance_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_KFPart);
-  LocalHisto.h_DecayVertexDistanceX_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_KFPart);
-  LocalHisto.h_DecayVertexDistanceY_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_KFPart);
-  LocalHisto.h_DecayVertexDistanceZ_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_KFPart);
 
-  LocalHisto.h_DecayVertexDistance_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexDistanceX_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexDistanceY_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexDistanceZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexDistance = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance);
+  LocalHisto.h_DecayVertexDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX);
+  LocalHisto.h_DecayVertexDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY);
+  LocalHisto.h_DecayVertexDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ);
 
-  LocalHisto.h_DecayVertexDistance_KFPart_PrimVtx_Mass = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_KFPart_PrimVtx_Mass);
-  LocalHisto.h_DecayVertexDistanceX_KFPart_PrimVtx_Mass = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_KFPart_PrimVtx_Mass);
-  LocalHisto.h_DecayVertexDistanceY_KFPart_PrimVtx_Mass = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_KFPart_PrimVtx_Mass);
-  LocalHisto.h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass);
+  LocalHisto.h_DecayVertexDistance_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_centroid);
+  LocalHisto.h_DecayVertexDistanceX_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_centroid);
+  LocalHisto.h_DecayVertexDistanceY_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_centroid);
+  LocalHisto.h_DecayVertexDistanceZ_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_centroid);
 
-  LocalHisto.h_DecayVertexcutDistance = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistance);
-  LocalHisto.h_DecayVertexcutDistanceX = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceX);
-  LocalHisto.h_DecayVertexcutDistanceY = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceY);
-  LocalHisto.h_DecayVertexcutDistanceZ = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceZ);
+  LocalHisto.h_DecayVertexDistance_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_KFPart);
+  LocalHisto.h_DecayVertexDistanceX_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_KFPart);
+  LocalHisto.h_DecayVertexDistanceY_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_KFPart);
+  LocalHisto.h_DecayVertexDistanceZ_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_KFPart);
+
+  LocalHisto.h_DecayVertexDistance_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexDistanceX_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexDistanceY_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexDistanceZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_KFPart_PrimVtx);
+
+  LocalHisto.h_DecayVertexDistance_KFPart_PrimVtx_Mass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_KFPart_PrimVtx_Mass);
+  LocalHisto.h_DecayVertexDistanceX_KFPart_PrimVtx_Mass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_KFPart_PrimVtx_Mass);
+  LocalHisto.h_DecayVertexDistanceY_KFPart_PrimVtx_Mass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_KFPart_PrimVtx_Mass);
+  LocalHisto.h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass);
+
+  LocalHisto.h_DecayVertexcutDistance = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistance);
+  LocalHisto.h_DecayVertexcutDistanceX = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceX);
+  LocalHisto.h_DecayVertexcutDistanceY = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceY);
+  LocalHisto.h_DecayVertexcutDistanceZ = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceZ);
 
 /*
-  LocalHisto.h_DecayVertexcutDistance_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistance_KFPart);
-  LocalHisto.h_DecayVertexcutDistanceX_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceX_KFPart);
-  LocalHisto.h_DecayVertexcutDistanceY_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceY_KFPart);
-  LocalHisto.h_DecayVertexcutDistanceZ_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceZ_KFPart);
+  LocalHisto.h_DecayVertexcutDistance_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistance_KFPart);
+  LocalHisto.h_DecayVertexcutDistanceX_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceX_KFPart);
+  LocalHisto.h_DecayVertexcutDistanceY_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceY_KFPart);
+  LocalHisto.h_DecayVertexcutDistanceZ_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceZ_KFPart);
 */
 
-  LocalHisto.h_DecayVertexcutDistance_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistance_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexcutDistanceX_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceX_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexcutDistanceY_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceY_KFPart_PrimVtx);
-  LocalHisto.h_DecayVertexcutDistanceZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexcutDistanceZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexcutDistance_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistance_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexcutDistanceX_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceX_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexcutDistanceY_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceY_KFPart_PrimVtx);
+  LocalHisto.h_DecayVertexcutDistanceZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexcutDistanceZ_KFPart_PrimVtx);
 
 
-  LocalHisto.h_DecayVertexPosZ_real = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_real);
-  LocalHisto.h_DecayVertexPosZ_vfunction = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_vfunction);
-  LocalHisto.h_DecayVertexPosZ_centroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_centroid);
-  LocalHisto.h_DecayVertexPosZ_KFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_KFPart);
-  LocalHisto.h_DecayVertexPosZ_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_AllVfunc);
-  LocalHisto.h_DecayVertexPosZ_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_AllCentroid);
-  LocalHisto.h_DecayVertexPosZ_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_AllKFPart);
+  LocalHisto.h_DecayVertexPosZ_real = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_real);
+  LocalHisto.h_DecayVertexPosZ_vfunction = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_vfunction);
+  LocalHisto.h_DecayVertexPosZ_centroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_centroid);
+  LocalHisto.h_DecayVertexPosZ_KFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_KFPart);
+  LocalHisto.h_DecayVertexPosZ_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_AllVfunc);
+  LocalHisto.h_DecayVertexPosZ_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_AllCentroid);
+  LocalHisto.h_DecayVertexPosZ_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_AllKFPart);
 
 //HISTO FOR POSSIBLE CUTS ON MOTHER TRACK
-  LocalHisto.h_N_MotherTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_MotherTracks);
-  LocalHisto.h_Dist_DaughterTracks = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_DaughterTracks);
-  LocalHisto.h_Angle_MotherFragment = AnaHisto->CloneAndRegister(AnaHisto->h_Angle_MotherFragment);
-  LocalHisto.h_Angle_MotherPion = AnaHisto->CloneAndRegister(AnaHisto->h_Angle_MotherPion);
-  LocalHisto.h_Chi2ndf_MotherTracks = AnaHisto->CloneAndRegister(AnaHisto->h_Chi2ndf_MotherTracks);
-  LocalHisto.h_Dist_MotherTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Dist_MotherTrackPrimVtx);
-  LocalHisto.h_Theta_MotherTrackPrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_Theta_MotherTrackPrimVtx);
-  LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexPosZ_KFPart_PrimVtx);
-  LocalHisto.h_DecayFragmentMomZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayFragmentMomZ_KFPart_PrimVtx);
-  LocalHisto.h_DecayPionMomZ_KFPart_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_DecayPionMomZ_KFPart_PrimVtx);
-  LocalHisto.h_Hyp_ArmenterosPodolanski = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_ArmenterosPodolanski);
-  LocalHisto.h_Hyp_CutArmenterosPodolanski = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_CutArmenterosPodolanski);
+  LocalHisto.h_N_MotherTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_N_MotherTracks);
+  LocalHisto.h_Dist_DaughterTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_DaughterTracks);
+  LocalHisto.h_Angle_MotherFragment = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Angle_MotherFragment);
+  LocalHisto.h_Angle_MotherPion = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Angle_MotherPion);
+  LocalHisto.h_Chi2ndf_MotherTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Chi2ndf_MotherTracks);
+  LocalHisto.h_Dist_MotherTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Dist_MotherTrackPrimVtx);
+  LocalHisto.h_Theta_MotherTrackPrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Theta_MotherTrackPrimVtx);
+  LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexPosZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayFragmentMomZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayFragmentMomZ_KFPart_PrimVtx);
+  LocalHisto.h_DecayPionMomZ_KFPart_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayPionMomZ_KFPart_PrimVtx);
+  LocalHisto.h_Hyp_ArmenterosPodolanski = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Hyp_ArmenterosPodolanski);
+  LocalHisto.h_Hyp_CutArmenterosPodolanski = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Hyp_CutArmenterosPodolanski);
   
-  LocalHisto.h_HypInvariantMass = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass);
-  LocalHisto.h_HypErrorInvariantMass = AnaHisto->CloneAndRegister(AnaHisto->h_HypErrorInvariantMass);
+  LocalHisto.h_HypInvariantMass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantMass);
+  LocalHisto.h_HypErrorInvariantMass = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypErrorInvariantMass);
 
-  LocalHisto.h_Hyp_RealLifeTime = AnaHisto->CloneAndRegister(AnaHisto->h_Hyp_RealLifeTime);
-  LocalHisto.h_HypLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypLifeTime_PrimVtx);
-  LocalHisto.h_HypErrorLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypErrorLifeTime_PrimVtx);
-  LocalHisto.h_HypcutLifeTime_PrimVtx = AnaHisto->CloneAndRegister(AnaHisto->h_HypcutLifeTime_PrimVtx);
+  LocalHisto.h_Hyp_RealLifeTime = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_Hyp_RealLifeTime);
+  LocalHisto.h_HypLifeTime_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypLifeTime_PrimVtx);
+  LocalHisto.h_HypErrorLifeTime_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypErrorLifeTime_PrimVtx);
+  LocalHisto.h_HypcutLifeTime_PrimVtx = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypcutLifeTime_PrimVtx);
 
-  LocalHisto.h_HypInvariantMassCheck      = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMassCheck);
-  LocalHisto.h_HypInvariantErrorMassCheck = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantErrorMassCheck);
+  LocalHisto.h_HypInvariantMassCheck = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantMassCheck);
+  LocalHisto.h_HypInvariantErrorMassCheck = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantErrorMassCheck);
 
-  LocalHisto.h_HypInvariantMass_LorentzVect    = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass_LorentzVect);
-  LocalHisto.h_HypInvariantMass_CutLorentzVect = AnaHisto->CloneAndRegister(AnaHisto->h_HypInvariantMass_CutLorentzVect);
+  LocalHisto.h_HypInvariantMass_LorentzVect = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantMass_LorentzVect);
+  LocalHisto.h_HypInvariantMass_CutLorentzVect = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_HypInvariantMass_CutLorentzVect);
 
-  LocalHisto.h_EffPosZ_real       = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_real);
-  LocalHisto.h_EffPosZ_preKF      = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKF);
-  LocalHisto.h_EffPosZ_postKF     = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_postKF);
-  LocalHisto.h_EffPosZ_preKFPart  = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_preKFPart);
-  LocalHisto.h_EffPosZ_postKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZ_postKFPart);
+  LocalHisto.h_EffPosZ_real = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_real);
+  LocalHisto.h_EffPosZ_preKF = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_preKF);
+  LocalHisto.h_EffPosZ_postKF = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_postKF);
+  LocalHisto.h_EffPosZ_preKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_preKFPart);
+  LocalHisto.h_EffPosZ_postKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZ_postKFPart);
 
-  LocalHisto.h_EffPosZPosR_real       = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZPosR_real);
-  LocalHisto.h_EffPosZPosR_postKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_EffPosZPosR_postKFPart);
+  LocalHisto.h_EffPosZPosR_real       = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZPosR_real);
+  LocalHisto.h_EffPosZPosR_postKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZPosR_postKFPart);
 
 
-  LocalHisto.h_N_SiHits_ReconsTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_SiHits_ReconsTracks);
+  LocalHisto.h_N_SiHits_ReconsTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_N_SiHits_ReconsTracks);
 
 /*
-  LocalHisto.h_N_Si_MotherTracks = AnaHisto->CloneAndRegister(AnaHisto->h_N_Si_MotherTracks);
+  LocalHisto.h_N_Si_MotherTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_N_Si_MotherTracks);
 
-  LocalHisto.h_DecayVertexDistance_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_AllVfunc);
-  LocalHisto.h_DecayVertexDistanceX_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_AllVfunc);
-  LocalHisto.h_DecayVertexDistanceY_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_AllVfunc);
-  LocalHisto.h_DecayVertexDistanceZ_AllVfunc = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_AllVfunc);
+  LocalHisto.h_DecayVertexDistance_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_AllVfunc);
+  LocalHisto.h_DecayVertexDistanceX_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_AllVfunc);
+  LocalHisto.h_DecayVertexDistanceY_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_AllVfunc);
+  LocalHisto.h_DecayVertexDistanceZ_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_AllVfunc);
 
-  LocalHisto.h_DecayVertexDistance_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_AllCentroid);
-  LocalHisto.h_DecayVertexDistanceX_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_AllCentroid);
-  LocalHisto.h_DecayVertexDistanceY_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_AllCentroid);
-  LocalHisto.h_DecayVertexDistanceZ_AllCentroid = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_AllCentroid);
+  LocalHisto.h_DecayVertexDistance_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_AllCentroid);
+  LocalHisto.h_DecayVertexDistanceX_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_AllCentroid);
+  LocalHisto.h_DecayVertexDistanceY_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_AllCentroid);
+  LocalHisto.h_DecayVertexDistanceZ_AllCentroid = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_AllCentroid);
 
-  LocalHisto.h_DecayVertexDistance_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistance_AllKFPart);
-  LocalHisto.h_DecayVertexDistanceX_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceX_AllKFPart);
-  LocalHisto.h_DecayVertexDistanceY_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceY_AllKFPart);
-  LocalHisto.h_DecayVertexDistanceZ_AllKFPart = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVertexDistanceZ_AllKFPart);
+  LocalHisto.h_DecayVertexDistance_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_AllKFPart);
+  LocalHisto.h_DecayVertexDistanceX_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceX_AllKFPart);
+  LocalHisto.h_DecayVertexDistanceY_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceY_AllKFPart);
+  LocalHisto.h_DecayVertexDistanceZ_AllKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistanceZ_AllKFPart);
 */
-  LocalHisto.h_DecayVtxstats = AnaHisto->CloneAndRegister(AnaHisto->h_DecayVtxstats);
+  LocalHisto.h_DecayVtxstats = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVtxstats);
 }
 
-int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
+template <class Out>
+int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 {
 
 /*
@@ -1486,7 +1496,8 @@ int TDecayVertex::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
 
-void TDecayVertex::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg)
+template <class Out>
+void TDecayVertex<Out>::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg)
 {
   if(StudyCase.compare("H3L") == 0)
     {
@@ -1529,7 +1540,8 @@ void TDecayVertex::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& F
 }
 
 
-void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
+template <class Out>
+void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                                         int& pdgParticle, int& cutConditions,
                                         std::vector<KFParticle>& RealTracks,
                                         std::vector<KFFitInfo>& Vect_FitInfo)
@@ -1612,7 +1624,8 @@ void TDecayVertex::RealTracksFinder(std::unordered_map<int, std::vector<std::vec
   return;
 }
 
-void TDecayVertex::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
+template <class Out>
+void TDecayVertex<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
                                     std::vector<KFParticle>& FragmentMDCTracks)
 {
   int temp_charge = TDatabasePDG::Instance()->GetParticle(fragment_pdg)->Charge()/3.;
@@ -1655,7 +1668,8 @@ void TDecayVertex::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& D
 }
 
 
-void TDecayVertex::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks)
+template <class Out>
+void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks)
 {
 /*
   Possible cuts:
@@ -1704,9 +1718,10 @@ void TDecayVertex::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All,
 }
 
 
-void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
+template <class Out>
+void TDecayVertex<Out>::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
                                     std::vector<KFParticle>& PionTracks,
-                                    std::vector<KFFitInfo>& Vect_FitInfo)
+                                        std::vector<KFFitInfo>& Vect_FitInfo)
 {
   std::unordered_map<int, ResSolDAF>::iterator itr;
   for(itr = DAF_results.begin(); itr != DAF_results.end(); ++itr)
@@ -1752,8 +1767,8 @@ void TDecayVertex::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_resu
   return;
 }
 
-void TDecayVertex::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& PionTracks,
-                                  std::vector<KFFitInfo>& Vect_FitInfo)
+template <class Out>
+void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& PionTracks, std::vector<KFFitInfo>& Vect_FitInfo)
 {
 /*
   Possible cuts:
@@ -1796,7 +1811,8 @@ void TDecayVertex::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector
 }
 
 
-void TDecayVertex::CloseDist(KFParticle& FragmentTrack, KFParticle& PionTrack, double& distance, TVector3& centroid)
+template <class Out>
+void TDecayVertex<Out>::CloseDist(KFParticle& FragmentTrack, KFParticle& PionTrack, double& distance, TVector3& centroid)
 {
   TVector3 n(FragmentTrack.GetPy() * PionTrack.GetPz() - FragmentTrack.GetPz() * PionTrack.GetPy(),
              FragmentTrack.GetPz() * PionTrack.GetPx() - FragmentTrack.GetPx() * PionTrack.GetPz(),
@@ -1837,7 +1853,8 @@ void TDecayVertex::CloseDist(KFParticle& FragmentTrack, KFParticle& PionTrack, d
   return;
 }
 
-double TDecayVertex::f_function(KFParticle& DecayTrack, TVector3& PosXYZ)
+template <class Out>
+double TDecayVertex<Out>::f_function(KFParticle& DecayTrack, TVector3& PosXYZ)
 {
   double slope_x     = DecayTrack.GetPx() / DecayTrack.GetPz();
   double intercept_x = DecayTrack.GetX() - slope_x * DecayTrack.GetZ();
@@ -1854,7 +1871,8 @@ double TDecayVertex::f_function(KFParticle& DecayTrack, TVector3& PosXYZ)
   return f;
 }
 
-double TDecayVertex::V_function(std::vector<double>& f_vector)
+template <class Out>
+double TDecayVertex<Out>::V_function(std::vector<double>& f_vector)
 {
   double sum_f  = 0;
   double sum_f2 = 0;
@@ -1873,7 +1891,8 @@ double TDecayVertex::V_function(std::vector<double>& f_vector)
   return v;
 }
 
-void TDecayVertex::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf,
+template <class Out>
+void TDecayVertex<Out>::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf,
                                          size_t& NstepsY, double& Zi, double& Zf, size_t& NstepsZ, size_t& border,
                                          std::vector<TVector3>& PosXYZ)
 {
@@ -1909,7 +1928,8 @@ void TDecayVertex::SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, 
   return;
 }
 
-void TDecayVertex::TrackstoDecayVertex(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::TrackstoDecayVertex(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                                         TVector3& PrimVtxRecons, TVector3& DecayVertexRecons)
 {
   std::vector<double> temp_f(FragmentTracks.size() + PionTracks.size(), 0.);
@@ -1978,7 +1998,8 @@ void TDecayVertex::TrackstoDecayVertex(std::vector<KFParticle>& FragmentTracks, 
   return;
 }
 
-void TDecayVertex::ThetaDist_TrackPrimVtx(KFParticle& Track, TVector3& PrimVtxRecons, double& theta, double& distance)
+template <class Out>
+void TDecayVertex<Out>::ThetaDist_TrackPrimVtx(KFParticle& Track, TVector3& PrimVtxRecons, double& theta, double& distance)
 {
   TVector3 u(Track.GetPx(), Track.GetPy(), Track.GetPz());
   TVector3 P(Track.GetX(), Track.GetY(), Track.GetZ());
@@ -1990,7 +2011,8 @@ void TDecayVertex::ThetaDist_TrackPrimVtx(KFParticle& Track, TVector3& PrimVtxRe
   return;
 }
 
-void TDecayVertex::KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<double,6> Cov_PrimVtx, KFParticleSIMD& temp_PrimVtx)
+template <class Out>
+void TDecayVertex<Out>::KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<double,6> Cov_PrimVtx, KFParticleSIMD& temp_PrimVtx)
 {
   const float_v fP_PrimVtx [] = {PrimVtxRecons.X(), PrimVtxRecons.Y(), PrimVtxRecons.Z(), 0., 0., 0.};
   
@@ -2011,7 +2033,8 @@ void TDecayVertex::KFPart_PrimaryVertex(TVector3& PrimVtxRecons, std::array<doub
 }
 
 /* //WORKING FINE FOR HOMOGENEUS FIELD
-void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                                       const KFParticleSIMD* pointer_PrimVtx, std::vector<KFParticle>& MotherTracks,
                                       std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks)
 {
@@ -2059,7 +2082,8 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
 }
 */
 
-void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                                       const KFParticleSIMD* pointer_PrimVtx, std::vector<KFParticle>& MotherTracks,
                                       std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks)
 {
@@ -2109,7 +2133,8 @@ void TDecayVertex::MotherTracksRecons(std::vector<KFParticle>& FragmentTracks, s
   return;
 }
 
-void TDecayVertex::MotherSelector(std::vector<KFParticle>& MotherTracks_All, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks_All,
+template <class Out>
+void TDecayVertex<Out>::MotherSelector(std::vector<KFParticle>& MotherTracks_All, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks_All,
                                   std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks, TVector3& PrimVtxRecons,
                                   std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks)
 {
@@ -2188,7 +2213,8 @@ void TDecayVertex::MotherSelector(std::vector<KFParticle>& MotherTracks_All, std
 }
 
 
-void TDecayVertex::SiHitsFinder(KFParticle& Track, std::vector<std::vector<double> >& Hits_Si,
+template <class Out>
+void TDecayVertex<Out>::SiHitsFinder(KFParticle& Track, std::vector<std::vector<double> >& Hits_Si,
                                   std::vector<std::vector<double> >& Track_Sihit)
 {
   if(Hits_Si.size() == 0)
@@ -2223,7 +2249,8 @@ void TDecayVertex::SiHitsFinder(KFParticle& Track, std::vector<std::vector<doubl
   return;
 }
 
-void TDecayVertex::MotherDaughtersTrack_SiHits(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::MotherDaughtersTrack_SiHits(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                     std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks,
                     std::vector<std::vector<double> >& Hits_Si1, std::vector<std::vector<double> >& Hits_Si2,
                     std::vector<std::tuple<int, std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>>>& Fragment_SiHits,
@@ -2301,7 +2328,8 @@ void TDecayVertex::MotherDaughtersTrack_SiHits(std::vector<KFParticle>& Fragment
 }
 
 
-void TDecayVertex::SiHitsFinder2(KFParticle& Track, int idSilicon, int stripDirection, //Strip direction: 1 -> X, 2 -> Y 
+template <class Out>
+void TDecayVertex<Out>::SiHitsFinder2(KFParticle& Track, int idSilicon, int stripDirection, //Strip direction: 1 -> X, 2 -> Y
                                   std::vector<std::tuple<double, size_t> >& Hits_Si, std::vector<std::vector<double> >& Track_Sihit)
 {
   if(Hits_Si.size() == 0)
@@ -2377,7 +2405,8 @@ void TDecayVertex::SiHitsFinder2(KFParticle& Track, int idSilicon, int stripDire
   return;
 }
 
-void TDecayVertex::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
+template <class Out>
+void TDecayVertex<Out>::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
                     std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks,
                     std::vector<std::tuple<double, size_t> >& HitsX_Si1, std::vector<std::tuple<double, size_t> >& HitsY_Si1,
                     std::vector<std::tuple<double, size_t> >& HitsX_Si2, std::vector<std::tuple<double, size_t> >& HitsY_Si2,
@@ -2527,7 +2556,8 @@ void TDecayVertex::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& Fragmen
 */
 
 
-void TDecayVertex::AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& AllTracks, TVector3& Old_DecayVertexRecons, TVector3& DecayVertexRecons)
+template <class Out>
+void TDecayVertex<Out>::AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& AllTracks, TVector3& Old_DecayVertexRecons, TVector3& DecayVertexRecons)
 {
   std::vector<double> temp_f(AllTracks.size(), 0.);
 
@@ -2590,7 +2620,8 @@ void TDecayVertex::AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& All
     }
 }
 
-void TDecayVertex::AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& AllTracks, TVector3& DecayVertexRecons)
+template <class Out>
+void TDecayVertex<Out>::AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& AllTracks, TVector3& DecayVertexRecons)
 {
   std::vector<TVector3> Vect_Centroids;
 
@@ -2612,8 +2643,8 @@ void TDecayVertex::AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& All
   DecayVertexRecons *= 1. / static_cast<double>(Vect_Centroids.size());
 }
 
-
-void TDecayVertex::TranslationZ_Target_System(double Target_PosZ)
+template<class Out>
+void TDecayVertex<Out>::TranslationZ_Target_System(double Target_PosZ)
 {
   double Dist_to_TransZ = Target_PosZ - 25.; // Reference target PosZ = 25.
   Zo_target += Dist_to_TransZ;
@@ -2623,3 +2654,6 @@ void TDecayVertex::TranslationZ_Target_System(double Target_PosZ)
   Z_plane_Si2 += Dist_to_TransZ;
 */
 }
+
+template class TDecayVertex<MCAnaEventG4Sol>;
+template class TDecayVertex<Ana_WasaEvent>;

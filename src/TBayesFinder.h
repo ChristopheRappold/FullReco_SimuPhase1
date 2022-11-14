@@ -14,7 +14,9 @@
 
 #include "THyphiAttributes.h"
 
-typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
+//typedef TDataProcess<FullRecoEvent,MCAnaEventG4Sol> TDataProcessInterface;
+template<class Out>
+using TDataProcessInterface = TDataProcess<FullRecoEvent, Out>;
 
 namespace BayesFind {
 
@@ -42,7 +44,8 @@ namespace BayesFind {
 
 };
 
-class TBayesFinder final :  public TDataProcessInterface
+template<class Out>
+class TBayesFinder final :  public TDataProcessInterface<Out>
 {
   public :
   const THyphiAttributes& att;
@@ -53,9 +56,9 @@ class TBayesFinder final :  public TDataProcessInterface
 
   //int Init(Ana_Hist* h);
   void InitMT() final;
-  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
+  ReturnRes::InfoM operator() (FullRecoEvent& RecoEvent,Out* OutTree) final;
  private:
-  int Exec(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree) final;
+  int Exec(FullRecoEvent& RecoEvent,Out* OutTree) final;
   ReturnRes::InfoM SoftExit(int) final;
   void SelectHists() final;
 

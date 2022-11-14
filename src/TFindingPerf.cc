@@ -1,5 +1,7 @@
 #include "TFindingPerf.h"
 
+#include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
@@ -132,19 +134,23 @@ std::size_t TPerf::Levenshtein_distance5(const std::set<std::string>& string_a, 
 using namespace std;
 using namespace G4Sol;
 
-TFindingPerf::TFindingPerf(const THyphiAttributes& attribut) : TDataProcessInterface("FindingPerf"), att(attribut)
+template<class Out>
+TFindingPerf<Out>::TFindingPerf(const THyphiAttributes& attribut) : TDataProcessInterface<Out>("FindingPerf"), att(attribut)
 {
 
 }
 
-TFindingPerf::~TFindingPerf()
+template<class Out>
+TFindingPerf<Out>::~TFindingPerf()
 {
 
 }
 
-void TFindingPerf::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
+template<class Out>
+void TFindingPerf<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
 
-ReturnRes::InfoM TFindingPerf::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+ReturnRes::InfoM TFindingPerf<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTree)
 {
 
   int result_finder = Exec(RecoEvent, OutTree);
@@ -152,17 +158,20 @@ ReturnRes::InfoM TFindingPerf::operator()(FullRecoEvent& RecoEvent, MCAnaEventG4
   return SoftExit(result_finder);
 }
 
-int TFindingPerf::Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+template<class Out>
+int TFindingPerf<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 {
   return CheckTrackFinding(RecoEvent);
 }
 
-ReturnRes::InfoM TFindingPerf::SoftExit(int result_full) { return ReturnRes::Fine; }
+template<class Out>
+ReturnRes::InfoM TFindingPerf<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
 
-void TFindingPerf::SelectHists()
+template<class Out>
+void TFindingPerf<Out>::SelectHists()
 {
-  LocalHisto.h_PerfFinder =  AnaHisto->CloneAndRegister(AnaHisto->h_PerfFinder);
-  LocalHisto.h_PerfFinderLevenshtein = AnaHisto->CloneAndRegister(AnaHisto->h_PerfFinderLevenshtein);
+  LocalHisto.h_PerfFinder =  this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PerfFinder);
+  LocalHisto.h_PerfFinderLevenshtein = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_PerfFinderLevenshtein);
   // auto Yaxis = LocalHisto.h_PerfFinder->GetYaxis();
   // Yaxis->SetBinLabel(1,"NotFoundReal");
   // Yaxis->SetBinLabel(2,"FoundReal");
@@ -189,7 +198,8 @@ void TFindingPerf::SelectHists()
 
 }
 
-int TFindingPerf::CheckTrackFinding(const FullRecoEvent& RecoEvent)
+template<class Out>
+int TFindingPerf<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 {
 
   auto minDet = G4Sol::MG01;
@@ -295,26 +305,31 @@ int TFindingPerf::CheckTrackFinding(const FullRecoEvent& RecoEvent)
     att._logger->debug("{}",std::accumulate(nameT.begin(),nameT.end(),std::string(),std::plus<std::string>()));
 
   for(const auto& [idT, nT] : nameRealTracks)
-    for(const auto& nameT : nameTrackFound)
-      {
-	int dist = TPerf::Levenshtein_distance5(nameT,nT);
-	att._logger->debug("Dist Levenshtein : {} = {} / {}: {}",dist,std::accumulate(nameT.begin(),nameT.end(),std::string(),std::plus<std::string>()),idT,std::accumulate(nT.begin(),nT.end(),std::string(),std::plus<std::string>()));
+    {
+      int best_dist = 999;
+      for(const auto& nameT : nameTrackFound)
+	{
+	  int dist = TPerf::Levenshtein_distance5(nameT,nT);
+	  att._logger->debug("Dist Levenshtein : {} = {} / {}: {}",dist,std::accumulate(nameT.begin(),nameT.end(),std::string(),std::plus<std::string>()),idT,std::accumulate(nT.begin(),nT.end(),std::string(),std::plus<std::string>()));
 
-	int max_dist = TMath::Max(nameT.size(),nT.size());
-	if(dist >= max_dist)
-	  {
-	    att._logger->debug(" -> completely diff ! max {} dist {}",max_dist,dist);
-	    continue;
-	  }
-	double perC = 1. - dist / static_cast<double>(nT.size());
-	if(perC >= 0.9)
-	  att._logger->debug(" -> Found ! dist {} real {} % = {}",dist,nT.size(),perC);
-	else
-	  att._logger->debug(" -> Shared : dist {} real {} % = {}",dist,nT.size(),perC);
+	  int max_dist = TMath::Max(nameT.size(),nT.size());
+	  if(dist >= max_dist)
+	    {
+	      att._logger->debug(" -> completely diff ! max {} dist {}",max_dist,dist);
+	      continue;
+	    }
+	  double perC = 1. - dist / static_cast<double>(nT.size());
+	  if(perC >= 0.9)
+	    att._logger->debug(" -> Found ! dist {} real {} % = {}",dist,nT.size(),perC);
+	  else
+	    att._logger->debug(" -> Shared : dist {} real {} % = {}",dist,nT.size(),perC);
 
-	LocalHisto.h_PerfFinderLevenshtein->Fill(dist,nT.size());
-      }
+	  if(dist<=best_dist)
+	    best_dist = dist;
 
+	}
+      LocalHisto.h_PerfFinderLevenshtein->Fill(best_dist,nT.size());
+    }
 
 
   struct Results {
@@ -463,6 +478,11 @@ int TFindingPerf::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 	}
     }
   int n_realTracks = realTracks.size();
+  for(int n_i = 1;n_i<n_realTracks;++n_i)
+    LocalHisto.h_PerfFinder->Fill("TotalReal",n_i,n_realTracks);
+
+  LocalHisto.h_PerfFinder->Fill("TotalReal_dN",n_realTracks,n_realTracks);
+
   for(const auto& [idTrack,Res] : TrackSummary)
     {
       att._logger->debug("Stats : trackID {} / {}",idTrack, n_realTracks);
@@ -537,3 +557,6 @@ int TFindingPerf::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 
   return 0;
 }
+
+template class TFindingPerf<MCAnaEventG4Sol>;
+template class TFindingPerf<Ana_WasaEvent>;

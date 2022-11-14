@@ -19,7 +19,7 @@
 //   list_processMC.resize(0);
 // }
 
-FullRecoTaskMT::FullRecoTaskMT(const FullRecoConfig& conf, const DataSim& In)
+FullRecoTaskMT::FullRecoTaskMT(const FullRecoConfig& conf, const DataSimExp& In)
   : Attributes(conf, In), REvent(Attributes.MTsetting.NQueue)
 {
   Attributes._logger->info(" *** > FullRecoTaskMT instance created | Reconstruction requested are :");

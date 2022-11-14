@@ -22,7 +22,7 @@ Ana_Hist::~Ana_Hist()
 }
 
 /********************************************************************/
-Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu, bool PrimVtx, bool DecayVtx)
+Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu, bool Builder, bool PrimVtx, bool DecayVtx)
 {
   EnableState.resize(SIZEOF_STATEHIST);
   EnableState[DAF] = Daf;
@@ -32,6 +32,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
   EnableState[RIEMANN] = Riemann;
   EnableState[HOUGH] = Hough;
   EnableState[SIMU] = Simu;
+  EnableState[BUILDER] = Builder;
   EnableState[PRIMVTX] = PrimVtx;
   EnableState[DECAYVTX] = DecayVtx;
 
@@ -339,6 +340,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
 
       geoSolenoid.resize(17, nullptr);
     }
+
   if(EnableState[RIEMANN])
     {
       std::vector<std::vector<TH1*>*> HistReg;
@@ -357,6 +359,155 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
 
       HistRegisteredByDir.insert(std::make_pair("RiemannFinder", std::make_tuple(HistReg,0)));
     }
+
+  if(EnableState[SIMU])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
+
+      h_ResidualFiberX.emplace_back(new TH2F("h_ResidualFiberX","h_ResidualFiberX",20,0,20,1000,-1,1));
+      HistReg.emplace_back(&h_ResidualFiberX.store);
+
+      h_ResidualFiberY.emplace_back(new TH2F("h_ResidualFiberY","h_ResidualFiberY",20,0,20,1000,-1,1));
+      HistReg.emplace_back(&h_ResidualFiberY.store);
+
+      TString nameTemp[] = {"FiberD3_u","FiberD3_v","MiniFiberD1_x1","MiniFiberD1_u1","MiniFiberD1_v1",
+			    "MiniFiberD1_x2","MiniFiberD1_u2","MiniFiberD1_v2","PSFE","PSCE","PSBE"};
+      TString nameTemp1[] = {"_qN","_qP"};
+
+      for(int i=0;i<11;++i)
+	for(int j=0;j<2;++j)
+	  {
+	    h_ResidualFiberX_Angle[i][j].emplace_back(new TH2F("h_ResidualFiberX_Angle_"+nameTemp[i]+nameTemp1[j],"h_ResidualFiberX_Angle_"+nameTemp[i]+nameTemp1[j],180,0.,90, 200,-1,1));
+	    HistReg.emplace_back(&h_ResidualFiberX_Angle[i][j].store);
+
+	    h_ResidualFiberY_Angle[i][j].emplace_back(new TH2F("h_ResidualFiberY_Angle_"+nameTemp[i]+nameTemp1[j],"h_ResidualFiberY_Angle_"+nameTemp[i]+nameTemp1[j],180,0.,90,200,-1,1));
+	    HistReg.emplace_back(&h_ResidualFiberY_Angle[i][j].store);
+	  }
+
+      HistRegisteredByDir.insert(std::make_pair("Simu", std::make_tuple(HistReg,0)));
+    }
+
+
+  if(EnableState[BUILDER])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
+
+      h_Builderstats.emplace_back(new TH1I("Builderstats", "Builderstats", 10, 0, 10));
+      HistReg.emplace_back(&h_Builderstats.store);
+
+      double range10[7] = {256, 256, 384, 256, 256, 256, 256 };
+      for(int i=0; i<7; ++i)
+      {
+        for(int j=0; j<3; ++j)
+        {
+          h10[i][j].emplace_back(new TH2D(Form("h10[%d][%d]",i,j),Form("h10[%d][%d]",i,j),range10[i],-0.5,range10[i]-0.5, 300, -1700, -1400));
+          HistReg.emplace_back(&h10[i][j].store);
+          h11[i][j].emplace_back(new TH1D(Form("h11[%d][%d]",i,j),Form("h11[%d][%d]",i,j),200,-100,100));
+          HistReg.emplace_back(&h11[i][j].store);
+          h12[i][j].emplace_back(new TH1D(Form("h12[%d][%d]",i,j),Form("h12[%d][%d]",i,j),200,-100,100));
+          HistReg.emplace_back(&h12[i][j].store);
+          h13[i][j].emplace_back(new TH1D(Form("h13[%d][%d]",i,j),Form("h13[%d][%d]",i,j),10,-0.5,9.5));
+          HistReg.emplace_back(&h13[i][j].store);
+          h14[i][j].emplace_back(new TH1D(Form("h14[%d][%d]",i,j),Form("h14[%d][%d]",i,j),10,-0.5,9.5));
+          HistReg.emplace_back(&h14[i][j].store);
+          h15[i][j].emplace_back(new TH1D(Form("h15[%d][%d]",i,j),Form("h15[%d][%d]",i,j),8,-0.5,7.5));
+          HistReg.emplace_back(&h15[i][j].store);
+        }
+        h16[i].emplace_back(new TH2D(Form("h16[%d]",i),Form("h16[%d]",i),200,-100,100, 200, -100, 100));
+        HistReg.emplace_back(&h16[i].store);
+        h17[i].emplace_back(new TH1D(Form("h17[%d]",i)  ,Form("h17[%d]",i)  ,10 ,-0.5 ,9.5));
+        HistReg.emplace_back(&h17[i].store);
+        h17_2[i].emplace_back(new TH1D(Form("h17_2[%d]",i),Form("h17_2[%d]",i),200,-30  ,30 ));
+        HistReg.emplace_back(&h17_2[i].store);        
+      }
+
+      hpsb_0_1.emplace_back(new TH1D("hpsb_0_1","tu cut" ,200, -21000, -19000));
+      HistReg.emplace_back(&hpsb_0_1.store);
+      hpsb_0_2.emplace_back(new TH1D("hpsb_0_2","nhit"   ,30, -0.5, 29.5));
+      HistReg.emplace_back(&hpsb_0_2.store);
+      hpsb_0_3.emplace_back(new TH1D("hpsb_0_3","phi"    ,200, -3.2*2, 3.2*2));
+      HistReg.emplace_back(&hpsb_0_3.store);
+      hpsb_0_4.emplace_back(new TH2D("hpsb_0_4","phi vs seg" ,46, -0.5,  45.5,  200, -3.2, 3.2));
+      HistReg.emplace_back(&hpsb_0_4.store);
+      hpsb_1_1.emplace_back(new TH1D("hpsb_1_1","pos z" ,200, -500, 500));
+      HistReg.emplace_back(&hpsb_1_1.store);
+      for(int i=0; i<46; ++i)
+      {
+        hpsb_2[i].emplace_back(new TH1D(Form("hpsb_2[%d]",i),Form("PSB Seg %d",i),200, -15, 15));
+        HistReg.emplace_back(&hpsb_2[i].store);
+        hpsb_3[i].emplace_back(new TH2D(Form("hpsb_3[%d]",i),Form("PSB Seg %d",i),200, -8, 8, 200, -400, 400));
+        HistReg.emplace_back(&hpsb_3[i].store);
+        hpsb_4[i].emplace_back(new TH1D(Form("hpsb_4[%d]",i),Form("PSB Seg %d",i),200, -500, 500));
+        HistReg.emplace_back(&hpsb_4[i].store);
+      }
+
+      hpsfe_0_1.emplace_back(new TH1D("hpsfe_0_1","t cut" ,200, -26500, -23500));
+      HistReg.emplace_back(&hpsfe_0_1.store);
+      hpsfe_0_2.emplace_back(new TH1D("hpsfe_0_2","nhit"   ,30, -0.5, 29.5));
+      HistReg.emplace_back(&hpsfe_0_2.store);
+      hpsfe_0_3.emplace_back(new TH1D("hpsfe_0_3","phi"    ,200, -3.2*2, 3.2*2));
+      HistReg.emplace_back(&hpsfe_0_3.store);
+      hpsfe_0_4.emplace_back(new TH2D("hpsfe_0_4","phi vs seg" ,46, -0.5,  45.5,  200, -3.2, 3.2));
+      HistReg.emplace_back(&hpsfe_0_4.store);
+
+      hpsbe_0_1.emplace_back(new TH1D("hpsbe_0_1","t cut" ,200, -26500, -23500));
+      HistReg.emplace_back(&hpsbe_0_1.store);
+      hpsbe_0_2.emplace_back(new TH1D("hpsbe_0_2","nhit"   ,30, -0.5, 29.5));
+      HistReg.emplace_back(&hpsbe_0_2.store);
+      hpsbe_0_3.emplace_back(new TH1D("hpsbe_0_3","phi"    ,200, -3.2*2, 3.2*2));
+      HistReg.emplace_back(&hpsbe_0_3.store);
+      hpsbe_0_4.emplace_back(new TH2D("hpsbe_0_4","phi vs seg" ,46, -0.5,  45.5,  200, -3.2, 3.2));
+      HistReg.emplace_back(&hpsbe_0_4.store);
+      hpsbe_1_0.emplace_back(new TH2D("hpsbe_1_0","t all" ,38, -0.5, 37.5, 200, -26500, -23500));
+      HistReg.emplace_back(&hpsbe_1_0.store);
+
+      ht0_0_1.emplace_back(new TH1D("ht0_0_1","tu cut" ,200, -26500, -25500));
+      HistReg.emplace_back(&ht0_0_1.store);
+      ht0_0_2.emplace_back(new TH1D("ht0_0_2","td cut" ,200, -26500, -25500));
+      HistReg.emplace_back(&ht0_0_2.store);
+      ht0_0_3.emplace_back(new TH1D("ht0_0_3","nhit"   ,30, -0.5, 29.5));
+      HistReg.emplace_back(&ht0_0_3.store);
+      ht0_0_4.emplace_back(new TH1D("ht0_0_4","seg"    ,28, -0.5, 27.5));
+      HistReg.emplace_back(&ht0_0_4.store);
+      for(int i=0; i<28; ++i)
+      {
+        ht0_1[i].emplace_back(new TH1D(Form("ht0_1[%d]",i),Form("T0 Seg %d",i),200, -15, 15));
+        HistReg.emplace_back(&ht0_1[i].store);
+      }
+
+      hmdc_0_1.emplace_back(new TH1D("hmdc_0_1","mdc leading"     ,200, -2000, 1000));
+      HistReg.emplace_back(&hmdc_0_1.store);
+      hmdc_0_2.emplace_back(new TH2D("hmdc_0_2","mdc leading tot" ,200, -2000, 1000, 200, 0, 1000));
+      HistReg.emplace_back(&hmdc_0_2.store);
+      hmdc_0_3.emplace_back(new TH1D("hmdc_0_3","mdc r"           ,200, 0, 500));
+      HistReg.emplace_back(&hmdc_0_3.store);
+      hmdc_0_4.emplace_back(new TH1D("hmdc_0_4","mdc phi"         ,200, -10, 10));
+      HistReg.emplace_back(&hmdc_0_4.store);
+      hmdc_0_5.emplace_back(new TH1D("hmdc_0_5","mdc leading layer 16"     ,200, -2000, 1000));
+      HistReg.emplace_back(&hmdc_0_5.store);
+      hmdc_0_6.emplace_back(new TH2D("hmdc_0_6","mdc leading tot layer 16" ,200, -2000, 1000, 200, 0, 1000));
+      HistReg.emplace_back(&hmdc_0_6.store);
+      for(int i=0; i<17; ++i)
+      {
+        hmdc_1[i].emplace_back(new TH1D(Form("hmdc_1[%d]",i),Form("TL layer %d",i), 300,-2000,-500));
+        HistReg.emplace_back(&hmdc_1[i].store);
+        hmdc_2[i].emplace_back(new TH1D(Form("hmdc_2[%d]",i),Form("DT layer %d",i), 125,-50,200));
+        HistReg.emplace_back(&hmdc_2[i].store);
+        hmdc_2_2[i].emplace_back(new TH1D(Form("hmdc_2_2[%d]",i),Form("DT layer %d cut",i), 125,-50,200));
+        HistReg.emplace_back(&hmdc_2_2[i].store);
+        hmdc_2_3[i].emplace_back(new TH1D(Form("hmdc_2_3[%d]",i),Form("DT layer %d cut",i), 125,-50,200));
+        HistReg.emplace_back(&hmdc_2_3[i].store);
+        hmdc_3[i].emplace_back(new TH1D(Form("hmdc_3[%d]",i),Form("DL layer %d",i), 100,-1,5));
+        HistReg.emplace_back(&hmdc_3[i].store);
+        hmdc_3_2[i].emplace_back(new TH1D(Form("hmdc_3_2[%d]",i),Form("DL layer %d cut",i), 100,-1,5));
+        HistReg.emplace_back(&hmdc_3_2[i].store);
+        hmdc_3_3[i].emplace_back(new TH1D(Form("hmdc_3_3[%d]",i),Form("DL layer %d cut",i), 100,-1,5));
+        HistReg.emplace_back(&hmdc_3_3[i].store);
+      }
+
+      HistRegisteredByDir.insert(std::make_pair("Builder", std::make_tuple(HistReg,0)));
+    }
+
 
   if(EnableState[PRIMVTX])
     {

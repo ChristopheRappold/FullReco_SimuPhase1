@@ -9,7 +9,15 @@
 #include "THyphiAttributes.h"
 #include "TRandom3.h"
 
-typedef TDataProcess<FullRecoEvent, MCAnaEventG4Sol> TDataProcessInterface;
+//typedef TDataProcess<FullRecoEvent, MCAnaEventG4Sol> TDataProcessInterface;
+// template<class Out>
+// struct TDataProcessInterfaceImp { using type = TDataProcess<FullRecoEvent, Out>; } ;
+
+// template<class Out>
+// using TDataProcessInterface = typename TDataProcessInterfaceImp<Out>::type;
+
+template<class Out>
+using TDataProcessInterface = TDataProcess<FullRecoEvent, Out>;
 
 /*
 class SiliconHits
@@ -469,7 +477,8 @@ public:
 };
 */
 
-class TPrimaryVertex final : public TDataProcessInterface
+template<class Out>
+class TPrimaryVertex final : public TDataProcessInterface<Out> //TDataProcess<FullRecoEvent, Out> //TDataProcessInterface
 {
 public:
   const THyphiAttributes& att;
@@ -479,10 +488,10 @@ public:
 
   // int Init(Ana_Hist* h);
   void InitMT() final;
-  ReturnRes::InfoM operator()(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) override;
+  ReturnRes::InfoM operator()(FullRecoEvent& RecoEvent, Out* OutTree) override;
 
 private:
-  int Exec(FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree) override;
+  int Exec(FullRecoEvent& RecoEvent, Out* OutTree) override;
 
   ReturnRes::InfoM SoftExit(int) override;
   void SelectHists() final;

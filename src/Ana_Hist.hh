@@ -32,6 +32,7 @@ enum StateHist : int
   RIEMANN,
   HOUGH,
   SIMU,
+  BUILDER,
   PRIMVTX,
   DECAYVTX,
   SIZEOF_STATEHIST
@@ -60,6 +61,7 @@ class Ana_Hist
   Hist<TH2I> h_statsLess3Mes;
   Hist<TH2I> h_statsInvalid;
   Hist<TH1I> h_task_exit;
+  
   //Field
   Hist<TH2F> FieldXY[3];
   Hist<TH2F> FieldXZ[3];
@@ -70,6 +72,7 @@ class Ana_Hist
   Hist<TH2F> FieldXY_n[3];
   Hist<TH2F> FieldXZ_n[3];
   Hist<TH2F> FieldYZ_n[3];
+  
   // Finder
   Hist<TH2F> h_xy;
   Hist<TH2F> h_PxPy;
@@ -94,7 +97,8 @@ class Ana_Hist
   Hist<TH2F> h_MDC_R_residu;
   Hist<TH2F> h_MDC_Z_pull;
   Hist<TH2F> h_MDC_R_pull;
-  // K>lman:
+  
+  // Kalman:
   Hist<TH1F> h_pv;
   Hist<TH1F> h_chi2;
   Hist<TH1F> hd_pv[2];
@@ -141,23 +145,74 @@ class Ana_Hist
 
   Hist<TH2F> h_total_dE;
 
-  //residual
+  // residual
   Hist<TH1F> h_ResFiber[9];
   Hist<TH1F> h_ResMiniFiber[6];
   Hist<TH1F> h_ResMDC[17][3];
   Hist<TH1F> h_ResPSCE[2];
 
   // Riemann Finder
-
   Hist<TH2F> h_RiemannChi2;
   Hist<TH2F> h_RiemannResidus;
 
   // PerfFinder
-
   Hist<TH2F> h_PerfFinder;
   Hist<TH2F> h_PerfFinderLevenshtein;
 
-  //Primary Vertex
+  // WASABuilder
+  Hist<TH1I> h_Builderstats;
+
+  Hist<TH2D> h10[7][3];
+  Hist<TH1D> h11[7][3];
+  Hist<TH1D> h12[7][3];
+  Hist<TH1D> h13[7][3];
+  Hist<TH1D> h14[7][3];
+  Hist<TH1D> h15[7][3];
+  Hist<TH2D> h16[7];
+  Hist<TH1D> h17[7];
+  Hist<TH1D> h17_2[7];
+
+  Hist<TH1D> hpsb_0_1;
+  Hist<TH1D> hpsb_0_2;
+  Hist<TH1D> hpsb_0_3;
+  Hist<TH2D> hpsb_0_4;
+  Hist<TH1D> hpsb_1_1;
+  Hist<TH1D> hpsb_2[46];
+  Hist<TH2D> hpsb_3[46];
+  Hist<TH1D> hpsb_4[46];
+
+  Hist<TH1D> hpsfe_0_1;
+  Hist<TH1D> hpsfe_0_2;
+  Hist<TH1D> hpsfe_0_3;
+  Hist<TH2D> hpsfe_0_4;
+
+  Hist<TH1D> hpsbe_0_1;
+  Hist<TH1D> hpsbe_0_2;
+  Hist<TH1D> hpsbe_0_3;
+  Hist<TH2D> hpsbe_0_4;
+  Hist<TH2D> hpsbe_1_0;
+
+  Hist<TH1D> ht0_0_1;
+  Hist<TH1D> ht0_0_2;
+  Hist<TH1D> ht0_0_3;
+  Hist<TH1D> ht0_0_4;
+  Hist<TH1D> ht0_1[28];
+
+  Hist<TH1D> hmdc_0_1;
+  Hist<TH2D> hmdc_0_2;
+  Hist<TH1D> hmdc_0_3;
+  Hist<TH1D> hmdc_0_4;
+  Hist<TH1D> hmdc_0_5;
+  Hist<TH2D> hmdc_0_6;
+  Hist<TH1D> hmdc_1[17];
+  Hist<TH1D> hmdc_2[17];
+  Hist<TH1D> hmdc_2_2[17];
+  Hist<TH1D> hmdc_2_3[17];
+  Hist<TH1D> hmdc_3[17];
+  Hist<TH1D> hmdc_3_2[17];
+  Hist<TH1D> hmdc_3_3[17];
+
+  // Primary Vertex
   Hist<TH1F> h_HitMultiplicity_Si1;
   Hist<TH1F> h_HitMultiplicityRecons_Si1;
   Hist<TH1F> h_HitMultiplicityDiff_Si1;
@@ -169,7 +224,6 @@ class Ana_Hist
   Hist<TH2F> h_nEventsGoodreconsGhost_Si1 ;
   Hist<TH2F> h_nEventsRealGoodrecons_Si1 ;
   Hist<TH2F> h_nEventsRealRejectPad_Si1 ;
-
 
   Hist<TH1F> h_HitMultiplicity_Si2 ;
   Hist<TH1F> h_HitMultiplicityRecons_Si2 ;
@@ -238,7 +292,7 @@ class Ana_Hist
   Hist<TH2F> h_PrimStatus;
   Hist<TH1F> h_PrimVtxstats ;
 
-  //Decay Vertex
+  // Decay Vertex
   Hist<TH1F> h_P_fragments ;
   Hist<TH1F> h_Pt_fragments ;
   Hist<TH1F> h_Pz_fragments ;
@@ -308,7 +362,6 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexcutDistanceY_KFPart_PrimVtx ;
   Hist<TH1F> h_DecayVertexcutDistanceZ_KFPart_PrimVtx ;
 
-
   Hist<TH1F> h_DecayVertexPosZ_real ;
   Hist<TH1F> h_DecayVertexPosZ_vfunction ;
   Hist<TH1F> h_DecayVertexPosZ_centroid ;
@@ -316,7 +369,6 @@ class Ana_Hist
   Hist<TH1F> h_DecayVertexPosZ_AllVfunc ;
   Hist<TH1F> h_DecayVertexPosZ_AllCentroid ;
   Hist<TH1F> h_DecayVertexPosZ_AllKFPart ;
-
 
   Hist<TH2F> h_N_MotherTracks ;
   Hist<TH2F> h_Dist_DaughterTracks ;
@@ -355,7 +407,13 @@ class Ana_Hist
   Hist<TH2F> h_EffPosZPosR_postKFPart ;
 
   Hist<TH2F> h_N_SiHits_ReconsTracks ;
-  
+
+  Hist<TH2F> h_ResidualFiberX;
+  Hist<TH2F> h_ResidualFiberY;
+
+  Hist<TH2F> h_ResidualFiberX_Angle[11][2];
+  Hist<TH2F> h_ResidualFiberY_Angle[11][2];
+
 /*
   Hist<TH1F> h_N_Si_MotherTracks ;
 
@@ -379,7 +437,7 @@ class Ana_Hist
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool PrimVtx = true, bool DecayVtx = true);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool DecayVtx = true);
   ~Ana_Hist();
 
   int Write(TFile*);

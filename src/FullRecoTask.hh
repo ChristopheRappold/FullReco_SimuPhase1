@@ -11,7 +11,9 @@
 #include "EventG4Sol/TG4Sol_Hit.hh"
 #include "Ana_Event/Ana_EventNew_v16.hh"
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
 #include "Ana_Event/AnaEvent_Metadata.hh"
+#include "EventWASAUnpack/WASAUnpackBranch.hh"
 
 #include "FullRecoEvent.hh"
 #include "TDataProcess.h"
@@ -30,27 +32,49 @@ class FullRecoEvent;
 class Ana_Hist;
 class FullRecoConfig;
 
+namespace recotask {
+
+  template <typename T, typename = int>
+  struct HasMC_Particle : std::false_type { };
+
+  template <typename T>
+  struct HasMC_Particle <T, decltype((void) T::fMC_Particle, 0)> : std::true_type { };
+
+
+};
+
+
+template<class TEOut>
 class FullRecoTask
 {
 
 public :
   FullRecoTask() = delete;
-  FullRecoTask(const FullRecoConfig& config, const DataSim& In);
-  ~FullRecoTask();
+  FullRecoTask(const FullRecoConfig& config, const DataSimExp& In);
+
+ ~FullRecoTask();
+
   
   //int EventLoop(THypHi_Event *event,std::vector<TUTracker_Event*> *UTrackerEvents,Ana_Event* OutTree);
 
 #ifdef ROOT6
-  int EventLoop(const TG4Sol_Event& ev, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits, MCAnaEventG4Sol* OutTree);
+  int EventLoop(const TG4Sol_Event& ev, const std::vector<TTreeReaderArray<TG4Sol_Hit>*>& hits, TEOut* OutTree);
 #else
-  int EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArray*>& hits, MCAnaEventG4Sol* OutTree);
+  int EventLoop(const TG4Sol_Event& ev, const std::vector<TClonesArray*>& hits, TEOut* OutTree);
 #endif  
 
 #ifdef ROOT6
-  int EventLoop(const MCAnaEventG4Sol& RestartEvent, MCAnaEventG4Sol* OutTree);
+  int EventLoop(const TEOut& RestartEvent, TEOut* OutTree);
 #else
-  int EventLoop(MCAnaEventG4Sol* RestartEvent, MCAnaEventG4Sol* OutTree);
+  int EventLoop(TEOut* RestartEvent, TEOut* OutTree);
 #endif
+
+#ifdef ROOT6
+  int EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree);
+#else
+  int EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* OutTree);
+#endif
+
 
   void AttachHisto(Ana_Hist* h);
   void SetEventMetadata(AnaEvent_Metadata& metadata);
@@ -64,9 +88,9 @@ private :
 
   TDataBuilder* det_build;
 
-  std::list<TDataProcess<FullRecoEvent,MCAnaEventG4Sol>*> list_processMC;
+  std::list<TDataProcess<FullRecoEvent,TEOut>*> list_processMC;
 
-  int EventProcess(FullRecoEvent& RecoEvent,MCAnaEventG4Sol* OutTree);
+  int EventProcess(FullRecoEvent& RecoEvent,TEOut* OutTree);
   
 
 };
