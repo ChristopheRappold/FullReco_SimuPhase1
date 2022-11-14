@@ -59,6 +59,9 @@ ReturnRes::InfoM TCheckFiberXUV<Out>::SoftExit(int result_full) { return ReturnR
 template<class Out>
 void TCheckFiberXUV<Out>::SelectHists()
 {
+	LocalHisto.h_EfficiencyFiberHit 	    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencyFiberHit);
+	LocalHisto.h_EfficiencySingleFiberHit = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencySingleFiberHit);
+
   for(size_t i = 2; i < 7; ++i)
 	  {
 	  	LocalHisto.h_ResidualFiberHitX[i]       					= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualFiberHitX[i]);
@@ -76,10 +79,11 @@ void TCheckFiberXUV<Out>::SelectHists()
 	  	LocalHisto.h_ResidualSingleFiberHitX_Theta[i]			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitX_Theta[i]);
 	  	LocalHisto.h_ResidualSingleFiberHitY_Theta[i] 		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitY_Theta[i]);
 	  	LocalHisto.h_ResidualSingleFiberHitR_Theta[i] 		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_ResidualSingleFiberHitR_Theta[i]);
-	  	LocalHisto.h_EfficiencyFiberHit[i]      					= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencyFiberHit[i]);
 	  	LocalHisto.h_EfficiencyFiberHit_Theta[i]    			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencyFiberHit_Theta[i]);
-	  	LocalHisto.h_EfficiencySingleFiberHit[i]      		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencySingleFiberHit[i]);
+	  	LocalHisto.h_EfficiencyFiberHit_dvalue[i]    			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencyFiberHit_dvalue[i]);
+	  	LocalHisto.h_EfficiencyFiberHit_mult[i]    	  		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencyFiberHit_mult[i]);
 	  	LocalHisto.h_EfficiencySingleFiberHit_Theta[i]    = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencySingleFiberHit_Theta[i]);
+	  	LocalHisto.h_EfficiencySingleFiberHit_dvalue[i]   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EfficiencySingleFiberHit_dvalue[i]);
 	  	LocalHisto.h_NumFiberHit_GoodReco[i]		      		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_NumFiberHit_GoodReco[i]);
 	  	LocalHisto.h_NumFiberHit_Ghost[i]      		  			= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_NumFiberHit_Ghost[i]);
 	  	LocalHisto.h_FiberHit_dvalue[i]      				  	  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHit_dvalue[i]);
@@ -91,7 +95,9 @@ void TCheckFiberXUV<Out>::SelectHists()
 	  	LocalHisto.h_FiberHitReal_dvalue_Theta1020_Phi[i] = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_Theta1020_Phi[i]);
 	  	LocalHisto.h_FiberHitReal_dvalue_HitX[i]      		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_HitX[i]);
 	  	LocalHisto.h_FiberHitReal_dvalue_HitY[i]      		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_HitY[i]);
+	  	LocalHisto.h_FiberHitReal_dvalue_PosX[i]      		= this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_PosX[i]);
 	  	LocalHisto.h_FiberHitReal_dvalue_dfunction[i]     = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHitReal_dvalue_dfunction[i]);
+	  	LocalHisto.h_FiberHit_Residualdvalue[i]           = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_FiberHit_Residualdvalue[i]);
 	  }
 }
 
@@ -213,12 +219,22 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 	  			vect_realHitXYAngId[i_det].emplace_back(std::make_tuple(tmp_realHitXY, theta, id_track));
 
   				double tmp_dvalue = FindHitReal_dvalue(tmp_hit_x, tmp_hit_u, tmp_hit_v, i_det);
-				  LocalHisto.h_FiberHitReal_dvalue_Theta[i_det]->Fill(theta, tmp_dvalue, 1.);
-				  LocalHisto.h_FiberHitReal_dvalue_HitX[i_det] ->Fill(meanPosX, tmp_dvalue, 1.);
-				  LocalHisto.h_FiberHitReal_dvalue_HitY[i_det] ->Fill(meanPosY, tmp_dvalue, 1.);
 
-				  double d_funct = d_function(i_det, meanPosX, meanPosY);
+				  //std::cout << "Real_dvalue: " << std::fabs(tmp_dvalue) << "\n";
+					LocalHisto.h_FiberHitReal_dvalue[i_det]      ->Fill(tmp_dvalue, 1.);
+				  LocalHisto.h_FiberHitReal_dvalue_Theta[i_det] ->Fill(theta, tmp_dvalue, 1.);
+				  LocalHisto.h_FiberHitReal_dvalue_HitX[i_det]  ->Fill(meanPosX, tmp_dvalue, 1.);
+				  LocalHisto.h_FiberHitReal_dvalue_HitY[i_det]  ->Fill(meanPosY, tmp_dvalue, 1.);
+				  LocalHisto.h_FiberHitReal_dvalue_PosX[i_det]  ->Fill(tmp_hit_x - realIP.X(), tmp_dvalue, 1.);
+
+				  //double d_funct = d_function1(i_det, meanPosX, meanPosY);
+				  double d_funct = d_function2(i_det, tmp_hit_x);
+
+				  //if(i_det == 3)
+				  //	std::cout << "Real_d: " << tmp_dvalue << "\t Reco_d: " << d_funct << "\n";
+
 				  LocalHisto.h_FiberHitReal_dvalue_dfunction[i_det]->Fill(d_funct, tmp_dvalue, 1.);
+				  LocalHisto.h_FiberHit_Residualdvalue[i_det]->Fill(tmp_dvalue - d_funct, 1.);
 
 				  if((0. <= theta ) && (theta < 3.))
 				  	LocalHisto.h_FiberHitReal_dvalue_Theta03_Phi[i_det]->Fill(phi, tmp_dvalue, 1.);
@@ -249,7 +265,7 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 		  std::cout << "Before FindHitXUV()\n";
 #endif
 
-	  	FindHitXUV_v2(hitx, hitu, hitv, i_det);
+	  	FindHitXUV_v3(hitx, hitu, hitv, i_det);
 
 #ifdef SINGLE_FIBERXUV
 	#ifdef DEBUG_FIBERXUV
@@ -297,7 +313,7 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 		  		std::vector<genfit::AbsMeasurement*> cluster_single_hitu = Clusterize(single_hitu);
 		  		std::vector<genfit::AbsMeasurement*> cluster_single_hitv = Clusterize(single_hitv);
 
-		  		FindSingleHitXUVId_v2(cluster_single_hitx, cluster_single_hitu, cluster_single_hitv, i_det, id_track);
+		  		FindSingleHitXUVId_v3(cluster_single_hitx, cluster_single_hitu, cluster_single_hitv, i_det, id_track);
 		  	}
 #endif
 
@@ -433,9 +449,14 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 
 			for(size_t i = 0; i < vect_realCombHit[i_det].size(); ++i)
 				{
-					LocalHisto.h_EfficiencyFiberHit[i_det]->Fill(0., 1.);
-					LocalHisto.h_EfficiencyFiberHit[i_det]->Fill(2.*vect_realCombHit[i_det].size(), 1.);
+					LocalHisto.h_EfficiencyFiberHit->Fill(i_det, "All", 1.);
 					LocalHisto.h_EfficiencyFiberHit_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][i]), "All", 1.);
+
+  				double tmp_realdvalue = FindHitReal_dvalue(std::get<0>(vect_realCombHit[i_det][i]), std::get<1>(vect_realCombHit[i_det][i]),
+  																											std::get<2>(vect_realCombHit[i_det][i]), i_det);
+
+					LocalHisto.h_EfficiencyFiberHit_dvalue[i_det]->Fill(tmp_realdvalue, "All", 1.);
+					LocalHisto.h_EfficiencyFiberHit_mult[i_det]->Fill(vect_realCombHit[i_det].size(), "All", 1.);
 
 					for(size_t j = 0; j < vect_CombHit[i_det].size(); ++j)
 						{
@@ -448,18 +469,24 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 
 							if((res_x < fiber_width) && (res_u < fiber_width) && (res_v < fiber_width))
 								{
-									LocalHisto.h_EfficiencyFiberHit[i_det]->Fill(1., 1.);
-									LocalHisto.h_EfficiencyFiberHit[i_det]->Fill(2.*vect_realCombHit[i_det].size() + 1., 1.);
+									LocalHisto.h_EfficiencyFiberHit->Fill(i_det, "Acc", 1.);
 									LocalHisto.h_EfficiencyFiberHit_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][i]), "Acc", 1.);
+
+	  							double tmp_recodvalue = FindHitReal_dvalue(std::get<0>(vect_CombHit[i_det][j]), std::get<1>(vect_CombHit[i_det][j]),
+  																														std::get<2>(vect_CombHit[i_det][j]), i_det);
+
+									LocalHisto.h_EfficiencyFiberHit_dvalue[i_det]->Fill(tmp_recodvalue, "Acc", 1.);
+									LocalHisto.h_EfficiencyFiberHit_mult[i_det]->Fill(vect_realCombHit[i_det].size(), "Acc", 1.);
+
 									++n_correct;
 									flag_used.insert(j);
 									break;
 								}
 						}
 
-					LocalHisto.h_EfficiencySingleFiberHit[i_det]->Fill(0., 1.);
-					LocalHisto.h_EfficiencySingleFiberHit[i_det]->Fill(2.*vect_realCombHit[i_det].size(), 1.);
+					LocalHisto.h_EfficiencySingleFiberHit->Fill(i_det, "All", 1.);
 					LocalHisto.h_EfficiencySingleFiberHit_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][i]), "All", 1.);
+					LocalHisto.h_EfficiencySingleFiberHit_dvalue[i_det]->Fill(tmp_realdvalue, "All", 1.);
 
 					for(size_t j = 0; j < vect_SingleCombHit[i_det].size(); ++j)
 						{
@@ -472,9 +499,14 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 
 							if((res_x < fiber_width) && (res_u < fiber_width) && (res_v < fiber_width))
 								{
-									LocalHisto.h_EfficiencySingleFiberHit[i_det]->Fill(1., 1.);
-									LocalHisto.h_EfficiencySingleFiberHit[i_det]->Fill(2.*vect_realCombHit[i_det].size() + 1., 1.);
+									LocalHisto.h_EfficiencySingleFiberHit->Fill(i_det, "Acc", 1.);
 									LocalHisto.h_EfficiencySingleFiberHit_Theta[i_det]->Fill(std::get<1>(vect_realHitXYAngId[i_det][i]), "Acc", 1.);
+
+	  							double tmp_recodvalue = FindHitReal_dvalue(std::get<0>(vect_SingleCombHit[i_det][j]), std::get<1>(vect_SingleCombHit[i_det][j]),
+  																															std::get<2>(vect_SingleCombHit[i_det][j]), i_det);
+
+									LocalHisto.h_EfficiencySingleFiberHit_dvalue[i_det]->Fill(tmp_recodvalue, "Acc", 1.);
+
 									flag_used_Single.insert(j);
 									break;
 								}
@@ -492,6 +524,7 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 			vect_realHitXYAngId[i_det].clear();
 			vect_realCombHit[i_det].clear();
 			vect_CombHit[i_det].clear();
+			vect_SingleCombHit[i_det].clear();
 		}
 
 #ifdef DEBUG_FIBERXUV
@@ -631,9 +664,6 @@ double TCheckFiberXUV<Out>::FindHitReal_dvalue(double hitx, double hitu, double 
   	hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
   else
   	hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
-
-  //std::cout << "Real_dvalue: " << std::fabs(hit_xu_y-hit_xv_y) << "\n";
-	LocalHisto.h_FiberHitReal_dvalue[id_det]->Fill(hit_xu_y-hit_xv_y, 1.);
 
 	return hit_xu_y-hit_xv_y;
 }
@@ -828,10 +858,11 @@ void TCheckFiberXUV<Out>::FindHitXUV_v3(const std::vector<genfit::AbsMeasurement
 								  double tmp_y = (tmp_hit_xu_y+tmp_hit_xv_y)/2.;
 
 								  double tmp_d = tmp_hit_xu_y-tmp_hit_xv_y;
-								  double expected_d = d_function(id_det, tmp_x, tmp_y);
+								  //double expected_d = d_function1(id_det, tmp_x, tmp_y);
+								  double expected_d = d_function2(id_det, pos_x);
 								  double tmp_diff_d = std::fabs(tmp_d - expected_d);
 
-								  if(std::fabs(hit_xu_y-hit_xv_y) > std::fabs(tmp_hit_xu_y-tmp_hit_xv_y))
+								  if(tmp_diff_d < diff_d)
 									  {
 									  	diff_d = tmp_diff_d;
 									  	hit_xu_x = pos_x;	
@@ -1165,11 +1196,12 @@ void TCheckFiberXUV<Out>::FindSingleHitXUVId_v3(const std::vector<genfit::AbsMea
 								  double tmp_y = (tmp_hit_xu_y+tmp_hit_xv_y)/2.;
 
 								  double tmp_d = tmp_hit_xu_y-tmp_hit_xv_y;
-								  double expected_d = d_function(id_det, tmp_x, tmp_y);
+								  //double expected_d = d_function1(id_det, tmp_x, tmp_y);
+								  double expected_d = d_function2(id_det, pos_x);
 								  double tmp_diff_d = std::fabs(tmp_d - expected_d);
 
 
-								  if(diff_d > tmp_diff_d)
+								  if(tmp_diff_d < diff_d)
 									  {
 									  	diff_d = tmp_diff_d;
 									  	hit_xu_x = pos_x;	
@@ -1352,7 +1384,7 @@ std::vector<genfit::AbsMeasurement*> TCheckFiberXUV<Out>::Clusterize(const std::
 
 
 template<class Out>
-double TCheckFiberXUV<Out>::d_function(int id_det, double hitx, double hity)
+double TCheckFiberXUV<Out>::d_function1(int id_det, double hitx, double hity)
 {
 	double x = hitx - realIP.X();
 	double y = hity - realIP.Y();
@@ -1361,8 +1393,20 @@ double TCheckFiberXUV<Out>::d_function(int id_det, double hitx, double hity)
 	double theta = TMath::ATan2( std::sqrt(x * x + y * y), z);
 	double phi = TMath::ATan2( y , x );
 
-	double d = std::get<0>(param_d_funct1[id_det]) +
-								std::get<1>(param_d_funct1[id_det]) * std::tan(theta) * std::cos(phi + std::get<2>(param_d_funct1[id_det]) * M_PI / 180.); //d_function_1
+	double f = std::tan(theta) * std::cos(phi + std::get<4>(param_d_funct1[id_det]) * M_PI / 180.);
+
+	double d = std::get<0>(param_d_funct1[id_det]) + std::get<1>(param_d_funct1[id_det]) * f + std::get<2>(param_d_funct1[id_det]) * f * f
+									+ std::get<3>(param_d_funct1[id_det]) * f * f * f; //d_function_1
+	return d;
+}
+
+template<class Out>
+double TCheckFiberXUV<Out>::d_function2(int id_det, double posx)
+{
+	double x = posx - realIP.X();
+
+	double d = std::get<0>(param_d_funct2[id_det]) + std::get<1>(param_d_funct2[id_det]) * x + std::get<2>(param_d_funct2[id_det]) * x * x
+								+ std::get<3>(param_d_funct2[id_det]) * x * x * x; //d_function_2
 	return d;
 }
 

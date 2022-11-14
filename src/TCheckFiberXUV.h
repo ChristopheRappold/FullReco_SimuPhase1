@@ -72,7 +72,8 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
 
   double FindHitReal_dvalue(double hitx, double hitu, double hitv, int id_det);
 
-  double d_function(int id_det, double hitx, double hity);
+  double d_function1(int id_det, double hitx, double hity);
+  double d_function2(int id_det, double posx);
 
   std::vector<genfit::AbsMeasurement*> Clusterize(const std::vector<std::unique_ptr<genfit::AbsMeasurement>>& hit);
   std::vector<genfit::AbsMeasurement*> Clusterize(const std::vector<genfit::AbsMeasurement*>& hit);
@@ -97,14 +98,23 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
   double Zpos_target = 196.12; // in cm
   std::vector<double> Zpos_Fiber = {154.77, 171.17, 199.67, 226.93, 230.93, 396.00, 405.63}; //in cm
 
-  std::vector< std::tuple<double, double, double> > param_d_funct1 = // d_offset, d_proportional, phi_offset
-               {std::make_tuple(0.,     0.,   0.), // UFT1
-                std::make_tuple(0.,     0.,   0.), // UFT2
-                std::make_tuple(0.,    2.3,  10.), // UFT3
-                std::make_tuple(0., -0.113, -30.), // MFT1
-                std::make_tuple(0., -0.109,  30.), // MFT2
-                std::make_tuple(0.,  0.047, -12.), // DFT1
-                std::make_tuple(0.,  0.046,   5.)}; // DFT2
+  std::vector< std::tuple<double, double, double, double, double> > param_d_funct1 = // p0, p1, p2, p3, phi_offset
+               {std::make_tuple(     0.,     0.,    0.,     0.,   0.),  // UFT1
+                std::make_tuple(     0.,     0.,    0.,     0.,   0.),  // UFT2
+                std::make_tuple(     0.,  2.364,    0., -0.189,  10.),  // UFT3
+                std::make_tuple( 0.0004, -0.945,    0.,   2.04, -30.),  // MFT1
+                std::make_tuple(-0.0008, -0.976, 0.048,   2.75,  30.),  // MFT2
+                std::make_tuple(     0.,  2.111,    0.,     0., -12.),  // DFT1
+                std::make_tuple( 0.0005,  2.122,    0.,     0.,   5.)}; // DFT2
+
+  std::vector< std::tuple<double, double, double, double> > param_d_funct2 = // p0, p1, p2, p3
+               {std::make_tuple(      0.,       0.,       0.,       0.),  // UFT1
+                std::make_tuple(      0.,       0.,       0.,       0.),  // UFT2
+                std::make_tuple(  0.0006,    0.736,   0.0002,  -0.0069),  // UFT3
+                std::make_tuple( -0.0009, -0.02648, 0.000055, 0.000049),  // MFT1
+                std::make_tuple(      0., -0.02333, 0.000042, 0.000031),  // MFT2
+                std::make_tuple(  0.0006,   0.0104,  0.00004,       0.),  // DFT1
+                std::make_tuple( 0.00056,  0.01008, 0.000028,       0.)}; // DFT2
 
   std::vector<int> id_detector = {G4Sol::FiberD1_x, G4Sol::FiberD2_x, G4Sol::FiberD3_x,
                                           G4Sol::MiniFiberD1_x1, G4Sol::MiniFiberD1_x2,
@@ -126,7 +136,7 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
   double minMFTtheta = 8.;
 
   TVector2 realIP;
-  double randIPXY = 0.01; // in cm
+  double randIPXY = 0.015; // in cm
 
   TRandom3* rand;
 
@@ -151,10 +161,13 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
     TH2F* h_ResidualSingleFiberHitX_Theta[7];
     TH2F* h_ResidualSingleFiberHitY_Theta[7];
     TH2F* h_ResidualSingleFiberHitR_Theta[7];
-    TH1F* h_EfficiencyFiberHit[7];
+    TH2F* h_EfficiencyFiberHit;
+    TH2F* h_EfficiencySingleFiberHit;
     TH2F* h_EfficiencyFiberHit_Theta[7];
-    TH1F* h_EfficiencySingleFiberHit[7];
+    TH2F* h_EfficiencyFiberHit_dvalue[7];
+    TH2F* h_EfficiencyFiberHit_mult[7];
     TH2F* h_EfficiencySingleFiberHit_Theta[7];
+    TH2F* h_EfficiencySingleFiberHit_dvalue[7];
     TH2F* h_NumFiberHit_GoodReco[7];
     TH2F* h_NumFiberHit_Ghost[7];
     TH1F* h_FiberHit_dvalue[7];
@@ -166,7 +179,9 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
     TH2F* h_FiberHitReal_dvalue_Theta1020_Phi[7];
     TH2F* h_FiberHitReal_dvalue_HitX[7];
     TH2F* h_FiberHitReal_dvalue_HitY[7];
+    TH2F* h_FiberHitReal_dvalue_PosX[7];
     TH2F* h_FiberHitReal_dvalue_dfunction[7];
+    TH1F* h_FiberHit_Residualdvalue[7];
   };
   LocalHists LocalHisto;
 };

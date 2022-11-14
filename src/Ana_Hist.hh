@@ -424,10 +424,13 @@ class Ana_Hist
   Hist<TH2F> h_ResidualSingleFiberHitX_Theta[7];
   Hist<TH2F> h_ResidualSingleFiberHitY_Theta[7];
   Hist<TH2F> h_ResidualSingleFiberHitR_Theta[7];
-  Hist<TH1F> h_EfficiencyFiberHit[7];
+  Hist<TH2F> h_EfficiencyFiberHit;
+  Hist<TH2F> h_EfficiencySingleFiberHit;
   Hist<TH2F> h_EfficiencyFiberHit_Theta[7];
-  Hist<TH1F> h_EfficiencySingleFiberHit[7];
+  Hist<TH2F> h_EfficiencyFiberHit_dvalue[7];
+  Hist<TH2F> h_EfficiencyFiberHit_mult[7];
   Hist<TH2F> h_EfficiencySingleFiberHit_Theta[7];
+  Hist<TH2F> h_EfficiencySingleFiberHit_dvalue[7];
   Hist<TH2F> h_NumFiberHit_GoodReco[7];
   Hist<TH2F> h_NumFiberHit_Ghost[7];
   Hist<TH1F> h_FiberHit_dvalue[7];
@@ -439,7 +442,9 @@ class Ana_Hist
   Hist<TH2F> h_FiberHitReal_dvalue_Theta1020_Phi[7];
   Hist<TH2F> h_FiberHitReal_dvalue_HitX[7];
   Hist<TH2F> h_FiberHitReal_dvalue_HitY[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_PosX[7];
   Hist<TH2F> h_FiberHitReal_dvalue_dfunction[7];
+  Hist<TH1F> h_FiberHit_Residualdvalue[7];
 
   // CheckFiberTrack
   Hist<TH2F> h_ResidualFiberX;
