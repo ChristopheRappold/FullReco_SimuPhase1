@@ -398,6 +398,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       att._logger->debug("iDet # {} {} {}", iDet, nameTempBr, TypeDet);
 #endif
 
+      std::set<int> used_fiber_pair;
       // double resolution_wire = 0.01;
       // double resolution_wire_z = 0.1;
       // double resolution_planar = 0.05; // cm
@@ -798,6 +799,10 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                 {
                   //if(IsFiberU_Vetoed(TypeDet))
                   //  continue;
+                  int leftright = LayerID%2;
+                  if(used_fiber_pair.size()>0 && used_fiber_pair.find(LayerID+std::pow(-1,leftright))!=used_fiber_pair.end())
+                    continue;
+
                   string volumeName;
                   string motherName;
                   int i_fiber;
@@ -924,7 +929,18 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix()->Print();
 #endif
                   TGeoMatrix* g1 =
-                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // fiber core
+                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // fiber hit core
+                  TGeoMatrix* g1_pair =
+                      gGeoManager->GetVolume(volumeName.c_str())->GetNode((LayerID + std::pow(-1, leftright)) * 2 + 1)->GetMatrix(); // fiber pair core
+                  TGeoHMatrix H1(*g1), H1_pair(*g1_pair);
+                  Double_t* center_hit = H1.GetTranslation();
+                  Double_t* center_pair = H1_pair.GetTranslation();
+                  Double_t center_both[3];
+                  center_both[0] = (center_hit[0] + center_pair[0]) / 2.;
+                  center_both[1] = (center_hit[1] + center_pair[1]) / 2.;
+                  center_both[2] = (center_hit[2] + center_pair[2]) / 2.;
+                  H1.SetTranslation(center_both);
+
                   TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
                                        ->GetNode(motherName.c_str())
                                        ->GetVolume()
@@ -933,7 +949,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   TGeoMatrix* g3 =
                       gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // fiber station
                   TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();     // MFLD
-                  TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
+
+                  TGeoHMatrix H2(*g2), H3(*g3), H4(*g4);
                   TGeoHMatrix H = H2 * H1;
                   H             = H3 * H;
                   H             = H4 * H;
@@ -969,9 +986,15 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
+
+                  used_fiber_pair.insert(LayerID);
                 }
               else if(IsFiberM(TypeDet))
                 {
+                  int leftright = LayerID%2;
+                  if(used_fiber_pair.size()>0 && used_fiber_pair.find(LayerID+std::pow(-1,leftright))!=used_fiber_pair.end())
+                    continue;
+
                   string volumeName;
                   string motherName;
                   int i_fiber;
@@ -1045,7 +1068,18 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix()->Print();
 #endif
                   TGeoMatrix* g1 =
-                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // minifiber core
+                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // minifiber hit core
+                  TGeoMatrix* g1_pair =
+                      gGeoManager->GetVolume(volumeName.c_str())->GetNode((LayerID + std::pow(-1, leftright)) * 2 + 1)->GetMatrix(); // minifiber pair core
+                  TGeoHMatrix H1(*g1), H1_pair(*g1_pair);
+                  Double_t* center_hit = H1.GetTranslation();
+                  Double_t* center_pair = H1_pair.GetTranslation();
+                  Double_t center_both[3];
+                  center_both[0] = (center_hit[0] + center_pair[0]) / 2.;
+                  center_both[1] = (center_hit[1] + center_pair[1]) / 2.;
+                  center_both[2] = (center_hit[2] + center_pair[2]) / 2.;
+                  H1.SetTranslation(center_both);
+
                   TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
                                        ->GetNode(motherName.c_str())
                                        ->GetVolume()
@@ -1054,7 +1088,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   TGeoMatrix* g3 =
                       gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // minifiber station
                   TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();     // MFLD
-                  TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
+
+                  TGeoHMatrix H2(*g2), H3(*g3), H4(*g4);
                   TGeoHMatrix H = H2 * H1;
                   H             = H3 * H;
                   H             = H4 * H;
@@ -1099,6 +1134,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
+
+                  used_fiber_pair.insert(LayerID);
                 }
               else if(IsWire(TypeDet))
                 {

@@ -227,8 +227,8 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 				  LocalHisto.h_FiberHitReal_dvalue_HitY[i_det]  ->Fill(meanPosY, tmp_dvalue, 1.);
 				  LocalHisto.h_FiberHitReal_dvalue_PosX[i_det]  ->Fill(tmp_hit_x - realIP.X(), tmp_dvalue, 1.);
 
-				  //double d_funct = d_function1(i_det, meanPosX, meanPosY);
-				  double d_funct = d_function2(i_det, tmp_hit_x);
+				  double d_funct = d_function1(i_det, meanPosX, meanPosY);
+				  //double d_funct = d_function2(i_det, tmp_hit_x);
 
 				  //if(i_det == 3)
 				  //	std::cout << "Real_d: " << tmp_dvalue << "\t Reco_d: " << d_funct << "\n";
@@ -858,8 +858,8 @@ void TCheckFiberXUV<Out>::FindHitXUV_v3(const std::vector<genfit::AbsMeasurement
 								  double tmp_y = (tmp_hit_xu_y+tmp_hit_xv_y)/2.;
 
 								  double tmp_d = tmp_hit_xu_y-tmp_hit_xv_y;
-								  //double expected_d = d_function1(id_det, tmp_x, tmp_y);
-								  double expected_d = d_function2(id_det, pos_x);
+								  double expected_d = d_function1(id_det, tmp_x, tmp_y);
+								  //double expected_d = d_function2(id_det, pos_x);
 								  double tmp_diff_d = std::fabs(tmp_d - expected_d);
 
 								  if(tmp_diff_d < diff_d)
@@ -1196,8 +1196,8 @@ void TCheckFiberXUV<Out>::FindSingleHitXUVId_v3(const std::vector<genfit::AbsMea
 								  double tmp_y = (tmp_hit_xu_y+tmp_hit_xv_y)/2.;
 
 								  double tmp_d = tmp_hit_xu_y-tmp_hit_xv_y;
-								  //double expected_d = d_function1(id_det, tmp_x, tmp_y);
-								  double expected_d = d_function2(id_det, pos_x);
+								  double expected_d = d_function1(id_det, tmp_x, tmp_y);
+								  //double expected_d = d_function2(id_det, pos_x);
 								  double tmp_diff_d = std::fabs(tmp_d - expected_d);
 
 
