@@ -298,10 +298,9 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   for(const auto& hit_PSFE : PSFEHitCont)
     {
       int hitID = hit_PSFE->GetSeg();
-
-      TGeoMatrix* g1   = gGeoManager->GetVolume("PSF")->GetNode(hitID)->GetMatrix();    // PSCE
-      TGeoMatrix* g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSF_1")->GetMatrix(); // PSB box
-      TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();       // INNNER
+      TGeoMatrix* g1   = gGeoManager->GetVolume("PSB")->GetNode(hitID)->GetMatrix();    // PSFE   -> In Geometry file PSBE/PSFE flipped
+      TGeoMatrix* g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSB_1")->GetMatrix(); // PSFE box
+      TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();       // INNER
       TGeoMatrix* g3   = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();       // MFLD
       TGeoHMatrix H1(*g1), H1_1(*g1_1), H2(*g2), H3(*g3);
       TGeoHMatrix H = H1_1 * H1;
@@ -372,8 +371,8 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     {
       int hitID = hit_PSBE->GetSeg();
 
-      TGeoMatrix* g1   = gGeoManager->GetVolume("PSB")->GetNode(hitID)->GetMatrix();    // PSCE
-      TGeoMatrix* g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSB_1")->GetMatrix(); // PSB box
+      TGeoMatrix* g1   = gGeoManager->GetVolume("PSF")->GetNode(hitID)->GetMatrix();    // PSBE    -> In geometry file, PSFE/PSBE are flipped 
+      TGeoMatrix* g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSF_1")->GetMatrix(); // PSBE box
       TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();       // INNNER
       TGeoMatrix* g3   = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();       // MFLD
       TGeoHMatrix H1(*g1), H1_1(*g1_1), H2(*g2), H3(*g3);
@@ -666,7 +665,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
                                   {"FiberD5_log_x", "FiberD5_log_u", "FiberD5_log_v"}};
 
   std::string nameMotherDet[7] = {"FiberD1_log_0",     "FiberD2_log_0", "FiberD3_log_0", "MiniFiberD1_log_0",
-                                  "MiniFiberD1_log_0", "FiberD4_log_0", "FiberD5_log_0"};
+                                  "MiniFiberD2_log_0", "FiberD4_log_0", "FiberD5_log_0"};
 
   for(int i = 0; i < 7; ++i)
     {

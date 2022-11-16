@@ -109,7 +109,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("RZ_MDCBiasCorr"))
     RZ_MDCBiasCorr = Config.Get<bool>("RZ_MDCBiasCorr");
 
-  _logger->info("RZ Settting: Prolate? {} Wire2? {} BiasCorr? {} ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
+  _logger->info("RZ Setting: Prolate? {} / Wire2? {} / BiasCorr? {} / ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
                 RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
 
   if(Config.IsAvailable("KF_Kalman"))
@@ -319,23 +319,31 @@ int THyphiAttributes::Init_Para()
   // Nb_CPU = 1;
   // Nb_Fraction = 1;
 
-  auto posTargetX  = InputPar.simParameters->find("Target_PosX");
-  Target_PositionX = posTargetX->second;
-  auto posTargetY  = InputPar.simParameters->find("Target_PosY");
-  Target_PositionY = posTargetY->second;
-  auto posTargetZ  = InputPar.simParameters->find("Target_PosZ");
-  Target_PositionZ = posTargetZ->second;
-  auto sizeTarget  = InputPar.simParameters->find("Target_Size");
-  Target_Size      = sizeTarget->second;
-  auto fieldV      = InputPar.simParameters->find("Field_CDS_Bz");
-  Field_Strength   = fieldV->second;
-  auto WasaS       = InputPar.simParameters->find("Wasa_Side");
-  Wasa_Side        = WasaS->second;
+  if(InputPar.simParameters != nullptr)
+    {
+      auto posTargetX  = InputPar.simParameters->find("Target_PosX");
+      Target_PositionX = posTargetX->second;
+      auto posTargetY  = InputPar.simParameters->find("Target_PosY");
+      Target_PositionY = posTargetY->second;
+      auto posTargetZ  = InputPar.simParameters->find("Target_PosZ");
+      Target_PositionZ = posTargetZ->second;
+      auto sizeTarget  = InputPar.simParameters->find("Target_Size");
+      Target_Size      = sizeTarget->second;
+      auto fieldV      = InputPar.simParameters->find("Field_CDS_Bz");
+      Field_Strength   = fieldV->second;
+      auto WasaS       = InputPar.simParameters->find("Wasa_Side");
+      Wasa_Side        = WasaS->second;
 
-  auto WasaMap  = InputPar.simParameters->find("Field_CDS_FieldMap");
-  Wasa_FieldMap = WasaMap != InputPar.simParameters->end() ? true : false;
-  if(Wasa_FieldMap)
-    Wasa_FieldMapName = "./field/MagField_default.dat";
+      auto WasaMap  = InputPar.simParameters->find("Field_CDS_FieldMap");
+      Wasa_FieldMap = WasaMap != InputPar.simParameters->end() ? true : false;
+      if(Wasa_FieldMap)
+        Wasa_FieldMapName = "./field/MagField_default.dat";
+    }
+  else
+    {
+      Wasa_FieldMap = true;
+      Wasa_FieldMapName = "./field/MagField_default.dat";
+    }
 
   TObjArray* L_vol = gGeoManager->GetListOfVolumes();
   int n_volume     = L_vol->GetEntries();

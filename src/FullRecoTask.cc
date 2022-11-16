@@ -174,7 +174,7 @@ void FullRecoTask<TEOut>::SetEventMetadata(AnaEvent_Metadata& metadata)
   metadata.DateOfRun = Attributes.DateOfRun;
   metadata.Hash = Attributes.Hash;
   metadata.FirstStep = det_build->signature;
-  metadata.FinalStep = list_processMC.back()->signature;
+  metadata.FinalStep = list_processMC.size() == 0 ? "None" : list_processMC.back()->signature;
   metadata.G4_simu = Attributes.G4_simu;
   metadata.NEvent = Attributes.NEvent;
   metadata.StartEvent = Attributes.Config.Get<uint>("Start_Event");
