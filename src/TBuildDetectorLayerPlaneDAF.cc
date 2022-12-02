@@ -69,7 +69,12 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
 	index_firstPSCE = i;
     }
   offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC -1;
-  
+
+  std::string nameMiniFiberMother = "MiniFiberD1_log_0";
+  if(gGeoManager->GetVolume("MFLD")->GetNode("MiniFiberD2_log_0") != nullptr)
+    MiniFiberMother = 2;
+
+
 }
 
 TBuildDetectorLayerPlaneDAF::~TBuildDetectorLayerPlaneDAF() {}
@@ -1000,24 +1005,25 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       std::cerr << "something wrong" << std::endl;
                       break;
                     }
-                  string motherName;
-                  switch(TypeDet)
+                  string motherName = "MiniFiberD1_log_0";
+		  if(MiniFiberMother == 2)
+		    switch(TypeDet)
                     {
                     case G4Sol::MiniFiberD1_x1:
-                      motherName = "MiniFiberD1_log_0";
-                      break;
+                      //motherName = "MiniFiberD1_log_0";
+                      //break;
                     case G4Sol::MiniFiberD1_u1:
-                      motherName = "MiniFiberD1_log_0";
-                      break;
+                      //motherName = "MiniFiberD1_log_0";
+                      //break;
                     case G4Sol::MiniFiberD1_v1:
-                      motherName = "MiniFiberD1_log_0";
+                      //motherName = "MiniFiberD1_log_0";
                       break;
                     case G4Sol::MiniFiberD1_x2:
-                      motherName = "MiniFiberD2_log_0";
-                      break;
+                      //motherName = "MiniFiberD2_log_0";
+                      //break;
                     case G4Sol::MiniFiberD1_u2:
-                      motherName = "MiniFiberD2_log_0";
-                      break;
+                      //motherName = "MiniFiberD2_log_0";
+                      //break;
                     case G4Sol::MiniFiberD1_v2:
                       motherName = "MiniFiberD2_log_0";
                       break;
@@ -1028,7 +1034,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 #ifdef DEBUG_BUILD2
                   std::cout << "fiberM" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
-                  std::cout << "name : " << tmpName << std::endl;
+                  std::cout << "name : " << tmpName << " | " <<motherName << std::endl;
                   std::cout << "LayerID : " << LayerID << std::endl;
                   std::cout << "HitPosX : " << hit.HitPosX << std::endl;
                   std::cout << "HitPosY : " << hit.HitPosY << std::endl;

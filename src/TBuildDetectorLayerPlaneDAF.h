@@ -256,6 +256,7 @@ private:
   PDG_fromName pid_fromName;
   int offsetGeoNameID_MDC = 0;
   int offsetGeoNameID_PSCE = 0;
+  int MiniFiberMother = 1;
   struct LocalHists
   {
     TH1I* h_stats;
