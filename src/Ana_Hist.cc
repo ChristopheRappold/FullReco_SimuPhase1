@@ -384,10 +384,10 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
 	    HistReg.emplace_back(&h_ResidualFiberY_Angle[i][j].store);
 	  }
 
-      h_ResidualFiberDzDphi.emplace_back(new TH2F("h_ResidualDzDphi","h_ResidualDzDphi",400,0,400,500,-20,20));
+      h_ResidualFiberDzDphi.emplace_back(new TH2F("h_ResidualDzDphi","h_ResidualDzDphi",300,0,300,600,-30,30));
       HistReg.emplace_back(&h_ResidualFiberDzDphi.store);
 
-      h_ResidualFiberDzDtheta.emplace_back(new TH2F("h_ResidualDzDtheta","h_ResidualDzDtheta",400,0,400,500,-20,20));
+      h_ResidualFiberDzDtheta.emplace_back(new TH2F("h_ResidualDzDtheta","h_ResidualDzDtheta",300,0,300,500,-10,10));
       HistReg.emplace_back(&h_ResidualFiberDzDtheta.store);
 
       HistRegisteredByDir.insert(std::make_pair("Simu", std::make_tuple(HistReg,0)));
