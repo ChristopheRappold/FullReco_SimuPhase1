@@ -44,6 +44,9 @@ ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
 
+GEANTCFLAGS := $(shell geant4-config --cflags)
+GEANTLIBS   := $(shell geant4-config --libs)
+
 GENFITV2FLAGS = -I./Genfit2_v2/include
 SPDLOGFLAGS = -I./spdlog/include
 ZMQFLAGS = -I./cppzmq/include -I./libzmq/include
@@ -52,9 +55,9 @@ TRICKTRACKFLAGS = -I./TrickTrack/include
 KFPARTICLEFLAGS = -I./KFParticle/install/include
 ORMFLAGS = -I./sqlite_orm/include
 
-CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
-LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3
-LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventWASAUnpack -lHitAna -lEventG4Sol -lTreePlayer -lHyphiFairBase -lAna_Event -lMCAnaEventG4Sol -lsqlite3
+CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GEANTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
+LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 $(GEANTLIBS)
+LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventWASAUnpack -lHitAna -lEventG4Sol -lTreePlayer -lHyphiFairBase -lAna_Event -lMCAnaEventG4Sol -lsqlite3 $(GEANTLIBS)
 
 GENFIT_LIB = -lgenfit2
 SPDLOG_LIB = -lspdlog
