@@ -78,6 +78,12 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   KF_KalmanRef  = false;
   KF_DAFRef     = false;
   KF_DAF        = false;
+  KF_G4e        = false;
+
+  G4e_FullProp = "0";
+  G4e_Basf2List = "1";
+  G4e_ExactJac = "1";
+  G4e_MaxEnergyLoss = "0.0005";
 
   KF_NbCentralCut   = 1;
   KF_NbMiniFiberCut = 4;
@@ -122,10 +128,23 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     KF_DAF = Config.Get<bool>("KF_DAF");
   if(Config.IsAvailable("KF_DAFRef"))
     KF_DAFRef = Config.Get<bool>("KF_DAFRef");
+  if(Config.IsAvailable("KF_G4e"))
+    KF_G4e = Config.Get<bool>("KF_G4e");
 
-  _logger->info("KF Setting: Kalman? {} / KalmanRef? {} / KalmanSqrt? {} / DAF? {} / DAFRef? {}", KF_Kalman,
-                KF_KalmanRef, KF_KalmanSqrt, KF_DAF, KF_DAFRef);
+  _logger->info("KF Setting: Kalman? {} / KalmanRef? {} / KalmanSqrt? {} / DAF? {} / DAFRef? {} / G4e? {}", KF_Kalman,
+                KF_KalmanRef, KF_KalmanSqrt, KF_DAF, KF_DAFRef, KF_G4e);
 
+  if(Config.IsAvailable("G4e_FullProp"))
+    G4e_FullProp = Config.Get<std::string>("G4e_FullProp");
+  if(Config.IsAvailable("G4e_Basf2List"))
+    G4e_Basf2List = Config.Get<std::string>("G4e_Basf2List");
+  if(Config.IsAvailable("G4e_ExactJac"))
+    G4e_ExactJac = Config.Get<std::string>("G4e_ExactJac");
+  if(Config.IsAvailable("G4e_MaxEnergyLoss"))
+    G4e_MaxEnergyLoss = Config.Get<std::string>("G4e_MaxEnergyLoss");
+
+  _logger->info("G4e Setting: FullProp? {} / Basf2List? {} / ExactJac? {} / MaxEnergyLoss? {}", G4e_FullProp, G4e_Basf2List, G4e_ExactJac, G4e_MaxEnergyLoss);
+  
   if(Config.IsAvailable("KF_NbCentralCut"))
     KF_NbCentralCut = Config.Get<int>("KF_NbCentralCut");
   if(Config.IsAvailable("KF_NbMiniFiberCut"))
@@ -214,8 +233,12 @@ if(Config.IsAvailable("CalibFile_T0time"))
   else
     map_ParamFiles.insert({"t0_time_file","./calib/t0_param/t0_time.csv"});
 
+ if(Config.IsAvailable("Wasa_FieldMap"))
+   Wasa_FieldMap = Config.Get<int>("Wasa_FieldMap");
 
-
+ if(Config.IsAvailable("Wasa_FieldMapName"))
+   Wasa_FieldMapName = Config.Get<std::string>("Wasa_FieldMapName");
+ 
   if(Wasa_FieldMap)
     {
       double signDir = Wasa_Side ? 1.0 : -1.0;

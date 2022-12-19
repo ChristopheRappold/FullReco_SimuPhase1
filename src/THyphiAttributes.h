@@ -190,7 +190,13 @@ struct RunTaskAttrDef
   bool KF_KalmanRef;
   bool KF_DAFRef;
   bool KF_DAF;
+  bool KF_G4e;
 
+  std::string G4e_FullProp;
+  std::string G4e_Basf2List;
+  std::string G4e_ExactJac;
+  std::string G4e_MaxEnergyLoss;
+  
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
 
@@ -366,6 +372,12 @@ class THyphiAttributes
   bool KF_KalmanRef;
   bool KF_DAFRef;
   bool KF_DAF;
+  bool KF_G4e;
+
+  std::string G4e_FullProp;
+  std::string G4e_Basf2List;
+  std::string G4e_ExactJac;
+  std::string G4e_MaxEnergyLoss;
 
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
