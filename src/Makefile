@@ -71,7 +71,7 @@ LIB_PROFILING = #-L/home/christophe/Workspace/gperftools-2.4/lib -ltcmalloc #-lp
 
 DEPEND        = makedepend $(CXXFLAGS)
 
-#--------------------------------------------------------------------
+#---------------------------------------------------------------------
 SourcesSimu = MainSimu.cc
 Objects_Simu = $(patsubst %.cc,%.o,$(SourcesSimu))
 

@@ -547,6 +547,42 @@ struct OutHit
   std::array<double, 4> MCparticle;
 };
 
+
+class PrimVtxTrack 
+{
+  public:
+    PrimVtxTrack() { };
+    ~PrimVtxTrack() = default;
+
+    void SetX(double _x) { x = _x; };
+    void SetY(double _y) { y = _y; };
+    void SetA(double _a) { a = _a; };
+    void SetB(double _b) { b = _b; };
+    void SetChi2NDF(double _chi2ndf) { chi2ndf = _chi2ndf; };
+    void SetFTHit(size_t i_ft, double hit_pos) { ft_hits.emplace_back(std::make_tuple(i_ft, hit_pos)); };
+
+    double GetX() { return x; };
+    double GetY() { return y; };
+    double GetA() { return a; };
+    double GetB() { return b; };
+    double GetChi2NDF() { return chi2ndf; };
+    std::vector<std::tuple<size_t,double>> GetFTHits() { return ft_hits; };
+
+    //bool IsFTHit(size_t i_ft);
+    double GetTheta();
+    size_t GetNHits() { return ft_hits.size(); };
+
+  private:
+    double x = -999.;
+    double y = -999.; //z = mid of target;
+    double a = -999.;
+    double b = -999.;
+    double chi2ndf = -999.;
+    std::vector<std::tuple<size_t,double>> ft_hits = {};
+};
+
+
+
 struct Hyp
 {
   Int_t Pattern; /// 1 = Simulation / 2 = KFParticle_real / 3 = KFParticle_cut / 4 = KFParticle / 5 = KFParticle_Mass / 6 = LorentzVector
@@ -680,6 +716,9 @@ public:
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 
+  std::vector<PrimVtxTrack> BeamTracks;
+  std::vector<PrimVtxTrack> PrimaryTracks;
+
 /*
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
   
@@ -693,8 +732,6 @@ public:
   std::vector<std::tuple<double, size_t> > HitsX_Si2{};
   std::vector<std::tuple<double, size_t> > HitsY_Si2{};
 */
-
-  std::vector<std::vector<FiberHitXUV*> > FiberXUVCont; //Remove!
 
   TLorentzVector Mother_MomE;
   std::array<double,3> InteractionPoint;

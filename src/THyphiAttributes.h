@@ -71,6 +71,7 @@ struct Task
 {
   bool Task_ReStart = false;
   bool Task_CheckField = false;
+  bool Task_FiberHitFinder = true;
   bool Task_PrimaryVtx = true;
   bool Task_PrimaryVtx_Si = false;
   bool Task_FlatMCOutputML = false;
@@ -85,11 +86,11 @@ struct Task
   bool Task_DecayVtx = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
+    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
     TASKKALMANDAF, TASKDECAYVTX, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -138,6 +139,7 @@ struct RunTaskDef
   std::string Hash;
 
   bool Task_CheckField;
+  bool Task_FiberHitFinder;
   bool Task_PrimaryVtx;
   bool Task_PrimaryVtx_Si;
   bool Task_FlatMCOutputML;
@@ -184,6 +186,9 @@ struct RunTaskAttrDef
 
   bool Debug_DAF;
   bool DoNoMaterial;
+
+  bool PV_RealXUVComb;
+  bool PV_RealPrimTrack;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
@@ -292,6 +297,8 @@ inline auto InitStorage()
 				 make_column("HashId", &RunTaskAttrDef::Hash),
 				 make_column("Debug_DAF", &RunTaskAttrDef::Debug_DAF),
 				 make_column("DoNoMaterial", &RunTaskAttrDef::DoNoMaterial),
+         make_column("PV_RealXUVComb", &RunTaskAttrDef::PV_RealXUVComb),
+         make_column("PV_RealPrimTrack", &RunTaskAttrDef::PV_RealPrimTrack),
 				 make_column("RZ_ChangeMiniFiber", &RunTaskAttrDef::RZ_ChangeMiniFiber),
 				 make_column("RZ_MDCProlate", &RunTaskAttrDef::RZ_MDCProlate),
 				 make_column("RZ_MDCWire2", &RunTaskAttrDef::RZ_MDCWire2),
@@ -362,6 +369,9 @@ class THyphiAttributes
   bool beam_only;
   bool Debug_DAF;
   bool DoNoMaterial;
+
+  bool PV_RealXUVComb;
+  bool PV_RealPrimTrack;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;

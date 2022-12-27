@@ -169,9 +169,6 @@ class Ana_Hist
   Hist<TH1D> h13[7][3];
   Hist<TH1D> h14[7][3];
   Hist<TH1D> h15[7][3];
-  Hist<TH2D> h16[7];
-  Hist<TH1D> h17[7];
-  Hist<TH1D> h17_2[7];
 
   Hist<TH1D> hpsb_0_1;
   Hist<TH1D> hpsb_0_2;
@@ -251,10 +248,23 @@ class Ana_Hist
   Hist<TH2F> h_EnergyDepositionMother ;
   Hist<TH2F> h_EnergyDepositionDaughters ;
 
+
+  Hist<TH2F> h_NFiberMult;
+  Hist<TH2F> h_NCombsXUV_UFT12;
+
+  Hist<TH2F> h_NCombsXUV[5];
+  Hist<TH2F> h_CombsXUV_dvalue_theta[5];
+  Hist<TH2F> h_CombsXUV_dvalue_phi[5];
+  Hist<TH2F> h_CombsXUV_dvalue_phi_theta5[5];
+  Hist<TH2F> h_CombsXUV_dvalue_phi_theta10[5];
+
+  Hist<TH2F> h_NHits_PrimaryTracks ;
+
   Hist<TH2F> h_nTrackCandidates ;
   Hist<TH2F> h_DistanceBeamTracks ;
   Hist<TH2F> h_PosZBeamTracks ;
   Hist<TH2F> h_thetaTracks ;
+  Hist<TH2F> h_chi2ndfTracks ;
   Hist<TH1F> h_thetaResol ;
 
   Hist<TH1F> h_Acc_ThetaCandidates ;
@@ -265,6 +275,12 @@ class Ana_Hist
 
   Hist<TH1F> h_nHypernucleiTrack ;
   Hist<TH1F> h_fvalues ;
+
+  Hist<TH1F> h_InteractionPointPosX ;
+  Hist<TH1F> h_InteractionPointPosY ;
+  Hist<TH1F> h_InteractionPointPosZ ;
+
+  Hist<TH2F> h_InteractionPointDistance_V_value ;
 
   Hist<TH1F> h_InteractionPointDistance ;
   Hist<TH1F> h_InteractionPointDistanceX ;
@@ -437,14 +453,17 @@ class Ana_Hist
   Hist<TH1F> h_FiberHitSingle_dvalue[7];
   Hist<TH1F> h_FiberHitReal_dvalue[7];
   Hist<TH2F> h_FiberHitReal_dvalue_Theta[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_Phi[7];
   Hist<TH2F> h_FiberHitReal_dvalue_Theta03_Phi[7];
   Hist<TH2F> h_FiberHitReal_dvalue_Theta310_Phi[7];
   Hist<TH2F> h_FiberHitReal_dvalue_Theta1020_Phi[7];
   Hist<TH2F> h_FiberHitReal_dvalue_HitX[7];
   Hist<TH2F> h_FiberHitReal_dvalue_HitY[7];
   Hist<TH2F> h_FiberHitReal_dvalue_PosX[7];
+  Hist<TH2F> h_FiberHitReal_dvalue_tanThetacosPhi[7];
   Hist<TH2F> h_FiberHitReal_dvalue_dfunction[7];
   Hist<TH1F> h_FiberHit_Residualdvalue[7];
+  Hist<TH2F> h_FiberHit_Residualdvalue_Realdvalue[7];
 
   // CheckFiberTrack
   Hist<TH2F> h_ResidualFiberX;

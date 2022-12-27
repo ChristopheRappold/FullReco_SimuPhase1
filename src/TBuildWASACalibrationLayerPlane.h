@@ -82,9 +82,6 @@ private:
     TH1D* h13[7][3];
     TH1D* h14[7][3];
     TH1D* h15[7][3];
-    TH2D* h16[7];
-    TH1D* h17[7];
-    TH1D* h17_2[7];
 
     TH1D* hpsb_0_1;
     TH1D* hpsb_0_2;

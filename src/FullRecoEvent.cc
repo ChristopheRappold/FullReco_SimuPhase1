@@ -52,6 +52,9 @@ void FullRecoEvent::Clear(int toclean)
   TrackMother.clear();
   DaughtersTrackDAFInit.clear();
 
+  BeamTracks.clear();
+  PrimaryTracks.clear();
+
   //Added when merging with master
   //FragmentTracks.clear();
   //PionTracks.clear();
@@ -70,8 +73,6 @@ void FullRecoEvent::Clear(int toclean)
   HitsY_Si2.clear();
 */
 
-  FiberXUVCont.clear();
-
   Mother_MomE.SetXYZM(0.,0.,0.,0.);
   InteractionPoint.fill(0.);
   DecayVertex.fill(0.);
@@ -84,4 +85,14 @@ void FullRecoEvent::Clear(int toclean)
   CovMatrix_SV.fill(0.);
 
   Hyp_Vect.clear();
+}
+
+
+
+double PrimVtxTrack::GetTheta()
+{
+  if(a > -990. && b > -990.)
+    return std::sqrt( a*a + b*b ) * 180. / M_PI;
+  else
+    return -999.;
 }

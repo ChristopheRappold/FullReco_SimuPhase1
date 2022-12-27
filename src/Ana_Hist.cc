@@ -373,11 +373,13 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistRegEff.emplace_back(&h_EfficiencySingleFiberHit.store);
 
       TString nameTempFib[] = {"UFT1", "UFT2", "UFT3", "MFT1", "MFT2", "DFT1", "DFT2"};
-      std::vector<int> res_binfactor     = {1, 1, 1, 1, 1, 4, 4};
-      std::vector<int> num_binfactor     = {1, 1, 2, 1, 1, 1, 1};
-      std::vector<int> dvalue_binfactor  = {4, 4, 4, 1, 1, 4, 4};
-      std::vector<int> dvalue_edgefactor = {1, 1, 4, 1, 1, 1, 1};
-      std::vector<int> mult_binfactor    = {1, 1, 2, 1, 1, 1, 1};
+      std::vector<int> res_binfactor       = {1, 1, 1, 1, 1, 4, 4};
+      std::vector<int> num_binfactor       = {1, 1, 3, 1, 1, 1, 1};
+      std::vector<int> dvalue_binfactor    = {4, 4, 5, 1, 1, 4, 4};
+      std::vector<int> dvalue_edgefactor   = {1, 1, 5, 1, 1, 1, 1};
+      std::vector<int> mult_binfactor      = {1, 1, 2, 1, 1, 1, 1};
+      std::vector<int> efftheta_edgefactor = {1, 1,16, 6, 6, 1, 1};
+      std::vector<int> efftheta_binfactor  = {1, 1, 4, 4, 2, 1, 1};
 
       for(size_t i = 2; i < 7; ++i)
         {
@@ -411,19 +413,19 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
           HistReg.emplace_back(&h_ResidualSingleFiberHitY_Theta[i].store);
           h_ResidualSingleFiberHitR_Theta[i].emplace_back(new TH2F("h_ResidualSingleFiberHitR_Theta_"+nameTempFib[i],"h_ResidualSingleFiberHitR_Theta_"+nameTempFib[i],80,0.,40., 100*res_binfactor[i], 0.,0.3));
           HistReg.emplace_back(&h_ResidualSingleFiberHitR_Theta[i].store);
-          h_EfficiencyFiberHit_Theta[i].emplace_back(new TH2F("h_EfficiencyFiberHit_Theta_"+nameTempFib[i],"h_EfficiencyFiberHit_Theta_"+nameTempFib[i],90,0,90.,2,0,2));
+          h_EfficiencyFiberHit_Theta[i].emplace_back(new TH2F("h_EfficiencyFiberHit_Theta_"+nameTempFib[i],"h_EfficiencyFiberHit_Theta_"+nameTempFib[i],10*efftheta_binfactor[i],0,5*efftheta_edgefactor[i],2,0,2));
           HistRegEff.emplace_back(&h_EfficiencyFiberHit_Theta[i].store);
           h_EfficiencyFiberHit_dvalue[i].emplace_back(new TH2F("h_EfficiencyFiberHit_dvalue_"+nameTempFib[i],"h_EfficiencyFiberHit_dvalue_"+nameTempFib[i],100,-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i],2,0,2));
           HistRegEff.emplace_back(&h_EfficiencyFiberHit_dvalue[i].store);
           h_EfficiencyFiberHit_mult[i].emplace_back(new TH2F("h_EfficiencyFiberHit_mult_"+nameTempFib[i],"h_EfficiencyFiberHit_mult_"+nameTempFib[i],8*mult_binfactor[i],0,8*mult_binfactor[i],2,0,2));
           HistRegEff.emplace_back(&h_EfficiencyFiberHit_mult[i].store);
-          h_EfficiencySingleFiberHit_Theta[i].emplace_back(new TH2F("h_EfficiencySingleFiberHit_Theta_"+nameTempFib[i],"h_EfficiencySingleFiberHit_Theta_"+nameTempFib[i],90,0,90.,2,0,2));
+          h_EfficiencySingleFiberHit_Theta[i].emplace_back(new TH2F("h_EfficiencySingleFiberHit_Theta_"+nameTempFib[i],"h_EfficiencySingleFiberHit_Theta_"+nameTempFib[i],10*efftheta_binfactor[i],0,5*efftheta_edgefactor[i],2,0,2));
           HistRegEff.emplace_back(&h_EfficiencySingleFiberHit_Theta[i].store);
           h_EfficiencySingleFiberHit_dvalue[i].emplace_back(new TH2F("h_EfficiencySingleFiberHit_dvalue_"+nameTempFib[i],"h_EfficiencySingleFiberHit_dvalue_"+nameTempFib[i],100,-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i],2,0,2));
           HistRegEff.emplace_back(&h_EfficiencySingleFiberHit_dvalue[i].store);
           h_NumFiberHit_GoodReco[i].emplace_back(new TH2F("h_NumFiberHit_GoodReco_"+nameTempFib[i],"h_NumFiberHit_GoodReco_"+nameTempFib[i],7*num_binfactor[i],0,7*num_binfactor[i],7*num_binfactor[i],0,7*num_binfactor[i]));
           HistReg.emplace_back(&h_NumFiberHit_GoodReco[i].store);
-          h_NumFiberHit_Ghost[i].emplace_back(new TH2F("h_NumFiberHit_Ghost_"+nameTempFib[i],"h_NumFiberHit_Ghost_"+nameTempFib[i],7*num_binfactor[i],0,7*num_binfactor[i],7*num_binfactor[i],0,7*num_binfactor[i]));
+          h_NumFiberHit_Ghost[i].emplace_back(new TH2F("h_NumFiberHit_Ghost_"+nameTempFib[i],"h_NumFiberHit_Ghost_"+nameTempFib[i],7*num_binfactor[i],0,7*num_binfactor[i],14*num_binfactor[i],0,14*num_binfactor[i]));
           HistReg.emplace_back(&h_NumFiberHit_Ghost[i].store);
           h_FiberHit_dvalue[i].emplace_back(new TH1F("h_FiberHit_dvalue_"+nameTempFib[i],"h_FiberHit_dvalue_"+nameTempFib[i], 100*dvalue_binfactor[i],-4.,4.));
           HistReg.emplace_back(&h_FiberHit_dvalue[i].store);
@@ -433,6 +435,8 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
           HistReg.emplace_back(&h_FiberHitReal_dvalue[i].store);
           h_FiberHitReal_dvalue_Theta[i].emplace_back(new TH2F("h_FiberHitReal_dvalue_Theta_"+nameTempFib[i],"h_FiberHitReal_dvalue_Theta_"+nameTempFib[i], 80,0.,40., 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i]));
           HistReg.emplace_back(&h_FiberHitReal_dvalue_Theta[i].store);
+          h_FiberHitReal_dvalue_Phi[i].emplace_back(new TH2F("h_FiberHitReal_dvalue_Phi_"+nameTempFib[i],"h_FiberHitReal_dvalue_Phi_"+nameTempFib[i], 180,-180.,180., 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i]));
+          HistReg.emplace_back(&h_FiberHitReal_dvalue_Phi[i].store);
           h_FiberHitReal_dvalue_Theta03_Phi[i].emplace_back(new TH2F("h_FiberHitReal_dvalue_Theta03_Phi_"+nameTempFib[i],"h_FiberHitReal_dvalue_Theta03_Phi_"+nameTempFib[i], 180,-180.,180., 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i]));
           HistReg.emplace_back(&h_FiberHitReal_dvalue_Theta03_Phi[i].store);
           h_FiberHitReal_dvalue_Theta310_Phi[i].emplace_back(new TH2F("h_FiberHitReal_dvalue_Theta310_Phi_"+nameTempFib[i],"h_FiberHitReal_dvalue_Theta310_Phi_"+nameTempFib[i], 180,-180.,180., 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i]));
@@ -445,10 +449,14 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
           HistReg.emplace_back(&h_FiberHitReal_dvalue_HitY[i].store);
           h_FiberHitReal_dvalue_PosX[i].emplace_back(new TH2F("h_FiberHitReal_dvalue_PosX_"+nameTempFib[i],"h_FiberHitReal_dvalue_PosX_"+nameTempFib[i], 200,-10.,10., 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i]));
           HistReg.emplace_back(&h_FiberHitReal_dvalue_PosX[i].store);
+          h_FiberHitReal_dvalue_tanThetacosPhi[i].emplace_back(new TH2F("h_FiberHitReal_dvalue_tanThetacosPhi_"+nameTempFib[i],"h_FiberHitReal_dvalue_tanThetacosPhi_"+nameTempFib[i], 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i], 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i]));
+          HistReg.emplace_back(&h_FiberHitReal_dvalue_tanThetacosPhi[i].store);
           h_FiberHitReal_dvalue_dfunction[i].emplace_back(new TH2F("h_FiberHitReal_dvalue_dfunction_"+nameTempFib[i],"h_FiberHitReal_dvalue_dfunction_"+nameTempFib[i], 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i], 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i]));
           HistReg.emplace_back(&h_FiberHitReal_dvalue_dfunction[i].store);
           h_FiberHit_Residualdvalue[i].emplace_back(new TH1F("h_FiberHit_Residualdvalue_"+nameTempFib[i],"h_FiberHit_Residualdvalue_"+nameTempFib[i], 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i]));
           HistReg.emplace_back(&h_FiberHit_Residualdvalue[i].store);
+          h_FiberHit_Residualdvalue_Realdvalue[i].emplace_back(new TH2F("h_FiberHit_Residualdvalue_Realdvalue_"+nameTempFib[i],"h_FiberHit_Residualdvalue_Realdvalue_"+nameTempFib[i], 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i], 100*dvalue_binfactor[i],-1.*dvalue_edgefactor[i],1.*dvalue_edgefactor[i]));
+          HistReg.emplace_back(&h_FiberHit_Residualdvalue_Realdvalue[i].store);
         }
 
       h_ResidualFiberX.emplace_back(new TH2F("h_ResidualFiberX","h_ResidualFiberX",20,0,20,1000,-1,1));
@@ -500,13 +508,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
           HistReg.emplace_back(&h14[i][j].store);
           h15[i][j].emplace_back(new TH1D(Form("h15[%d][%d]",i,j),Form("h15[%d][%d]",i,j),8,-0.5,7.5));
           HistReg.emplace_back(&h15[i][j].store);
-        }
-        h16[i].emplace_back(new TH2D(Form("h16[%d]",i),Form("h16[%d]",i),200,-100,100, 200, -100, 100));
-        HistReg.emplace_back(&h16[i].store);
-        h17[i].emplace_back(new TH1D(Form("h17[%d]",i)  ,Form("h17[%d]",i)  ,10 ,-0.5 ,9.5));
-        HistReg.emplace_back(&h17[i].store);
-        h17_2[i].emplace_back(new TH1D(Form("h17_2[%d]",i),Form("h17_2[%d]",i),200,-30  ,30 ));
-        HistReg.emplace_back(&h17_2[i].store);        
+        }    
       }
 
       hpsb_0_1.emplace_back(new TH1D("hpsb_0_1","tu cut" ,200, -21000, -19000));
@@ -600,25 +602,62 @@ if(EnableState[PRIMVTX])
     {
       std::vector<std::vector<TH1*>*> HistReg;
 
-      h_nTrackCandidates.emplace_back(new TH2F("h_nTrackCandidates","h_nTrackCandidates", 400, 0, 400, 5, 0, 5));
-      HistReg.emplace_back(&h_nTrackCandidates.store);
-      h_DistanceBeamTracks.emplace_back(new TH2F("h_DistanceBeamTracks","h_DistanceBeamTracks", 10000, 0, 0.5, 3, 0, 3));
-      HistReg.emplace_back(&h_DistanceBeamTracks.store);
-      h_PosZBeamTracks.emplace_back(new TH2F("h_PosZBeamTracks","h_PosZBeamTracks", 1000, 22, 29, 3, 0, 3));
-      HistReg.emplace_back(&h_PosZBeamTracks.store);
-      h_thetaTracks.emplace_back(new TH2F("h_thetaTracks","h_thetaTracks", 1000, 0, 90, 3, 0, 3));
-      HistReg.emplace_back(&h_thetaTracks.store);
+      TString nameTempFib[] = {"UFT1", "UFT2", "UFT3", "MFT1", "MFT2", "DFT1", "DFT2"};
 
-      h_fvalues.emplace_back(new TH1F("h_fvalues", "h_fvalues", 2000, -0.5, 1.5));
+      h_NFiberMult.emplace_back(new TH2F("h_NFiberMult", "h_NFiberMult", 20, 0, 20, 15, 0, 15));
+      HistReg.emplace_back(&h_NFiberMult.store);
+      h_NCombsXUV_UFT12.emplace_back(new TH2F("h_NCombsXUV_UFT12", "h_NCombsXUV_UFT12", 10, 0, 10, 10, 0, 10));
+      HistReg.emplace_back(&h_NCombsXUV_UFT12.store);
+
+      for(size_t i = 0; i < 5; ++i)
+        {
+          h_NCombsXUV[i].emplace_back(new TH2F("h_NCombsXUV_"+nameTempFib[i], "h_NCombsXUV_"+nameTempFib[i], 50, 0, 50, 2, 0, 2));
+          HistReg.emplace_back(&h_NCombsXUV[i].store);
+        }
+      for(size_t i = 2; i < 5; ++i)
+        {
+          h_CombsXUV_dvalue_theta[i].emplace_back(new TH2F("h_CombsXUV_dvalue_theta_"+nameTempFib[i], "h_CombsXUV_dvalue_theta_"+nameTempFib[i], 90, 0, 90, 500, -5, 5));
+          HistReg.emplace_back(&h_CombsXUV_dvalue_theta[i].store);
+          h_CombsXUV_dvalue_phi[i].emplace_back(new TH2F("h_CombsXUV_dvalue_phi_"+nameTempFib[i], "h_CombsXUV_dvalue_phi_"+nameTempFib[i], 180, -180, 180, 500, -5, 5));
+          HistReg.emplace_back(&h_CombsXUV_dvalue_phi[i].store);
+          h_CombsXUV_dvalue_phi_theta5[i].emplace_back(new TH2F("h_CombsXUV_dvalue_phi_theta5_"+nameTempFib[i], "h_CombsXUV_dvalue_phi_theta5_"+nameTempFib[i], 180, -180, 180, 500, -5, 5));
+          HistReg.emplace_back(&h_CombsXUV_dvalue_phi_theta5[i].store);
+          h_CombsXUV_dvalue_phi_theta10[i].emplace_back(new TH2F("h_CombsXUV_dvalue_phi_theta10_"+nameTempFib[i], "h_CombsXUV_dvalue_phi_theta10_"+nameTempFib[i], 180, -180, 180, 500, -5, 5));
+          HistReg.emplace_back(&h_CombsXUV_dvalue_phi_theta10[i].store);
+        }
+
+      h_NHits_PrimaryTracks.emplace_back(new TH2F("h_NHits_PrimaryTracks", "h_NHits_PrimaryTracks", 10, 0, 10, 5, 0, 5));
+      HistReg.emplace_back(&h_NHits_PrimaryTracks.store);
+
+      h_nTrackCandidates.emplace_back(new TH2F("h_nTrackCandidates","h_nTrackCandidates", 50, 0, 50, 6, 0, 6));
+      HistReg.emplace_back(&h_nTrackCandidates.store);
+      h_DistanceBeamTracks.emplace_back(new TH2F("h_DistanceBeamTracks","h_DistanceBeamTracks", 400, 0, 20, 3, 0, 3));
+      HistReg.emplace_back(&h_DistanceBeamTracks.store);
+      h_PosZBeamTracks.emplace_back(new TH2F("h_PosZBeamTracks","h_PosZBeamTracks", 800, 100, 300, 3, 0, 3));
+      HistReg.emplace_back(&h_PosZBeamTracks.store);
+      h_thetaTracks.emplace_back(new TH2F("h_thetaTracks","h_thetaTracks", 200, 0, 50, 5, 0, 5));
+      HistReg.emplace_back(&h_thetaTracks.store);
+      h_chi2ndfTracks.emplace_back(new TH2F("h_chi2ndfTracks","h_chi2ndfTracks", 1000, 0, 1000, 5, 0, 5));
+      HistReg.emplace_back(&h_chi2ndfTracks.store);
+
+      h_fvalues.emplace_back(new TH1F("h_fvalues", "h_fvalues", 200, -0.5, 1.5));
       HistReg.emplace_back(&h_fvalues.store);
 
-      h_InteractionPointDistance.emplace_back(new TH1F("h_InteractionPointDistance","h_InteractionPointDistance", 1000, 0, 1));
-      HistReg.emplace_back(&h_InteractionPointDistance.store);
-      h_InteractionPointDistanceX.emplace_back(new TH1F("h_InteractionPointDistanceX","h_InteractionPointDistanceX", 2000, -1, 1));
+      h_InteractionPointPosX.emplace_back(new TH1F("h_InteractionPointPosX","h_InteractionPointPosX", 100, -2, 2));
+      HistReg.emplace_back(&h_InteractionPointPosX.store);
+      h_InteractionPointPosY.emplace_back(new TH1F("h_InteractionPointPosY","h_InteractionPointPosY", 100, -2, 2));
+      HistReg.emplace_back(&h_InteractionPointPosY.store);
+      h_InteractionPointPosZ.emplace_back(new TH1F("h_InteractionPointPosZ","h_InteractionPointPosZ", 100, 192, 200));
+      HistReg.emplace_back(&h_InteractionPointPosZ.store);
+
+      h_InteractionPointDistance_V_value.emplace_back(new TH2F("h_InteractionPointDistance_V_value","h_InteractionPointDistance_V_value", 100, 0, 5, 100, 0, 5));
+      HistReg.emplace_back(&h_InteractionPointDistance_V_value.store);
+
+      h_InteractionPointDistanceX.emplace_back(new TH1F("h_InteractionPointDistanceX","h_InteractionPointDistanceX", 600, -3, 3));
       HistReg.emplace_back(&h_InteractionPointDistanceX.store);
-      h_InteractionPointDistanceY.emplace_back(new TH1F("h_InteractionPointDistanceY","h_InteractionPointDistanceY", 2000, -1, 1));
+      h_InteractionPointDistanceY.emplace_back(new TH1F("h_InteractionPointDistanceY","h_InteractionPointDistanceY", 600, -3, 3));
       HistReg.emplace_back(&h_InteractionPointDistanceY.store);
-      h_InteractionPointDistanceZ.emplace_back(new TH1F("h_InteractionPointDistanceZ","h_InteractionPointDistanceZ", 2000, -1, 1));
+      h_InteractionPointDistanceZ.emplace_back(new TH1F("h_InteractionPointDistanceZ","h_InteractionPointDistanceZ", 500, -5, 5));
       HistReg.emplace_back(&h_InteractionPointDistanceZ.store);
 
       h_InteractionPointDistanceX_pull.emplace_back(new TH1F("h_InteractionPointDistanceX_pull","h_InteractionPointDistanceX_pull", 2000, -5, 5));

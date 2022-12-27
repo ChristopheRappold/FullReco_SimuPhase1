@@ -68,6 +68,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   Debug_DAF         = false;
   DoNoMaterial      = false;
 
+  PV_RealXUVComb   = false;
+  PV_RealPrimTrack = false;
+
   RZ_ChangeMiniFiber = false;
   RZ_MDCProlate      = true;
   RZ_MDCWire2        = false;
@@ -100,6 +103,12 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     Debug_DAF = true;
   if(Config.IsAvailable("NoMaterial"))
     DoNoMaterial = true;
+
+  if(Config.IsAvailable("PV_RealXUVComb"))
+    PV_RealXUVComb = Config.Get<bool>("PV_RealXUVComb");
+  if(Config.IsAvailable("PV_RealPrimTrack"))
+    PV_RealPrimTrack = Config.Get<bool>("PV_RealPrimTrack");
+
   if(Config.IsAvailable("RZ_ChangeMiniFiber"))
     RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
   if(Config.IsAvailable("RZ_MDCProlate"))
@@ -653,6 +662,8 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.Hash = Hash;
   out.RunTaskAttr.Debug_DAF          = Debug_DAF;
   out.RunTaskAttr.DoNoMaterial       = DoNoMaterial;
+  out.RunTaskAttr.PV_RealXUVComb     = PV_RealXUVComb;
+  out.RunTaskAttr.PV_RealPrimTrack   = PV_RealPrimTrack;
   out.RunTaskAttr.RZ_ChangeMiniFiber = RZ_ChangeMiniFiber;
   out.RunTaskAttr.RZ_MDCProlate      = RZ_MDCProlate;
   out.RunTaskAttr.RZ_MDCWire2        = RZ_MDCWire2;

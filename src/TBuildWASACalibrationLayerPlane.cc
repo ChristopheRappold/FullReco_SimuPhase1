@@ -78,9 +78,6 @@ void TBuildWASACalibrationLayerPlane::SelectHists()
           LocalHisto.h14[i][j] = AnaHisto->CloneAndRegister(AnaHisto->h14[i][j]);
           LocalHisto.h15[i][j] = AnaHisto->CloneAndRegister(AnaHisto->h15[i][j]);
         }
-      LocalHisto.h16[i]   = AnaHisto->CloneAndRegister(AnaHisto->h16[i]);
-      LocalHisto.h17[i]   = AnaHisto->CloneAndRegister(AnaHisto->h17[i]);
-      LocalHisto.h17_2[i] = AnaHisto->CloneAndRegister(AnaHisto->h17_2[i]);
     }
 
   LocalHisto.hpsb_0_1 = AnaHisto->CloneAndRegister(AnaHisto->hpsb_0_1);
@@ -176,7 +173,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
                                           Ana_WasaEvent* OutTree)
 #endif
 {
-  att._logger->info("Start Build Calibration of Wasa Detector !");
+  att._logger->info("Start BuildWASACalibration!");
   // Sub classes of calibrations
   // Fiber : Input event.s2fiber
 
@@ -643,9 +640,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
 
   FiberAnalyzer* fiberana = new FiberAnalyzer();
   FiberHitClCont          = fiberana->Clusterize(FiberHitCont);
-  std::vector<std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par.get());
-  
-  RecoEvent.FiberXUVCont  = FiberXUVCont;
 
 
   int TypeDet[7][3] = {{G4Sol::FiberD1_x, G4Sol::FiberD1_u, G4Sol::FiberD1_v},
@@ -762,15 +756,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
         }
     }
 
-  for(int i = 0; i < 7; ++i)
-    {
-      for(int j = 0; j < (int)FiberXUVCont[i].size(); ++j)
-        {
-          LocalHisto.h16[i]->Fill(FiberXUVCont[i][j]->GetPosX(), FiberXUVCont[i][j]->GetPosY());
-          LocalHisto.h17_2[i]->Fill(FiberXUVCont[i][j]->GetD());
-        }
-      LocalHisto.h17[i]->Fill(FiberXUVCont[i].size());
-    }
 
   // clear /////////////////////////////////////
   for(int i = 0; i < 7; ++i)
@@ -789,15 +774,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
               delete FiberHitClCont[i][j].back();
               FiberHitClCont[i][j].pop_back();
             }
-        }
-    }
-  for(int i = 0; i < 7; ++i)
-    {
-      int num = (int)FiberXUVCont[i].size();
-      for(int j = 0; j < num; ++j)
-        {
-          delete FiberXUVCont[i].back();
-          FiberXUVCont[i].pop_back();
         }
     }
 
