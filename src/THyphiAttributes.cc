@@ -191,13 +191,29 @@ if(Config.IsAvailable("CalibFile_MDCphys"))
   else
     map_ParamFiles.insert({"mdc_phys_file","./calib/mdc_mapping/MDC_PhysicalMap.csv"});
 
-if(Config.IsAvailable("CalibFile_MDCpar"))
+if(Config.IsAvailable("CalibFile_MDCdrift"))
   {
-    auto tmpStr = Config.Get<std::string>("CalibFile_MDCpar");
-    map_ParamFiles.insert({"mdc_par_file",tmpStr});
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCdrift");
+    map_ParamFiles.insert({"mdc_drift_file",tmpStr});
   }
   else
-    map_ParamFiles.insert({"mdc_par_file","./calib/mdc_driftparam/MDC_DriftParam.txt"});
+    map_ParamFiles.insert({"mdc_drift_file","./calib/mdc_driftparam/MDC_DriftParam.txt"});
+
+if(Config.IsAvailable("CalibFile_MDCparT0"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCparT0");
+    map_ParamFiles.insert({"mdc_parT0_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_parT0_file","./calib/mdc_driftparam/MDC_T0Param.csv"});
+
+if(Config.IsAvailable("CalibFile_MDCparT0_Wir"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCparT0_Wir");
+    map_ParamFiles.insert({"mdc_parT0wir_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_parT0wir_file","./calib/mdc_driftparam/MDC_T0Param_Wir.csv"});
 
 if(Config.IsAvailable("CalibFile_Fiberoffset"))
   {
@@ -206,6 +222,22 @@ if(Config.IsAvailable("CalibFile_Fiberoffset"))
   }
   else
     map_ParamFiles.insert({"fiber_offset_file","./calib/fiber_offset/fiber_offset.csv"});
+
+if(Config.IsAvailable("CalibFile_FiberTimeoffset"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_FiberTimeoffset");
+    map_ParamFiles.insert({"fiber_timeoffset_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"fiber_timeoffset_file","./calib/fiber_offset/fiber_timeoffset.csv"});
+
+if(Config.IsAvailable("CalibFile_FiberAngleoffset"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_FiberAngleoffset");
+    map_ParamFiles.insert({"fiber_angleoffset_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"fiber_angleoffset_file","./calib/fiber_offset/fiber_angleoffset.csv"});
 
 if(Config.IsAvailable("CalibFile_PSBtime"))
   {
@@ -222,6 +254,30 @@ if(Config.IsAvailable("CalibFile_T0time"))
   }
   else
     map_ParamFiles.insert({"t0_time_file","./calib/t0_param/t0_time.csv"});
+
+if(Config.IsAvailable("CalibFile_MWDCDtDx"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MWDCDtDx");
+    map_ParamFiles.insert({"mwdc_name_dtdx",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mwdc_name_dtdx","./calib/mwdc_dtdx/mwdc_dtdx_param.txt"});
+
+if(Config.IsAvailable("CalibFile_MWDCDtDxtable"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MWDCDtDxtable");
+    map_ParamFiles.insert({"mwdc_name_dtdxtable",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mwdc_name_dtdxtable","./calib/mwdc_dtdx/mwdc_dtdxtable.root"});
+
+if(Config.IsAvailable("CalibFile_Optics"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_Optics");
+    map_ParamFiles.insert({"optics_name",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"optics_name","./calib/optics/optics_par.csv"});
 
 
   if(Wasa_FieldMap)

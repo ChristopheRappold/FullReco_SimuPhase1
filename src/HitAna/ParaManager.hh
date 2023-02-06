@@ -2,8 +2,17 @@
 #define PARA_MANAGER_HH
 
 #include <string>
+#include <cstring>
 #include <array>
 #include <unordered_map>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
+#include "TFile.h"
+#include "TH1.h"
+#include "TGraph.h"
+
 
 struct InfoTDC
 {
@@ -56,12 +65,23 @@ class ParaManager
 
   //  Cut  //////
   double cut_chi2_gf;
+  double cut_chi2_mft12;
+  double cut_chi2_dft12;
+  double cut_chi2_uft12;
   double cut_phi_fm;
   int    cut_num_mdc;
   double cut_psb_phi;
   double cut_psb_z;
   double cut_psfe_phi;
   double cut_psbe_phi;
+  double cut_t0_time;
+  double cut_mft12_combi;
+  double cut_dft12_combi;
+  double cut_mft12_hit;
+  double cut_dft12_tot_mean;
+  double cut_dft12_tot_sig;
+  double cut_dft12_time_mean;
+  double cut_dft12_time_sig;
 
   //  Field  //////
   bool   field_flag;
@@ -76,12 +96,24 @@ class ParaManager
   double fiber_uft12_cut_min;  double fiber_uft12_cut_max; // SFP2
   double fiber_dft12_cut_min;  double fiber_dft12_cut_max; // SFP3
 
+  double fiber_tot_mft_cut_min  ;  double fiber_tot_mft_cut_max  ;
+  double fiber_tot_uft3_cut_min ;  double fiber_tot_uft3_cut_max ;
+  double fiber_tot_uft12_cut_min;  double fiber_tot_uft12_cut_max;
+  double fiber_tot_dft12_cut_min;  double fiber_tot_dft12_cut_max;
+
+  double fiber_time_mft_cut_min  ;  double fiber_time_mft_cut_max  ;
+  double fiber_time_uft3_cut_min ;  double fiber_time_uft3_cut_max ;
+  double fiber_time_uft12_cut_min;  double fiber_time_uft12_cut_max;
+  double fiber_time_dft12_cut_min;  double fiber_time_dft12_cut_max;
+  
   double fiber_mft_cut_d ;
   double fiber_uft1_cut_d;
   double fiber_uft2_cut_d;
   double fiber_uft3_cut_d;
   double fiber_dft1_cut_d;
   double fiber_dft2_cut_d;
+
+  double fiber_ch2ns;
 
   double fiber_tgt_pos_x;   double fiber_tgt_pos_y;   double fiber_tgt_pos_z;
   double fiber_tgt_size_x;  double fiber_tgt_size_y;  double fiber_tgt_size_z;
@@ -112,6 +144,10 @@ class ParaManager
 
   std::string fiber_name_offset;
   std::array<std::array<std::array<double, 384>, 3>, 7> fiber_offset;
+  std::string fiber_name_timeoffset;
+  std::array<std::array<std::array<double, 384>, 3>, 7> fiber_time_offset;
+  std::string fiber_name_angleoffset;
+  std::array<std::array<std::array<double, 2>, 3>, 7> fiber_angle_offset;
 
   double fiber_mft1_off_ang_x1; double fiber_mft1_off_ang_u1; double fiber_mft1_off_ang_v1;
   double fiber_mft1_off_ang_x2; double fiber_mft1_off_ang_u2; double fiber_mft1_off_ang_v2;
@@ -123,7 +159,8 @@ class ParaManager
 
   //  PSB  //////
   double psb_tcut_min; double psb_tcut_max;
-  double psb_pos_z;
+  double psb_pos_x;  double psb_pos_y;  double psb_pos_z;
+  double psb_rot_z;
   double psb_res_phi;
   double psb_res_z;
   std::string psb_name_time;
@@ -165,17 +202,93 @@ class ParaManager
   double mdc_rot_z;
 
   double mdc_ch2ns;
-  double mdc_t0_off;
   std::array<std::array<InfoTDC, 8>, 16> mdc_MappingMDC;
   std::array<InfoMDC, 17> mdc_PhysMDC;
   std::string mdc_name_map;
   std::string mdc_name_phys;
-  std::string mdc_name_par;
+
+  std::string mdc_name_drift;
+
+  double mdc_t0_off[17];
+  double mdc_t0_off_wir[17][148];
+  std::string mdc_name_t0;
+  std::string mdc_name_t0_wir;
 
   double mdc_res;
 
   bool InitMDCParameter(const std::unordered_map<std::string,std::string>& ParamFilesMDC);
   bool mdc_init_done = false;
+
+
+  //  MWDC  //////
+  std::string mwdc_name_dtdx;
+  char mwdc_name_dtdxtable[256];
+
+  void SetMWDCdtdxFromTH1D(char*, float**, int*, int*);
+  float dist_focS4;     /* All distances from    */
+  float dist_MWDC_zref; /*  MWDC reference point   */
+  float dist_s4test;    /*  for testing something. */
+  float dist_SC41;      /*        in mm          */
+  float dist_SC42;      /*        in mm          */
+  float dist_SC43;      /*        in mm          */
+
+  int mwdc_lt_valid_min;
+  int mwdc_lt_valid_max;
+  int id_plane[8][8];     //[id_board][id_group(16ch)]  to  id_plane
+  int id_wiregroup[8][8]; //[id_board][id_group(16ch)]  to  id_plane
+  char plane_name[16][32];
+  int participate_tracking_plane[16];
+  float mwdc_zpos[16], mwdc_center_id[16], mwdc_plane_angle[16], mwdc_plane_sign[16];
+  float mwdc_assumed_plane_resolution;
+  float mwdc_tracking_chi2cut_max;
+  int mwdc_max_hit_combination_for_tracking;
+  int mwdc_min_plane_with_hit_for_tracking;
+  float mwdc_dtdxtable[16][1000]; // for our MWDC41/42, ~300 is enough. 1000 is just in case.
+  int mwdc_dtdxtable_dtmin[16];
+  int mwdc_dtdxtable_dtmax[16];
+  float mwdc_shift_x_alignment; // shift due to detector misalignment at S4
+  float mwdc_shift_a_alignment; // shift due to detector misalignment at S4
+  float mwdc_shift_y_alignment; // shift due to detector misalignment at S4
+  float mwdc_shift_b_alignment; // shift due to detector misalignment at S4
+  float cut_a_s4;
+  float mwdc_dtdxconversion(int, int); // i_plane, tdc_val(int)
+  int mwdc_tdccut_timing_threshold[2]; // used in TFRSUserProc.cxx [0]:begin, [1]: end
+
+  //// mwdc drift time to drift length convert parameter, later fit for each run with Fermi function
+  double mwdc_dtdx_par[16][4];
+  double mwdc_ch2ns;
+  double mwdc_t0_off;
+
+  /// --- S3, S4 Scintillators -- //
+  double mtdc_ch2ns;
+  int tcut_sc31_min;
+  int tcut_sc31_max;
+  int tcut_sc41_1_min;
+  int tcut_sc41_1_max;
+  int tcut_sc41_2_min;
+  int tcut_sc41_2_max;
+  int tcut_sc41_3_min;
+  int tcut_sc41_3_max;
+  int tcut_sc42_min;
+  int tcut_sc42_max;
+  int tcut_sc43_1_min;
+  int tcut_sc43_1_max;
+  int tcut_sc43_2_min;
+  int tcut_sc43_2_max;
+  int tcut_sc43_3_min;
+  int tcut_sc43_3_max;
+  int tcut_sc43_4_min;
+  int tcut_sc43_4_max;
+  double offset_tof_sc3141;
+  double offset_tof_sc4143;
+
+
+  // Optics
+  std::string optics_name;
+  std::map<std::string, std::vector<float>> optics_par;
+  double optics_s2z;
+
+
 
   std::unordered_map<std::string,std::string>::const_iterator itr_ParamFiles;
 
