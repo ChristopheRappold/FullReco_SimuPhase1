@@ -7,7 +7,7 @@
 class FiberHitAna
 {
   public:
-    FiberHitAna(FiberHit a, ParaManager *par, int tref);
+    FiberHitAna(FiberHit a, ParaManager *par, int tref, double t_t0);
     FiberHitAna(FiberHitAna *a);
     ~FiberHitAna();
     int    GetSfp(){   return i_sfp;};
@@ -21,7 +21,8 @@ class FiberHitAna
     int    GetTT(){    return t_trailing;};
     double GetPos(){   return i_pos;};
     double GetAng(){   return i_ang;};
-    double GetTot(){   return t_tot;};
+    double GetTOT(){   return t_tot;};
+    double GetTime(){  return t_time;};
     double GetClFib(){ return i_cl_fiber;};
     double GetZ(){     return i_z;};
     double GetRes(){   return i_res;};
@@ -43,6 +44,7 @@ class FiberHitAna
     double i_pos = -9999.;
     double i_ang = -9999.;
     double t_tot = -9999.;
+    double t_time = -9999.;
     double i_cl_fiber = -9999.;
     double i_z   = -9999.;
     double i_res = -9999.;

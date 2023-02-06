@@ -37,19 +37,19 @@ void PSBHitAna::SetRPhi(void){
 
   if(_seg<23){
     if (0 == (_seg % 2)) { // inner PSB
-      _r   = 221.25;
+      _r   = 217.;
       _phi = TMath::Pi() * (9.15 + 14.7 * ((double)(_seg / 2))) / 180.0;
     } else { // outer PSB
-      _r   = 231.75;
+      _r   = 227.75;
       _phi = TMath::Pi() * (16.5 + 14.7 * ((double)((_seg - 1) / 2))) / 180.0;
     }
   }
   else{
     if (0 == ((_seg-23) % 2)) { // inner PSB
-      _r   =  221.25;
+      _r   = 217.;
       _phi = TMath::Pi() * (189.15 + 14.7 * ((float)((_seg-23) / 2))) / 180.0;
-    } else { // uter PSB
-      _r   = 231.75;
+    } else { // outer PSB
+      _r   = 227.75;
       _phi = TMath::Pi() * (196.5 + 14.7 * ((float)(((_seg-23) - 1) / 2))) / 180.0;
     }
   }

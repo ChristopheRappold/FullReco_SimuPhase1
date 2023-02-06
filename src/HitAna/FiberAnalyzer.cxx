@@ -46,13 +46,13 @@ std::vector< std::vector< std::vector< FiberHitAna* > > > FiberAnalyzer::Cluster
         double edge_right = pos_cluster;
         for(size_t l = k+1; l < buf_cont[i][j].size(); ++l){
           if(flag_used.size()>0 && flag_used.find(l)!=flag_used.end()) continue;
-          if(((buf_cont[i][j][k]->GetPos()-buf_cont[i][j][l]->GetPos())>0.) && fabs(edge_left - buf_cont[i][j][l]->GetPos())<0.826){
+          if(((buf_cont[i][j][k]->GetPos()-buf_cont[i][j][l]->GetPos())>0.) && fabs(edge_left - buf_cont[i][j][l]->GetPos())<1.1){
             buf_cont[i][j][k]->Add(buf_cont[i][j][l]);
             flag_used.insert(l);
             edge_left = buf_cont[i][j][l]->GetPos();
             l=k;
           }
-          else if(((buf_cont[i][j][l]->GetPos()-buf_cont[i][j][k]->GetPos())>0.) && fabs(buf_cont[i][j][l]->GetPos()-edge_right)<0.826){
+          else if(((buf_cont[i][j][l]->GetPos()-buf_cont[i][j][k]->GetPos())>0.) && fabs(buf_cont[i][j][l]->GetPos()-edge_right)<1.1){
             buf_cont[i][j][k]->Add(buf_cont[i][j][l]);
             flag_used.insert(l);
             edge_right = buf_cont[i][j][l]->GetPos();

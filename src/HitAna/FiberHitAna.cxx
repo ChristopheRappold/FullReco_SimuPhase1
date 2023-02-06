@@ -4,7 +4,7 @@
 #include <iostream>
 #include <math.h>
 
-FiberHitAna::FiberHitAna(FiberHit a, ParaManager *par, int tref){
+FiberHitAna::FiberHitAna(FiberHit a, ParaManager *par, int tref, double t_t0){
   i_sfp      = a.i_sfp;
   i_ctdc     = a.i_ctdc;
   i_ch       = a.i_ch;
@@ -17,6 +17,10 @@ FiberHitAna::FiberHitAna(FiberHit a, ParaManager *par, int tref){
   i_ang = GetAngFiber(par);
   i_pos = GetPosFiber(par);
   t_tot = t_trailing - t_leading;
+  t_time = (t_leading + par->fiber_time_offset[i_detector][i_layer][i_fiber]) * par->fiber_ch2ns - t_t0;
+  //std::cout << t_leading << "\n";
+
+  //std::cout << par->fiber_time_offset[i_detector][i_layer][i_fiber] << "\n";
   i_cl_fiber = a.i_fiber;
   i_z        = GetZFiber(par);
   //i_res      = 0.15;
@@ -37,7 +41,8 @@ FiberHitAna::FiberHitAna(FiberHitAna *a){
   t_trailing = a->GetTT();
   i_ang      = a->GetAng();
   i_pos      = a->GetPos();
-  t_tot      = a->GetTot();
+  t_tot      = a->GetTOT();
+  t_time     = a->GetTime();
   i_cl_fiber = a->GetClFib();
   i_z        = a->GetZ();
   i_res      = a->GetRes();
@@ -236,13 +241,29 @@ double FiberHitAna::GetZFiber(ParaManager *par){
 }
 
 bool FiberHitAna::GetValidFiber(ParaManager *par){
-  bool judge = false;
+  bool judge = true;
 
   switch(i_sfp){
-    case 0: if( par->fiber_mft_cut_min   < t_leading && par->fiber_mft_cut_max   > t_leading) judge = true; break;
-    case 1: if( par->fiber_uft3_cut_min  < t_leading && par->fiber_uft3_cut_max  > t_leading) judge = true; break;
-    case 2: if( par->fiber_uft12_cut_min < t_leading && par->fiber_uft12_cut_max > t_leading) judge = true; break;
-    case 3: if( par->fiber_dft12_cut_min < t_leading && par->fiber_dft12_cut_max > t_leading) judge = true; break;
+    case 0: if( par->fiber_mft_cut_min   > t_leading || par->fiber_mft_cut_max   < t_leading) judge = false; break;
+    case 1: if( par->fiber_uft3_cut_min  > t_leading || par->fiber_uft3_cut_max  < t_leading) judge = false; break;
+    case 2: if( par->fiber_uft12_cut_min > t_leading || par->fiber_uft12_cut_max < t_leading) judge = false; break;
+    case 3: if( par->fiber_dft12_cut_min > t_leading || par->fiber_dft12_cut_max < t_leading) judge = false; break;
+    default: break;
+  }
+
+  switch(i_sfp){
+    case 0: if( par->fiber_tot_mft_cut_min   > t_tot || par->fiber_tot_mft_cut_max   < t_tot) judge = false; break;
+    case 1: if( par->fiber_tot_uft3_cut_min  > t_tot || par->fiber_tot_uft3_cut_max  < t_tot) judge = false; break;
+    case 2: if( par->fiber_tot_uft12_cut_min > t_tot || par->fiber_tot_uft12_cut_max < t_tot) judge = false; break;
+    case 3: if( par->fiber_tot_dft12_cut_min > t_tot || par->fiber_tot_dft12_cut_max < t_tot) judge = false; break;
+    default: break;
+  }
+
+  switch(i_sfp){
+    case 0: if( par->fiber_time_mft_cut_min   > t_time || par->fiber_time_mft_cut_max   < t_time) judge = false; break;
+    case 1: if( par->fiber_time_uft3_cut_min  > t_time || par->fiber_time_uft3_cut_max  < t_time) judge = false; break;
+    case 2: if( par->fiber_time_uft12_cut_min > t_time || par->fiber_time_uft12_cut_max < t_time) judge = false; break;
+    case 3: if( par->fiber_time_dft12_cut_min > t_time || par->fiber_time_dft12_cut_max < t_time) judge = false; break;
     default: break;
   }
 
@@ -251,12 +272,12 @@ bool FiberHitAna::GetValidFiber(ParaManager *par){
 
 void FiberHitAna::Add(FiberHitAna *hit){
 
-  if(t_tot < hit->GetTot()){
+  if(t_tot < hit->GetTOT()){
     i_ch    = hit->GetCh();
     i_fiber = hit->GetFib();
     t_leading  = hit->GetTL();
     t_trailing = hit->GetTT();
-    t_tot    = hit->GetTot();
+    t_tot    = hit->GetTOT();
   }
 
   i_pos      = ( i_pos      * i_clsize + hit->GetPos()   * hit->GetClsize() ) / ( i_clsize + hit->GetClsize() );
