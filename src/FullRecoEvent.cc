@@ -39,6 +39,8 @@ void FullRecoEvent::Clear(int toclean)
   //     }
   ListHits.clear();
   OldListHits.clear();
+  ListHitsInfo.clear();
+  
   ListHitsToTracks.clear();
 
   TrackDAF.clear();
@@ -89,10 +91,18 @@ void FullRecoEvent::Clear(int toclean)
 
 
 
-double PrimVtxTrack::GetTheta()
+double PrimaryVtxTrack::GetTheta()
 {
   if(a > -990. && b > -990.)
-    return std::sqrt( a*a + b*b ) * 180. / M_PI;
+    return TMath::ATan2(std::sqrt( a*a + b*b ), 1.) * 180. / M_PI;
+  else
+    return -999.;
+}
+
+double PrimaryVtxTrack::GetPhi()
+{
+  if(a > -990. && b > -990.)
+    return TMath::ATan2(b, a) * 180. / M_PI;
   else
     return -999.;
 }

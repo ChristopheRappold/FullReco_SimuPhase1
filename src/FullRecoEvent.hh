@@ -83,8 +83,9 @@ enum SolDet : int
   FiberD5_x, /*36*/
   FiberD5_u,
   FiberD5_v,
-  PSFE, /*39*/
-  MG01, /*40*/
+  TO_Counter, /*39*/
+  PSFE, /*40*/
+  MG01, /*41*/
   MG02,
   MG03,
   MG04,
@@ -100,9 +101,25 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17, /*56*/
-  PSCE, /*57*/
-  PSBE, /*58*/
+  MG17, /*57*/
+  PSCE, /*58*/
+  PSBE, /*59*/
+  MWDC01, /*60*/
+  MWDC02,
+  MWDC03,
+  MWDC04,
+  MWDC05,
+  MWDC06,
+  MWDC07,
+  MWDC08,
+  MWDC09,
+  MWDC10,
+  MWDC11,
+  MWDC12,
+  MWDC13,
+  MWDC14,
+  MWDC15,
+  MWDC16, /*75*/
   FiberD1_xy,
   FiberD2_xy,
   FiberD3_xy,
@@ -145,11 +162,13 @@ constexpr auto nameLiteralDet = {
     "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1", "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
     "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
     "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      "FiberD4_x",      "FiberD4_u",      "FiberD4_v",
-    "FiberD5_x",           "FiberD5_u",      "FiberD5_v",           "PSFE",           "MG01",           "MG02",
+    "FiberD5_x",           "FiberD5_u",      "FiberD5_v", "T0_Counter",   "PSFE",     "MG01",           "MG02",
     "MG03",                     "MG04",           "MG05",           "MG06",           "MG07",           "MG08",
     "MG09",                     "MG10",           "MG11",           "MG12",           "MG13",           "MG14",
     "MG15",                     "MG16",           "MG17",           "PSCE",           "PSBE",
-    "FiberD1_xy", "FiberD2_xy","FiberD3_xy","FiberD4_xy","FiberD5_xy","MiniFiberD1_xy","MiniFiberD2_xy",
+    "MWDC01", "MWDC02", "MWDC03", "MWDC04", "MWDC05", "MWDC06", "MWDC07", "MWDC08", "MWDC09", "MWDC10", "MWDC11",
+    "MWDC12", "MWDC13", "MWDC14", "MWDC15", "MWDC16",
+    "FiberD1_xy", "FiberD2_xy", "FiberD3_xy", "FiberD4_xy",  "FiberD5_xy",  "MiniFiberD1_xy", "MiniFiberD2_xy",
     "CDC0",
     "CDC1",                     "CDC2",           "CDC3",           "CDC4",           "CDC5",           "CDC6",
     "CDC7",                     "CDC8",           "CDC9",          "CDC10",          "CDC11",          "CDC12",
@@ -193,6 +212,7 @@ constexpr T EnumIter<T, args...>::values[];
     MiniFiberD1_x1, MiniFiberD1_x1,MiniFiberD1_v1, MiniFiberD1_x2, MiniFiberD1_x2,MiniFiberD1_v2,
     FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x, FiberD2_u, FiberD2_v,
     FiberD3_x, FiberD3_u, FiberD3_v, FiberD4_x, FiberD4_u, FiberD4_v,FiberD5_x, FiberD5_u, FiberD5_v,
+    TO_Counter,
     PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07,
     MG08, MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/,
     FiberD1_xy,FiberD2_xy,FiberD3_xy,FiberD4_xy,FiberD5_xy,MiniFiberD1_xy,MiniFiberD2_xy,
@@ -548,11 +568,11 @@ struct OutHit
 };
 
 
-class PrimVtxTrack 
+class PrimaryVtxTrack 
 {
   public:
-    PrimVtxTrack() { };
-    ~PrimVtxTrack() = default;
+    PrimaryVtxTrack() { };
+    ~PrimaryVtxTrack() = default;
 
     void SetX(double _x) { x = _x; };
     void SetY(double _y) { y = _y; };
@@ -570,6 +590,7 @@ class PrimVtxTrack
 
     //bool IsFTHit(size_t i_ft);
     double GetTheta();
+    double GetPhi();
     size_t GetNHits() { return ft_hits.size(); };
 
   private:
@@ -686,6 +707,19 @@ struct CandTrack
 //   double Cov[6][6];
 // };
 
+
+struct MeasurementInfo
+{
+  double TOT = -9999.;
+  double time = -9999.;
+  double dE = -9999.;
+  //size_t layer = 100000;
+
+  MeasurementInfo() = default;
+  MeasurementInfo(double TOT_, double time_, double dE_):TOT(TOT_),time(time_),dE(dE_) {};
+};
+
+
 class FullRecoEvent
 {
 public:
@@ -701,6 +735,7 @@ public:
 
   std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > ListHits;
   std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > OldListHits;
+  std::vector<std::vector<MeasurementInfo> > ListHitsInfo;
 
   std::vector<std::vector<int> > ListHitsToTracks;
   // std::vector< std::vector<std::vector<genfit::AbsMeasurement*> > > ListHitsDAF;
@@ -716,8 +751,8 @@ public:
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 
-  std::vector<PrimVtxTrack> BeamTracks;
-  std::vector<PrimVtxTrack> PrimaryTracks;
+  std::vector<PrimaryVtxTrack> BeamTracks;
+  std::vector<PrimaryVtxTrack> PrimaryTracks;
 
 /*
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;

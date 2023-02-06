@@ -194,6 +194,69 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   //  ana tmp  //////////////////////////////////////////////////////////////////////////////////
 
   RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
+  RecoEvent.ListHitsInfo.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
+
+
+// T0 ana //////////////////////////////////
+  std::vector<T0HitAna*> T0HitCont;
+  for(int i = 0; i < 28; ++i)
+    {
+      bool flag_u = false;
+      bool flag_d = false;
+      int i_u     = -1;
+      int i_d     = -1;
+      for(int k = 0; k < event.s2tq2->nhit_t0[i][0]; ++k)
+        {
+          if(par->t0_tcut_min < event.s2tq2->tdc_t0[i][0][k] && event.s2tq2->tdc_t0[i][0][k] < par->t0_tcut_max)
+            {
+              flag_u = true;
+              i_u    = k;
+              break;
+            }
+        }
+      for(int k = 0; k < event.s2tq2->nhit_t0[i][1]; ++k)
+        {
+          if(par->t0_tcut_min < event.s2tq2->tdc_t0[i][1][k] && event.s2tq2->tdc_t0[i][1][k] < par->t0_tcut_max)
+            {
+              flag_d = true;
+              i_d    = k;
+              break;
+            }
+        }
+      if(flag_u && flag_d)
+        {
+          int t_u           = event.s2tq2->tdc_t0[i][0][i_u];
+          int t_d           = event.s2tq2->tdc_t0[i][1][i_d];
+          int q_u           = event.s2tq2->qdc_t0[i][0];
+          int q_d           = event.s2tq2->qdc_t0[i][1];
+          T0HitAna* hit_ana = new T0HitAna(i, t_u, t_d, q_u, q_d, par.get());
+          T0HitCont.emplace_back(hit_ana);
+        }
+    }
+
+  T0HitAna* hit_t0_main = nullptr;
+  double time_ref = 9999.;
+
+  for(int i = 0; i < (int)T0HitCont.size(); ++i)
+    {
+      LocalHisto.ht0_0_1->Fill(T0HitCont[i]->GetTU());
+      LocalHisto.ht0_0_2->Fill(T0HitCont[i]->GetTD());
+      LocalHisto.ht0_0_4->Fill(T0HitCont[i]->GetSeg());
+      LocalHisto.ht0_1[T0HitCont[i]->GetSeg()]->Fill(T0HitCont[i]->GetTime());
+
+      double time_buf = std::fabs(T0HitCont[i]->GetTime());
+      if(time_buf < time_ref && time_buf < par->cut_t0_time)
+      {
+        hit_t0_main = T0HitCont[i];
+        time_ref = time_buf;
+      }
+    }
+
+    //std::cout << time_ref << "\n";
+  LocalHisto.ht0_0_3->Fill(T0HitCont.size());
+
+
+
 
   // PSB ana //////////////////////////////////
   std::vector<PSBHitAna*> PSBHitCont;
@@ -259,12 +322,17 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       hitCoords(0) = 0.;
       hitCoords(1) = hit_PSB->GetZ() * 0.1; // mm to cm
       TMatrixDSym hitCov(2);
-      hitCov(0, 0)     = TMath::Sq(par->psb_res_phi * 0.1);//0.1; // to be adjusted resolution_psce * resolution_psce;
-      hitCov(1, 1)     = TMath::Sq(par->psb_res_z   * 0.1);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
+      //hitCov(0, 0)     = TMath::Sq(par->psb_res_phi * 0.1);//0.1; // to be adjusted resolution_psce * resolution_psce;
+      //hitCov(1, 1)     = TMath::Sq(par->psb_res_z   * 0.1);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
+      hitCov(0, 0)     = std::pow(par->psb_res_phi * 0.1, 2.);//0.1; // to be adjusted resolution_psce * resolution_psce;
+      hitCov(1, 1)     = std::pow(par->psb_res_z   * 0.1, 2.);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSCE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
       RecoEvent.ListHits[G4Sol::PSCE].emplace_back(measurement.release());
+
+      MeasurementInfo measinfo(-9999., hit_PSB->GetTime(), -9999.); //CHECK include dE
+      RecoEvent.ListHitsInfo[G4Sol::PSCE].emplace_back(measinfo);
     }
 
   for(int i = 0; i < (int)PSBHitCont.size(); ++i)
@@ -331,7 +399,8 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       TVectorD hitCoords(1);
       hitCoords(0) = 0.;
       TMatrixDSym hitCov(1);
-      hitCov(0, 0) = TMath::Sq(par->psfe_res_phi * 0.1); // mm to cm
+      //hitCov(0, 0) = TMath::Sq(par->psfe_res_phi * 0.1); // mm to cm
+      hitCov(0, 0) = std::pow(par->psfe_res_phi * 0.1, 2.); // mm to cm
 
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSFE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
@@ -419,50 +488,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     }
   LocalHisto.hpsbe_0_2->Fill(PSBEHitCont.size());
 
-  // T0 ana //////////////////////////////////
-  std::vector<T0HitAna*> T0HitCont;
-  for(int i = 0; i < 28; ++i)
-    {
-      bool flag_u = false;
-      bool flag_d = false;
-      int i_u     = -1;
-      int i_d     = -1;
-      for(int k = 0; k < event.s2tq2->nhit_t0[i][0]; ++k)
-        {
-          if(par->t0_tcut_min < event.s2tq2->tdc_t0[i][0][k] && event.s2tq2->tdc_t0[i][0][k] < par->t0_tcut_max)
-            {
-              flag_u = true;
-              i_u    = k;
-              break;
-            }
-        }
-      for(int k = 0; k < event.s2tq2->nhit_t0[i][1]; ++k)
-        {
-          if(par->t0_tcut_min < event.s2tq2->tdc_t0[i][1][k] && event.s2tq2->tdc_t0[i][1][k] < par->t0_tcut_max)
-            {
-              flag_d = true;
-              i_d    = k;
-              break;
-            }
-        }
-      if(flag_u && flag_d)
-        {
-          int t_u           = event.s2tq2->tdc_t0[i][0][i_u];
-          int t_d           = event.s2tq2->tdc_t0[i][1][i_d];
-          int q_u           = event.s2tq2->qdc_t0[i][0];
-          int q_d           = event.s2tq2->qdc_t0[i][1];
-          T0HitAna* hit_ana = new T0HitAna(i, t_u, t_d, q_u, q_d, par.get());
-          T0HitCont.emplace_back(hit_ana);
-        }
-    }
-  for(int i = 0; i < (int)T0HitCont.size(); ++i)
-    {
-      LocalHisto.ht0_0_1->Fill(T0HitCont[i]->GetTU());
-      LocalHisto.ht0_0_2->Fill(T0HitCont[i]->GetTD());
-      LocalHisto.ht0_0_4->Fill(T0HitCont[i]->GetSeg());
-      LocalHisto.ht0_1[T0HitCont[i]->GetSeg()]->Fill(T0HitCont[i]->GetTime());
-    }
-  LocalHisto.ht0_0_3->Fill(T0HitCont.size());
 
   // MDC ana //////////////////////////////////
   std::vector<std::vector<MDCHitAna*> > MDCHitCont;
@@ -473,7 +498,10 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     }
   for(int i = 0; i < (int)event.s2mdc->mdchit.size(); ++i)
     {
-      MDCHitAna* hit_ana = new MDCHitAna(event.s2mdc->mdchit[i], par.get(), event.s2mdc->tref[0]);
+      double t_t0 = 0.;
+      if(hit_t0_main) t_t0 = hit_t0_main->GetTime();
+
+      MDCHitAna* hit_ana = new MDCHitAna(event.s2mdc->mdchit[i], par.get(), event.s2mdc->tref[0], t_t0);
       if(!hit_ana->IsValid())
         {
           delete hit_ana;
@@ -567,13 +595,17 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
             hitCoords(5) = edge1[2];
           }
         TMatrixDSym hitCov(7);
-        hitCov(6, 6) = TMath::Sq(hit_MDC->GetRes()*0.1); // to be adjucted resolution_dl * resolution_dl;
+        //hitCov(6, 6) = TMath::Sq(hit_MDC->GetRes()*0.1); // to be adjucted resolution_dl * resolution_dl;
+        hitCov(6, 6) = std::pow(hit_MDC->GetRes()*0.1, 2.); // to be adjucted resolution_dl * resolution_dl;
         auto measurement =
             std::make_unique<genfit::WireMeasurement>(hitCoords, hitCov, G4Sol::MG01 + MDCLayerID, hitID, nullptr);
         dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setLeftRightResolution(1);
         dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setMaxDistance(dlmax);
 
         RecoEvent.ListHits[G4Sol::MG01 + MDCLayerID].emplace_back(measurement.release());
+
+        MeasurementInfo measinfo(hit_MDC->GetTot(), -9999., -9999.);
+        RecoEvent.ListHitsInfo[G4Sol::MG01 + MDCLayerID].emplace_back(measinfo);
       }
 
   for(int i = 0; i < 17; ++i)
@@ -617,7 +649,13 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
 
   for(int i = 0; i < (int)event.s2fiber->fiberhit.size(); ++i)
     {
-      FiberHitAna* hit_ana = new FiberHitAna(event.s2fiber->fiberhit[i], par.get(), t_r);
+      double t_t0 = 0.;
+      if(hit_t0_main) t_t0 = hit_t0_main->GetTime();
+
+      //std::cout << t_t0 << "\n";
+      FiberHitAna* hit_ana = new FiberHitAna(event.s2fiber->fiberhit[i], par.get(), t_r, t_t0);
+      //std::cout << hit_ana->GetTime() << "\n";
+
       if(!hit_ana->IsValid())
         {
           delete hit_ana;
@@ -722,12 +760,16 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
               TVectorD hitCoords(1);
               hitCoords(0) = FiberHitClCont[i][j][k]->GetPos()*0.1; //u.Dot(TVector3(shift[0], shift[1], 0));
               TMatrixDSym hitCov(1);
-              hitCov(0, 0) = TMath::Sq(FiberHitClCont[i][j][k]->GetRes()*0.1); // mm to cm // to be adjusted resolution_fiber * resolution_fiber;
+              //hitCov(0, 0) = TMath::Sq(FiberHitClCont[i][j][k]->GetRes()*0.1); // mm to cm // to be adjusted resolution_fiber * resolution_fiber; // Check with or without Square root?
+              hitCov(0, 0) = std::pow(FiberHitClCont[i][j][k]->GetRes()*0.1, 2.); // mm to cm
               auto measurement =
                   std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, TypeDet[i][j], hitID, nullptr);
               dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
               RecoEvent.ListHits[TypeDet[i][j]].emplace_back(measurement.release());
+
+              MeasurementInfo measinfo(FiberHitClCont[i][j][k]->GetTOT(), FiberHitClCont[i][j][k]->GetTime(), -9999.);
+              RecoEvent.ListHitsInfo[TypeDet[i][j]].emplace_back(measinfo);
             }
         }
     }
