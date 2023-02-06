@@ -259,9 +259,9 @@ private:
   std::unordered_map<int,std::string> orderDetName;
   PDG_fromName pid_fromName;
   bool Fiber_removefragment_flag = false;
-  bool Fiber_moveXlayer_flag = false;
-  double Fiber_moveXlayer_stepsize = 0.02; //in cm
-  int Fiber_moveXlayer_ntimes = 0;
+  //bool Fiber_moveXlayer_flag = false;
+  //double Fiber_moveXlayer_stepsize = 0.02; //in cm
+  //int Fiber_moveXlayer_ntimes = 0;
 
   int offsetGeoNameID_MDC = 0;
   int offsetGeoNameID_PSCE = 0;

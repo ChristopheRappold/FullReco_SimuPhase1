@@ -24,6 +24,40 @@ template<class Out>
 using TDataProcessInterface = TDataProcess<FullRecoEvent, Out>;
 
 
+class PrimVtxTrack 
+{
+  public:
+    PrimVtxTrack() { };
+    ~PrimVtxTrack() = default;
+
+    void SetX(double _x) { x = _x; };
+    void SetY(double _y) { y = _y; };
+    void SetA(double _a) { a = _a; };
+    void SetB(double _b) { b = _b; };
+    void SetChi2NDF(double _chi2ndf) { chi2ndf = _chi2ndf; };
+    void SetFTHit(size_t i_ft, double hit_pos) { ft_hits.emplace_back(std::make_tuple(i_ft, hit_pos)); };
+
+    double GetX() { return x; };
+    double GetY() { return y; };
+    double GetA() { return a; };
+    double GetB() { return b; };
+    double GetChi2NDF() { return chi2ndf; };
+    std::vector<std::tuple<size_t,double>> GetFTHits() { return ft_hits; };
+
+    //bool IsFTHit(size_t i_ft);
+    double GetTheta();
+    double GetPhi();
+    size_t GetNHits() { return ft_hits.size(); };
+
+  private:
+    double x = -999.;
+    double y = -999.; //z = mid of target;
+    double a = -999.;
+    double b = -999.;
+    double chi2ndf = -999.;
+    std::vector<std::tuple<size_t,double>> ft_hits = {};
+};
+
 
 template<class Out>
 class TPrimaryVertex final : public TDataProcessInterface<Out> //TDataProcess<FullRecoEvent, Out> //TDataProcessInterface
@@ -62,6 +96,9 @@ private:
   void BeamTracksSelector(std::vector<PrimVtxTrack>& BeamTracks_All, std::vector<PrimVtxTrack>& BeamTracks);
 
   void PrimaryTracksFinder(std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > >& ListHits, std::vector<PrimVtxTrack>& PrimaryTracks_All);
+
+  void PrimaryTracksFinder_v2(std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > >& ListHits, PrimVtxTrack& BeamTrack,
+                                  std::vector<PrimVtxTrack>& PrimaryTracks_All);
 
   void RealPrimaryTracksFinder(std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > >& ListHits,
                                 std::vector<std::vector<int> >& ListHitsToTracks,
@@ -108,10 +145,15 @@ private:
                         const std::vector<std::tuple<double,double,double>>& CombXUV_MFT2,
                           std::vector<PrimVtxTrack>& PrimaryTracks);
 
+  bool PrimVtxTracking(PrimVtxTrack& PrimaryVtxTrack);
+
+  bool CloseToBeam(std::tuple<double,double,double,double> BeamEllipsePar, PrimVtxTrack& PrimaryVtxTrack);
+
   PrimVtxTrack TrackFitting(int nlayer, double* w, double* z, double* angle, double* s);
 
   bool GaussJordan( double **a, int n, double *b, int *indxr, int *indxc, int *ipiv );
 
+  std::tuple<double,double,double,double> BeamEllipseParam(PrimVtxTrack& BeamTrack);
 
   std::vector<std::vector<TVector2> >                            vect_HitXY = {{}, {}, {}, {}, {}, {}, {}};
   std::vector<std::vector<std::tuple<double, double, double> > > vect_CombHit = {{}, {}, {}, {}, {}, {}, {}};
@@ -169,6 +211,8 @@ private:
 
   bool RealPrimTrack = false;
 
+  bool onlyMFT = true;
+
   //Experimental setup parameters about target
   TVector3 target_pos;
   TVector3 target_size;
@@ -189,12 +233,12 @@ private:
   double MaxChi2ndf_PrimaryTracks = 10.; //Change !
 
   bool ifCut_MaxCloseDistToBeam_PrimaryTracks = true;
-  double MaxCloseDistToBeam_PrimaryTracks = 2.;
+  double MaxCloseDistToBeam_PrimaryTracks = 0.5;
 
   bool ifCut_MaxDistZBeamToTarget_PrimaryTracks = true;
-  double MaxDistZBeamToTarget_PrimaryTracks = 0.75; //in target_size.Mag() units, which is 3 cm, from target_pos.Z()
+  double MaxDistZBeamToTarget_PrimaryTracks = 0.6; //in target_size.Mag() units, which is 3 cm, from target_pos.Z()
 
-  bool ifCut_MinTheta_PrimaryTracks = false;
+  bool ifCut_MinTheta_PrimaryTracks = true;
   double MinTheta_PrimaryTracks = 5.;
 
   bool ifCut_MaxTheta_PrimaryTracks = true;
@@ -226,8 +270,8 @@ private:
   double boxDistBeamXY        = 0.4; //in cm
 
   //Parameter for v function method
-  double k_factor       = 2.; // multiplies the beam track f function value
-  bool ifCut_min_V_value = true;
+  double k_factor       = 30.; // multiplies the beam track f function value
+  bool ifCut_min_V_value = false;
   double min_V_value = 0.9; //change
 
   size_t i_BeamTracks_Vmax = 99.;

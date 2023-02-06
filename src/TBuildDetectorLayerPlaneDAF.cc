@@ -944,8 +944,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   center_both[1] = (center_hit[1] + center_pair[1]) / 2.;
                   center_both[2] = (center_hit[2] + center_pair[2]) / 2.;
 
-                  if(Fiber_moveXlayer_flag && i_lay == 0)
-                    center_both[0] += Fiber_moveXlayer_stepsize * Fiber_moveXlayer_ntimes;
+                  //if(Fiber_moveXlayer_flag && i_lay == 0)
+                  //  center_both[0] += Fiber_moveXlayer_stepsize * Fiber_moveXlayer_ntimes;
 
                   H1.SetTranslation(center_both);
 
@@ -995,8 +995,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
 
-                  if(Fiber_moveXlayer_flag && i_lay == 0)
-                    hitCoordsTree(0) += Fiber_moveXlayer_stepsize * Fiber_moveXlayer_ntimes;
+                  //if(Fiber_moveXlayer_flag && i_lay == 0)
+                  //  hitCoordsTree(0) += Fiber_moveXlayer_stepsize * Fiber_moveXlayer_ntimes;
 
                   used_fiber_pair.insert(LayerID);
                 }
@@ -1090,8 +1090,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   center_both[1] = (center_hit[1] + center_pair[1]) / 2.;
                   center_both[2] = (center_hit[2] + center_pair[2]) / 2.;
 
-                  if(Fiber_moveXlayer_flag && i_lay == 0)
-                    center_both[0] += Fiber_moveXlayer_stepsize * Fiber_moveXlayer_ntimes;
+                  //if(Fiber_moveXlayer_flag && i_lay == 0)
+                  //  center_both[0] += Fiber_moveXlayer_stepsize * Fiber_moveXlayer_ntimes;
 
                   H1.SetTranslation(center_both);
 
@@ -1150,8 +1150,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
 
-                  if(Fiber_moveXlayer_flag && i_lay == 0)
-                    hitCoordsTree(0) += Fiber_moveXlayer_stepsize * Fiber_moveXlayer_ntimes;
+                  //if(Fiber_moveXlayer_flag && i_lay == 0)
+                  //  hitCoordsTree(0) += Fiber_moveXlayer_stepsize * Fiber_moveXlayer_ntimes;
                   
                   used_fiber_pair.insert(LayerID);
                 }

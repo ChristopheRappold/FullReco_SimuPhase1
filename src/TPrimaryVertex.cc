@@ -182,7 +182,7 @@ int TPrimaryVertex<Out>::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
   std::vector<PrimVtxTrack> BeamTracks = {};
   BeamTracksSelector(BeamTracks_All, BeamTracks);
-  RecoEvent.BeamTracks = BeamTracks;
+  //RecoEvent.BeamTracks = BeamTracks;
 
   LocalHisto.h_nTrackCandidates->Fill(BeamTracks.size(), "BeamTracks", 1.);
 
@@ -214,7 +214,8 @@ int TPrimaryVertex<Out>::FinderPrimaryVertex(FullRecoEvent& RecoEvent)
 
   std::vector<PrimVtxTrack> PrimaryTracks_All = {};
   if(att.PV_RealXUVComb == false)
-    PrimaryTracksFinder(RecoEvent.ListHits, PrimaryTracks_All);
+    //PrimaryTracksFinder(RecoEvent.ListHits, PrimaryTracks_All);
+    PrimaryTracksFinder_v2(RecoEvent.ListHits, BeamTracks[0], PrimaryTracks_All);
   else if(att.PV_RealXUVComb == true)
     RealPrimaryTracksFinder(RecoEvent.ListHits, RecoEvent.ListHitsToTracks, RecoEvent.TrackDAFSim, PrimaryTracks_All);
 
@@ -636,6 +637,90 @@ void TPrimaryVertex<Out>::PrimaryTracksFinder(std::vector<std::vector<std::uniqu
     return;
 
   PrimaryTracking(CombXUV_UFT3, CombXUV_MFT1, CombXUV_MFT2, PrimaryTracks_All);
+
+  return;
+}
+
+
+template <class Out>
+void TPrimaryVertex<Out>::PrimaryTracksFinder_v2(std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > >& ListHits,
+                                                  PrimVtxTrack& BeamTrack,
+                                                  std::vector<PrimVtxTrack>& PrimaryTracks_All)
+{
+
+  std::vector<std::vector<std::vector<genfit::AbsMeasurement*>>> hits_FT = {{}, {}, {}};
+
+  for(int i_det = 2; i_det < 5; ++i_det)
+    {
+      int i = id_detector[i_det];
+
+      std::vector<genfit::AbsMeasurement*> hitx = Clusterize(ListHits[i]);
+      std::vector<genfit::AbsMeasurement*> hitu = Clusterize(ListHits[i+1]);
+      std::vector<genfit::AbsMeasurement*> hitv = Clusterize(ListHits[i+2]);
+
+      hits_FT[(i_det-2)].emplace_back(hitx);
+      hits_FT[(i_det-2)].emplace_back(hitu);
+      hits_FT[(i_det-2)].emplace_back(hitv);
+    }
+
+  LocalHisto.h_NFiberMult->Fill(hits_FT[0][0].size(), "UFT3_x", 1.);
+  LocalHisto.h_NFiberMult->Fill(hits_FT[0][1].size(), "UFT3_u", 1.);
+  LocalHisto.h_NFiberMult->Fill(hits_FT[0][2].size(), "UFT3_v", 1.);
+  LocalHisto.h_NFiberMult->Fill(hits_FT[1][0].size(), "MFT1_x", 1.);
+  LocalHisto.h_NFiberMult->Fill(hits_FT[1][1].size(), "MFT1_u", 1.);
+  LocalHisto.h_NFiberMult->Fill(hits_FT[1][2].size(), "MFT1_v", 1.);
+  LocalHisto.h_NFiberMult->Fill(hits_FT[2][0].size(), "MFT2_x", 1.);
+  LocalHisto.h_NFiberMult->Fill(hits_FT[2][1].size(), "MFT2_u", 1.);
+  LocalHisto.h_NFiberMult->Fill(hits_FT[2][2].size(), "MFT2_v", 1.);
+
+
+  std::tuple<double,double,double,double> BeamEllPar = BeamEllipseParam(BeamTrack); //a_ell, b_ell, h_ell, k_ell
+
+
+  size_t n_cand = 0;
+  size_t n_fitted = 0;
+  size_t n_closebeam = 0;
+
+  for(size_t d1=0; d1<2; ++d1)
+  {
+    if(onlyMFT)
+      ++d1;
+    for(size_t d2=d1+1; d2<3; ++d2)
+      for(size_t d1lay1=0; d1lay1<2; ++d1lay1)
+        for(size_t d1lay2=d1lay1+1; d1lay2<3; ++d1lay2)
+          for(size_t d2lay1=0; d2lay1<2; ++d2lay1)
+            for(size_t d2lay2=d2lay1+1; d2lay2<3; ++d2lay2)
+              for(size_t hit1=0; hit1<hits_FT[d1][d1lay1].size(); ++hit1)
+                for(size_t hit2=0; hit2<hits_FT[d1][d1lay2].size(); ++hit2)
+                  for(size_t hit3=0; hit3<hits_FT[d2][d2lay1].size(); ++hit3)
+                    for(size_t hit4=0; hit4<hits_FT[d2][d2lay2].size(); ++hit4)
+                      {
+                        PrimVtxTrack tmp_PrimaryTrack;
+                        tmp_PrimaryTrack.SetFTHit((d1+2)*3+d1lay1, (hits_FT[d1][d1lay1][hit1]->getRawHitCoords())[0]);
+                        tmp_PrimaryTrack.SetFTHit((d1+2)*3+d1lay2, (hits_FT[d1][d1lay2][hit2]->getRawHitCoords())[0]);
+                        tmp_PrimaryTrack.SetFTHit((d2+2)*3+d2lay1, (hits_FT[d2][d2lay1][hit3]->getRawHitCoords())[0]);
+                        tmp_PrimaryTrack.SetFTHit((d2+2)*3+d2lay2, (hits_FT[d2][d2lay2][hit4]->getRawHitCoords())[0]);
+
+                        ++n_cand;
+
+                        if(PrimVtxTracking(tmp_PrimaryTrack) == false)
+                          continue;
+
+                        ++n_fitted;
+
+                        if(CloseToBeam(BeamEllPar, tmp_PrimaryTrack) == false)
+                          continue;
+
+                        ++n_closebeam;
+
+                        PrimaryTracks_All.emplace_back(tmp_PrimaryTrack);
+
+                      }
+  }
+
+  LocalHisto.h_nTrackCandidates->Fill(n_cand, "PrimaryTracks_n_cand", 1.);
+  LocalHisto.h_nTrackCandidates->Fill(n_fitted, "PrimaryTracks_n_fitted", 1.);
+  LocalHisto.h_nTrackCandidates->Fill(n_closebeam, "PrimaryTracks_n_closebeam", 1.);
 
   return;
 }
@@ -1760,6 +1845,75 @@ void TPrimaryVertex<Out>::PrimaryTracking(const std::vector<std::tuple<double,do
 
 
 template<class Out>
+bool TPrimaryVertex<Out>::PrimVtxTracking(PrimVtxTrack& PrimaryVtxTrack)
+{
+
+  std::vector<std::tuple<size_t,double>> hits_FT =  PrimaryVtxTrack.GetFTHits();
+  size_t nlayer = hits_FT.size();
+
+  std::vector<double> w;
+  std::vector<double> z;
+  std::vector<double> angle;
+  std::vector<double> s;
+
+  for(size_t i = 0; i < hits_FT.size(); ++i)
+    {
+      size_t i_det = get<0>(hits_FT[i])/3;
+      size_t i_lay = get<0>(hits_FT[i])%3;
+
+      if(get<0>(hits_FT[i]) == 13)
+        ++i_lay;
+      else if(get<0>(hits_FT[i]) == 14)
+        --i_lay;
+
+      w.emplace_back(    fiber_resolution );
+      z.emplace_back(    Zpos_Fiber[i_det] + 0.4 * (i_lay - 1));
+      angle.emplace_back(ang[i_det][i_lay] * M_PI / 180.);
+      s.emplace_back(    get<1>(hits_FT[i]));
+    }
+
+  PrimVtxTrack tmp_PrimaryTrack = TrackFitting(nlayer, &w[0], &z[0], &angle[0], &s[0]);
+
+  if(tmp_PrimaryTrack.GetX() < -990.) //Fitting failed
+    return false;
+
+  PrimaryVtxTrack.SetX(tmp_PrimaryTrack.GetX());
+  PrimaryVtxTrack.SetY(tmp_PrimaryTrack.GetY());
+  PrimaryVtxTrack.SetA(tmp_PrimaryTrack.GetA());
+  PrimaryVtxTrack.SetB(tmp_PrimaryTrack.GetB());
+
+  if(PrimaryVtxTrack.GetNHits() == 4)
+    PrimaryVtxTrack.SetChi2NDF(0.);
+  else
+    PrimaryVtxTrack.SetChi2NDF(tmp_PrimaryTrack.GetChi2NDF());
+
+  return true;
+}
+
+
+template<class Out>
+bool TPrimaryVertex<Out>::CloseToBeam(std::tuple<double,double,double,double> BeamEllipsePar, PrimVtxTrack& PrimaryVtxTrack)
+{
+
+  double a_ell = get<0>(BeamEllipsePar);
+  double b_ell = get<1>(BeamEllipsePar);
+  double h_ell = get<2>(BeamEllipsePar);
+  double k_ell = get<3>(BeamEllipsePar);
+
+  double m = PrimaryVtxTrack.GetB() / PrimaryVtxTrack.GetA();
+  double s = PrimaryVtxTrack.GetY() - PrimaryVtxTrack.GetX() * m - k_ell;
+
+  double radicand = std::pow(a_ell*a_ell*m*s - b_ell*b_ell*h_ell, 2)
+                      - (b_ell*b_ell + a_ell*a_ell*m*m)*(s*s*a_ell + h_ell*h_ell*b_ell-a_ell*a_ell*b_ell*b_ell);
+
+  if (radicand < 0.)
+    return false;
+  else
+    return true;
+}
+
+
+template<class Out>
 PrimVtxTrack TPrimaryVertex<Out>::TrackFitting(int nlayer, double* w, double* z, double* angle, double* s)
 {
   PrimVtxTrack tmp_PrimVtxTrack;
@@ -1896,6 +2050,30 @@ bool TPrimaryVertex<Out>::GaussJordan( double **a, int n, double *b, int *indxr,
     }
   }
   return true;
+}
+
+
+template<class Out>
+std::tuple<double,double,double,double> TPrimaryVertex<Out>::BeamEllipseParam(PrimVtxTrack& BeamTrack)
+{
+  return std::make_tuple(50.*fiber_resolution, 50.*fiber_resolution, BeamTrack.GetX(), BeamTrack.GetY());//Change!
+}
+
+
+double PrimVtxTrack::GetTheta()
+{
+  if(a > -990. && b > -990.)
+    return TMath::ATan2(std::sqrt( a*a + b*b ), 1.) * 180. / M_PI;
+  else
+    return -999.;
+}
+
+double PrimVtxTrack::GetPhi()
+{
+  if(a > -990. && b > -990.)
+    return TMath::ATan2(b, a) * 180. / M_PI;
+  else
+    return -999.;
 }
 
 

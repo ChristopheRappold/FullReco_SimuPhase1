@@ -629,7 +629,7 @@ if(EnableState[PRIMVTX])
       h_NHits_PrimaryTracks.emplace_back(new TH2F("h_NHits_PrimaryTracks", "h_NHits_PrimaryTracks", 10, 0, 10, 5, 0, 5));
       HistReg.emplace_back(&h_NHits_PrimaryTracks.store);
 
-      h_nTrackCandidates.emplace_back(new TH2F("h_nTrackCandidates","h_nTrackCandidates", 50, 0, 50, 6, 0, 6));
+      h_nTrackCandidates.emplace_back(new TH2F("h_nTrackCandidates","h_nTrackCandidates", 100000, 0, 100000, 8, 0, 8));
       HistReg.emplace_back(&h_nTrackCandidates.store);
       h_DistanceBeamTracks.emplace_back(new TH2F("h_DistanceBeamTracks","h_DistanceBeamTracks", 400, 0, 20, 3, 0, 3));
       HistReg.emplace_back(&h_DistanceBeamTracks.store);
@@ -650,7 +650,7 @@ if(EnableState[PRIMVTX])
       h_InteractionPointPosZ.emplace_back(new TH1F("h_InteractionPointPosZ","h_InteractionPointPosZ", 100, 192, 200));
       HistReg.emplace_back(&h_InteractionPointPosZ.store);
 
-      h_InteractionPointDistance_V_value.emplace_back(new TH2F("h_InteractionPointDistance_V_value","h_InteractionPointDistance_V_value", 100, 0, 5, 100, 0, 5));
+      h_InteractionPointDistance_V_value.emplace_back(new TH2F("h_InteractionPointDistance_V_value","h_InteractionPointDistance_V_value", 100, 0, 5, 200, 0, 10));
       HistReg.emplace_back(&h_InteractionPointDistance_V_value.store);
 
       h_InteractionPointDistanceX.emplace_back(new TH1F("h_InteractionPointDistanceX","h_InteractionPointDistanceX", 600, -3, 3));
