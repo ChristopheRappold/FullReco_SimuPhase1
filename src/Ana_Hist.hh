@@ -210,6 +210,33 @@ class Ana_Hist
   Hist<TH1D> hmdc_3_2[17];
   Hist<TH1D> hmdc_3_3[17];
 
+  Hist<TH1D> hmwdc_1_1;
+  Hist<TH1D> hmwdc_1_2;
+  Hist<TH1D> hmwdc_1_3;
+  Hist<TH1D> hmwdc_1_4;
+  Hist<TH1D> hmwdc_1_5;
+  Hist<TH1D> hmwdc_1_6;
+
+  Hist<TH1D> hs4sci_1_1;
+  Hist<TH1D> hs4sci_1_2;
+  Hist<TH1D> hs4sci_1_3;
+  Hist<TH1D> hs4sci_1_4;
+  Hist<TH2D> hs4sci_2_1;
+  Hist<TH2D> hs4sci_2_2;
+  Hist<TH2D> hs4sci_2_3;
+  Hist<TH2D> hs4sci_2_4;
+
+  Hist<TH1D> hopt_1_1;
+  Hist<TH1D> hopt_1_2;
+  Hist<TH1D> hopt_1_3;
+  Hist<TH1D> hopt_1_4;
+  Hist<TH2D> hopt_2_1;
+  Hist<TH2D> hopt_2_2;
+  Hist<TH1D> hopt_2_3;
+  Hist<TH1D> hopt_2_4;
+
+
+
   // Primary Vertex
   Hist<TH1F> h_HitMultiplicity_Si1;
   Hist<TH1F> h_HitMultiplicityRecons_Si1;

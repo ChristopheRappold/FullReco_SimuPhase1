@@ -126,6 +126,31 @@ void TBuildWASACalibrationLayerPlane::SelectHists()
       LocalHisto.hmdc_3_2[i] = AnaHisto->CloneAndRegister(AnaHisto->hmdc_3_2[i]);
       LocalHisto.hmdc_3_3[i] = AnaHisto->CloneAndRegister(AnaHisto->hmdc_3_3[i]);
     }
+
+  LocalHisto.hmwdc_1_1 = AnaHisto->CloneAndRegister(AnaHisto->hmwdc_1_1);
+  LocalHisto.hmwdc_1_2 = AnaHisto->CloneAndRegister(AnaHisto->hmwdc_1_2);
+  LocalHisto.hmwdc_1_3 = AnaHisto->CloneAndRegister(AnaHisto->hmwdc_1_3);
+  LocalHisto.hmwdc_1_4 = AnaHisto->CloneAndRegister(AnaHisto->hmwdc_1_4);
+  LocalHisto.hmwdc_1_5 = AnaHisto->CloneAndRegister(AnaHisto->hmwdc_1_5);
+  LocalHisto.hmwdc_1_6 = AnaHisto->CloneAndRegister(AnaHisto->hmwdc_1_6);
+
+  LocalHisto.hs4sci_1_1 = AnaHisto->CloneAndRegister(AnaHisto->hs4sci_1_1);
+  LocalHisto.hs4sci_1_2 = AnaHisto->CloneAndRegister(AnaHisto->hs4sci_1_2);
+  LocalHisto.hs4sci_1_3 = AnaHisto->CloneAndRegister(AnaHisto->hs4sci_1_3);
+  LocalHisto.hs4sci_1_4 = AnaHisto->CloneAndRegister(AnaHisto->hs4sci_1_4);
+  LocalHisto.hs4sci_2_1 = AnaHisto->CloneAndRegister(AnaHisto->hs4sci_2_1);
+  LocalHisto.hs4sci_2_2 = AnaHisto->CloneAndRegister(AnaHisto->hs4sci_2_2);
+  LocalHisto.hs4sci_2_3 = AnaHisto->CloneAndRegister(AnaHisto->hs4sci_2_3);
+  LocalHisto.hs4sci_2_4 = AnaHisto->CloneAndRegister(AnaHisto->hs4sci_2_4);
+
+  LocalHisto.hopt_1_1 = AnaHisto->CloneAndRegister(AnaHisto->hopt_1_1);
+  LocalHisto.hopt_1_2 = AnaHisto->CloneAndRegister(AnaHisto->hopt_1_2);
+  LocalHisto.hopt_1_3 = AnaHisto->CloneAndRegister(AnaHisto->hopt_1_3);
+  LocalHisto.hopt_1_4 = AnaHisto->CloneAndRegister(AnaHisto->hopt_1_4);
+  LocalHisto.hopt_2_1 = AnaHisto->CloneAndRegister(AnaHisto->hopt_2_1);
+  LocalHisto.hopt_2_2 = AnaHisto->CloneAndRegister(AnaHisto->hopt_2_2);
+  LocalHisto.hopt_2_3 = AnaHisto->CloneAndRegister(AnaHisto->hopt_2_3);
+  LocalHisto.hopt_2_4 = AnaHisto->CloneAndRegister(AnaHisto->hopt_2_4);
 }
 
 ReturnRes::InfoM TBuildWASACalibrationLayerPlane::SoftExit(int return_build)
@@ -797,6 +822,95 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
             }
         }
     }
+
+
+    //  S4 Scintillators  //
+    S4SciHitAna *s4hit = new S4SciHitAna(event.s4tq, par.get());
+    LocalHisto.hs4sci_1_1->Fill(s4hit->GetdE_sc31());
+    LocalHisto.hs4sci_1_2->Fill(s4hit->GetdE_sc41());
+    LocalHisto.hs4sci_1_3->Fill(s4hit->GetdE_sc42_high());
+    LocalHisto.hs4sci_1_4->Fill(s4hit->GetdE_sc42_low());
+    LocalHisto.hs4sci_2_1->Fill(s4hit->GetTOF_sc3141() , s4hit->GetdE_sc31());
+    LocalHisto.hs4sci_2_2->Fill(s4hit->GetTOF_sc3141() , s4hit->GetdE_sc41());
+    LocalHisto.hs4sci_2_3->Fill(s4hit->GetTOF_sc3141() , s4hit->GetdE_sc42_high());
+    LocalHisto.hs4sci_2_4->Fill(s4hit->GetTOF_sc3141() , s4hit->GetdE_sc42_low());
+    //s4hit->Print();
+
+    /// --- MWDC HIT ---- ///////////////////////////////////////////////
+    int nt_mwdc = 0;
+    //std::vector<MWDCHitAna *> MWDCHitCont;
+    //MWDCHitCont.clear();
+    //for(auto mwdc_hit : s4mwdc->mwdchit){
+    //  MWDCHitAna *hit_ana = new MWDCHitAna(mwdc_hit, par, s4mwdc->tref[0]);
+    //  MWDCHitCont.emplace_back(hit_ana);
+    //}
+
+    float mwdc_x = -999.;
+    float mwdc_a = -999.;
+    float mwdc_y = -999.;
+    float mwdc_b = -999.;
+    float mwdc_chi2 = -999.;
+    MWDCTracking mwdc_track(par.get());// = new MWDCTracking(par);
+    // for(auto hit_mwdc : MWDCHitCont){
+    //   mwdc_track.StoreHit(hit_mwdc, par); /// only leading time cut
+    // }
+
+    for(auto mwdc_hit : event.s4mwdc->mwdchit){
+      float lt_tmp = mwdc_hit.t_leading - event.s4mwdc->tref[0];
+      float tot_tmp = mwdc_hit.t_trailing - mwdc_hit.t_leading;
+      // if(tot_tmp<200) continue;
+      // if(lt_tmp>-600 || lt_tmp<-850) continue;
+      if(lt_tmp < par->mwdc_lt_valid_min || lt_tmp > par->mwdc_lt_valid_max) continue;
+      float mwdc_length = par->mwdc_dtdxconversion(mwdc_hit.i_plane, lt_tmp);
+      float wirepos_tmp = (par->mwdc_plane_sign[mwdc_hit.i_plane])*(5.0)*((float)(mwdc_hit.i_wire)-(par->mwdc_center_id[mwdc_hit.i_plane]));
+      mwdc_track.StoreHit(mwdc_hit.i_plane,
+          -wirepos_tmp,
+          fabs(mwdc_length),
+          tot_tmp,
+          lt_tmp,
+          -par->mwdc_plane_angle[mwdc_hit.i_plane],
+          par->mwdc_zpos[mwdc_hit.i_plane]);
+    }
+
+    mwdc_track.SetAssumedResolution(par->mwdc_assumed_plane_resolution);
+    mwdc_track.SetMinPlaneEnebaled(par->mwdc_min_plane_with_hit_for_tracking);   // 12,13,14,15,16 or something like that
+    mwdc_track.SetMaxHitCombination(par->mwdc_max_hit_combination_for_tracking); // around 10. small number for online analysis!
+
+    // bool tracking_status = mwdc_track.Tracking();
+    int tracking_status = mwdc_track.Tracking_PairLR();  /// which is better? seems this is faster
+    if(tracking_status==1){
+      mwdc_chi2 = mwdc_track.GetChi2();
+      if(mwdc_chi2 >= 0.0 && mwdc_chi2 < par->mwdc_tracking_chi2cut_max){
+        mwdc_x = mwdc_track.GetX() + mwdc_track.GetA() * (par->dist_focS4 - par->dist_MWDC_zref)
+          + par->mwdc_shift_x_alignment;
+        mwdc_a = mwdc_track.GetA() * 1000. + par->mwdc_shift_a_alignment;
+        mwdc_y = mwdc_track.GetY() + mwdc_track.GetB() * (par->dist_focS4 - par->dist_MWDC_zref)
+          + par->mwdc_shift_y_alignment;
+        mwdc_b = mwdc_track.GetB() * 1000. + par->mwdc_shift_b_alignment;
+        nt_mwdc++;
+        //for(int i=0; i<16; ++i){ //CHECK LATER
+        //  res_mwdc[i] = mwdc_track.GetResidual(i);
+        //  hmwdc_2[i]->Fill(res_mwdc[i]);
+        //}
+        LocalHisto.hmwdc_1_1->Fill(mwdc_x);
+        LocalHisto.hmwdc_1_2->Fill(mwdc_y);
+        LocalHisto.hmwdc_1_3->Fill(mwdc_a);
+        LocalHisto.hmwdc_1_4->Fill(mwdc_b);
+        LocalHisto.hmwdc_1_5->Fill(mwdc_chi2);
+        //t_mwdc_x.emplace_back(mwdc_x); //Check include later to output root file
+        //t_mwdc_y.emplace_back(mwdc_y);
+        //t_mwdc_a.emplace_back(mwdc_a);
+        //t_mwdc_b.emplace_back(mwdc_b);
+        //t_mwdc_chi2.emplace_back(mwdc_chi2);
+      }
+    }
+
+    RecoEvent.MWDCTracks.emplace_back(mwdc_track);
+
+    //t_nt_mwdc = nt_mwdc;
+    LocalHisto.hmwdc_1_6->Fill(nt_mwdc);
+    //  MWDC end  ///////////////////////////////////////////
+
 
 
   // clear /////////////////////////////////////

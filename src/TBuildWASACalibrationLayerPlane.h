@@ -19,6 +19,10 @@
 #include "HitAna/PSBHitAna.hh"
 #include "HitAna/PSFEHitAna.hh"
 #include "HitAna/T0HitAna.hh"
+#include "HitAna/MWDCHitAna.hh"
+#include "HitAna/MWDCTracking.hh"
+#include "HitAna/S4SciHitAna.hh"
+#include "HitAna/OpticsMom.hh"
 
 #include "Ana_Event/Ana_WasaEvent.hh"
 #include "EventWASAUnpack/WASAUnpackBranch.hh"
@@ -122,6 +126,31 @@ private:
     TH1D* hmdc_3[17];
     TH1D* hmdc_3_2[17];
     TH1D* hmdc_3_3[17];
+
+    TH1D* hmwdc_1_1;
+    TH1D* hmwdc_1_2;
+    TH1D* hmwdc_1_3;
+    TH1D* hmwdc_1_4;
+    TH1D* hmwdc_1_5;
+    TH1D* hmwdc_1_6;
+
+    TH1D* hs4sci_1_1;
+    TH1D* hs4sci_1_2;
+    TH1D* hs4sci_1_3;
+    TH1D* hs4sci_1_4;
+    TH2D* hs4sci_2_1;
+    TH2D* hs4sci_2_2;
+    TH2D* hs4sci_2_3;
+    TH2D* hs4sci_2_4;
+
+    TH1D* hopt_1_1;
+    TH1D* hopt_1_2;
+    TH1D* hopt_1_3;
+    TH1D* hopt_1_4;
+    TH2D* hopt_2_1;
+    TH2D* hopt_2_2;
+    TH1D* hopt_2_3;
+    TH1D* hopt_2_4;
   };
 
   LocalHists LocalHisto;

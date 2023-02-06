@@ -54,6 +54,8 @@ void FullRecoEvent::Clear(int toclean)
   TrackMother.clear();
   DaughtersTrackDAFInit.clear();
 
+  MWDCTracks.clear();
+
   BeamTracks.clear();
   PrimaryTracks.clear();
 

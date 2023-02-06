@@ -595,6 +595,55 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
         HistReg.emplace_back(&hmdc_3_3[i].store);
       }
 
+      hmwdc_1_1.emplace_back(new TH1D("hmwdc_1_1","MWDC X"   ,500, -200 ,200));
+      HistReg.emplace_back(&hmwdc_1_1.store);
+      hmwdc_1_2.emplace_back(new TH1D("hmwdc_1_2","MWDC Y"   ,500, -50  ,50 ));
+      HistReg.emplace_back(&hmwdc_1_2.store);
+      hmwdc_1_3.emplace_back(new TH1D("hmwdc_1_3","MWDC A"   ,500, -30  ,30));
+      HistReg.emplace_back(&hmwdc_1_3.store);
+      hmwdc_1_4.emplace_back(new TH1D("hmwdc_1_4","MWDC B"   ,500, -30  ,30 ));
+      HistReg.emplace_back(&hmwdc_1_4.store);
+      hmwdc_1_5.emplace_back(new TH1D("hmwdc_1_5","MWDC Chi2",500, 0    ,10));
+      HistReg.emplace_back(&hmwdc_1_5.store);
+      hmwdc_1_6.emplace_back(new TH1D("hmwdc_1_6","MWDC nt"  ,10 , 0    ,10));
+      HistReg.emplace_back(&hmwdc_1_6.store);
+
+      hs4sci_1_1.emplace_back(new TH1D("hs4sci_1_1","S4 SC31 dE"     ,500, 0 ,3000));
+      HistReg.emplace_back(&hs4sci_1_1.store);
+      hs4sci_1_2.emplace_back(new TH1D("hs4sci_1_2","S4 SC41 dE"     ,500, 0 ,3000));
+      HistReg.emplace_back(&hs4sci_1_2.store);
+      hs4sci_1_3.emplace_back(new TH1D("hs4sci_1_3","S4 SC42 High dE",500, 0 ,3000));
+      HistReg.emplace_back(&hs4sci_1_3.store);
+      hs4sci_1_4.emplace_back(new TH1D("hs4sci_1_4","S4 SC42 Low dE",500, 0 ,3000));
+      HistReg.emplace_back(&hs4sci_1_4.store);
+
+      hs4sci_2_1.emplace_back(new TH2D("hs4sci_2_1","S4 TOF31-41 : SC31 dE"     ,200, 30 ,100, 200, 0, 3000));
+      HistReg.emplace_back(&hs4sci_2_1.store);
+      hs4sci_2_2.emplace_back(new TH2D("hs4sci_2_2","S4 TOF31-41 : SC41 dE"     ,200, 30 ,100, 200, 0, 3000));
+      HistReg.emplace_back(&hs4sci_2_2.store);
+      hs4sci_2_3.emplace_back(new TH2D("hs4sci_2_3","S4 TOF31-41 : SC42 High dE",200, 30 ,100, 200, 0, 3000));
+      HistReg.emplace_back(&hs4sci_2_3.store);
+      hs4sci_2_4.emplace_back(new TH2D("hs4sci_2_4","S4 TOF31-41 : SC42 Low  dE",200, 30 ,100, 200, 0, 3000));
+      HistReg.emplace_back(&hs4sci_2_4.store);
+
+      hopt_1_1.emplace_back(new TH1D("hopt_1_1","Optics A2 reco" ,500, -100 ,100));
+      HistReg.emplace_back(&hopt_1_1.store);
+      hopt_1_2.emplace_back(new TH1D("hopt_1_2","Optics B2 reco" ,500, -100 ,100));
+      HistReg.emplace_back(&hopt_1_2.store);
+      hopt_1_3.emplace_back(new TH1D("hopt_1_3","Optics Mom He3" ,500, 7.0  ,8.0));
+      HistReg.emplace_back(&hopt_1_3.store);
+      hopt_1_4.emplace_back(new TH1D("hopt_1_4","Optics Num"     ,  5, -0.5 ,4.5));
+      HistReg.emplace_back(&hopt_1_4.store);
+
+      hopt_2_1.emplace_back(new TH2D("hopt_2_1","Optics A2 reco : A2" ,500, -100 ,100, 500, -100, 100));
+      HistReg.emplace_back(&hopt_2_1.store);
+      hopt_2_2.emplace_back(new TH2D("hopt_2_2","Optics B2 reco : B2" ,500, -100 ,100, 500, -100, 100));
+      HistReg.emplace_back(&hopt_2_2.store);
+      hopt_2_3.emplace_back(new TH1D("hopt_2_3","Optics A2 reco - A2" ,500, -30 ,30 ));
+      HistReg.emplace_back(&hopt_2_3.store);
+      hopt_2_4.emplace_back(new TH1D("hopt_2_4","Optics B2 reco - B2" ,500, -30 ,30 ));
+      HistReg.emplace_back(&hopt_2_4.store);
+      
       HistRegisteredByDir.insert(std::make_pair("Builder", std::make_tuple(HistReg,0)));
     }
 

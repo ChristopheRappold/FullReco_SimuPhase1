@@ -31,6 +31,7 @@
 #include "spdlog/spdlog.h"
 
 #include "HitAna/FiberHitXUV.hh"
+#include "HitAna/MWDCTracking.hh"
 //#include "HitAna/FiberTrackAna.hh"
 
 #include <cassert>
@@ -750,6 +751,8 @@ public:
 
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
+
+  std::vector<MWDCTracking> MWDCTracks;
 
   std::vector<PrimaryVtxTrack> BeamTracks;
   std::vector<PrimaryVtxTrack> PrimaryTracks;
