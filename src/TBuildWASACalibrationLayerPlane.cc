@@ -407,7 +407,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       TVectorD hitCoords(1);
       hitCoords(0) = 0.;
       TMatrixDSym hitCov(1);
-      hitCov(0, 0) = pow(par->psfe_res_phi * mm2cm, 2); // must be corrected
+      hitCov(0, 0) = pow(par->psfe_res_phi * hitana::mm2cm, 2); // must be corrected
 
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSBE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
