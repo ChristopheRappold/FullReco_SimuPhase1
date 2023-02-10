@@ -82,8 +82,7 @@ struct Task
   bool Task_DecayVtx = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKFLATMCOUTPUTML, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
-    TASKKALMANDAF, TASKDECAYVTX, NBTASKID
+    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKFLATMCOUTPUTML, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, NBTASKID
   };
 
   std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
@@ -190,7 +189,13 @@ struct RunTaskAttrDef
   bool KF_KalmanRef;
   bool KF_DAFRef;
   bool KF_DAF;
+  bool KF_G4e;
 
+  std::string G4e_FullProp;
+  std::string G4e_Basf2List;
+  std::string G4e_ExactJac;
+  std::string G4e_MaxEnergyLoss;
+  
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
 
@@ -366,6 +371,13 @@ class THyphiAttributes
   bool KF_KalmanRef;
   bool KF_DAFRef;
   bool KF_DAF;
+  bool KF_G4e;
+
+  std::string G4e_FullProp;
+  std::string G4e_Basf2List;
+  std::string G4e_ExactJac;
+  std::string G4e_MaxEnergyLoss;
+  std::string G4e_Verbose;
 
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;

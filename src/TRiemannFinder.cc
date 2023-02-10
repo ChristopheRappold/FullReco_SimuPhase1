@@ -123,7 +123,7 @@ int TRiemannFinder<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 	OutTrack->Seed_Par[id_par] = trackC.helix.Par[id_par];
 
       auto* DataCov = trackC.helix.Cov.GetMatrixArray();
-      for(size_t id_cov = 0; id_cov<trackC.helix.Cov.GetNoElements();++id_cov)
+      for(int id_cov = 0; id_cov<trackC.helix.Cov.GetNoElements();++id_cov)
 	OutTrack->Seed_Cov[id_cov] = DataCov[id_cov];
 
       OutTrack->Chi2_C = trackC.helix.chi2_circle;
@@ -148,7 +148,7 @@ int TRiemannFinder<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 }
 
 template<class Out>
-ReturnRes::InfoM TRiemannFinder<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
+ReturnRes::InfoM TRiemannFinder<Out>::SoftExit(int ) { return ReturnRes::Fine; }
 
 template<class Out>
 void TRiemannFinder<Out>::SelectHists()

@@ -78,6 +78,13 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   KF_KalmanRef  = false;
   KF_DAFRef     = false;
   KF_DAF        = false;
+  KF_G4e        = false;
+
+  G4e_FullProp = "0";
+  G4e_Basf2List = "1";
+  G4e_ExactJac = "1";
+  G4e_MaxEnergyLoss = "0.0005";
+  G4e_Verbose = "0";
 
   KF_NbCentralCut   = 1;
   KF_NbMiniFiberCut = 4;
@@ -122,10 +129,25 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     KF_DAF = Config.Get<bool>("KF_DAF");
   if(Config.IsAvailable("KF_DAFRef"))
     KF_DAFRef = Config.Get<bool>("KF_DAFRef");
+  if(Config.IsAvailable("KF_G4e"))
+    KF_G4e = Config.Get<bool>("KF_G4e");
 
-  _logger->info("KF Setting: Kalman? {} / KalmanRef? {} / KalmanSqrt? {} / DAF? {} / DAFRef? {}", KF_Kalman,
-                KF_KalmanRef, KF_KalmanSqrt, KF_DAF, KF_DAFRef);
+  _logger->info("KF Setting: Kalman? {} / KalmanRef? {} / KalmanSqrt? {} / DAF? {} / DAFRef? {} / G4e? {}", KF_Kalman,
+                KF_KalmanRef, KF_KalmanSqrt, KF_DAF, KF_DAFRef, KF_G4e);
 
+  if(Config.IsAvailable("G4e_FullProp"))
+    G4e_FullProp = Config.Get<std::string>("G4e_FullProp");
+  if(Config.IsAvailable("G4e_Basf2List"))
+    G4e_Basf2List = Config.Get<std::string>("G4e_Basf2List");
+  if(Config.IsAvailable("G4e_ExactJac"))
+    G4e_ExactJac = Config.Get<std::string>("G4e_ExactJac");
+  if(Config.IsAvailable("G4e_MaxEnergyLoss"))
+    G4e_MaxEnergyLoss = Config.Get<std::string>("G4e_MaxEnergyLoss");
+  if(Config.IsAvailable("G4e_Verbose"))
+    G4e_Verbose = Config.Get<std::string>("G4e_Verbose");
+
+  _logger->info("G4e Setting: FullProp? {} / Basf2List? {} / ExactJac? {} / MaxEnergyLoss? {} / Verbose? {}", G4e_FullProp, G4e_Basf2List, G4e_ExactJac, G4e_MaxEnergyLoss, G4e_Verbose);
+  
   if(Config.IsAvailable("KF_NbCentralCut"))
     KF_NbCentralCut = Config.Get<int>("KF_NbCentralCut");
   if(Config.IsAvailable("KF_NbMiniFiberCut"))
@@ -214,8 +236,12 @@ if(Config.IsAvailable("CalibFile_T0time"))
   else
     map_ParamFiles.insert({"t0_time_file","./calib/t0_param/t0_time.csv"});
 
+ if(Config.IsAvailable("Wasa_FieldMap"))
+   Wasa_FieldMap = Config.Get<int>("Wasa_FieldMap");
 
-
+ if(Config.IsAvailable("Wasa_FieldMapName"))
+   Wasa_FieldMapName = Config.Get<std::string>("Wasa_FieldMapName");
+ 
   if(Wasa_FieldMap)
     {
       double signDir = Wasa_Side ? 1.0 : -1.0;
@@ -352,7 +378,7 @@ int THyphiAttributes::Init_Para()
 
 int THyphiAttributes::Reload_Para()
 {
-  std::string Hash(InputPar.previousMeta->Hash);
+  Hash = InputPar.previousMeta->Hash;
 
   auto storage = InitStorage();
   storage.sync_schema();
@@ -459,26 +485,37 @@ void Task::Init(const FullRecoConfig& Config)
 {
   if(Config.IsAvailable("Task_CheckField"))
     Task_CheckField = Config.Get<bool>("Task_CheckField");
+
   if(Config.IsAvailable("Task_PrimaryVtx"))
     Task_PrimaryVtx = Config.Get<bool>("Task_PrimaryVtx");
+
   if(Config.IsAvailable("Task_FlatMCOutputML"))
     Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
+
   if(Config.IsAvailable("Task_CheckFiberTrack"))
     Task_CheckFiberTrack = Config.Get<bool>("Task_CheckFiberTrack");
+
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
+
   if(Config.IsAvailable("Task_RiemannFinder"))
     Task_RiemannFinder = Config.Get<bool>("Task_RiemannFinder");
+
   if(Config.IsAvailable("Task_FindingPerf"))
     Task_FindingPerf = Config.Get<bool>("Task_FindingPerf");
+
   if(Config.IsAvailable("Task_FinderCM"))
     Task_FinderCM = Config.Get<bool>("Task_FinderCM");
+
   if(Config.IsAvailable("Task_CheckRZ"))
     Task_CheckRZ = Config.Get<bool>("Task_CheckRZ");
+
   if(Config.IsAvailable("Task_KalmanDAF"))
     Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
+
   if(Config.IsAvailable("Task_DecayVtx"))
     Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
+
   if(Config.IsAvailable("Task_ReStart"))
     Task_ReStart = Config.Get<bool>("Task_ReStart");
 

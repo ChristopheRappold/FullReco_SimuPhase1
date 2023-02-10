@@ -70,7 +70,7 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
       std::tuple<int, int> id_after_mag  = std::make_tuple(-1, -1);
       std::tuple<int, int> id_psb        = std::make_tuple(-1, -1);
 
-      for(int id_det = 0; id_det < it_ListHits->second.size(); ++id_det)
+      for(size_t id_det = 0; id_det < it_ListHits->second.size(); ++id_det)
         {
           int id_hit = it_ListHits->second[id_det];
 
@@ -605,10 +605,10 @@ ReturnRes::InfoM TFlatMCOutputML<Out>::operator()(FullRecoEvent& RecoEvent, Out*
 }
 
 template<class Out>
-int TFlatMCOutputML<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FlattenOut(RecoEvent); }
+int TFlatMCOutputML<Out>::Exec(FullRecoEvent& RecoEvent, Out* ) { return FlattenOut(RecoEvent); }
 
 template<class Out>
-ReturnRes::InfoM TFlatMCOutputML<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
+ReturnRes::InfoM TFlatMCOutputML<Out>::SoftExit(int ) { return ReturnRes::Fine; }
 
 template<class Out>
 void TFlatMCOutputML<Out>::SelectHists()

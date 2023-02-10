@@ -72,6 +72,30 @@ TKalmanFilter_DAF<Out>::TKalmanFilter_DAF(const THyphiAttributes& attribut)
   else
     att._logger->error("E> Kalman Filter fitter not set correctly !");
 
+  if(att.KF_G4e)
+    {
+      std::string nameField = att.Wasa_FieldMapName;
+      double signDir = att.Wasa_Side ? 1.0 : -1.0;
+      std::array<double,3> fieldValues = {att.Field_Strength*signDir*0.1, 0., 0.}; 
+      // std::unordered_map<std::string, std::string> G4eConfig = {{"FullProp","0"},{"G4eBasf2PhysicsList","1"},{"ExactJac","1"},
+      // 								//,{"TrackingVerbose","10"},{"ControlVerbose","2"},{"G4eVerbose","4"}};
+      // 								//{"StepLength","25 mm"},
+      // 								//{"MagFieldDiff","0.01",},
+      // 								{"MaxEnergyLoss","0.0005"}
+
+      std::unordered_map<std::string, std::string> G4eConfig = {{"FullProp",att.G4e_FullProp},{"G4eBasf2PhysicsList",att.G4e_Basf2List},
+								{"ExactJac",att.G4e_ExactJac},
+								//,{"TrackingVerbose","10"},{"ControlVerbose","2"},{"G4eVerbose","4"}};
+								//{"StepLength","25 mm"},
+								//{"MagFieldDiff","0.01",},
+								{"MaxEnergyLoss", att.G4e_MaxEnergyLoss}};
+
+      G4eMag = std::make_unique<G4eManager>(G4eConfig,fieldValues, true, nameField);
+      G4eMag->InitG4e();
+    }
+
+
+  
   Fitter->setMinIterations(3);
   Fitter->setMaxIterations(nIter);
 
@@ -723,7 +747,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       seed_p.SetMag(new_P);
 
       // Forward
-      genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG, 1);
+      genfit::AbsTrackRep* REP = att.KF_G4e ? new genfit::G4eTrackRep(*G4eMag,PDG) : new genfit::RKTrackRep(PDG, 1);
       // REP->setDebugLvl(2);
       // genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG,-1);
 
