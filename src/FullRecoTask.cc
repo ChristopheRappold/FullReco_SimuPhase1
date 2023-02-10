@@ -115,6 +115,7 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
 	case Task::TASKCHECKRZ:
 	  if(Attributes.TaskConfig.Task_CheckRZ)
 	    list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
+	  break;
 	case Task::TASKKALMANDAF:
 	  if(Attributes.TaskConfig.Task_KalmanDAF)
 	    list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
