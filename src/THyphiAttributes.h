@@ -377,6 +377,7 @@ class THyphiAttributes
   std::string G4e_Basf2List;
   std::string G4e_ExactJac;
   std::string G4e_MaxEnergyLoss;
+  std::string G4e_Verbose;
 
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
