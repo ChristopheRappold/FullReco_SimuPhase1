@@ -32,6 +32,7 @@ class WasaSolenoidFieldMap : public FairField
   void Init();
 
   void SetPositionFromGeoManager(const TString& name_node);
+  void SetPosition(double posX, double posY, double posZ) {fPosX = posX; fPosY = posY; fPosZ = posZ;}
 
   Bool_t IsInside(Double_t x, Double_t y, Double_t z);
   /** Get components of field at a given point 
