@@ -362,7 +362,7 @@ int TBuildDetectorLayerPlaneDAF_ZMQ::Exec(const TG4Sol_Event& event, const std::
 #ifdef ROOT6
           for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
 #else
-          for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
+          for(int it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
 #endif
             {
 #ifdef ROOT6
@@ -455,7 +455,7 @@ int TBuildDetectorLayerPlaneDAF_ZMQ::Exec(const TG4Sol_Event& event, const std::
 #ifdef ROOT6
           for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
 #else
-          for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
+          for(int it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
 #endif
             {
 #ifdef ROOT6

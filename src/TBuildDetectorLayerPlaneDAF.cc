@@ -97,9 +97,9 @@ ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& eve
   return SoftExit(result);
 }
 
-ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& event,
-                                                         const std::vector<TClonesArray*>& hits,
-                                                         FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree)
+ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event&,
+                                                         const std::vector<TClonesArray*>&,
+                                                         FullRecoEvent&, Ana_WasaEvent*)
 {
   return ReturnRes::BuildError;
 }
@@ -410,7 +410,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 #ifdef ROOT6
           for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
 #else
-          for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
+          for(int it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
 #endif
             {
 #ifdef ROOT6
@@ -502,7 +502,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 #ifdef ROOT6
           for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
 #else
-          for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
+          for(int it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
 #endif
             {
 #ifdef ROOT6

@@ -95,7 +95,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
   if constexpr(restart::HasMC_Particle<Out>::value == true)
     {
       int MotherTrackID = -1;
-      for(size_t it_MC = 0; it_MC < event->fMC_Particle->GetEntries(); ++it_MC)
+      for(int it_MC = 0; it_MC < event->fMC_Particle->GetEntries(); ++it_MC)
 	{
 	  const TMcParticle& MCpar = *(dynamic_cast<TMcParticle*>(event->fMC_Particle->At(it_MC)));
 
@@ -115,7 +115,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	    }
 	}
 
-      for(size_t it_MC = 0; it_MC < event->fMC_Particle->GetEntries(); ++it_MC)
+      for(int it_MC = 0; it_MC < event->fMC_Particle->GetEntries(); ++it_MC)
 	{
 	  const TMcParticle& MCpar = *(dynamic_cast<TMcParticle*>(event->fMC_Particle->At(it_MC)));
 
@@ -172,7 +172,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
       double resolution_psce_z = 1.0;
       double time_res          = 0.150; // ns
 
-      for(size_t it_Si = 0; it_Si < event->NInSi; ++it_Si)
+      for(int it_Si = 0; it_Si < event->NInSi; ++it_Si)
 	{
 
 	  const TMcHit& SiHit = *(dynamic_cast<TMcHit*>(event->InSi->At(it_Si)));
@@ -207,7 +207,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
       att._logger->debug("NFiber: {} {}",event->NFiber,event->Fiber->GetEntries());
       att._logger->debug("NMDC  : {} {}",event->NCdc,event->CDC->GetEntries());
 
-      for(size_t it_PSCE = 0; it_PSCE < event->PSCE->GetEntries(); ++it_PSCE)
+      for(int it_PSCE = 0; it_PSCE < event->PSCE->GetEntries(); ++it_PSCE)
 	{
 
 	  TMcHit* PSCEHit = dynamic_cast<TMcHit*>(event->PSCE->At(it_PSCE));
@@ -298,7 +298,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempTrackInfo->second[TypeDet].length = PSCEHit->TrackLength;
 	}
 
-      for(size_t it_PSBE = 0; it_PSBE < event->NPsbe; ++it_PSBE)
+      for(int it_PSBE = 0; it_PSBE < event->NPsbe; ++it_PSBE)
 	{
 
 	  const TMcHit& PSBEHit = *(dynamic_cast<TMcHit*>(event->PSBE->At(it_PSBE)));
@@ -395,7 +395,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempTrackInfo->second[TypeDet].length = PSBEHit.TrackLength;
 	}
 
-      for(size_t it_Fiber = 0; it_Fiber < event->NFiber; ++it_Fiber)
+      for(int it_Fiber = 0; it_Fiber < event->NFiber; ++it_Fiber)
 	{
 
 	  const TMcHit& FiberHit = *(dynamic_cast<TMcHit*>(event->Fiber->At(it_Fiber)));
@@ -788,7 +788,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	    }
 	}
 
-      for(size_t it_MDC = 0; it_MDC < event->NCdc; ++it_MDC)
+      for(int it_MDC = 0; it_MDC < event->NCdc; ++it_MDC)
 	{
 
 	  const TMcHit& MDCHit = *(dynamic_cast<TMcHit*>(event->CDC->At(it_MDC)));
@@ -956,7 +956,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempTrackInfo->second[TypeDet].time  = MDCHit.Time;
 	}
 
-      for(size_t it_TrFwd = 0; it_TrFwd < event->NFwdtracker; ++it_TrFwd)
+      for(int it_TrFwd = 0; it_TrFwd < event->NFwdtracker; ++it_TrFwd)
 	{
 
 	  const TMcHit& TrFwdHit = *(dynamic_cast<TMcHit*>(event->FwdTracker->At(it_TrFwd)));
@@ -1020,7 +1020,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempTrackInfo->second[TypeDet].time  = TrFwdHit.Time;
 	}
 
-      for(size_t it_FMF2 = 0; it_FMF2 < event->NFmf2; ++it_FMF2)
+      for(int it_FMF2 = 0; it_FMF2 < event->NFmf2; ++it_FMF2)
 	{
 
 	  const TMcHit& FMF2Hit = *(dynamic_cast<TMcHit*>(event->FwdTracker->At(it_FMF2)));
@@ -1085,13 +1085,13 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	}
     }
 
-  for(size_t it_trCand = 0; it_trCand < event->NtrackCand;++it_trCand)
+  for(int it_trCand = 0; it_trCand < event->NtrackCand;++it_trCand)
     {
       const TTrackCand& TrackC = *(dynamic_cast<TTrackCand*>(OutTree->TrackCand->At(it_trCand)));
 
       std::vector<int> sortedHits;
 
-      for(size_t it_set = 0; it_set<TrackC.NSet;++it_set)
+      for(int it_set = 0; it_set<TrackC.NSet;++it_set)
 	{
 	  RecoEvent.IdHitsToMeasurement.emplace_back(TrackC.SetLayerID[it_set],TrackC.SetHitID[it_set],TrackC.TrackID);
 	  int tempId = RecoEvent.IdHitsToMeasurement.size() - 1;
@@ -1108,7 +1108,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 
 
 
-  for(size_t it_track = 0; it_track < event->Ntrack; ++it_track)
+  for(int it_track = 0; it_track < event->Ntrack; ++it_track)
     {
       const THyphiTrack& OutTrack = *(dynamic_cast<THyphiTrack*>(OutTree->fTrack->At(it_track)));
       int TrackID                 = -1;

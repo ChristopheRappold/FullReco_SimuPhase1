@@ -37,7 +37,7 @@ private:
 
   int FinderDecayVertex(FullRecoEvent& RecoEvent);
 
-  void StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg);
+  void StudyCaseSelector(std::string StudyCase, int& Hyppdg, int& Fragment_pdg);
 
   void RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                          int& pdgParticle, int& cutConditions,

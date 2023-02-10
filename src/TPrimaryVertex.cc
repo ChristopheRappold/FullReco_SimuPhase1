@@ -47,7 +47,7 @@ ReturnRes::InfoM TPrimaryVertex<Out>::operator()(FullRecoEvent& RecoEvent, Out* 
 }
 
 template <class Out>
-int TPrimaryVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FinderPrimaryVertex(RecoEvent); }
+int TPrimaryVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* ) { return FinderPrimaryVertex(RecoEvent); }
 
 template <class Out>
 ReturnRes::InfoM TPrimaryVertex<Out>::SoftExit(int result_full) {
@@ -3016,8 +3016,8 @@ void TPrimaryVertex<Out>::RealHitstoRealTracks(
     std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal_Si2,
     std::vector<std::vector<std::vector<double> > >& RealTracks)
 {
-  double Z_plane_Si1 = 27.; // in cm
-  double Z_plane_Si2 = 30.; // in cm
+  Z_plane_Si1 = 27.; // in cm
+  Z_plane_Si2 = 30.; // in cm
 
   double particletype;
 

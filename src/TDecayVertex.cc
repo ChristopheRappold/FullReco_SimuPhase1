@@ -1497,42 +1497,42 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
 template <class Out>
-void TDecayVertex<Out>::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg)
+void TDecayVertex<Out>::StudyCaseSelector(std::string StudyCase, int& HypPDG, int& FragmentPDG)
 {
   if(StudyCase.compare("H3L") == 0)
     {
-      Hyp_pdg = H3L_pdg;
-      Fragment_pdg = He3_pdg;
+      HypPDG = H3L_pdg;
+      FragmentPDG = He3_pdg;
       recons_from_FRS_MDC = 1;
     }
   else if(StudyCase.compare("H4L") == 0)
     {
-      Hyp_pdg = H4L_pdg;
-      Fragment_pdg = He4_pdg;
+      HypPDG = H4L_pdg;
+      FragmentPDG = He4_pdg;
       recons_from_FRS_MDC = 1;
     }
   else if(StudyCase.compare("nnL") == 0)
     {
       //Hyp_pdg =
-      Fragment_pdg = deuteron_pdg;
+      FragmentPDG = deuteron_pdg;
       recons_from_FRS_MDC = 1;
     }
   else if(StudyCase.compare("lambda") == 0)
     {
-      Hyp_pdg = lambda_pdg;
-      Fragment_pdg = proton_pdg;
+      HypPDG = lambda_pdg;
+      FragmentPDG = proton_pdg;
       recons_from_FRS_MDC = 2;
     }
   else if(StudyCase.compare("background_H3L") == 0)
     {
-      Hyp_pdg = H3L_pdg;
-      Fragment_pdg = He3_pdg;
+      HypPDG = H3L_pdg;
+      FragmentPDG = He3_pdg;
       recons_from_FRS_MDC = 1;
     }
   else if(StudyCase.compare("background_H4L") == 0)
     {
-      Hyp_pdg = H4L_pdg;
-      Fragment_pdg = He4_pdg;
+      HypPDG = H4L_pdg;
+      FragmentPDG = He4_pdg;
       recons_from_FRS_MDC = 1;
     }
 
@@ -2221,7 +2221,7 @@ void TDecayVertex<Out>::SiHitsFinder(KFParticle& Track, std::vector<std::vector<
     return;
 
   Track_Sihit.clear();
-  float Z_plane = Hits_Si[0][3];
+  Z_plane = Hits_Si[0][3];
   std::vector<double> Empty_Sihit = {-1., -1., -1., -1.}; // (E, X, Y, Z)
 
   double track_parameter = (Z_plane - Track.GetZ()) / Track.GetPz();

@@ -45,13 +45,13 @@ ReturnRes::InfoM TCheckFiberTrack<Out>::operator()(FullRecoEvent& RecoEvent, Out
 }
 
 template<class Out>
-int TCheckFiberTrack<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
+int TCheckFiberTrack<Out>::Exec(FullRecoEvent& RecoEvent, Out* )
 {
   return CheckTrackFinding(RecoEvent);
 }
 
 template<class Out>
-ReturnRes::InfoM TCheckFiberTrack<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
+ReturnRes::InfoM TCheckFiberTrack<Out>::SoftExit(int ) { return ReturnRes::Fine; }
 
 template<class Out>
 void TCheckFiberTrack<Out>::SelectHists()

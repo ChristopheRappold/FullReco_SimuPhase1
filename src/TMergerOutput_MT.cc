@@ -30,7 +30,7 @@ void TMergerOutput_MT::SelectHists()
   LocalHisto.h_stats = AnaHisto->CloneAndRegister(AnaHisto->h_stats);
 }
 
-ReturnRes::InfoM TMergerOutput_MT::SoftExit(int return_build) { return ReturnRes::Fine; }
+ReturnRes::InfoM TMergerOutput_MT::SoftExit(int ) { return ReturnRes::Fine; }
 
 int TMergerOutput_MT::Exec(FullRecoEvent& RecoEvent, ReturnRes::InfoM Status, MCAnaEventG4Sol* OutTree)
 {

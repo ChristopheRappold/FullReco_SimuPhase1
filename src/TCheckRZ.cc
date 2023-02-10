@@ -58,10 +58,10 @@ ReturnRes::InfoM TCheckRZ<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutTre
 }
 
 template<class Out>
-int TCheckRZ<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FinderTrack(RecoEvent); }
+int TCheckRZ<Out>::Exec(FullRecoEvent& RecoEvent, Out* ) { return FinderTrack(RecoEvent); }
 
 template<class Out>
-ReturnRes::InfoM TCheckRZ<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
+ReturnRes::InfoM TCheckRZ<Out>::SoftExit(int ) { return ReturnRes::Fine; }
 
 template<class Out>
 void TCheckRZ<Out>::SelectHists()
@@ -293,7 +293,7 @@ int TCheckRZ<Out>::FinderTrack(FullRecoEvent& RecoEvent)
               {
                 // std::cout<<"f_extract : "<<tempVecPos[0]<<" "<<tempVecPos[1]<<" "<<tempVecPos[2]<<"\n";
                 TMatrixD temp1(3, 1);
-                for(size_t iM = 0; iM < temp1.GetNrows(); ++iM)
+                for(int iM = 0; iM < temp1.GetNrows(); ++iM)
                   temp1(iM, 0) = (TMath::Floor(1000 * tempVecPos[iM]) * 0.001) - tempLabPos[iM];
                 auto temp2 = temp1;
                 temp2.T();
@@ -321,7 +321,7 @@ int TCheckRZ<Out>::FinderTrack(FullRecoEvent& RecoEvent)
             SubCovSqrt *= TMath::Sqrt(2 * SubCov.GetNcols());
             std::vector<double> Rs;
             double mean_R = 0.;
-            for(size_t iC = 0; iC < SubCovSqrt.GetNcols(); ++iC)
+            for(int iC = 0; iC < SubCovSqrt.GetNcols(); ++iC)
               {
                 double x1 = tempLabPos.X() + SubCovSqrt(0, iC);
                 double y1 = tempLabPos.Y() + SubCovSqrt(0, iC);
@@ -385,7 +385,7 @@ int TCheckRZ<Out>::FinderTrack(FullRecoEvent& RecoEvent)
             SubCovSqrt *= TMath::Sqrt(2 * TrackFiberCov.GetNcols());
             std::vector<double> Rs;
             double mean_R = 0.;
-            for(size_t iC = 0; iC < SubCovSqrt.GetNcols(); ++iC)
+            for(int iC = 0; iC < SubCovSqrt.GetNcols(); ++iC)
               {
                 double XPosAtZ = (TrackFiber(2) + SubCovSqrt(2, iC)) * Orig.Z() + (TrackFiber(0) + SubCovSqrt(0, iC));
                 double YPosAtZ = (TrackFiber(3) + SubCovSqrt(3, iC)) * Orig.Z() + (TrackFiber(1) + SubCovSqrt(1, iC));
@@ -543,7 +543,7 @@ int TCheckRZ<Out>::FinderTrack(FullRecoEvent& RecoEvent)
         for(auto tempV : miniTrackAll)
           {
             TMatrixD temp1(4, 1);
-            for(size_t iM = 0; iM < temp1.GetNrows(); ++iM)
+            for(int iM = 0; iM < temp1.GetNrows(); ++iM)
               temp1(iM, 0) = tempV[iM] - Res[iM];
             auto temp2 = temp1;
             temp2.T();

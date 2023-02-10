@@ -159,13 +159,13 @@ ReturnRes::InfoM TFindingPerf<Out>::operator()(FullRecoEvent& RecoEvent, Out* Ou
 }
 
 template<class Out>
-int TFindingPerf<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
+int TFindingPerf<Out>::Exec(FullRecoEvent& RecoEvent, Out* )
 {
   return CheckTrackFinding(RecoEvent);
 }
 
 template<class Out>
-ReturnRes::InfoM TFindingPerf<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
+ReturnRes::InfoM TFindingPerf<Out>::SoftExit(int ) { return ReturnRes::Fine; }
 
 template<class Out>
 void TFindingPerf<Out>::SelectHists()
@@ -207,17 +207,17 @@ int TFindingPerf<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 
   std::unordered_map<int, std::map<int,std::vector<int>>> realTracks;
 
-  using key_t = std::tuple<int, int>;
-  struct key_hash : public std::unary_function<key_t, std::size_t>
+  using key_t1 = std::tuple<int, int>;
+  struct key_hash : public std::unary_function<key_t1, std::size_t>
   {
-    std::size_t operator()(const key_t& k) const
+    std::size_t operator()(const key_t1& k) const
     {
       return std::get<0>(k) ^ std::get<1>(k);
     }
   };
 
 
-  using DetHitmap_t = std::unordered_map<key_t, std::string, key_hash,std::equal_to<std::tuple<int,int>>>;
+  using DetHitmap_t = std::unordered_map<key_t1, std::string, key_hash,std::equal_to<std::tuple<int,int>>>;
   DetHitmap_t nameHits;
 
   TPerf::GenNameHit genNames;
