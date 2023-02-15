@@ -7,7 +7,7 @@
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
 
-S4SciHitAna::S4SciHitAna(S4TQ *a, ParaManager *par){
+S4SciHitAna::S4SciHitAna(S4TQ *a, ParaManager *par, const std::string& StudyCase){
   // tdc_sc31 = a.tdc_sc31; /// copy class members here
   // tdc_sc41 = a.tdc_sc41;
   // tdc_sc42 = a.tdc_sc42;
@@ -37,30 +37,34 @@ S4SciHitAna::S4SciHitAna(S4TQ *a, ParaManager *par){
   tof_sc3141 = t_sc41-t_sc31 + par->offset_tof_sc3141; ///
   tof_sc4143 = t_sc43-t_sc41 + par->offset_tof_sc4143; /// path length correction can be done in OpticsMom
 
-  ResIdentify(); // get PID of residual w/ de_sc42 and tof_sc3141 cut
+  ResIdentify(StudyCase); // get PID of residual w/ de_sc42 and tof_sc3141 cut
 };
 
 S4SciHitAna::~S4SciHitAna(){};
 
-void S4SciHitAna::ResIdentify(){
+void S4SciHitAna::ResIdentify(const std::string& StudyCase){
   // TParticlePDG *partRoot = TDatabasePDG::Instance()->GetParticle(pdg[ipdg]);
-  if(tof_sc3141>60 && tof_sc3141<65) {
+
+  //std::string StudyCase = config.IsAvailable("StudyCase") ? config.Get<std::string>("StudyCase") : "None";
+
+
+  if(StudyCase.compare("H3L") == 0 && tof_sc3141>60 && tof_sc3141<65) {
     if(de_sc42_high>1500 && de_sc42_high<3500){  //He3 (H3L)
-      PID_residual = 1000020030;
+      PID_residual = 10003;
       mass_residual = 2808.391; // in MeV/(c^2)
     }
   }
   if(tof_sc3141>50 && tof_sc3141<60) {
-    if(de_sc42_high>300 && de_sc42_high<1200){   // d (nnL)
-      PID_residual = 1000010020;
+    if(StudyCase.compare("nnL") == 0 && de_sc42_high>300 && de_sc42_high<1200){   // d (nnL)
+      PID_residual = 10000;
       mass_residual = 1875.613;
     }
-    else if(de_sc42_high>1500 && de_sc42_high<3500){ // He4 (H4L)
-      PID_residual = 1000020040;
+    else if(StudyCase.compare("H4L") == 0 && de_sc42_high>1500 && de_sc42_high<3500){ // He4 (H4L)
+      PID_residual = 10002;
       mass_residual = 3727.379;
     }
   }
-  if(tof_sc3141>50 && tof_sc3141<60) {
+  if(StudyCase.compare("lambda") == 0 && tof_sc3141>50 && tof_sc3141<60) {
     if(de_sc42_high>400 && de_sc42_high<1500){  // p (Lambda)
       PID_residual = 2212;
       mass_residual = 938.27203; // in MeV/(c^2)

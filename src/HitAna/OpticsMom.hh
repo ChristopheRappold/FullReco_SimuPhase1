@@ -7,11 +7,12 @@
 #include "S4SciHitAna.hh"
 #include "TVector3.h"
 #include "FiberTrackAna.hh"
+#include <map>
 
 class OpticsMom
 {
   public:
-    OpticsMom(FiberTrackAna *fiber, MWDCTracking *mwdc, S4SciHitAna *s4scin, ParaManager *par);
+    OpticsMom(FiberTrackAna *fiber, MWDCTracking mwdc, int FragmentPID, std::map<std::string, std::vector<float>> optics_par, double optics_s2z);
     ~OpticsMom();
     std::map<std::string, std::vector<float>> par_optics;
     float  GetX4(){     return X4;};
@@ -39,6 +40,7 @@ class OpticsMom
     void   CorrectTOF();
     void   SetBest(){ flag_best = true;};
     bool   IsBest(){  return flag_best;};
+    bool   IsValid(){ return flag_valid;};
     void   Print();
   private:
     float X4 = -9999.;
@@ -61,6 +63,7 @@ class OpticsMom
     double Pref = -9999.;
     TVector3 v_mom;
     bool flag_best = false;
+    bool flag_valid = true;
     FiberTrackAna *track = nullptr;
 };
 

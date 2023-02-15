@@ -4,31 +4,9 @@
 #include <math.h>
 #include "OpticsMom.hh"
 
-OpticsMom::OpticsMom(FiberTrackAna *fiber, MWDCTracking  *mwdc, S4SciHitAna *s4scin, ParaManager *par){
-  /// --- Optics Parameters ---- 17 Tm ---- ///
-  par_optics["xx"] = par->optics_par["xx"];
-  par_optics["xa"] = par->optics_par["xa"];
-  par_optics["ax"] = par->optics_par["ax"];
-  par_optics["aa"] = par->optics_par["aa"];
-  par_optics["xd"] = par->optics_par["xd"];
-  par_optics["ad"] = par->optics_par["ad"];
-  par_optics["by"] = par->optics_par["by"];
-  par_optics["bb"] = par->optics_par["bb"];
-  par_optics["bd"] = par->optics_par["bd"];
-  par_optics["xxd"] = par->optics_par["xxd"];
-  par_optics["xad"] = par->optics_par["xad"];
-  par_optics["axd"] = par->optics_par["axd"];
-  par_optics["aad"] = par->optics_par["aad"];
-  par_optics["byd"] = par->optics_par["byd"];
-  par_optics["bbd"] = par->optics_par["bbd"];
-  par_optics["xxxd"] = par->optics_par["xxxd"];
-  par_optics["xaad"] = par->optics_par["xaad"];
-  par_optics["axxd"] = par->optics_par["axxd"];
-  par_optics["aaad"] = par->optics_par["aaad"];
-  par_optics["bbbd"] = par->optics_par["bbbd"];
-  par_optics["yy"] = par->optics_par["yy"];
-  par_optics["yb"] = par->optics_par["yb"];
-  par_optics["yd"] = par->optics_par["yd"];
+OpticsMom::OpticsMom(FiberTrackAna *fiber, MWDCTracking  mwdc, int FragmentPID, std::map<std::string, std::vector<float>> optics_par, double optics_s2z){
+
+  par_optics = optics_par;
   //// ---------
   //float X4_offset =  0.13;
   //float A4_offset =  -0.47 + 0.15;
@@ -39,11 +17,11 @@ OpticsMom::OpticsMom(FiberTrackAna *fiber, MWDCTracking  *mwdc, S4SciHitAna *s4s
   float Y4_offset = -3.1;
   float B4_offset = -1.7;
 
-  X4 = mwdc->GetX() + mwdc->GetA()*(par->dist_focS4 - par->dist_MWDC_zref) +  par->mwdc_shift_x_alignment;;
-  A4 = mwdc->GetA()*1000. + par->mwdc_shift_a_alignment;
-  Y4 = mwdc->GetY() + mwdc->GetB()*(par->dist_focS4 - par->dist_MWDC_zref) +  par->mwdc_shift_y_alignment;;
-  B4 = mwdc->GetB()*1000. + par->mwdc_shift_b_alignment;
-  chi2_s4 = mwdc->GetChi2();
+  X4 = mwdc.GetX();
+  A4 = mwdc.GetA();
+  Y4 = mwdc.GetY();
+  B4 = mwdc.GetB();
+  chi2_s4 = mwdc.GetChi2();
 
   //// offset by limit S2 phase space, just to compensate the residual of reconstucted delta, A2, B2.
   X4 += X4_offset;
@@ -51,21 +29,23 @@ OpticsMom::OpticsMom(FiberTrackAna *fiber, MWDCTracking  *mwdc, S4SciHitAna *s4s
   Y4 += Y4_offset;
   B4 += B4_offset;
 
-  X2 = fiber->GetX()+fiber->GetA()*par->optics_s2z; //par->dft12_z
+  X2 = fiber->GetX()+fiber->GetA()*optics_s2z;
   A2 = fiber->GetA()*1000.;
-  Y2 = fiber->GetY()+fiber->GetB()*par->optics_s2z;
+  Y2 = fiber->GetY()+fiber->GetB()*optics_s2z;
   B2 = fiber->GetB() *1000.;
-  Z2 = par->optics_s2z;
+  Z2 = optics_s2z;
   chi2_dft = fiber->GetChi2();
-  tof_sc3141 = s4scin->GetTOF_sc3141();
+  //tof_sc3141 = s4scin->GetTOF_sc3141();
   CalDelta();
   CorrectTOF();
-  PID = s4scin->GetPID();
-  mass = s4scin->GetMass() ; //He3 mass
+  //PID = s4scin->GetPID();
+  PID = FragmentPID;
+  //mass = s4scin->GetMass() ; //He3 mass
   GetPref();
   CalMom();
   CalVec();
   track = fiber;
+  if( !std::isfinite( GetA2Rec() ) || !std::isfinite( GetB2Rec() ) || momentum==0.) flag_valid = false;
 };
 OpticsMom::~OpticsMom(){};
 
@@ -89,15 +69,15 @@ void OpticsMom::CalDelta(){
     + par_optics["xa"][0] * A4 + par_optics["xa"][1] * pow(A4, 2) - X4;
   float delta_tmp = (-1. / (2 * a_tmp)) * (b_tmp - sqrt(b_tmp * b_tmp - 4 * a_tmp * c_tmp));
   // to correct the energy loss difference in SC31 between He4 and d
-  if(PID==1000020020) delta_tmp-=(0.04393+0.00072*delta_tmp)/100.;
+  if(PID==10000) delta_tmp-=(0.04393+0.00072*delta_tmp)/100.;
   delta = delta_tmp;
 };
 
 void OpticsMom::GetPref(){
   if(     PID == 2212)       Pref = 2000.0; // Lambda(p), Brho(S2->S3)=6.6713 Tm, in MeV/c
-  else if(PID == 1000020030) Pref = 7501.2; // H3L(He3), Brho(S2->S3)=12.51072 Tm, in MeV/c
-  else if(PID == 1000020040) Pref = 9971.0; // H4L(He4), Brho(S2->S3)=16.6298 Tm, in MeV/c
-  else if(PID == 1000020020) Pref = 4985.5; // nnL(d), Brho(S2->S3)=16.6298 Tm, in MeV/c
+  else if(PID == 10003) Pref = 7501.2; // H3L(He3), Brho(S2->S3)=12.51072 Tm, in MeV/c
+  else if(PID == 10002) Pref = 9971.0; // H4L(He4), Brho(S2->S3)=16.6298 Tm, in MeV/c
+  else if(PID == 10000) Pref = 4985.5; // nnL(d), Brho(S2->S3)=16.6298 Tm, in MeV/c
   else {
     std::cout<<" NO corresponding Pref found !!!!"<<std::endl;
     std::cout << "PID : " << PID << std::endl;
@@ -109,7 +89,7 @@ void OpticsMom::CalMom(){
   if(Pref!=0.)
     momentum = (1. + delta) * Pref /1000.; // in GeV/c
   else{
-    std::cout<<"Pref doesn't exsit, please check analys!!!"<<std::endl;
+    std::cout<<"Pref doesn't exist, please check analysis!!!"<<std::endl;
     momentum = 0.;
   }
 }

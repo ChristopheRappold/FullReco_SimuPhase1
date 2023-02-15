@@ -87,6 +87,86 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   RF_OutputEvents = false;
 
+  //Optics parameters
+  optics_name  = config.Get<std::string>("Optics_name");
+  std::ifstream ifs_optics ( optics_name );
+  if(ifs_optics.is_open()){
+    const std::string CommentSymbol("#");
+
+    std::string temp_line;
+    while(std::getline(ifs_optics,temp_line)){
+      std::stringstream stream(temp_line);
+      std::string testComment(stream.str());
+      std::size_t it_comment = testComment.find(CommentSymbol);
+      if(it_comment!=std::string::npos){
+        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
+        continue;
+      }
+      char name[8];
+      float par1;
+      float par2;
+      stream >> name >> par1  >> par2;
+
+      optics_par[name].emplace_back(par1);
+      optics_par[name].emplace_back(par2);
+    }
+
+    printf("Optics done : %s\n", optics_name.c_str());
+  }
+  else
+  {
+    printf(" ! fail to open  : %s\n", optics_name.c_str());
+    exit(-1);
+  }
+
+  optics_s2z = 4187.5; //Ti: 4150 mm, take this value just for easy expression
+
+
+  //MFT Cor parameters
+  for(int i=0; i<2; ++i)
+    for(int j=0; j<3; ++j)
+      for(int k=0; k<2; ++k)
+        for(int l=0; l<3; ++l)
+          fiber_mft_cor_par[i][j][k][l] = 0.;
+
+  fiber_name_mftcor  = config.Get<std::string>("Fiber_MFTCor_name");
+  std::ifstream ifs_mftcorfiber ( fiber_name_mftcor );
+  if(ifs_mftcorfiber.is_open())
+  {
+    const std::string CommentSymbol("#");
+
+    std::string temp_line;
+    while(std::getline(ifs_mftcorfiber,temp_line))
+    {
+      std::stringstream stream(temp_line);
+      std::string testComment(stream.str());
+      std::size_t it_comment = testComment.find(CommentSymbol);
+      if(it_comment!=std::string::npos)
+      {
+        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
+        continue;
+      }
+
+      int det, lay, seg;
+      double p0, p1, p2;
+
+      stream >> det >> lay >> seg >> p0 >> p1 >> p2;
+      //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+
+      fiber_mft_cor_par[det][lay][seg][0] = p0;
+      fiber_mft_cor_par[det][lay][seg][1] = p1;
+      fiber_mft_cor_par[det][lay][seg][2] = p2;
+    }
+    //std::cout << "done " << mdc_name_map << std::endl;
+    printf("fiber mft cor loaded : %s\n", fiber_name_mftcor.c_str());
+  }
+  else
+  {
+    //std::cout << " ! fail to open " << mdc_name_map << std::endl;
+    printf(" ! fail to open  : %s\n", fiber_name_mftcor.c_str());
+    exit(-1);
+  }
+
   TaskConfig.Init(Config);
 
   if(Config.IsAvailable("G4_simu"))
@@ -270,7 +350,7 @@ if(Config.IsAvailable("CalibFile_MWDCDtDxtable"))
   }
   else
     map_ParamFiles.insert({"mwdc_name_dtdxtable","./calib/mwdc_dtdx/mwdc_dtdxtable.root"});
-
+/*
 if(Config.IsAvailable("CalibFile_Optics"))
   {
     auto tmpStr = Config.Get<std::string>("CalibFile_Optics");
@@ -278,7 +358,7 @@ if(Config.IsAvailable("CalibFile_Optics"))
   }
   else
     map_ParamFiles.insert({"optics_name","./calib/optics/optics_par.csv"});
-
+*/
 
   if(Wasa_FieldMap)
     {
@@ -588,6 +668,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_CheckFiberXUV = Config.Get<bool>("Task_CheckFiberXUV");
   if(Config.IsAvailable("Task_CheckFiberTrack"))
     Task_CheckFiberTrack = Config.Get<bool>("Task_CheckFiberTrack");
+  if(Config.IsAvailable("Task_FragmentFinder"))
+    Task_FragmentFinder = Config.Get<bool>("Task_FragmentFinder");
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
   if(Config.IsAvailable("Task_RiemannFinder"))
@@ -631,7 +713,9 @@ void Task::Init(const FullRecoConfig& Config)
       Task_Order.push_back(TASKCHECKFIBERXUV);
 	  if(s == "Task_CheckFiberTrack")
 	    Task_Order.push_back(TASKCHECKFIBERTRACK);
-  	  if(s == "Task_BayesFinder")
+    if(s == "Task_FragmentFinder")
+      Task_Order.push_back(TASKFRAGMENTFINDER);
+  	if(s == "Task_BayesFinder")
 	    Task_Order.push_back(TASKBAYESFINDER);
 	  if(s == "Task_RiemannFinder")
 	    Task_Order.push_back(TASKRIEMANNFINDER);
@@ -683,6 +767,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Task_PrimaryVtx      = TaskConfig.Task_PrimaryVtx;
   out.RunTask.Task_PrimaryVtx_Si   = TaskConfig.Task_PrimaryVtx_Si;
   out.RunTask.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
+  out.RunTask.Task_FragmentFinder  = TaskConfig.Task_FragmentFinder;
   out.RunTask.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
   out.RunTask.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;
   out.RunTask.Task_FinderCM        = TaskConfig.Task_FinderCM;

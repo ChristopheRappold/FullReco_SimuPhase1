@@ -81,7 +81,7 @@ std::vector< std::vector< std::vector< FiberHitAna* > > > FiberAnalyzer::Cluster
 
 std::vector< std::vector< FiberHitXUV* > > FiberAnalyzer::FindHit(std::vector< std::vector< std::vector< FiberHitAna* > > > &cont, ParaManager *par){
 
-  // ang > 0 is U (only hear)
+  // ang > 0 is U (only here)
   int id_x[7] = {0, 0, 0, 0, 0, 2, 0};
   int id_u[7] = {1, 1, 1, 2, 1, 0, 1};
   int id_v[7] = {2, 2, 2, 1, 2, 1, 2};
@@ -93,7 +93,7 @@ std::vector< std::vector< FiberHitXUV* > > FiberAnalyzer::FindHit(std::vector< s
   }
 
   for(int det=0; det<7; ++det){
-    //int nhit = 0;
+    int id = 0;
     std::set<int> flag_x;
     std::set<int> flag_u;
     std::set<int> flag_v;
@@ -122,7 +122,7 @@ std::vector< std::vector< FiberHitXUV* > > FiberAnalyzer::FindHit(std::vector< s
     }
 
     for(int i=0; i<nx; ++i){
-      if(flag_x.size()>0 && flag_x.find(i)!=flag_x.end()) continue;
+      //if(flag_x.size()>0 && flag_x.find(i)!=flag_x.end()) continue;
       double pos_x = cont[det][ix][i]->GetPos();
       double hit_xu_x = pos_x;
       double hit_xu_y = 999;
@@ -131,7 +131,7 @@ std::vector< std::vector< FiberHitXUV* > > FiberAnalyzer::FindHit(std::vector< s
       int used_k = -999;
 
       for(int j=0; j<nu; ++j){
-        if(flag_u.size()>0 && flag_u.find(j)!=flag_u.end()) continue;
+        //if(flag_u.size()>0 && flag_u.find(j)!=flag_u.end()) continue;
         double pos_u = cont[det][iu][j]->GetPos();
         pos_u = pos_u/cos(ang_uv);
         double temp_hit_xu_y = 999;
@@ -139,34 +139,69 @@ std::vector< std::vector< FiberHitXUV* > > FiberAnalyzer::FindHit(std::vector< s
         else         temp_hit_xu_y =  tan((TMath::Pi()/2. + ang_uv))*pos_x - tan((TMath::Pi()/2. +ang_uv))*pos_u;
 
         for(int k=0; k<nv; ++k){
-          if(flag_v.size()>0 && flag_v.find(k)!=flag_v.end()) continue;
+          //if(flag_v.size()>0 && flag_v.find(k)!=flag_v.end()) continue;
           double pos_v = cont[det][iv][k]->GetPos();
           pos_v = pos_v/cos(ang_uv);
           double temp_hit_xv_y = -999;
           if(ang_uv>0) temp_hit_xv_y =  tan((TMath::Pi()/2. - ang_uv))*pos_x - tan((TMath::Pi()/2. - ang_uv))*pos_v;
           else         temp_hit_xv_y = -tan((TMath::Pi()/2. + ang_uv))*pos_x + tan((TMath::Pi()/2. + ang_uv))*pos_v;
-          if(fabs(hit_xu_y-hit_xv_y) > fabs(temp_hit_xu_y-temp_hit_xv_y)){
-            hit_xu_y = temp_hit_xu_y;
-            hit_xv_y = temp_hit_xv_y;
-            used_j = j;
-            used_k = k;
-          }
+          //if(fabs(hit_xu_y-hit_xv_y) > fabs(temp_hit_xu_y-temp_hit_xv_y)){
+          //  hit_xu_y = temp_hit_xu_y;
+          //  hit_xv_y = temp_hit_xv_y;
+          //  used_j = j;
+          //  used_k = k;
+          //}
+          hit_xu_y = temp_hit_xu_y;
+          hit_xv_y = temp_hit_xv_y;
+          used_j = j;
+          used_k = k;
+          double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*tan(ang_uv/2.);
+          double buf_y = (hit_xu_y+hit_xv_y)/2.;
+          double buf_d = hit_xu_y-hit_xv_y;
+          if((fabs(hit_xu_y-999)<1.)||(fabs(hit_xv_y+999)<1.)) continue;
+          if(fabs(hit_xu_y-hit_xv_y) > cut_d) continue;
+          FiberHitXUV *buf_hit = new FiberHitXUV(buf_x, buf_y, buf_d, cont[det][ix][i], cont[det][iu][used_j], cont[det][iv][used_k], id++);
+          buf_cont[det].emplace_back(buf_hit);
+
         } // for k
       } // for j
-      if((fabs(hit_xu_y-999)<1.)||(fabs(hit_xv_y+999)<1.)) continue;
-      if(fabs(hit_xu_y-hit_xv_y) > cut_d) continue;
-
-      double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*tan(ang_uv/2.);
-      double buf_y = (hit_xu_y+hit_xv_y)/2.;
-      double buf_d = hit_xu_y-hit_xv_y;
-      FiberHitXUV *buf_hit = new FiberHitXUV(buf_x, buf_y, buf_d, cont[det][ix][i], cont[det][iu][used_j], cont[det][iv][used_k]);
-      buf_cont[det].emplace_back(buf_hit);
+      //if((fabs(hit_xu_y-999)<1.)||(fabs(hit_xv_y+999)<1.)) continue;
+      //if(fabs(hit_xu_y-hit_xv_y) > cut_d) continue;
+      //double buf_x = hit_xu_x + (hit_xu_y-hit_xv_y)/2.*tan(ang_uv/2.);
+      //double buf_y = (hit_xu_y+hit_xv_y)/2.;
+      //double buf_d = hit_xu_y-hit_xv_y;
+      //FiberHitXUV *buf_hit = new FiberHitXUV(buf_x, buf_y, buf_d, cont[det][ix][i], cont[det][iu][used_j], cont[det][iv][used_k], id++);
+      //buf_cont[det].emplace_back(buf_hit);
 
       flag_x.insert(i);
       flag_u.insert(used_j);
       flag_v.insert(used_k);
 
     } // for i
+
+    switch(det){
+      case 0:
+      case 1:
+        buf_cont[det] = FiberAnalyzer::DeleteDupXUV(buf_cont[det]);
+        break;
+
+      case 2:
+        if(par->flag_dup_xuv_uft3) buf_cont[det] = FiberAnalyzer::DeleteDupXUV(buf_cont[det]);
+        break;
+
+      case 3:
+      case 4:
+        if(par->flag_dup_xuv_mft12) buf_cont[det] = FiberAnalyzer::DeleteDupXUV(buf_cont[det]);
+        break;
+
+      case 5:
+      case 6:
+        buf_cont[det] = FiberAnalyzer::DeleteDupXUV(buf_cont[det]);
+        break;
+
+      default: break;
+    }
+
   } // for det
 
   return buf_cont;
@@ -190,14 +225,14 @@ std::vector< FiberTrackAna* > FiberAnalyzer::DeleteDup( std::vector< FiberTrackA
     bool flag = true;
     std::vector<FiberHitXUV*> buf_xuv = cont[i]->GetContXUV();
     for(int j=0; j<(int)buf_xuv.size(); ++j){
-      int fib = buf_xuv[j]->GetHit0()->GetFib();
-      if(used_hit[j].size()>0 && used_hit[j].find(fib)!=used_hit[j].end()) flag = false;
+      int id = buf_xuv[j]->GetID();
+      if(used_hit[j].size()>0 && used_hit[j].find(id)!=used_hit[j].end()) flag = false;
     }
     if(flag){
       buf_cont.emplace_back(cont[i]);
       for(int j=0; j<(int)buf_xuv.size(); ++j){
-        int fib = buf_xuv[j]->GetHit0()->GetFib();
-        used_hit[j].insert(fib);
+        int id = buf_xuv[j]->GetID();
+        used_hit[j].insert(id);
       }
     }
     else delete cont[i];
@@ -206,6 +241,94 @@ std::vector< FiberTrackAna* > FiberAnalyzer::DeleteDup( std::vector< FiberTrackA
   return buf_cont;
 
 }
+
+std::vector< FiberTrackAna* > FiberAnalyzer::DeleteDupCombi( std::vector< FiberTrackAna* > &cont){
+
+  std::vector< FiberTrackAna* > buf_cont;
+  if(cont.size()==0) return buf_cont;
+
+  int det_first = cont.front()->GetContHit().at(0)->GetDet();
+  int id_offset = -999;
+  if(     det_first==0 || det_first==1) id_offset = 0; // UFT12
+  else if(det_first==3 || det_first==4) id_offset = 3; // MFT12
+  else if(det_first==5 || det_first==6) id_offset = 5; // DFT12
+
+  std::sort(cont.begin(), cont.end(), [](auto const& a, auto const& b) {
+      return a->GetNlayer() != b->GetNlayer() ? a->GetNlayer() > b->GetNlayer() : a->GetChi2() < b->GetChi2(); });
+  int num_lay = 6;
+  //std::cout << "num_det : " << num_det << std::endl;
+  std::vector< std::set<int> > used_hit;
+  for(int i=0; i<num_lay; ++i){
+    std::set<int> buf_set;
+    used_hit.emplace_back(buf_set);
+  }
+  int num_cont = cont.size();
+  for(int i=0; i<num_cont; ++i){
+    bool flag = true;
+    std::vector<FiberHitAna*> buf_hit = cont[i]->GetContHit();
+    for(int j=0; j<(int)buf_hit.size(); ++j){
+      int fib = buf_hit[j]->GetFib();
+      int det = buf_hit[j]->GetDet();
+      int lay = buf_hit[j]->GetLay();
+      int buf_id = (det - id_offset)*3 + lay;
+      if(used_hit[buf_id].size()>0 && used_hit[buf_id].find(fib)!=used_hit[buf_id].end()) flag = false;
+    }
+    if(flag){
+      buf_cont.emplace_back(cont[i]);
+      for(int j=0; j<(int)buf_hit.size(); ++j){
+        int fib = buf_hit[j]->GetFib();
+        int det = buf_hit[j]->GetDet();
+        int lay = buf_hit[j]->GetLay();
+        int buf_id = (det-id_offset)*3 + lay;
+        used_hit[buf_id].insert(fib);
+      }
+    }
+    else delete cont[i];
+  }
+
+  return buf_cont;
+
+}
+
+
+std::vector< FiberHitXUV* > FiberAnalyzer::DeleteDupXUV( std::vector< FiberHitXUV* > &cont){
+
+  std::vector< FiberHitXUV* > buf_cont;
+  if(cont.size()==0) return buf_cont;
+
+  std::sort(cont.begin(), cont.end(), [](auto const& a, auto const& b) {
+      return a->GetD() <  b->GetD();});
+
+  std::map< int, std::set<int> > used_hit;
+
+  int num_cont = cont.size();
+
+  for(int i=0; i<num_cont; ++i){
+    FiberHitXUV *hit = cont[i];
+    bool flag = true;
+
+    for(int j=0; j<3; ++j){
+      int fib = hit->GetHit(j)->GetFib();
+      int did = hit->GetHit(j)->GetDid();
+      if(used_hit[did].size()>0 && used_hit[did].find(fib)!=used_hit[did].end()) flag = false;
+    }
+
+    if(flag){
+      buf_cont.emplace_back(cont[i]);
+      for(int j=0; j<3; ++j){
+        int fib = hit->GetHit(j)->GetFib();
+        int did = hit->GetHit(j)->GetDid();
+        used_hit[did].insert(fib);
+      }
+
+    }
+    else delete cont[i];
+  }
+
+  return buf_cont;
+
+}
+
 
 TVector3 FiberAnalyzer::GetVertexPoint( const TVector3 & Xin, const TVector3 & Xout,
     const TVector3 & Pin, const TVector3 & Pout,

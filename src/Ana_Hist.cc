@@ -22,7 +22,7 @@ Ana_Hist::~Ana_Hist()
 }
 
 /********************************************************************/
-Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu, bool Builder, bool PrimVtx, bool PrimVtx_Si, bool DecayVtx)
+Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu, bool Builder, bool PrimVtx, bool PrimVtx_Si, bool DecayVtx, bool FragmentFinder)
 {
   EnableState.resize(SIZEOF_STATEHIST);
   EnableState[DAF] = Daf;
@@ -36,6 +36,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
   EnableState[PRIMVTX] = PrimVtx;
   EnableState[PRIMVTX_SI] = PrimVtx_Si;
   EnableState[DECAYVTX] = DecayVtx;
+  EnableState[FRAGMENT] = FragmentFinder;
 
 
 
@@ -493,23 +494,88 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
 
       double range10[7] = {256, 256, 384, 256, 256, 256, 256 };
       for(int i=0; i<7; ++i)
-      {
-        for(int j=0; j<3; ++j)
         {
-          h10[i][j].emplace_back(new TH2D(Form("h10[%d][%d]",i,j),Form("h10[%d][%d]",i,j),range10[i],-0.5,range10[i]-0.5, 300, -1700, -1400));
-          HistReg.emplace_back(&h10[i][j].store);
-          h11[i][j].emplace_back(new TH1D(Form("h11[%d][%d]",i,j),Form("h11[%d][%d]",i,j),200,-100,100));
-          HistReg.emplace_back(&h11[i][j].store);
-          h12[i][j].emplace_back(new TH1D(Form("h12[%d][%d]",i,j),Form("h12[%d][%d]",i,j),200,-100,100));
-          HistReg.emplace_back(&h12[i][j].store);
-          h13[i][j].emplace_back(new TH1D(Form("h13[%d][%d]",i,j),Form("h13[%d][%d]",i,j),10,-0.5,9.5));
-          HistReg.emplace_back(&h13[i][j].store);
-          h14[i][j].emplace_back(new TH1D(Form("h14[%d][%d]",i,j),Form("h14[%d][%d]",i,j),10,-0.5,9.5));
-          HistReg.emplace_back(&h14[i][j].store);
-          h15[i][j].emplace_back(new TH1D(Form("h15[%d][%d]",i,j),Form("h15[%d][%d]",i,j),8,-0.5,7.5));
-          HistReg.emplace_back(&h15[i][j].store);
-        }    
-      }
+          for(int j=0; j<3; ++j)
+            {
+              h10[i][j].emplace_back(new TH2D(Form("h10[%d][%d]",i,j),Form("h10[%d][%d]",i,j),range10[i],-0.5,range10[i]-0.5, 300, -1700, -1400));
+              HistReg.emplace_back(&h10[i][j].store);
+              h11[i][j].emplace_back(new TH1D(Form("h11[%d][%d]",i,j),Form("h11[%d][%d]",i,j),200,-100,100));
+              HistReg.emplace_back(&h11[i][j].store);
+              h12[i][j].emplace_back(new TH1D(Form("h12[%d][%d]",i,j),Form("h12[%d][%d]",i,j),200,-100,100));
+              HistReg.emplace_back(&h12[i][j].store);
+              h13[i][j].emplace_back(new TH1D(Form("h13[%d][%d]",i,j),Form("h13[%d][%d]",i,j),10,-0.5,9.5));
+              HistReg.emplace_back(&h13[i][j].store);
+              h14[i][j].emplace_back(new TH1D(Form("h14[%d][%d]",i,j),Form("h14[%d][%d]",i,j),10,-0.5,9.5));
+              HistReg.emplace_back(&h14[i][j].store);
+              h15[i][j].emplace_back(new TH1D(Form("h15[%d][%d]",i,j),Form("h15[%d][%d]",i,j),8,-0.5,7.5));
+              HistReg.emplace_back(&h15[i][j].store);
+            }
+          h16[i].emplace_back(new TH2D(Form("h16[%d]",i),Form("h16[%d]",i),200,-100,100, 200, -100, 100));
+          HistReg.emplace_back(&h16[i].store);
+          h17[i].emplace_back(new TH1D(Form("h17[%d]",i),Form("h17[%d]",i),10 ,-0.5 ,9.5));
+          HistReg.emplace_back(&h17[i].store);
+          h17_2[i].emplace_back(new TH1D(Form("h17_2[%d]",i),Form("h17_2[%d]",i),200,-30  ,30 ));
+          HistReg.emplace_back(&h17_2[i].store);
+        }
+      h18_3_1.emplace_back(new TH1D("h18_3_1","DFT12 ntrack",10, -0.5, 9.5));
+      HistReg.emplace_back(&h18_3_1.store);
+      h18_3_2.emplace_back(new TH1D("h18_3_2","DFT12 chi2"  ,200,   0, 100));
+      HistReg.emplace_back(&h18_3_2.store);
+      h18_3_3.emplace_back(new TH2D("h18_3_3","DFT12 XA"    ,100, -30, 30, 100, -30, 30));
+      HistReg.emplace_back(&h18_3_3.store);
+      h18_3_4.emplace_back(new TH2D("h18_3_4","DFT12 YB"    ,100, -30, 30, 100, -30, 30));
+      HistReg.emplace_back(&h18_3_4.store);
+      h18_3_5.emplace_back(new TH1D("h18_3_5","DFT12 X"     ,200, -30, 30));
+      HistReg.emplace_back(&h18_3_5.store);
+      h18_3_6.emplace_back(new TH1D("h18_3_6","DFT12 Y"     ,200, -30, 30));
+      HistReg.emplace_back(&h18_3_6.store);
+      h18_3_7.emplace_back(new TH1D("h18_3_7","DFT12 A"     ,200, -30, 30));
+      HistReg.emplace_back(&h18_3_7.store);
+      h18_3_8.emplace_back(new TH1D("h18_3_8","DFT12 B"     ,200, -30, 30));
+      HistReg.emplace_back(&h18_3_8.store);
+
+      hfiber_4_1.emplace_back(new TH1D("hfiber_4_1","DFT12 ntrack", 10, -0.5, 9.5));
+      HistReg.emplace_back(&hfiber_4_1.store);
+      hfiber_4_2_1.emplace_back(new TH2D("hfiber_4_2_1", "DFT12 XY single" , 100, -100, 100, 100, -100, 100));
+      HistReg.emplace_back(&hfiber_4_2_1.store);
+      hfiber_4_3_1.emplace_back(new TH2D("hfiber_4_3_1", "DFT12 XA single" , 100, -100, 100, 100, -100, 100));
+      HistReg.emplace_back(&hfiber_4_3_1.store);
+      hfiber_4_4_1.emplace_back(new TH2D("hfiber_4_4_1", "DFT12 YB single" , 100, -100, 100, 100, -100, 100));
+      HistReg.emplace_back(&hfiber_4_4_1.store);
+      hfiber_4_5_1.emplace_back(new TH1D("hfiber_4_5_1", "DFT12 TOT single", 150, 0, 150));
+      HistReg.emplace_back(&hfiber_4_5_1.store);
+      hfiber_4_2_2.emplace_back(new TH2D("hfiber_4_2_2", "DFT12 XY multi" , 100, -100, 100, 100, -100, 100));
+      HistReg.emplace_back(&hfiber_4_2_2.store);
+      hfiber_4_3_2.emplace_back(new TH2D("hfiber_4_3_2", "DFT12 XA multi" , 100, -100, 100, 100, -100, 100));
+      HistReg.emplace_back(&hfiber_4_3_2.store);
+      hfiber_4_4_2.emplace_back(new TH2D("hfiber_4_4_2", "DFT12 YB multi" , 100, -100, 100, 100, -100, 100));
+      HistReg.emplace_back(&hfiber_4_4_2.store);
+      hfiber_4_5_2.emplace_back(new TH1D("hfiber_4_5_2", "DFT12 TOT multi", 150, 0, 150));
+      HistReg.emplace_back(&hfiber_4_5_2.store);
+      hfiber_4_1_3.emplace_back(new TH1D("hfiber_4_1_3","DFT12 ntrack", 10, -0.5, 9.5));
+      HistReg.emplace_back(&hfiber_4_1_3.store);
+      hfiber_4_2_3.emplace_back(new TH2D("hfiber_4_2_3", "DFT12 XY all" , 100, -100, 100, 100, -100, 100));
+      HistReg.emplace_back(&hfiber_4_2_3.store);
+      hfiber_4_3_3.emplace_back(new TH2D("hfiber_4_3_3", "DFT12 XA all" , 100, -100, 100, 100, -100, 100));
+      HistReg.emplace_back(&hfiber_4_3_3.store);
+      hfiber_4_4_3.emplace_back(new TH2D("hfiber_4_4_3", "DFT12 YB all" , 100, -100, 100, 100, -100, 100));
+      HistReg.emplace_back(&hfiber_4_4_3.store);
+      hfiber_4_5_3.emplace_back(new TH1D("hfiber_4_5_3", "DFT12 TOT all", 150, 0, 150));
+      HistReg.emplace_back(&hfiber_4_5_3.store);
+      hfiber_5_1.emplace_back(new TH1D("hfiber_5_1","DFT12 combi"        ,101, -0.5, 100.5));
+      HistReg.emplace_back(&hfiber_5_1.store);
+      hfiber_5_2.emplace_back(new TH1D("hfiber_5_2","DFT12 combi [k]"    ,500,  0  , 100  ));
+      HistReg.emplace_back(&hfiber_5_2.store);
+      hfiber_5_3.emplace_back(new TH1D("hfiber_5_3","DFT12 combi [k]"    ,500,  0  , 1000 ));
+      HistReg.emplace_back(&hfiber_5_3.store);
+      hfiber_5_4.emplace_back(new TH1D("hfiber_5_4","DFT12 combi [M]"    ,500,  0  , 10   ));
+      HistReg.emplace_back(&hfiber_5_4.store);
+      hfiber_5_5.emplace_back(new TH1D("hfiber_5_5","DFT12 combi all [k]",500,  0  , 100  ));
+      HistReg.emplace_back(&hfiber_5_5.store);
+      hfiber_5_6.emplace_back(new TH1D("hfiber_5_6","DFT12 combi all [k]",500,  0  , 1000 ));
+      HistReg.emplace_back(&hfiber_5_6.store);
+      hfiber_5_7.emplace_back(new TH1D("hfiber_5_7","DFT12 combi all [M]",500,  0  , 10   ));
+      HistReg.emplace_back(&hfiber_5_7.store);
 
       hpsb_0_1.emplace_back(new TH1D("hpsb_0_1","tu cut" ,200, -21000, -19000));
       HistReg.emplace_back(&hpsb_0_1.store);
@@ -626,6 +692,25 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       hs4sci_2_4.emplace_back(new TH2D("hs4sci_2_4","S4 TOF31-41 : SC42 Low  dE",200, 30 ,100, 200, 0, 3000));
       HistReg.emplace_back(&hs4sci_2_4.store);
 
+      htrig_0.emplace_back(new TH1D("htrig_0","Trig (pre)"     ,16, -0.5, 15.5));
+      HistReg.emplace_back(&htrig_0.store);
+      htrig_1.emplace_back(new TH2D("htrig_1","V775 (pre)"     ,32, -0.5, 31.5, 200, 0, 4000));
+      HistReg.emplace_back(&htrig_1.store);
+      htrig_2.emplace_back(new TH2D("htrig_2","V775 cut (pre)" ,32, -0.5, 31.5, 200, 0, 4000));
+      HistReg.emplace_back(&htrig_2.store);
+      htrig_3.emplace_back(new TH1D("htrig_3","Trig"     ,16, -0.5, 15.5));
+      HistReg.emplace_back(&htrig_3.store);
+      htrig_4.emplace_back(new TH2D("htrig_4","V775 cut" ,32, -0.5, 31.5, 200, 0, 4000));
+      HistReg.emplace_back(&htrig_4.store);
+
+      HistRegisteredByDir.insert(std::make_pair("Builder", std::make_tuple(HistReg,0)));
+    }
+
+
+  if(EnableState[FRAGMENT])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
+
       hopt_1_1.emplace_back(new TH1D("hopt_1_1","Optics A2 reco" ,500, -100 ,100));
       HistReg.emplace_back(&hopt_1_1.store);
       hopt_1_2.emplace_back(new TH1D("hopt_1_2","Optics B2 reco" ,500, -100 ,100));
@@ -643,9 +728,10 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistReg.emplace_back(&hopt_2_3.store);
       hopt_2_4.emplace_back(new TH1D("hopt_2_4","Optics B2 reco - B2" ,500, -30 ,30 ));
       HistReg.emplace_back(&hopt_2_4.store);
-      
-      HistRegisteredByDir.insert(std::make_pair("Builder", std::make_tuple(HistReg,0)));
+
+      HistRegisteredByDir.insert(std::make_pair("FragmentFinder", std::make_tuple(HistReg,0)));
     }
+
 
 if(EnableState[PRIMVTX])
     {

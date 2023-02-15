@@ -59,6 +59,15 @@ void FullRecoEvent::Clear(int toclean)
   BeamTracks.clear();
   PrimaryTracks.clear();
 
+  FragmentTracks.clear();
+  FragmentPID = -999;
+
+  for(auto x : FiberTrackCont)
+    for(int i=0; i<x.second.size(); ++i)
+      delete x.second[i];
+    
+  FiberTrackCont.clear();
+
   //Added when merging with master
   //FragmentTracks.clear();
   //PionTracks.clear();

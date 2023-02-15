@@ -11,6 +11,7 @@ namespace ReturnRes
       MultiS2_Start,
       StartTimingCut,
       ChamberHitLimit,
+      TriggerCut,
       NoBeam,
       BuildError,
       PrimVtxError,

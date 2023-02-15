@@ -208,7 +208,7 @@ int main(int argc, char** argv)
       config.Add("Stop_Event", Stop_event);
 
       Ana_Hist ListHisto(true /*Daf*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Riemann*/, false /*Hough*/,
-                            false /*Simu*/, true /*Builder*/, true /*PrimVtx*/, false /*PrimVtx_Si*/, true /*DecayVtx*/);
+                  false /*Simu*/, true /*Builder*/, true /*PrimVtx*/, false /*PrimVtx_Si*/, true /*DecayVtx*/, true /*FragmentFinder*/);
 
       AnaEvent_Metadata metadata;
 

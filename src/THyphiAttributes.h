@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <fstream>
 //#include "TRandom3.h"
 #include "FullRecoConfig.hh"
 
@@ -77,6 +78,7 @@ struct Task
   bool Task_FlatMCOutputML = false;
   bool Task_CheckFiberXUV = false;
   bool Task_CheckFiberTrack = false;
+  bool Task_FragmentFinder = false;
   bool Task_BayesFinder = false;
   bool Task_RiemannFinder = false;
   bool Task_FinderCM = false;
@@ -86,11 +88,11 @@ struct Task
   bool Task_DecayVtx = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
+    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
     TASKKALMANDAF, TASKDECAYVTX, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -145,6 +147,7 @@ struct RunTaskDef
   bool Task_FlatMCOutputML;
   bool Task_CheckFiberXUV;
   bool Task_CheckFiberTrack;
+  bool Task_FragmentFinder;
   bool Task_BayesFinder;
   bool Task_RiemannFinder;
   bool Task_FinderCM;
@@ -265,7 +268,8 @@ inline auto InitStorage()
          make_column("Task_PrimaryVtx", &RunTaskDef::Task_PrimaryVtx),
          make_column("Task_PrimaryVtx_Si", &RunTaskDef::Task_PrimaryVtx_Si),
 				 make_column("Task_FlatMCOutputML", &RunTaskDef::Task_FlatMCOutputML),
-				 make_column("Task_BayesFinder", &RunTaskDef::Task_BayesFinder),
+         make_column("Task_FragmentFinder", &RunTaskDef::Task_FragmentFinder),
+         make_column("Task_BayesFinder", &RunTaskDef::Task_BayesFinder),
 				 make_column("Task_RiemannFinder", &RunTaskDef::Task_RiemannFinder),
 				 make_column("Task_FinderCM", &RunTaskDef::Task_FinderCM),
 				 make_column("Task_FindingPerf", &RunTaskDef::Task_FindingPerf),
@@ -338,6 +342,15 @@ class THyphiAttributes
 
   std::unordered_map<std::string,std::string> map_ParamFiles;
   //std::unordered_map<std::string,std::string> Unpack_map_ParamFiles;
+
+  // Optics parameters
+  std::string optics_name;
+  std::map<std::string, std::vector<float>> optics_par;
+  double optics_s2z;
+
+  // MFT cor parameters
+  std::string fiber_name_mftcor;
+  std::array<std::array<std::array<std::array<double, 3>, 2>, 3>, 2> fiber_mft_cor_par;
 
   int Nb_CPU;
   int Nb_Fraction;

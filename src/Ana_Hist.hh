@@ -36,6 +36,7 @@ enum StateHist : int
   PRIMVTX,
   PRIMVTX_SI,
   DECAYVTX,
+  FRAGMENT,
   SIZEOF_STATEHIST
 };
 
@@ -169,6 +170,39 @@ class Ana_Hist
   Hist<TH1D> h13[7][3];
   Hist<TH1D> h14[7][3];
   Hist<TH1D> h15[7][3];
+  Hist<TH2D> h16[7];
+  Hist<TH1D> h17[7];
+  Hist<TH1D> h17_2[7];
+  Hist<TH1D> h18_3_1;
+  Hist<TH1D> h18_3_2;
+  Hist<TH2D> h18_3_3;
+  Hist<TH2D> h18_3_4;
+  Hist<TH1D> h18_3_5;
+  Hist<TH1D> h18_3_6;
+  Hist<TH1D> h18_3_7;
+  Hist<TH1D> h18_3_8;
+
+  Hist<TH1D> hfiber_4_1;
+  Hist<TH2D> hfiber_4_2_1;
+  Hist<TH2D> hfiber_4_3_1;
+  Hist<TH2D> hfiber_4_4_1;
+  Hist<TH1D> hfiber_4_5_1;
+  Hist<TH2D> hfiber_4_2_2;
+  Hist<TH2D> hfiber_4_3_2;
+  Hist<TH2D> hfiber_4_4_2;
+  Hist<TH1D> hfiber_4_5_2;
+  Hist<TH1D> hfiber_4_1_3;
+  Hist<TH2D> hfiber_4_2_3;
+  Hist<TH2D> hfiber_4_3_3;
+  Hist<TH2D> hfiber_4_4_3;
+  Hist<TH1D> hfiber_4_5_3;
+  Hist<TH1D> hfiber_5_1;
+  Hist<TH1D> hfiber_5_2;
+  Hist<TH1D> hfiber_5_3;
+  Hist<TH1D> hfiber_5_4;
+  Hist<TH1D> hfiber_5_5;
+  Hist<TH1D> hfiber_5_6;
+  Hist<TH1D> hfiber_5_7;
 
   Hist<TH1D> hpsb_0_1;
   Hist<TH1D> hpsb_0_2;
@@ -235,6 +269,11 @@ class Ana_Hist
   Hist<TH1D> hopt_2_3;
   Hist<TH1D> hopt_2_4;
 
+  Hist<TH1D> htrig_0;
+  Hist<TH2D> htrig_1;
+  Hist<TH2D> htrig_2;
+  Hist<TH1D> htrig_3;
+  Hist<TH2D> htrig_4;
 
 
   // Primary Vertex
@@ -522,7 +561,7 @@ class Ana_Hist
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool PrimVtx_Si = false, bool DecayVtx = true);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool PrimVtx_Si = false, bool DecayVtx = true, bool FragmentFinder = true);
   ~Ana_Hist();
 
   int Write(TFile*);

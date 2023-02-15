@@ -86,6 +86,39 @@ private:
     TH1D* h13[7][3];
     TH1D* h14[7][3];
     TH1D* h15[7][3];
+    TH2D* h16[7];
+    TH1D* h17[7];
+    TH1D* h17_2[7];
+    TH1D* h18_3_1;
+    TH1D* h18_3_2;
+    TH2D* h18_3_3;
+    TH2D* h18_3_4;
+    TH1D* h18_3_5;
+    TH1D* h18_3_6;
+    TH1D* h18_3_7;
+    TH1D* h18_3_8;
+
+    TH1D* hfiber_4_1;
+    TH2D* hfiber_4_2_1;
+    TH2D* hfiber_4_3_1;
+    TH2D* hfiber_4_4_1;
+    TH1D* hfiber_4_5_1;
+    TH2D* hfiber_4_2_2;
+    TH2D* hfiber_4_3_2;
+    TH2D* hfiber_4_4_2;
+    TH1D* hfiber_4_5_2;
+    TH1D* hfiber_4_1_3;
+    TH2D* hfiber_4_2_3;
+    TH2D* hfiber_4_3_3;
+    TH2D* hfiber_4_4_3;
+    TH1D* hfiber_4_5_3;
+    TH1D* hfiber_5_1;
+    TH1D* hfiber_5_2;
+    TH1D* hfiber_5_3;
+    TH1D* hfiber_5_4;
+    TH1D* hfiber_5_5;
+    TH1D* hfiber_5_6;
+    TH1D* hfiber_5_7;
 
     TH1D* hpsb_0_1;
     TH1D* hpsb_0_2;
@@ -151,6 +184,13 @@ private:
     TH2D* hopt_2_2;
     TH1D* hopt_2_3;
     TH1D* hopt_2_4;
+
+    TH1D* htrig_0;
+    TH2D* htrig_1;
+    TH2D* htrig_2;
+    TH1D* htrig_3;
+    TH2D* htrig_4;
+
   };
 
   LocalHists LocalHisto;

@@ -26,6 +26,10 @@ class MWDCTracking
     Float_t GetY(void);
     Float_t GetA(void);
     Float_t GetB(void);
+    void SetX( Float_t _x_track) { x_track = _x_track; };
+    void SetY( Float_t _y_track) { y_track = _y_track; };
+    void SetA( Float_t _a_track) { a_track = _a_track; };
+    void SetB( Float_t _b_track) { b_track = _b_track; };
     Float_t GetXError(void);
     Float_t GetYError(void);
     Float_t GetAError(void);

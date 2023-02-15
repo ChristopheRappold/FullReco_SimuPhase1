@@ -32,6 +32,7 @@
 
 #include "HitAna/FiberHitXUV.hh"
 #include "HitAna/MWDCTracking.hh"
+#include "HitAna/FiberTrackAna.hh"
 //#include "HitAna/FiberTrackAna.hh"
 
 #include <cassert>
@@ -604,6 +605,42 @@ class PrimaryVtxTrack
 };
 
 
+class FragmentTrack 
+{
+  public:
+    FragmentTrack() { };
+    ~FragmentTrack() = default;
+
+    void SetPos(TVector3 _pos) { pos = _pos; };
+    void SetMom(TVector3 _mom) { mom = _mom; };
+    void SetCovMatrix(std::vector<double> _cov_matrix) { cov_matrix = _cov_matrix; };
+    void SetTOT(double _tot) { tot = _tot; };
+    void SetTime(double _time) { time = _time; };
+    void SetChi2NDF(double _chi2ndf) { chi2ndf = _chi2ndf; };
+    void SetIsBest(bool _isbest) { isbest = _isbest; };
+    void SetPID(int _pid) { pid = _pid; };
+
+
+    TVector3 GetPos() { return pos; };
+    TVector3 GetMom() { return mom; };
+    std::vector<double> GetCovMatrix() { return cov_matrix; };
+    double GetTOT() { return tot; };
+    double GetTime() { return time; };
+    double GetChi2NDF() { return chi2ndf; };
+    bool GetIsBest() { return isbest; };
+    int GetPID() { return pid; };
+
+  private:
+    TVector3 pos = TVector3(-999., -999., -999.);
+    TVector3 mom = TVector3(-999., -999., -999.);
+    std::vector<double> cov_matrix = {};
+    double tot = -999.;
+    double time = -999.;
+    double chi2ndf = -999.;
+    bool isbest = false;
+    int pid = -999;
+};
+
 
 struct Hyp
 {
@@ -757,6 +794,10 @@ public:
   std::vector<PrimaryVtxTrack> BeamTracks;
   std::vector<PrimaryVtxTrack> PrimaryTracks;
 
+  std::vector<FragmentTrack> FragmentTracks;
+  int FragmentPID;
+
+  std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
 /*
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
   

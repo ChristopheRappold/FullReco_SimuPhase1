@@ -62,6 +62,17 @@ class ParaManager
   bool write_hist_all;
   bool write_canvas;
   bool flag_mft12;
+  bool flag_debug;
+  bool flag_dft12_cut;
+  bool flag_dft12_combi;
+  bool flag_dup_xuv_mft12;
+  bool flag_dup_xuv_uft3;
+
+  //  Trig  //////
+  bool trig_main;
+  bool trig_clock;
+  bool trig_t0;
+  bool trig_sc41;
 
   //  Cut  //////
   double cut_chi2_gf;
@@ -80,6 +91,7 @@ class ParaManager
   double cut_mft12_hit;
   double cut_dft12_tot_mean;
   double cut_dft12_tot_sig;
+  double cut_dft12_tot_max;
   double cut_dft12_time_mean;
   double cut_dft12_time_sig;
 
@@ -115,8 +127,9 @@ class ParaManager
 
   double fiber_ch2ns;
 
-  double fiber_tgt_pos_x;   double fiber_tgt_pos_y;   double fiber_tgt_pos_z;
+  double fiber_tgt_pos_x;   double fiber_tgt_pos_y;   double fiber_tgt_pos_z; //CHECK possibly duplicated
   double fiber_tgt_size_x;  double fiber_tgt_size_y;  double fiber_tgt_size_z;
+  double target_pos_x;      double target_pos_y;      double target_pos_z;
 
   double fiber_mft1_pos_x;  double fiber_mft1_pos_y;  double fiber_mft1_pos_z;
   double fiber_mft2_pos_x;  double fiber_mft2_pos_y;  double fiber_mft2_pos_z;
@@ -282,12 +295,12 @@ class ParaManager
   double offset_tof_sc3141;
   double offset_tof_sc4143;
 
-
+/*
   // Optics
   std::string optics_name;
   std::map<std::string, std::vector<float>> optics_par;
   double optics_s2z;
-
+*/
 
 
   std::unordered_map<std::string,std::string>::const_iterator itr_ParamFiles;

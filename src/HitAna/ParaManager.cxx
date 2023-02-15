@@ -9,15 +9,34 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   write_hist_all = true;
   write_canvas = true;
   flag_mft12 = true;
+  flag_debug = false;
+  flag_dft12_cut = true;
+  flag_dft12_combi = true;
+  flag_dup_xuv_mft12    = false;
+  flag_dup_xuv_uft3     = true;
+
+  //  Trig  //////
+  trig_main  = false;
+  trig_clock = false;
+  trig_t0    = false;
+  trig_sc41  = false;
 
   //  Cut  //////
   cut_chi2_gf = 50;
+  cut_chi2_dft12 = 10.;
   cut_phi_fm  = 0.3;
   cut_num_mdc = 3;
   cut_psb_phi = 0.6;
   cut_psb_z   = 120;
   cut_psfe_phi = 0.6;
   cut_psbe_phi = 0.6;
+  cut_mft12_combi = 1e5;
+  cut_dft12_combi = 1e5;
+  cut_dft12_tot_mean  = 88.8;
+  cut_dft12_tot_sig   =  3.2;
+  cut_dft12_tot_max   = 75.;
+  cut_dft12_time_mean = 0.04;
+  cut_dft12_time_sig  = 1.09;
 
   //  Field  //////
   field_flag = true; // true : measurement field , false : constant field
@@ -51,7 +70,7 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   fiber_mft_cut_d  = 4.;
   fiber_uft1_cut_d = 4.;
   fiber_uft2_cut_d = 4.;
-  fiber_uft3_cut_d = 20.;
+  fiber_uft3_cut_d = 8.;
   fiber_dft1_cut_d = 6.;
   fiber_dft2_cut_d = 6.;
 
@@ -234,7 +253,7 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   fiber_mft2_off_ang_v1 = fiber_angle_offset[4][1][0];  fiber_mft2_off_ang_v2 = fiber_angle_offset[4][1][1];
   fiber_mft2_off_ang_u1 = fiber_angle_offset[4][2][0];  fiber_mft2_off_ang_u2 = fiber_angle_offset[4][2][1];
 
-  fiber_res = 0.15;
+  fiber_res = 0.2;
 
   //  PSB  //////
   psb_tcut_min = -20200; psb_tcut_max = -19400;
@@ -645,7 +664,7 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
 
   SetMWDCdtdxFromTH1D(mwdc_name_dtdxtable, ptable, (mwdc_dtdxtable_dtmin), (mwdc_dtdxtable_dtmax));
 
-
+/*
   // Optics
   itr_ParamFiles = ParamFiles.find("optics_name");
   if(itr_ParamFiles != ParamFiles.end())
@@ -687,7 +706,7 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
 
   //optics_s2z = 3987.5;
   optics_s2z = 4187.5; //Ti: 4150 mm, take this value just for easy expression
-
+*/
 
 
 }

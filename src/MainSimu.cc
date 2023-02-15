@@ -251,7 +251,7 @@ int main(int argc, char** argv)
 
 
       Ana_Hist ListHisto(true /*Daf*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Riemann*/, false /*Hough*/,
-                            true /*Simu*/, true /*Builder*/, true /*PrimVtx*/, false /*PrimVtx_Si*/, true /*DecayVtx*/);
+                  true /*Simu*/, true /*Builder*/, true /*PrimVtx*/, false /*PrimVtx_Si*/, true /*DecayVtx*/, true /*FragmentFinder*/);
 
 
       AnaEvent_Metadata metadata;

@@ -2,11 +2,12 @@
 #define S4SCI_HIT_ANA_HH
 #include "../EventWASAUnpack/WASAUnpackBranch.hh"
 #include "ParaManager.hh"
+#include "../FullRecoConfig.hh"
 
 class S4SciHitAna
 {
   public:
-    S4SciHitAna(S4TQ *a, ParaManager *par); /// modify later
+    S4SciHitAna(S4TQ *a, ParaManager *par, const std::string& StudyCase); /// modify later
     ~S4SciHitAna();
 
     float GetTOF_sc3141(){return tof_sc3141;};
@@ -17,7 +18,7 @@ class S4SciHitAna
     float GetdE_sc42_high(){return de_sc42_high;};
     int   GetPID(){ return PID_residual;};
     float GetMass(){return mass_residual;};
-    void  ResIdentify();
+    void  ResIdentify(const std::string& StudyCase);
     void  Print();
 
   private:

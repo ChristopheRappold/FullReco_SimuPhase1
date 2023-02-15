@@ -78,7 +78,40 @@ void TBuildWASACalibrationLayerPlane::SelectHists()
           LocalHisto.h14[i][j] = AnaHisto->CloneAndRegister(AnaHisto->h14[i][j]);
           LocalHisto.h15[i][j] = AnaHisto->CloneAndRegister(AnaHisto->h15[i][j]);
         }
+      LocalHisto.h16[i]   = AnaHisto->CloneAndRegister(AnaHisto->h16[i]);
+      LocalHisto.h17[i]   = AnaHisto->CloneAndRegister(AnaHisto->h17[i]);
+      LocalHisto.h17_2[i] = AnaHisto->CloneAndRegister(AnaHisto->h17_2[i]);
     }
+  LocalHisto.h18_3_1 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_1);
+  LocalHisto.h18_3_2 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_2);
+  LocalHisto.h18_3_3 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_3);
+  LocalHisto.h18_3_4 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_4);
+  LocalHisto.h18_3_5 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_5);
+  LocalHisto.h18_3_6 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_6);
+  LocalHisto.h18_3_7 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_7);
+  LocalHisto.h18_3_8 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_8);
+
+  LocalHisto.hfiber_4_1   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_1);
+  LocalHisto.hfiber_4_2_1 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_2_1);
+  LocalHisto.hfiber_4_3_1 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_3_1);
+  LocalHisto.hfiber_4_4_1 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_4_1);
+  LocalHisto.hfiber_4_5_1 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_5_1);
+  LocalHisto.hfiber_4_2_2 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_2_2);
+  LocalHisto.hfiber_4_3_2 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_3_2);
+  LocalHisto.hfiber_4_4_2 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_4_2);
+  LocalHisto.hfiber_4_5_2 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_5_2);
+  LocalHisto.hfiber_4_1_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_1_3);
+  LocalHisto.hfiber_4_2_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_2_3);
+  LocalHisto.hfiber_4_3_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_3_3);
+  LocalHisto.hfiber_4_4_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_4_3);
+  LocalHisto.hfiber_4_5_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_5_3);
+  LocalHisto.hfiber_5_1   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_1);
+  LocalHisto.hfiber_5_2   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_2);
+  LocalHisto.hfiber_5_3   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_3);
+  LocalHisto.hfiber_5_4   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_4);
+  LocalHisto.hfiber_5_5   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_5);
+  LocalHisto.hfiber_5_6   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_6);
+  LocalHisto.hfiber_5_7   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_7);
 
   LocalHisto.hpsb_0_1 = AnaHisto->CloneAndRegister(AnaHisto->hpsb_0_1);
   LocalHisto.hpsb_0_2 = AnaHisto->CloneAndRegister(AnaHisto->hpsb_0_2);
@@ -151,6 +184,12 @@ void TBuildWASACalibrationLayerPlane::SelectHists()
   LocalHisto.hopt_2_2 = AnaHisto->CloneAndRegister(AnaHisto->hopt_2_2);
   LocalHisto.hopt_2_3 = AnaHisto->CloneAndRegister(AnaHisto->hopt_2_3);
   LocalHisto.hopt_2_4 = AnaHisto->CloneAndRegister(AnaHisto->hopt_2_4);
+
+  LocalHisto.htrig_0 = AnaHisto->CloneAndRegister(AnaHisto->htrig_0);
+  LocalHisto.htrig_1 = AnaHisto->CloneAndRegister(AnaHisto->htrig_1);
+  LocalHisto.htrig_2 = AnaHisto->CloneAndRegister(AnaHisto->htrig_2);
+  LocalHisto.htrig_3 = AnaHisto->CloneAndRegister(AnaHisto->htrig_3);
+  LocalHisto.htrig_4 = AnaHisto->CloneAndRegister(AnaHisto->htrig_4);
 }
 
 ReturnRes::InfoM TBuildWASACalibrationLayerPlane::SoftExit(int return_build)
@@ -172,6 +211,12 @@ ReturnRes::InfoM TBuildWASACalibrationLayerPlane::SoftExit(int return_build)
       att._logger->warn("!> Chamber Hit > 1000 : event rejected");
       LocalHisto.h_Builderstats->Fill("chamber hit>1000", 1);
       return ReturnRes::ChamberHitLimit;
+    }
+  else if(return_build == -4)
+    {
+      att._logger->warn("!> Trigger Cut: event rejected");
+      LocalHisto.h_Builderstats->Fill("Trigger cut", 1);
+      return ReturnRes::TriggerCut;
     }
   else if(return_build == -9)
     {
@@ -198,7 +243,8 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
                                           Ana_WasaEvent* OutTree)
 #endif
 {
-  att._logger->info("Start BuildWASACalibration!");
+  //att._logger->info("Start BuildWASACalibration!");
+
   // Sub classes of calibrations
   // Fiber : Input event.s2fiber
 
@@ -222,7 +268,49 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   RecoEvent.ListHitsInfo.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
 
 
-// T0 ana //////////////////////////////////
+
+  // Trigger //////////////////
+  bool trig[16];
+  for(int i=0; i<32; ++i)
+    {
+      double val = event.s4tq->v775[i];
+      if(val>0)
+        LocalHisto.htrig_1->Fill(i, val);
+    }
+  for(int i=0; i<16; ++i)
+  {
+    trig[i] = event.s4tq->trig[i];
+    int offset = 0;
+    if(i>7)
+      offset = 8;
+    if(trig[i])
+      {
+        LocalHisto.htrig_0->Fill(i);
+        double val = event.s4tq->v775[i+offset];
+        LocalHisto.htrig_2->Fill(i+offset, val);
+      }
+  }
+
+  if( par->trig_main  && !trig[3] ) return -4;
+  if( par->trig_clock && !trig[5] ) return -4;
+  if( par->trig_t0    && !(trig[7] && trig[9]) ) return -4;
+  if( par->trig_sc41  && !trig[1] ) return -4;
+
+  for(int i=0; i<16; ++i)
+    {
+      int offset = 0;
+      if(i>7)
+        offset = 8;
+      if(trig[i])
+        {
+          LocalHisto.htrig_3->Fill(i);
+          double val = event.s4tq->v775[i+offset];
+          LocalHisto.htrig_4->Fill(i+offset, val);
+        }
+    }
+
+
+  // T0 ana //////////////////////////////////
   std::vector<T0HitAna*> T0HitCont;
   for(int i = 0; i < 28; ++i)
     {
@@ -668,18 +756,14 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       FiberHitClCont.emplace_back(buf_vv);
     }
 
-  // make container
-
   int t_r = event.s2fiber->tref[3];
 
   for(int i = 0; i < (int)event.s2fiber->fiberhit.size(); ++i)
     {
       double t_t0 = 0.;
-      if(hit_t0_main) t_t0 = hit_t0_main->GetTime();
-
-      //std::cout << t_t0 << "\n";
+      if(hit_t0_main)
+        t_t0 = hit_t0_main->GetTime();
       FiberHitAna* hit_ana = new FiberHitAna(event.s2fiber->fiberhit[i], par.get(), t_r, t_t0);
-      //std::cout << hit_ana->GetTime() << "\n";
 
       if(!hit_ana->IsValid())
         {
@@ -687,18 +771,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
           continue;
         }
       FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].emplace_back(hit_ana);
-    }
-
-  for(int i = 0; i < 7; ++i)
-    {
-      for(int j = 0; j < 3; ++j)
-        {
-          for(int k = 0; k < (int)FiberHitCont[i][j].size(); ++k)
-            {
-              LocalHisto.h10[i][j]->Fill(FiberHitCont[i][j][k]->GetFib(), FiberHitCont[i][j][k]->GetTL());
-              LocalHisto.h11[i][j]->Fill(FiberHitCont[i][j][k]->GetPos());
-            }
-        }
     }
 
   FiberAnalyzer* fiberana = new FiberAnalyzer();
@@ -736,7 +808,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
               std::string volumeName = nameVolDet[i][j];
               std::string motherName = nameMotherDet[i];
 
-              int hitID = FiberHitClCont[i][j][k]->GetClFib(); // todo check
+              int hitID = FiberHitClCont[i][j][k]->GetClFib(); // CHECK
 
               TGeoMatrix* g1 =
                   gGeoManager->GetVolume(volumeName.c_str())->GetNode(hitID * 2 + 1)->GetMatrix(); // fiber core
@@ -803,29 +875,218 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     {
       for(int j = 0; j < 3; ++j)
         {
+          LocalHisto.h13[i][j]->Fill(FiberHitCont[i][j].size());
+          LocalHisto.h14[i][j]->Fill(FiberHitClCont[i][j].size());
+
+          for(int k = 0; k < (int)FiberHitCont[i][j].size(); ++k)
+            {
+              LocalHisto.h10[i][j]->Fill(FiberHitCont[i][j][k]->GetFib(), FiberHitCont[i][j][k]->GetTL());
+              LocalHisto.h11[i][j]->Fill(FiberHitCont[i][j][k]->GetPos());
+            }
+
           for(int k = 0; k < (int)FiberHitClCont[i][j].size(); ++k)
             {
               LocalHisto.h12[i][j]->Fill(FiberHitClCont[i][j][k]->GetPos());
-            }
-        }
-    }
-
-  for(int i = 0; i < 7; ++i)
-    {
-      for(int j = 0; j < 3; ++j)
-        {
-          LocalHisto.h13[i][j]->Fill(FiberHitCont[i][j].size());
-          LocalHisto.h14[i][j]->Fill(FiberHitClCont[i][j].size());
-          for(int k = 0; k < (int)FiberHitClCont[i][j].size(); ++k)
-            {
               LocalHisto.h15[i][j]->Fill(FiberHitClCont[i][j][k]->GetClsize());
             }
         }
     }
 
 
+    //temp
+    std::vector< std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par.get());
+    std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
+
+
+    for(int i=0; i<7; ++i)
+      {
+        LocalHisto.h17[i]->Fill( FiberXUVCont[i].size() );
+        for(int j=0; j<(int)FiberXUVCont[i].size(); ++j)
+          {
+            LocalHisto.h16[i]->Fill(FiberXUVCont[i][j]->GetPosX(), FiberXUVCont[i][j]->GetPosY());
+            LocalHisto.h17_2[i]->Fill(FiberXUVCont[i][j]->GetD());
+          }
+      }
+
+    // dft12
+    int nt_dft12 = 0;
+
+    if(FiberXUVCont[5].size()>0 && FiberXUVCont[6].size()>0){
+      std::vector<FiberTrackAna*> buf_track;
+      for(int i=0; i<(int)FiberXUVCont[5].size(); ++i){
+        for(int j=0; j<(int)FiberXUVCont[6].size(); ++j){
+          std::vector<FiberHitXUV*>   buf_xuv;
+          buf_xuv.emplace_back(FiberXUVCont[5][i]);
+          buf_xuv.emplace_back(FiberXUVCont[6][j]);
+          FiberTrackAna *track = new FiberTrackAna(buf_xuv, par.get());
+          if(par->flag_dft12_cut){
+            double tot_mean = track->GetTOT();
+            double x_buf = track->GetXdet();
+            double y_buf = track->GetYdet();
+            double a_buf = track->GetA() * 1000;
+            double b_buf = track->GetB() * 1000;
+            bool flag_cut = false;
+            if( pow(x_buf/60., 2.) + pow(y_buf/40., 2) > 1. ) flag_cut = true;
+            if( fabs( x_buf * 23./50. - a_buf) > 20. ) flag_cut = true;
+            if( fabs( y_buf * 35./60. - b_buf) > 30. ) flag_cut = true;
+            if( tot_mean < par->cut_dft12_tot_max ) flag_cut = true;
+            if(flag_cut){ delete track; continue; }
+          }
+          if(!par->flag_dft12_combi)                      buf_track.emplace_back(track);
+          else if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track);
+        }
+      }
+      if((int)buf_track.size()>0) FiberTrackCont["dft12"] = fiberana->DeleteDup(buf_track);
+      nt_dft12     = FiberTrackCont["dft12"].size();
+    }
+
+    LocalHisto.hfiber_4_1->Fill(nt_dft12);
+    for(int i=0; i<nt_dft12; ++i){
+      FiberTrackAna *track = FiberTrackCont["dft12"][i];
+      double tot_mean = track->GetTOT();
+      if(nt_dft12==1){
+        LocalHisto.hfiber_4_2_1->Fill(track->GetXdet(), track->GetYdet());
+        LocalHisto.hfiber_4_3_1->Fill(track->GetXdet(), track->GetA()*1000);
+        LocalHisto.hfiber_4_4_1->Fill(track->GetYdet(), track->GetB()*1000);
+        LocalHisto.hfiber_4_5_1->Fill(tot_mean);
+      }
+      if(nt_dft12>1){
+        LocalHisto.hfiber_4_2_2->Fill(track->GetXdet(), track->GetYdet());
+        LocalHisto.hfiber_4_3_2->Fill(track->GetXdet(), track->GetA()*1000);
+        LocalHisto.hfiber_4_4_2->Fill(track->GetYdet(), track->GetB()*1000);
+        LocalHisto.hfiber_4_5_2->Fill(tot_mean);
+      }
+    }
+
+
+    for(auto v: FiberTrackCont["dft12"]){
+      for(int i=0; i<6; ++i){
+        v->GetContHit().at(i)->SetUsed();
+      }
+    }
+
+    int num_combi_dft12 = 1;
+    for(int i=5; i<7; ++i){
+      for(int j=0; j<3; ++j){
+        num_combi_dft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
+      }
+    }
+    LocalHisto.hfiber_5_5->Fill((double)num_combi_dft12*1e-3);
+    LocalHisto.hfiber_5_6->Fill((double)num_combi_dft12*1e-3);
+    LocalHisto.hfiber_5_7->Fill((double)num_combi_dft12*1e-6);
+    if(par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
+
+    if(par->flag_dft12_combi && num_combi_dft12<par->cut_dft12_combi){
+      LocalHisto.hfiber_5_1->Fill(num_combi_dft12);
+      LocalHisto.hfiber_5_2->Fill((double)num_combi_dft12*1e-3);
+      LocalHisto.hfiber_5_3->Fill((double)num_combi_dft12*1e-3);
+      LocalHisto.hfiber_5_4->Fill((double)num_combi_dft12*1e-6);
+      std::vector<FiberTrackAna*> buf_track;
+      for(int a=-1; a<(int)FiberHitClCont[5][0].size(); ++a){
+        for(int b=-1; b<(int)FiberHitClCont[5][1].size(); ++b){
+          for(int c=-1; c<(int)FiberHitClCont[5][2].size(); ++c){
+            for(int d=-1; d<(int)FiberHitClCont[6][0].size(); ++d){
+              for(int e=-1; e<(int)FiberHitClCont[6][1].size(); ++e){
+                for(int f=-1; f<(int)FiberHitClCont[6][2].size(); ++f){
+                  std::vector<FiberHitAna*> buf_hit;
+                  int count = 0;
+                  if(a>-1 && !FiberHitClCont[5][0][a]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[5][0][a]); count++;}
+                  if(b>-1 && !FiberHitClCont[5][1][b]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[5][1][b]); count++;}
+                  if(c>-1 && !FiberHitClCont[5][2][c]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[5][2][c]); count++;}
+                  if(d>-1 && !FiberHitClCont[6][0][d]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][0][d]); count++;}
+                  if(e>-1 && !FiberHitClCont[6][1][e]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][1][e]); count++;}
+                  if(f>-1 && !FiberHitClCont[6][2][f]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][2][f]); count++;}
+                  if(count<4) continue;
+                  //if(count!=4) continue;
+                  FiberTrackAna *track = new FiberTrackAna(buf_hit, par.get());
+
+                  if(par->flag_dft12_cut){
+                    double tot_mean = track->GetTOT();
+                    double x_buf = track->GetXdet();
+                    double y_buf = track->GetYdet();
+                    double a_buf = track->GetA() * 1000;
+                    double b_buf = track->GetB() * 1000;
+                    bool flag_cut = false;
+                    if( pow(x_buf/60., 2.) + pow(y_buf/40., 2) > 1. ) flag_cut = true;
+                    if( fabs( x_buf * 23./50. - a_buf) > 20. ) flag_cut = true;
+                    if( fabs( y_buf * 35./60. - b_buf) > 30. ) flag_cut = true;
+                    if( tot_mean < 75. ) flag_cut = true;
+                    if(flag_cut){ delete track; continue; }
+                  }
+
+                  switch(track->GetNlayer()){
+                    case 4: buf_track.emplace_back(track); break;
+                    case 5: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
+                    case 6: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
+                    default: break;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      if(par->flag_debug) std::cout << "- dft12 combi" << std::endl;
+
+      std::vector<FiberTrackAna*> buf_track_tmp = fiberana->DeleteDupCombi(buf_track);
+      if(par->flag_debug) std::cout << "- dft12 dup" << std::endl;
+      buf_track = buf_track_tmp;
+
+      for(auto v: buf_track){
+        for(auto v2: v->GetContHit()){ v2->SetUsed(); }
+      }
+
+      for(auto v : buf_track){
+        FiberTrackCont["dft12"].emplace_back(v);
+      }
+      nt_dft12 = FiberTrackCont["dft12"].size();
+
+    }
+
+    LocalHisto.hfiber_4_1_3->Fill(nt_dft12);
+    int buf_i_dft12 = -1;
+    double buf_diff_dft12 = -9999.;
+    for(int i=0; i<nt_dft12; ++i){
+      FiberTrackAna *track = FiberTrackCont["dft12"][i];
+      double tot_mean  = track->GetTOT();
+      double time_mean = track->GetTime();
+      LocalHisto.hfiber_4_2_3->Fill(track->GetXdet(), track->GetYdet());
+      LocalHisto.hfiber_4_3_3->Fill(track->GetXdet(), track->GetA()*1000);
+      LocalHisto.hfiber_4_4_3->Fill(track->GetYdet(), track->GetB()*1000);
+      LocalHisto.hfiber_4_5_3->Fill(tot_mean);
+      double dist_dft12 =
+        pow( (tot_mean  - par->cut_dft12_tot_mean)  / par->cut_dft12_tot_sig , 2.) +
+        pow( (time_mean - par->cut_dft12_time_mean) / par->cut_dft12_time_sig, 2.);
+      if(buf_diff_dft12<0 || dist_dft12 < buf_diff_dft12){
+        buf_i_dft12 = i;
+        buf_diff_dft12 = dist_dft12;
+      }
+    }
+
+    if(buf_i_dft12>-1) FiberTrackCont["dft12"][buf_i_dft12]->SetBest();
+
+
+    LocalHisto.h18_3_1->Fill(nt_dft12);
+    if(nt_dft12>0){
+      LocalHisto.h18_3_2->Fill(FiberTrackCont["dft12"][0]->GetChi2());
+      LocalHisto.h18_3_3->Fill(FiberTrackCont["dft12"][0]->GetXtgt(), FiberTrackCont["dft12"][0]->GetA()*1000);
+      LocalHisto.h18_3_4->Fill(FiberTrackCont["dft12"][0]->GetYtgt(), FiberTrackCont["dft12"][0]->GetB()*1000);
+      LocalHisto.h18_3_5->Fill(FiberTrackCont["dft12"][0]->GetXtgt());
+      LocalHisto.h18_3_6->Fill(FiberTrackCont["dft12"][0]->GetYtgt());
+      LocalHisto.h18_3_7->Fill(FiberTrackCont["dft12"][0]->GetA()*1000);
+      LocalHisto.h18_3_8->Fill(FiberTrackCont["dft12"][0]->GetB()*1000);
+    }
+
+    RecoEvent.FiberTrackCont = FiberTrackCont;
+
+    if(par->flag_debug) std::cout << "- dft12 end" << std::endl;
+
+
     //  S4 Scintillators  //
-    S4SciHitAna *s4hit = new S4SciHitAna(event.s4tq, par.get());
+    S4SciHitAna *s4hit = new S4SciHitAna(event.s4tq, par.get(), att.StudyCase);
+
+    RecoEvent.FragmentPID = s4hit->GetPID();
+
     LocalHisto.hs4sci_1_1->Fill(s4hit->GetdE_sc31());
     LocalHisto.hs4sci_1_2->Fill(s4hit->GetdE_sc41());
     LocalHisto.hs4sci_1_3->Fill(s4hit->GetdE_sc42_high());
@@ -897,6 +1158,13 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
         LocalHisto.hmwdc_1_3->Fill(mwdc_a);
         LocalHisto.hmwdc_1_4->Fill(mwdc_b);
         LocalHisto.hmwdc_1_5->Fill(mwdc_chi2);
+
+        mwdc_track.SetX(mwdc_x);
+        mwdc_track.SetY(mwdc_y);
+        mwdc_track.SetA(mwdc_a);
+        mwdc_track.SetB(mwdc_b);
+
+
         //t_mwdc_x.emplace_back(mwdc_x); //Check include later to output root file
         //t_mwdc_y.emplace_back(mwdc_y);
         //t_mwdc_a.emplace_back(mwdc_a);
