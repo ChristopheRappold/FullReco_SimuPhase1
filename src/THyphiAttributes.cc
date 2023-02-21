@@ -120,6 +120,16 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   }
 
   optics_s2z = 4187.5; //Ti: 4150 mm, take this value just for easy expression
+  
+  psb_pos_x = 0.5; psb_pos_y = 5.5; psb_pos_z = 2760.;
+  psb_rot_z = -0.4;
+  cut_psb_phi = 0.4;
+  cut_psb_z   = 150;
+  cut_phi_fm  = 0.3;
+
+  flag_dup_trackhit = true;
+  flag_dup_trackhit_mdc = false;
+  flag_trackhit_inclusive = true;
 
 
   //MFT Cor parameters
@@ -318,6 +328,14 @@ if(Config.IsAvailable("CalibFile_FiberAngleoffset"))
   }
   else
     map_ParamFiles.insert({"fiber_angleoffset_file","./calib/fiber_offset/fiber_angleoffset.csv"});
+
+if(Config.IsAvailable("Fiber_MFTCor_name"))
+  {
+    auto tmpStr = Config.Get<std::string>("Fiber_MFTCor_name");
+    map_ParamFiles.insert({"fiber_mftcor_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"fiber_mftcor_file","./calib/fiber_mftcor/fiber_mftcor.csv"});
 
 if(Config.IsAvailable("CalibFile_PSBtime"))
   {
@@ -670,6 +688,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_CheckFiberTrack = Config.Get<bool>("Task_CheckFiberTrack");
   if(Config.IsAvailable("Task_FragmentFinder"))
     Task_FragmentFinder = Config.Get<bool>("Task_FragmentFinder");
+  if(Config.IsAvailable("Task_WASAFinder"))
+    Task_WASAFinder = Config.Get<bool>("Task_WASAFinder");
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
   if(Config.IsAvailable("Task_RiemannFinder"))
@@ -715,6 +735,8 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKCHECKFIBERTRACK);
     if(s == "Task_FragmentFinder")
       Task_Order.push_back(TASKFRAGMENTFINDER);
+    if(s == "Task_WASAFinder")
+      Task_Order.push_back(TASKWASAFINDER);
   	if(s == "Task_BayesFinder")
 	    Task_Order.push_back(TASKBAYESFINDER);
 	  if(s == "Task_RiemannFinder")
@@ -768,6 +790,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Task_PrimaryVtx_Si   = TaskConfig.Task_PrimaryVtx_Si;
   out.RunTask.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
   out.RunTask.Task_FragmentFinder  = TaskConfig.Task_FragmentFinder;
+  out.RunTask.Task_WASAFinder      = TaskConfig.Task_WASAFinder;
   out.RunTask.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
   out.RunTask.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;
   out.RunTask.Task_FinderCM        = TaskConfig.Task_FinderCM;

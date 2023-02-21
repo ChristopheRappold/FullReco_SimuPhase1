@@ -37,6 +37,7 @@ enum StateHist : int
   PRIMVTX_SI,
   DECAYVTX,
   FRAGMENT,
+  WASA,
   SIZEOF_STATEHIST
 };
 
@@ -63,7 +64,8 @@ class Ana_Hist
   Hist<TH2I> h_statsLess3Mes;
   Hist<TH2I> h_statsInvalid;
   Hist<TH1I> h_task_exit;
-  
+
+
   //Field
   Hist<TH2F> FieldXY[3];
   Hist<TH2F> FieldXZ[3];
@@ -74,7 +76,8 @@ class Ana_Hist
   Hist<TH2F> FieldXY_n[3];
   Hist<TH2F> FieldXZ_n[3];
   Hist<TH2F> FieldYZ_n[3];
-  
+
+
   // Finder
   Hist<TH2F> h_xy;
   Hist<TH2F> h_PxPy;
@@ -99,7 +102,8 @@ class Ana_Hist
   Hist<TH2F> h_MDC_R_residu;
   Hist<TH2F> h_MDC_Z_pull;
   Hist<TH2F> h_MDC_R_pull;
-  
+
+
   // Kalman:
   Hist<TH1F> h_pv;
   Hist<TH1F> h_chi2;
@@ -147,19 +151,23 @@ class Ana_Hist
 
   Hist<TH2F> h_total_dE;
 
+
   // residual
   Hist<TH1F> h_ResFiber[9];
   Hist<TH1F> h_ResMiniFiber[6];
   Hist<TH1F> h_ResMDC[17][3];
   Hist<TH1F> h_ResPSCE[2];
 
+
   // Riemann Finder
   Hist<TH2F> h_RiemannChi2;
   Hist<TH2F> h_RiemannResidus;
 
+
   // PerfFinder
   Hist<TH2F> h_PerfFinder;
   Hist<TH2F> h_PerfFinderLevenshtein;
+
 
   // WASABuilder
   Hist<TH1I> h_Builderstats;
@@ -181,7 +189,41 @@ class Ana_Hist
   Hist<TH1D> h18_3_6;
   Hist<TH1D> h18_3_7;
   Hist<TH1D> h18_3_8;
+  Hist<TH1D> hfiber_13_0[7][3];
+  Hist<TH1D> hfiber_13_1[7][3];
+  Hist<TH1D> hfiber_13_2[7][3];
+  Hist<TH2D> hfiber_13_3[7][3];
+  Hist<TH2D> hfiber_13_4[7][3];
+  Hist<TH2D> h51[3][3][2];
 
+  //MFT12
+  Hist<TH1D> hfiber_1_1;
+  Hist<TH1D> hfiber_1_2;
+  Hist<TH1D> hfiber_1_3;
+  Hist<TH1D> hfiber_1_4;
+  Hist<TH1D> hfiber_1_5;
+  Hist<TH1D> hfiber_1_6;
+  Hist<TH1D> hfiber_1_7;
+  Hist<TH1D> hfiber_1_9;
+  Hist<TH1D> hfiber_2_1_1;
+  Hist<TH1D> hfiber_2_1_2;
+  Hist<TH1D> hfiber_2_2_1;
+  Hist<TH1D> hfiber_2_2_2;
+  Hist<TH1D> hfiber_2_3;
+  Hist<TH1D> hfiber_3_0;
+  Hist<TH1D> hfiber_3_0_2;
+  Hist<TH1D> hfiber_6_1;
+  Hist<TH1D> hfiber_6_2;
+  Hist<TH2D> hfiber_6_3;
+  Hist<TH2D> hfiber_6_4;
+  Hist<TH2D> hfiber_12_1_1;
+  Hist<TH2D> hfiber_12_2_1;
+  Hist<TH2D> hfiber_12_3_1;
+  Hist<TH2D> hfiber_12_1_2;
+  Hist<TH2D> hfiber_12_2_2;
+  Hist<TH2D> hfiber_12_3_2;
+
+  //DFT12
   Hist<TH1D> hfiber_4_1;
   Hist<TH2D> hfiber_4_2_1;
   Hist<TH2D> hfiber_4_3_1;
@@ -236,12 +278,11 @@ class Ana_Hist
   Hist<TH1D> hmdc_0_4;
   Hist<TH1D> hmdc_0_5;
   Hist<TH2D> hmdc_0_6;
+  Hist<TH2D> hmdc_0_9;
   Hist<TH1D> hmdc_1[17];
   Hist<TH1D> hmdc_2[17];
-  Hist<TH1D> hmdc_2_2[17];
-  Hist<TH1D> hmdc_2_3[17];
   Hist<TH1D> hmdc_3[17];
-  Hist<TH1D> hmdc_3_2[17];
+  Hist<TH1D> hmdc_2_3[17];
   Hist<TH1D> hmdc_3_3[17];
 
   Hist<TH1D> hmwdc_1_1;
@@ -260,6 +301,14 @@ class Ana_Hist
   Hist<TH2D> hs4sci_2_3;
   Hist<TH2D> hs4sci_2_4;
 
+  Hist<TH1D> htrig_0;
+  Hist<TH2D> htrig_1;
+  Hist<TH2D> htrig_2;
+  Hist<TH1D> htrig_3;
+  Hist<TH2D> htrig_4;
+
+
+  // FragmentFinder
   Hist<TH1D> hopt_1_1;
   Hist<TH1D> hopt_1_2;
   Hist<TH1D> hopt_1_3;
@@ -269,12 +318,20 @@ class Ana_Hist
   Hist<TH1D> hopt_2_3;
   Hist<TH1D> hopt_2_4;
 
-  Hist<TH1D> htrig_0;
-  Hist<TH2D> htrig_1;
-  Hist<TH2D> htrig_2;
-  Hist<TH1D> htrig_3;
-  Hist<TH2D> htrig_4;
 
+  // WASAFinder
+  Hist<TH2D> h23_1;
+  Hist<TH2D> h23_2;
+  Hist<TH2D> h24_1;
+  Hist<TH2D> h24_2;
+  Hist<TH2D> h24_3[17];
+  Hist<TH2D> h24_4[17];
+  Hist<TH1D> h24_2_1;
+  Hist<TH1D> h24_2_2;
+  Hist<TH1D> h24_2_3[17];
+  Hist<TH1D> h24_2_4[17];
+  Hist<TH1D> hmdc_2_2[17];
+  Hist<TH1D> hmdc_3_2[17];
 
   // Primary Vertex
   Hist<TH1F> h_HitMultiplicity_Si1;
@@ -374,6 +431,7 @@ class Ana_Hist
   Hist<TH2F> h_PrimStatus;
   Hist<TH1F> h_PrimVtxstats ;
 
+
   // Decay Vertex
   Hist<TH1F> h_P_fragments ;
   Hist<TH1F> h_Pt_fragments ;
@@ -392,7 +450,6 @@ class Ana_Hist
   Hist<TH1F> h_Ncutpions ;
   Hist<TH1F> h_Npions ;
 
-
   Hist<TH1F> h_Closedist_Distance ;
   Hist<TH1F> h_Closedist_PosZ ;
   Hist<TH2F> h_Dist_DecayTrackPrimVtx ;
@@ -400,7 +457,6 @@ class Ana_Hist
   Hist<TH1F> h_Closedist_cutDistance ;
   Hist<TH1F> h_Closedist_cutPosZ ;
   Hist<TH2F> h_Dist_cutDecayTrackPrimVtx ;
-
 
   Hist<TH1F> h_DecayVertexDistance ;
   Hist<TH1F> h_DecayVertexDistanceX ;
@@ -490,6 +546,7 @@ class Ana_Hist
 
   Hist<TH2F> h_N_SiHits_ReconsTracks ;
 
+
   // CheckFiberXUV
   Hist<TH1F> h_ResidualFiberHitX[7];
   Hist<TH1F> h_ResidualFiberHitY[7];
@@ -531,6 +588,7 @@ class Ana_Hist
   Hist<TH1F> h_FiberHit_Residualdvalue[7];
   Hist<TH2F> h_FiberHit_Residualdvalue_Realdvalue[7];
 
+
   // CheckFiberTrack
   Hist<TH2F> h_ResidualFiberX;
   Hist<TH2F> h_ResidualFiberY;
@@ -561,7 +619,7 @@ class Ana_Hist
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool PrimVtx_Si = false, bool DecayVtx = true, bool FragmentFinder = true);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool PrimVtx_Si = false, bool DecayVtx = true, bool FragmentFinder = true, bool WASAFinder = true);
   ~Ana_Hist();
 
   int Write(TFile*);

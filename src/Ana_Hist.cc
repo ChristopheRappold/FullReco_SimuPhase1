@@ -22,7 +22,7 @@ Ana_Hist::~Ana_Hist()
 }
 
 /********************************************************************/
-Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu, bool Builder, bool PrimVtx, bool PrimVtx_Si, bool DecayVtx, bool FragmentFinder)
+Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu, bool Builder, bool PrimVtx, bool PrimVtx_Si, bool DecayVtx, bool FragmentFinder, bool WASAFinder)
 {
   EnableState.resize(SIZEOF_STATEHIST);
   EnableState[DAF] = Daf;
@@ -37,6 +37,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
   EnableState[PRIMVTX_SI] = PrimVtx_Si;
   EnableState[DECAYVTX] = DecayVtx;
   EnableState[FRAGMENT] = FragmentFinder;
+  EnableState[WASA] = WASAFinder;
 
 
 
@@ -492,7 +493,8 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       h_Builderstats.emplace_back(new TH1I("Builderstats", "Builderstats", 10, 0, 10));
       HistReg.emplace_back(&h_Builderstats.store);
 
-      double range10[7] = {256, 256, 384, 256, 256, 256, 256 };
+      int range10[7] = {256, 256, 384, 256, 256, 256, 256};
+      int num_f13[7] = {256, 256, 384, 256, 256, 256, 256};
       for(int i=0; i<7; ++i)
         {
           for(int j=0; j<3; ++j)
@@ -509,6 +511,16 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
               HistReg.emplace_back(&h14[i][j].store);
               h15[i][j].emplace_back(new TH1D(Form("h15[%d][%d]",i,j),Form("h15[%d][%d]",i,j),8,-0.5,7.5));
               HistReg.emplace_back(&h15[i][j].store);
+              hfiber_13_0[i][j].emplace_back(new TH1D(Form("hfiber_13_0[%d][%d]",i,j),Form("Fiber %d-%d Leading Time" ,i,j), 300, -1700-0.5, -1400-0.5));
+              HistReg.emplace_back(&hfiber_13_0[i][j].store);
+              hfiber_13_1[i][j].emplace_back(new TH1D(Form("hfiber_13_1[%d][%d]",i,j),Form("Fiber %d-%d Time"         ,i,j), 200, -20, 20));
+              HistReg.emplace_back(&hfiber_13_1[i][j].store);
+              hfiber_13_2[i][j].emplace_back(new TH1D(Form("hfiber_13_2[%d][%d]",i,j),Form("Fiber %d-%d Time (w/o T0)",i,j), 200, -20, 20));
+              HistReg.emplace_back(&hfiber_13_2[i][j].store);
+              hfiber_13_3[i][j].emplace_back(new TH2D(Form("hfiber_13_3[%d][%d]",i,j),Form("Fiber %d-%d LeadingTime : Fiber" ,i,j), num_f13[i], -0.5, num_f13[i]-0.5, 300, -1700, -1400));
+              HistReg.emplace_back(&hfiber_13_3[i][j].store);
+              hfiber_13_4[i][j].emplace_back(new TH2D(Form("hfiber_13_4[%d][%d]",i,j),Form("Fiber %d-%d Time : Fiber"        ,i,j), num_f13[i], -0.5, num_f13[i]-0.5, 200, -30  , 30 ));
+              HistReg.emplace_back(&hfiber_13_4[i][j].store);
             }
           h16[i].emplace_back(new TH2D(Form("h16[%d]",i),Form("h16[%d]",i),200,-100,100, 200, -100, 100));
           HistReg.emplace_back(&h16[i].store);
@@ -533,7 +545,72 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistReg.emplace_back(&h18_3_7.store);
       h18_3_8.emplace_back(new TH1D("h18_3_8","DFT12 B"     ,200, -30, 30));
       HistReg.emplace_back(&h18_3_8.store);
+      int num51[3] = {384, 256, 256};
+      for(int i=0; i<3 ; ++i)
+        {
+          for(int j=0; j<3; ++j)
+            {
+              for(int k=0; k<2; ++k)
+                {
+                  h51[i][j][k].emplace_back(new TH2D(Form("h51[%d][%d][%d]",i,j,k),Form("Fiber %d-%d %d",i,j,k) ,num51[i], -0.5, num51[i]-0.5, 100, 0, 100 ));
+                  HistReg.emplace_back(&h51[i][j][k].store);
+                }
+            }
+        }
 
+      //MFT12
+      hfiber_1_1.emplace_back(new TH1D("hfiber_1_1","MFT12 combi"        ,101, -0.5, 100.5));
+      HistReg.emplace_back(&hfiber_1_1.store);
+      hfiber_1_2.emplace_back(new TH1D("hfiber_1_2","MFT12 combi [k]"    ,500,  0  , 100  ));
+      HistReg.emplace_back(&hfiber_1_2.store);
+      hfiber_1_3.emplace_back(new TH1D("hfiber_1_3","MFT12 combi [k]"    ,500,  0  , 1000 ));
+      HistReg.emplace_back(&hfiber_1_3.store);
+      hfiber_1_4.emplace_back(new TH1D("hfiber_1_4","MFT12 combi [M]"    ,500,  0  , 10   ));
+      HistReg.emplace_back(&hfiber_1_4.store);
+      hfiber_1_5.emplace_back(new TH1D("hfiber_1_5","MFT12 combi all [k]",500,  0  , 100  ));
+      HistReg.emplace_back(&hfiber_1_5.store);
+      hfiber_1_6.emplace_back(new TH1D("hfiber_1_6","MFT12 combi all [k]",500,  0  , 1000 ));
+      HistReg.emplace_back(&hfiber_1_6.store);
+      hfiber_1_7.emplace_back(new TH1D("hfiber_1_7","MFT12 combi all [M]",500,  0  , 10   ));
+      HistReg.emplace_back(&hfiber_1_7.store);
+      hfiber_1_9.emplace_back(new TH1D("hfiber_1_9","MFT12 pair combi [k]",500, 0  , 100));
+      HistReg.emplace_back(&hfiber_1_9.store);
+      hfiber_2_1_1.emplace_back(new TH1D("hfiber_2_1_1","MFT12 combi pre"    ,101, -0.5, 100.5));
+      HistReg.emplace_back(&hfiber_2_1_1.store);
+      hfiber_2_1_2.emplace_back(new TH1D("hfiber_2_1_2","MFT12 combi pre [k]",500,  0  , 100  ));
+      HistReg.emplace_back(&hfiber_2_1_2.store);
+      hfiber_2_2_1.emplace_back(new TH1D("hfiber_2_2_1","MFT12 combi"        ,101, -0.5, 100.5));
+      HistReg.emplace_back(&hfiber_2_2_1.store);
+      hfiber_2_2_2.emplace_back(new TH1D("hfiber_2_2_2","MFT12 combi [k]"    ,500,  0  , 100  ));
+      HistReg.emplace_back(&hfiber_2_2_2.store);
+      hfiber_2_3.emplace_back(new TH1D("hfiber_2_3"  ,"MFT12 combi buf1"   ,101, -0.5, 100.5));
+      HistReg.emplace_back(&hfiber_2_3.store);
+      hfiber_3_0.emplace_back(new TH1D("hfiber_3_0"  ,"MFT12 ntrack"           ,11, -0.5, 10.5));
+      HistReg.emplace_back(&hfiber_3_0.store);
+      hfiber_3_0_2.emplace_back(new TH1D("hfiber_3_0_2","MFT12 ntrack (XUV)"     ,11, -0.5, 10.5));
+      HistReg.emplace_back(&hfiber_3_0_2.store);
+      hfiber_6_1.emplace_back(new TH1D("hfiber_6_1","MFT PSB diff phi (combi)" , 200, -0.7, 0.7));
+      HistReg.emplace_back(&hfiber_6_1.store);
+      hfiber_6_2.emplace_back(new TH1D("hfiber_6_2","MFT PSB diff Z (combi)  " , 200, -300, 300));
+      HistReg.emplace_back(&hfiber_6_2.store);
+      hfiber_6_3.emplace_back(new TH2D("hfiber_6_3","MFT PSB phi (combi)"      , 100, -180, 180, 100, -180, 180));
+      HistReg.emplace_back(&hfiber_6_3.store);
+      hfiber_6_4.emplace_back(new TH2D("hfiber_6_4","MFT PSB Z (combi)  "      , 100, -500, 500, 100, -500, 500));
+      HistReg.emplace_back(&hfiber_6_4.store);
+      hfiber_12_1_1.emplace_back(new TH2D("hfiber_12_1_1","MFT X1 X2 (all)" , 100, -100, 100, 100, -100 ,100));
+      HistReg.emplace_back(&hfiber_12_1_1.store);
+      hfiber_12_2_1.emplace_back(new TH2D("hfiber_12_2_1","MFT U1 U2 (all)" , 100, -100, 100, 100, -100 ,100));
+      HistReg.emplace_back(&hfiber_12_2_1.store);
+      hfiber_12_3_1.emplace_back(new TH2D("hfiber_12_3_1","MFT V1 V2 (all)" , 100, -100, 100, 100, -100 ,100));
+      HistReg.emplace_back(&hfiber_12_3_1.store);
+      hfiber_12_1_2.emplace_back(new TH2D("hfiber_12_1_2","MFT X1 X2 (pair)", 100, -100, 100, 100, -100 ,100));
+      HistReg.emplace_back(&hfiber_12_1_2.store);
+      hfiber_12_2_2.emplace_back(new TH2D("hfiber_12_2_2","MFT U1 U2 (pair)", 100, -100, 100, 100, -100 ,100));
+      HistReg.emplace_back(&hfiber_12_2_2.store);
+      hfiber_12_3_2.emplace_back(new TH2D("hfiber_12_3_2","MFT V1 V2 (pair)", 100, -100, 100, 100, -100 ,100));
+      HistReg.emplace_back(&hfiber_12_3_2.store);
+
+      //DFT12
       hfiber_4_1.emplace_back(new TH1D("hfiber_4_1","DFT12 ntrack", 10, -0.5, 9.5));
       HistReg.emplace_back(&hfiber_4_1.store);
       hfiber_4_2_1.emplace_back(new TH2D("hfiber_4_2_1", "DFT12 XY single" , 100, -100, 100, 100, -100, 100));
@@ -643,16 +720,14 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistReg.emplace_back(&hmdc_0_5.store);
       hmdc_0_6.emplace_back(new TH2D("hmdc_0_6","mdc leading tot layer 16" ,200, -2000, 1000, 200, 0, 1000));
       HistReg.emplace_back(&hmdc_0_6.store);
+      hmdc_0_9.emplace_back(new TH2D("hmdc_0_9","mdc wire vs phi layer 16" ,300, 0, 300, 360, -180, 180));
+      HistReg.emplace_back(&hmdc_0_9.store);
       for(int i=0; i<17; ++i)
       {
         hmdc_1[i].emplace_back(new TH1D(Form("hmdc_1[%d]",i),Form("TL layer %d",i), 300,-2000,-500));
         HistReg.emplace_back(&hmdc_1[i].store);
         hmdc_2[i].emplace_back(new TH1D(Form("hmdc_2[%d]",i),Form("DT layer %d",i), 125,-50,200));
         HistReg.emplace_back(&hmdc_2[i].store);
-        hmdc_2_2[i].emplace_back(new TH1D(Form("hmdc_2_2[%d]",i),Form("DT layer %d cut",i), 125,-50,200));
-        HistReg.emplace_back(&hmdc_2_2[i].store);
-        hmdc_2_3[i].emplace_back(new TH1D(Form("hmdc_2_3[%d]",i),Form("DT layer %d cut",i), 125,-50,200));
-        HistReg.emplace_back(&hmdc_2_3[i].store);
         hmdc_3[i].emplace_back(new TH1D(Form("hmdc_3[%d]",i),Form("DL layer %d",i), 100,-1,5));
         HistReg.emplace_back(&hmdc_3[i].store);
         hmdc_3_2[i].emplace_back(new TH1D(Form("hmdc_3_2[%d]",i),Form("DL layer %d cut",i), 100,-1,5));
@@ -732,6 +807,40 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistRegisteredByDir.insert(std::make_pair("FragmentFinder", std::make_tuple(HistReg,0)));
     }
 
+  if(EnableState[WASA])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
+
+      h23_1.emplace_back(new TH2D("h23_1","Fiber PSB Phi"     ,200, -3.2, 3.2, 50 , -3.21, 3.34));
+      HistReg.emplace_back(&h23_1.store);
+      h23_2.emplace_back(new TH2D("h23_2","Fiber PSB Z"       ,200, -500, 500, 200, -500 , 500 ));
+      HistReg.emplace_back(&h23_2.store);
+      h24_1.emplace_back(new TH2D("h24_1","Fiber MDC Phi"     ,200, -3.2, 3.2, 200 , -3.2, 3.2));
+      HistReg.emplace_back(&h24_1.store);
+      h24_2.emplace_back(new TH2D("h24_2","Fiber MDC Phi cut" ,200, -3.2, 3.2, 200 , -3.2, 3.2));
+      HistReg.emplace_back(&h24_2.store);
+      h24_2_1.emplace_back(new TH1D("h24_2_1","Fiber MDC Phi"     ,200, -0.5, 0.5));
+      HistReg.emplace_back(&h24_2_1.store);
+      h24_2_2.emplace_back(new TH1D("h24_2_2","Fiber MDC Phi cut" ,200, -0.5, 0.5));
+      HistReg.emplace_back(&h24_2_2.store);
+      for(int i = 0; i < 17; ++i)
+        {
+          h24_3[i].emplace_back(new TH2D(Form("h24_3[%d]",i),Form("Fiber MDC Phi layer %d",i)     ,200, -3.2, 3.2, 200 , -3.2, 3.2));
+          HistReg.emplace_back(&h24_3[i].store);
+          h24_4[i].emplace_back(new TH2D(Form("h24_4[%d]",i),Form("Fiber MDC Phi layer %d cut",i) ,200, -3.2, 3.2, 200 , -3.2, 3.2));
+          HistReg.emplace_back(&h24_4[i].store);
+          h24_2_3[i].emplace_back(new TH1D(Form("h24_2_3[%d]",i),Form("Fiber MDC Phi layer %d",i)     ,200, -0.5, 0.5));
+          HistReg.emplace_back(&h24_2_3[i].store);
+          h24_2_4[i].emplace_back(new TH1D(Form("h24_2_4[%d]",i),Form("Fiber MDC Phi layer %d cut",i) ,200, -0.5, 0.5));
+          HistReg.emplace_back(&h24_2_4[i].store);
+          hmdc_2_2[i].emplace_back(new TH1D(Form("hmdc_2_2[%d]",i),Form("DT layer %d cut",i), 125,-50,200));
+          HistReg.emplace_back(&hmdc_2_2[i].store);
+          hmdc_3_2[i].emplace_back(new TH1D(Form("hmdc_3_2[%d]",i),Form("DL layer %d cut",i), 100,-1,5));
+          HistReg.emplace_back(&hmdc_3_2[i].store);
+        }
+
+      HistRegisteredByDir.insert(std::make_pair("WasaFinder", std::make_tuple(HistReg,0)));
+    }
 
 if(EnableState[PRIMVTX])
     {

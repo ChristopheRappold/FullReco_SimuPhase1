@@ -14,6 +14,7 @@
 #include "TCheckFiberXUV.h"
 #include "TCheckFiberTrack.h"
 #include "TFragmentFinder.h"
+#include "TWASAFinder.h"
 #include "TCheckRZ.h"
 #include "TFlatMCOutputML.h"
 #include "TPrimaryVertex.h"
@@ -109,6 +110,10 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
           case Task::TASKFRAGMENTFINDER:
             if(Attributes.TaskConfig.Task_FragmentFinder)
               list_processMC.emplace_back(new TFragmentFinder<TEOut>(Attributes));
+            break;
+          case Task::TASKWASAFINDER:
+            if(Attributes.TaskConfig.Task_WASAFinder)
+              list_processMC.emplace_back(new TWASAFinder<TEOut>(Attributes));
             break;
           case Task::TASKBAYESFINDER:
             if(Attributes.TaskConfig.Task_BayesFinder)

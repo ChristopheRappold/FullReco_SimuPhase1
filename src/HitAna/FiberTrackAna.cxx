@@ -399,7 +399,6 @@ void FiberTrackAna::SetTime(){
 
 }
 
-/* CHECK: take care of parameters
 void FiberTrackAna::CorrectMFT(ParaManager *par){
 
   for(auto v: _cont_xuv){
@@ -463,9 +462,7 @@ void FiberTrackAna::CorrectMFT(ParaManager *par){
   SetResidual();
 
 }
-*/
 
-/* CHECK: take care of parameters
 void FiberTrackAna::CorrectMFTCombi(ParaManager *par){
 
   for(auto v: _cont_hit){
@@ -512,7 +509,6 @@ void FiberTrackAna::CorrectMFTCombi(ParaManager *par){
   Tracking(_cont_hit, par);
 
 }
-*/
 
 void FiberTrackAna::SetPosL(){
 

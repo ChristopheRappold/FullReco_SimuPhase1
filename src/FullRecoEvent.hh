@@ -33,7 +33,7 @@
 #include "HitAna/FiberHitXUV.hh"
 #include "HitAna/MWDCTracking.hh"
 #include "HitAna/FiberTrackAna.hh"
-//#include "HitAna/FiberTrackAna.hh"
+#include "HitAna/FiberHitAna.hh"
 
 #include <cassert>
 
@@ -798,6 +798,8 @@ public:
   int FragmentPID;
 
   std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
+  std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitClCont;
+
 /*
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
   

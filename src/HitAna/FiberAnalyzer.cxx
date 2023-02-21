@@ -39,27 +39,59 @@ std::vector< std::vector< std::vector< FiberHitAna* > > > FiberAnalyzer::Cluster
       if(buf_cont[i][j].size()<2) continue;
       std::set<int> flag_used;
       //std::cout << "\nsize before : " << buf_cont[i][j].size() << std::endl;
-      for(size_t k=0; k<buf_cont[i][j].size(); ++k){
-        if(flag_used.size()>0 && flag_used.find(k)!=flag_used.end()) continue;
-        double pos_cluster = buf_cont[i][j][k]->GetPos();
-        double edge_left  = pos_cluster;
-        double edge_right = pos_cluster;
-        for(size_t l = k+1; l < buf_cont[i][j].size(); ++l){
-          if(flag_used.size()>0 && flag_used.find(l)!=flag_used.end()) continue;
-          if(((buf_cont[i][j][k]->GetPos()-buf_cont[i][j][l]->GetPos())>0.) && fabs(edge_left - buf_cont[i][j][l]->GetPos())<1.1){
-            buf_cont[i][j][k]->Add(buf_cont[i][j][l]);
-            flag_used.insert(l);
-            edge_left = buf_cont[i][j][l]->GetPos();
-            l=k;
-          }
-          else if(((buf_cont[i][j][l]->GetPos()-buf_cont[i][j][k]->GetPos())>0.) && fabs(buf_cont[i][j][l]->GetPos()-edge_right)<1.1){
-            buf_cont[i][j][k]->Add(buf_cont[i][j][l]);
-            flag_used.insert(l);
-            edge_right = buf_cont[i][j][l]->GetPos();
-            l=k;
-          }
-        } // for l
-      } // for k
+      for(size_t k=0; k<buf_cont[i][j].size(); ++k)
+        {
+          if(flag_used.size()>0 && flag_used.find(k)!=flag_used.end()) continue;
+          double pos_cluster = buf_cont[i][j][k]->GetPos();
+          double edge_left  = pos_cluster;
+          double edge_right = pos_cluster;
+          for(size_t l = k+1; l < buf_cont[i][j].size(); ++l)
+            {
+
+              //printf("%d %d %.8f\n" , i, j, fabs(buf_cont[i][j][k]->GetPos()-buf_cont[i][j][l]->GetPos()));
+
+              if(flag_used.size()>0 && flag_used.find(l)!=flag_used.end()) continue;
+
+              if( (buf_cont[i][j][l]->GetPos()>=edge_left &&  buf_cont[i][j][l]->GetPos()<=edge_right)
+                || fabs(edge_left - buf_cont[i][j][l]->GetPos())<1.1 || fabs(edge_left - buf_cont[i][j][l]->GetPos())-1.1 <1e-4
+                || fabs(edge_right - buf_cont[i][j][l]->GetPos())<1.1 || fabs(edge_right - buf_cont[i][j][l]->GetPos())-1.1 <1e-4)
+                {
+                                //printf("%d %d %.8f %.8f\n" , i, j, fabs(edge_right-buf_cont[i][j][k]->GetPos()), fabs(edge_right-buf_cont[i][j][l]->GetPos()));
+                                //printf("%d %d %.8f %.8f\n" , i, j, fabs(edge_left-buf_cont[i][j][l]->GetPos()), fabs(edge_right-buf_cont[i][j][l]->GetPos()));
+
+                  buf_cont[i][j][k]->Add(buf_cont[i][j][l]);
+                  flag_used.insert(l);
+                  if(edge_left >= buf_cont[i][j][l]->GetPos()) edge_left = buf_cont[i][j][l]->GetPos();
+                  if(edge_right <= buf_cont[i][j][l]->GetPos()) edge_right = buf_cont[i][j][l]->GetPos();
+                  l=k;
+                }
+
+              /*
+              if(((((buf_cont[i][j][k]->GetPos()-buf_cont[i][j][l]->GetPos())>0.) || fabs(buf_cont[i][j][k]->GetPos()-buf_cont[i][j][l]->GetPos())<1e-4))
+                && fabs(edge_left - buf_cont[i][j][l]->GetPos())<=1.1)
+                {
+                  
+                printf("%d %d %.8f\n" , i, j, fabs(edge_left - buf_cont[i][j][l]->GetPos()));
+
+                  buf_cont[i][j][k]->Add(buf_cont[i][j][l]);
+                  flag_used.insert(l);
+                  if(edge_left >= buf_cont[i][j][l]->GetPos()) edge_left = buf_cont[i][j][l]->GetPos();
+                  l=k;
+                }
+              else if(((((buf_cont[i][j][l]->GetPos()-buf_cont[i][j][k]->GetPos())>0.) || fabs(buf_cont[i][j][k]->GetPos()-buf_cont[i][j][l]->GetPos())<1e-4))
+                && fabs(buf_cont[i][j][l]->GetPos()-edge_right)<=1.1)
+                {
+                  buf_cont[i][j][k]->Add(buf_cont[i][j][l]);
+                  flag_used.insert(l);
+                  if(edge_right <= buf_cont[i][j][l]->GetPos()) edge_right = buf_cont[i][j][l]->GetPos();
+                                        printf("%d %d %.8f\n" , i, j, fabs(edge_right - buf_cont[i][j][l]->GetPos()));
+
+                  l=k;
+
+                }
+                */
+            } // for l
+        } // for k
 
       for(int k=(int)buf_cont[i][j].size()-1; k>=0; --k){
         if(flag_used.size()>0 && flag_used.find(k)!=flag_used.end()){
@@ -291,6 +323,243 @@ std::vector< FiberTrackAna* > FiberAnalyzer::DeleteDupCombi( std::vector< FiberT
 }
 
 
+std::vector< FiberTrackAna* > FiberAnalyzer::DeleteSame( std::vector< FiberTrackAna* > &cont){
+
+  std::vector< FiberTrackAna* > buf_cont;
+  std::sort(cont.begin(), cont.end(), [](auto const& a, auto const& b) { return a->IsFlagXUV() > b->IsFlagXUV(); });
+  for(int i=0; i<(int)cont.size(); ++i){
+    bool flag = true;
+    bool flag_same = false;
+    for(int j=(int)cont.size()-1; j>i; --j){
+      if( cont[i]->GetNlayer()==6 && cont[j]->GetNlayer()==6 && cont[i]->IsFlagXUV()!=cont[j]->IsFlagXUV() ){
+        flag_same = true;
+        for(int k=0; k<6; ++k){
+          if(cont[i]->GetHit(k)->GetFib() != cont[j]->GetHit(k)->GetFib()) flag_same = false;
+        }
+        if(flag_same){
+          flag = cont[i]->IsFlagXUV();
+          if(flag){
+            delete cont[j];
+            cont.erase(cont.begin() + j);
+          }
+          else break;
+        }
+      }
+    }
+    if(!flag_same) buf_cont.emplace_back(cont[i]);
+    else if(flag){
+      buf_cont.emplace_back(cont[i]);
+    }
+    else delete cont[i];
+  }
+
+  for(int i=0; i<(int)buf_cont.size(); ++i){
+    bool flag_same = false;
+    for(int j=(int)buf_cont.size()-1; j>i; --j){
+      if( (buf_cont[i]->GetNlayer()==4 && buf_cont[j]->GetNlayer()==4) || (buf_cont[i]->GetNlayer()==5 && buf_cont[j]->GetNlayer()==5) ){
+        flag_same = true;
+        for(int k=0; k<buf_cont[i]->GetNlayer(); ++k){
+          if(buf_cont[i]->GetHit(k)->GetDid() != buf_cont[j]->GetHit(k)->GetDid()) flag_same = false;
+          if(buf_cont[i]->GetHit(k)->GetFib() != buf_cont[j]->GetHit(k)->GetFib()) flag_same = false;
+        }
+        if(flag_same){
+          delete buf_cont[j];
+          buf_cont.erase(buf_cont.begin() + j);
+        }
+      }
+    }
+  }
+
+  return buf_cont;
+
+}
+
+
+std::vector< FiberTrackAna* > FiberAnalyzer::DeleteInclusive( std::vector< FiberTrackAna* > &cont){
+
+  std::vector< FiberTrackAna* > buf_cont;
+  std::sort(cont.begin(), cont.end(), [](auto const& a, auto const& b) { return a->GetNlayer() > b->GetNlayer(); });
+
+  for(int i=0; i<(int)cont.size(); ++i){
+    bool flag = false;
+    for(int j=(int)cont.size()-1; j>i; --j){
+      if( cont[i]->GetNlayer() >  cont[j]->GetNlayer() ){
+        if(cont[i]->IsInclusive(cont[j])){
+          delete cont[j];
+          cont.erase(cont.begin() + j);
+        }
+
+      }
+      else if( cont[i]->GetNlayer() <  cont[j]->GetNlayer() ){
+        if(cont[j]->IsInclusive(cont[i])){
+          flag = true;
+          break;
+        }
+      }
+    }
+    if(flag){
+      delete cont[i];
+      cont.erase(cont.begin() + i);
+      i--;
+    }
+    else buf_cont.emplace_back(cont[i]);
+
+  }
+
+  return buf_cont;
+
+}
+
+
+std::vector< TrackHit* > FiberAnalyzer::DeleteInclusiveTrackHit( std::vector< TrackHit* > &cont){
+
+  std::vector< TrackHit* > buf_cont;
+  std::sort(cont.begin(), cont.end(), [](auto const& a, auto const& b) { return a->GetNum() > b->GetNum(); });
+
+  for(int i=0; i<(int)cont.size(); ++i){
+    bool flag = false;
+    for(int j=(int)cont.size()-1; j>i; --j){
+      if( cont[i]->GetNum() >  cont[j]->GetNum() ){
+        if(cont[i]->IsInclusive(cont[j])){
+          delete cont[j];
+          cont.erase(cont.begin() + j);
+        }
+
+      }
+      else if( cont[i]->GetNum() <  cont[j]->GetNum() ){
+        if(cont[j]->IsInclusive(cont[i])){
+          flag = true;
+          break;
+        }
+      }
+    }
+    if(flag){
+      delete cont[i];
+      cont.erase(cont.begin() + i);
+      i--;
+    }
+    else buf_cont.emplace_back(cont[i]);
+
+  }
+
+  return buf_cont;
+
+}
+
+std::vector< TrackHit* > FiberAnalyzer::DeleteDupTrackHit( std::vector< TrackHit* > &cont){
+
+  std::vector< TrackHit* >  buf_cont;
+  if(cont.size()==0) return buf_cont;
+  int num_cont = cont.size();
+
+  //std::sort(cont.begin(), cont.end(), [](auto const& a, auto const& b) {
+  //    return a->GetNumMDC() != b->GetNumMDC() ? a->GetNumMDC() > b->GetNumMDC() :
+  //    (a->GetNumFiber() != b->GetNumFiber() ? a->GetNumFiber() > b->GetNumFiber() :
+  //     (a->GetTrack()->GetChi2() == b->GetTrack()->GetChi2() ? a->GetTrack()->IsFlagXUV() > b->GetTrack()->IsFlagXUV() :
+  //     a->GetTrack()->GetChi2() < b->GetTrack()->GetChi2() ) )
+  //    ;});
+  std::sort(cont.begin(), cont.end(), [](auto const& a, auto const& b) {
+      return a->GetNumFiber() != b->GetNumFiber() ? a->GetNumFiber() > b->GetNumFiber() :
+      (a->GetNumMDC() != b->GetNumMDC() ? a->GetNumMDC() > b->GetNumMDC() :
+       a->GetChi2NDF() < b->GetChi2NDF()) ;});
+
+  std::map< int, std::set<int> > used_hit_fib;
+  std::map< int, std::set<int> > used_hit_mdc;
+
+  for(int i=0; i<num_cont; ++i){
+    TrackHit *track_hit =cont[i];
+    std::vector<int> _fiberhit = track_hit->GetFiberHit();
+    std::vector<int> _mdchit_bestdif = track_hit->GetMDCHit();
+    bool flag = true;
+
+    for(size_t i=0;i<6;++i)
+    {
+      if(_fiberhit[i]==-1) continue;
+      int fib = _fiberhit[i];
+      int did = i;
+      if(used_hit_fib[did].size()>0 && used_hit_fib[did].find(fib)!=used_hit_fib[did].end()) flag = false;
+    }
+    for(size_t i=0;i<17;++i)
+    {
+      if(_mdchit_bestdif[i]==-1) continue;
+      int wir = _mdchit_bestdif[i];
+      int did = i;
+      if(used_hit_mdc[did].size()>0 && used_hit_mdc[did].find(wir)!=used_hit_mdc[did].end()) flag = false;
+    }
+
+    if(flag){
+      buf_cont.emplace_back(cont[i]);
+      for(size_t i=0;i<6;++i)
+      {
+        if(_fiberhit[i]==-1) continue;
+        int fib = _fiberhit[i];
+        int did = i;
+        used_hit_fib[did].insert(fib);
+      }
+      for(size_t i=0;i<17;++i)
+      {
+        if(_mdchit_bestdif[i]==-1) continue;
+        int wir = _mdchit_bestdif[i];
+        int did = i;
+        used_hit_mdc[did].insert(wir);
+      }
+
+    }
+    else delete cont[i];
+  }
+
+  return buf_cont;
+
+}
+
+
+std::vector< TrackHit* > FiberAnalyzer::DeleteDupTrackHitMDC( std::vector< TrackHit* > &cont){
+
+  std::vector< TrackHit* >  buf_cont;
+  if(cont.size()==0) return buf_cont;
+
+  int num_cont = cont.size();
+
+  std::sort(cont.begin(), cont.end(), [](auto const& a, auto const& b) {
+      return a->GetNumMDC() != b->GetNumMDC() ? a->GetNumMDC() > b->GetNumMDC() :
+      (a->GetNumFiber() != b->GetNumFiber() ? a->GetNumFiber() > b->GetNumFiber() :
+       a->GetChi2NDF() < b->GetChi2NDF() )
+      ;});
+
+  std::map< int, std::set<int> > used_hit_mdc;
+
+  for(int i=0; i<num_cont; ++i){
+    TrackHit *track_hit =cont[i];
+    std::vector<int> _mdchit_bestdif = track_hit->GetMDCHit();
+    bool flag = true;
+
+
+    for(size_t i=0;i<17;++i)
+    {
+      if(_mdchit_bestdif[i]==-1) continue;
+      int wir = _mdchit_bestdif[i];
+      int did = i;
+      if(used_hit_mdc[did].size()>0 && used_hit_mdc[did].find(wir)!=used_hit_mdc[did].end()) flag = false;
+    }
+
+    if(flag){
+      buf_cont.emplace_back(cont[i]);
+      for(size_t i=0;i<17;++i)
+      {
+        if(_mdchit_bestdif[i]==-1) continue;
+        int wir = _mdchit_bestdif[i];
+        int did = i;
+        used_hit_mdc[did].insert(wir);
+      }
+    }
+    else delete cont[i];
+  }
+
+  return buf_cont;
+
+}
+
+
 std::vector< FiberHitXUV* > FiberAnalyzer::DeleteDupXUV( std::vector< FiberHitXUV* > &cont){
 
   std::vector< FiberHitXUV* > buf_cont;
@@ -345,4 +614,19 @@ TVector3 FiberAnalyzer::GetVertexPoint( const TVector3 & Xin, const TVector3 & X
   dist=sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
 
   return TVector3( 0.5*(x1+x2), 0.5*(y1+y2), z);
+}
+
+
+double FiberAnalyzer::CalcPhiDif(const double phi1, const double phi2){
+
+  double diff = phi1 - phi2;
+  while( diff >  TMath::Pi() ){
+    diff -= 2*TMath::Pi();
+  }
+  while( diff < -TMath::Pi() ){
+    diff += 2*TMath::Pi();
+  }
+
+  return diff;
+
 }

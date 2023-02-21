@@ -79,6 +79,7 @@ struct Task
   bool Task_CheckFiberXUV = false;
   bool Task_CheckFiberTrack = false;
   bool Task_FragmentFinder = false;
+  bool Task_WASAFinder = false;
   bool Task_BayesFinder = false;
   bool Task_RiemannFinder = false;
   bool Task_FinderCM = false;
@@ -88,11 +89,11 @@ struct Task
   bool Task_DecayVtx = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
+    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
     TASKKALMANDAF, TASKDECAYVTX, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -148,6 +149,7 @@ struct RunTaskDef
   bool Task_CheckFiberXUV;
   bool Task_CheckFiberTrack;
   bool Task_FragmentFinder;
+  bool Task_WASAFinder;
   bool Task_BayesFinder;
   bool Task_RiemannFinder;
   bool Task_FinderCM;
@@ -269,6 +271,7 @@ inline auto InitStorage()
          make_column("Task_PrimaryVtx_Si", &RunTaskDef::Task_PrimaryVtx_Si),
 				 make_column("Task_FlatMCOutputML", &RunTaskDef::Task_FlatMCOutputML),
          make_column("Task_FragmentFinder", &RunTaskDef::Task_FragmentFinder),
+         make_column("Task_WASAFinder", &RunTaskDef::Task_WASAFinder),
          make_column("Task_BayesFinder", &RunTaskDef::Task_BayesFinder),
 				 make_column("Task_RiemannFinder", &RunTaskDef::Task_RiemannFinder),
 				 make_column("Task_FinderCM", &RunTaskDef::Task_FinderCM),
@@ -352,6 +355,19 @@ class THyphiAttributes
   std::string fiber_name_mftcor;
   std::array<std::array<std::array<std::array<double, 3>, 2>, 3>, 2> fiber_mft_cor_par;
 
+  //PSB
+  double psb_pos_x;
+  double psb_pos_y;
+  double psb_pos_z;
+  double psb_rot_z;
+  double cut_psb_phi;
+  double cut_psb_z;
+  double cut_phi_fm;
+
+  bool flag_dup_trackhit;
+  bool flag_dup_trackhit_mdc;
+  bool flag_trackhit_inclusive;
+  
   int Nb_CPU;
   int Nb_Fraction;
   int NEvent;

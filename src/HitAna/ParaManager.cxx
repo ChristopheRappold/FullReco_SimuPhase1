@@ -13,7 +13,15 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   flag_dft12_cut = true;
   flag_dft12_combi = true;
   flag_dup_xuv_mft12    = false;
+  flag_dup_mft12_combi = false;
+  flag_mft12_inclusive = true;
   flag_dup_xuv_uft3     = true;
+  flag_mft12_allcombi = false;
+  flag_mft12_posang = true;
+  flag_mft12_combi = true;
+  flag_mft12_pair = true;
+  flag_mft12_xuv_psb = false;
+  flag_dup_mft12_xuv = false;
 
   //  Trig  //////
   trig_main  = false;
@@ -24,10 +32,11 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   //  Cut  //////
   cut_chi2_gf = 50;
   cut_chi2_dft12 = 10.;
+  cut_chi2_mft12 = 10.;
   cut_phi_fm  = 0.3;
   cut_num_mdc = 3;
-  cut_psb_phi = 0.6;
-  cut_psb_z   = 120;
+  cut_psb_phi = 0.4;
+  cut_psb_z   = 150;
   cut_psfe_phi = 0.6;
   cut_psbe_phi = 0.6;
   cut_mft12_combi = 1e5;
@@ -252,6 +261,57 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   fiber_mft2_off_ang_x1 = fiber_angle_offset[4][0][0];  fiber_mft2_off_ang_x2 = fiber_angle_offset[4][0][1];
   fiber_mft2_off_ang_v1 = fiber_angle_offset[4][1][0];  fiber_mft2_off_ang_v2 = fiber_angle_offset[4][1][1];
   fiber_mft2_off_ang_u1 = fiber_angle_offset[4][2][0];  fiber_mft2_off_ang_u2 = fiber_angle_offset[4][2][1];
+
+
+
+  itr_ParamFiles = ParamFiles.find("fiber_mftcor_file");
+  if(itr_ParamFiles != ParamFiles.end())
+    fiber_name_mftcor  = itr_ParamFiles->second;
+
+
+  for(int i=0; i<2; ++i)
+    for(int j=0; j<3; ++j)
+      for(int k=0; k<2; ++k)
+        for(int l=0; l<3; ++l)
+          fiber_mft_cor_par[i][j][k][l] = 0.;
+
+  std::ifstream ifs_mftcorfiber ( fiber_name_mftcor );
+  if(ifs_mftcorfiber.is_open())
+  {
+    const std::string CommentSymbol("#");
+
+    std::string temp_line;
+    while(std::getline(ifs_mftcorfiber,temp_line))
+    {
+      std::stringstream stream(temp_line);
+      std::string testComment(stream.str());
+      std::size_t it_comment = testComment.find(CommentSymbol);
+      if(it_comment!=std::string::npos)
+      {
+        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
+        continue;
+      }
+
+      int det, lay, seg;
+      double p0, p1, p2;
+
+      stream >> det >> lay >> seg >> p0 >> p1 >> p2;
+      //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+
+      fiber_mft_cor_par[det][lay][seg][0] = p0;
+      fiber_mft_cor_par[det][lay][seg][1] = p1;
+      fiber_mft_cor_par[det][lay][seg][2] = p2;
+    }
+    //std::cout << "done " << mdc_name_map << std::endl;
+    printf("fiber mft cor loaded : %s\n", fiber_name_mftcor.c_str());
+  }
+  else
+  {
+    //std::cout << " ! fail to open " << mdc_name_map << std::endl;
+    printf(" ! fail to open  : %s\n", fiber_name_mftcor.c_str());
+    exit(-1);
+  }
+
 
   fiber_res = 0.2;
 

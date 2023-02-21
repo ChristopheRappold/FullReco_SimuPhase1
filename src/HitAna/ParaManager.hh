@@ -66,7 +66,15 @@ class ParaManager
   bool flag_dft12_cut;
   bool flag_dft12_combi;
   bool flag_dup_xuv_mft12;
+  bool flag_dup_mft12_combi;
+  bool flag_mft12_inclusive;
   bool flag_dup_xuv_uft3;
+  bool flag_mft12_allcombi;
+  bool flag_mft12_posang;
+  bool flag_mft12_combi;
+  bool flag_mft12_pair;
+  bool flag_mft12_xuv_psb;
+  bool flag_dup_mft12_xuv;
 
   //  Trig  //////
   bool trig_main;
@@ -161,6 +169,8 @@ class ParaManager
   std::array<std::array<std::array<double, 384>, 3>, 7> fiber_time_offset;
   std::string fiber_name_angleoffset;
   std::array<std::array<std::array<double, 2>, 3>, 7> fiber_angle_offset;
+  std::string fiber_name_mftcor;
+  std::array<std::array<std::array<std::array<double, 3>, 2>, 3>, 2> fiber_mft_cor_par;
 
   double fiber_mft1_off_ang_x1; double fiber_mft1_off_ang_u1; double fiber_mft1_off_ang_v1;
   double fiber_mft1_off_ang_x2; double fiber_mft1_off_ang_u2; double fiber_mft1_off_ang_v2;
