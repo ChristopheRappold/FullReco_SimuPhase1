@@ -37,15 +37,15 @@ private:
 
   int FinderDecayVertex(FullRecoEvent& RecoEvent);
 
-  void StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg);
+  void StudyCaseSelector_Hyp(std::string StudyCase, int& Hyp_pdg);
 
   void RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                          int& pdgParticle, int& cutConditions,
                          std::vector<KFParticle>& RealTracks,
                          std::vector<KFFitInfo>& Vect_FitInfo);
 
-  void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
-                                std::vector<KFParticle>& FragmentMDCTracks);
+//  void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
+//                                std::vector<KFParticle>& FragmentMDCTracks);
 
   void FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks);
 
@@ -79,7 +79,7 @@ private:
   void MotherSelector(std::vector<KFParticle>& MotherTracks_All, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks_All,
                       std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks, TVector3& PrimVtxRecons,
                       std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks);
-
+/*
   void SiHitsFinder(KFParticle& Track, std::vector<std::vector<double> >& Hits_Si, std::vector<std::vector<double> >& Track_Sihit);
 
   void MotherDaughtersTrack_SiHits(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
@@ -99,14 +99,12 @@ private:
                     std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>>& Fragment_SiHits,
                     std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>>& Pion_SiHits,
                     std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>>& Mother_SiHits);
-
+*/
   void AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& AllTracks, TVector3& Old_DecayVertexRecons, TVector3& DecayVertexRecons);
 
   void AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& AllTracks, TVector3& DecayVertexRecons);
 
-  void TranslationZ_Target_System(double Target_PosZ);
-
-
+/*
   //Silicon details (copy from TPrimaryVertex.h)
 
   double Z_plane_Si1x   = 27.4; // in cm
@@ -137,15 +135,16 @@ private:
   double actlenghtY;
   double sigma;
   int nStrips;
+*/
 
-  double Zo_target = 24.; // in cm
-  double Zf_target = 26.; // in cm
-  double Zo_minifibers = 47.5; // in cm
+  double Zo_target; // in cm
+  double Zf_target; // in cm
+  double Zo_minifibers; // in cm
 
 
-  double Dist_to_Target = 0.5; // in cm
-  double Dist_to_Silicons = 0.5; // in cm
-  double Dist_to_Minifibers = 0.5; // in cm
+//  double Dist_to_Target = 0.5; // in cm
+//  double Dist_to_Silicons = 0.5; // in cm
+//  double Dist_to_Minifibers = 0.5; // in cm
 
   double k_factor       = 3.; // multiplies the fragment track f function value
 
@@ -163,8 +162,6 @@ private:
   
   PDG_fromName pid_fromName;
 
-  int Fragment_pdg;
-
   int He3_pdg = pid_fromName("He3");
   int He4_pdg = pid_fromName("alpha");
   int deuteron_pdg = pid_fromName("deuteron");
@@ -174,6 +171,7 @@ private:
 
   int H3L_pdg = 20001;
   int H4L_pdg = 20002;
+  int nnL_pdg = 0; //CHECK Change!
 
   int Hyp_pdg;
   int Hyp_charge;
@@ -195,7 +193,7 @@ private:
   bool ifOnlyRealFragment = false;
 
   //Cut conditions on reconstructed fragments
-  bool ifCut_MaxChi2ndf_FragmentTracks = true;
+  bool ifCut_MaxChi2ndf_FragmentTracks = false;
   double MaxChi2ndf_FragmentTracks = 3.; //Change !
 
   bool ifCut_MinDist_FragmentTracksPrimVtx = false;
@@ -211,7 +209,7 @@ private:
 
   //Cut conditions on reconstructed pions
   bool ifCut_MaxChi2ndf_PionTracks = true;
-  double MaxChi2ndf_PionTracks = 3.; //Change !
+  double MaxChi2ndf_PionTracks = 50.; //Change !
 
   bool ifCut_MinDist_PionTracksPrimVtx = false;
   double MinDist_PionTracksPrimVtx = 0.05; //Change !
@@ -252,14 +250,14 @@ private:
 
   bool ifCut_ArmenterosPodolanski = false;
 
-
+/*
   //Cut conditions on silicons hits from reconstructed tracks
   bool ifCut_MaxDist_SiHit = true;
   double MaxDist_SiHit = 0.05; //Change !
 
   bool ifCut_MinEnergyDeposition_SiHit = true;
   double MinEnergyDeposition_SiHit = 0.1; //Change !
-
+*/
 
 
   struct LocalHists
@@ -379,9 +377,9 @@ private:
 
     TH2F* h_EffPosZPosR_real;
     TH2F* h_EffPosZPosR_postKFPart;
-
-    TH2F* h_N_SiHits_ReconsTracks;
 /*
+    TH2F* h_N_SiHits_ReconsTracks;
+
     TH1F* h_N_Si_MotherTracks;
 
 

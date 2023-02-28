@@ -122,7 +122,7 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
                 std::make_tuple( 0.0001,  0.00985,       0.,       0.)}; // DFT2
 
   std::vector<int> id_detector = {G4Sol::FiberD1_x, G4Sol::FiberD2_x, G4Sol::FiberD3_x,
-                                          G4Sol::MiniFiberD1_x1, G4Sol::MiniFiberD1_x2,
+                                            G4Sol::MiniFiberD1_x, G4Sol::MiniFiberD2_x,
                                                     G4Sol::FiberD4_x, G4Sol::FiberD5_x};
 
   double ang[7][3] = {

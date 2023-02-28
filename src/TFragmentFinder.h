@@ -47,11 +47,25 @@ private:
 
   int FinderFragment(FullRecoEvent& RecoEvent);
 
+  void StudyCaseSelector_Fr(std::string StudyCase, int& Fragment_pdg);
 
+  void RealFragmentFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
+                         int& fragment_pdg, std::vector<FragmentTrack>& RealFragmentTracks);
 
+  void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
+                                std::vector<FragmentTrack>& FragmentMDCTracks);
 
+  PDG_fromName pid_fromName;
 
+  int Fragment_pdg;
 
+  int He3_pdg = pid_fromName("He3");
+  int He4_pdg = pid_fromName("alpha");
+  int deuteron_pdg = pid_fromName("deuteron");
+  int proton_pdg = pid_fromName("proton");
+
+  //Methods for reconstructed fragments
+  int recons_from_FRS_MDC = -1; // 1-> FRS, 2-> MDC
 
   struct LocalHists
   {

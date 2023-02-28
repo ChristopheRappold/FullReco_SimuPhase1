@@ -117,7 +117,7 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
       bool id_FirstFiberU = it_ListHitsSim->second[G4Sol::FiberD3_u].size() > 0 ;
       bool id_FirstFiberV = it_ListHitsSim->second[G4Sol::FiberD3_v].size() > 0 ;
 
-      std::list<int> id_dets = {G4Sol::MiniFiberD1_x1,  G4Sol::MiniFiberD1_u1,  G4Sol::MiniFiberD1_v1,  G4Sol::MiniFiberD1_x2,  G4Sol::MiniFiberD1_u2,  G4Sol::MiniFiberD1_v2, G4Sol::PSFE, G4Sol::PSCE, G4Sol::PSBE};
+      std::list<int> id_dets = {G4Sol::MiniFiberD1_x,  G4Sol::MiniFiberD1_u,  G4Sol::MiniFiberD1_v,  G4Sol::MiniFiberD2_x,  G4Sol::MiniFiberD2_u,  G4Sol::MiniFiberD2_v, G4Sol::PSFE, G4Sol::PSCE, G4Sol::PSBE};
       
       int id_FirstFiber = -1;
       if(id_FirstFiberX)
@@ -189,8 +189,8 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 	      TString nameT(G4Sol::nameLiteralDet.begin()[id_det]);
 	      //att._logger->debug("    -> hitZ: {}, hit xy {},{} : Exp xy {},{}", it_ListHitsSim->second[id_det][0].hitZ, it_ListHitsSim->second[id_det][0].hitX, it_ListHitsSim->second[id_det][0].hitY, hitExp[0], hitExp[1]);
 
-	      const TString nameTemp[] = {"FiberD3_u","FiberD3_v","MiniFiberD1_x1","MiniFiberD1_u1","MiniFiberD1_v1",
-					  "MiniFiberD1_x2","MiniFiberD1_u2","MiniFiberD1_v2","PSCE","PSFE","PSCE","PSBE"};
+	      const TString nameTemp[] = {"FiberD3_u","FiberD3_v","MiniFiberD1_x","MiniFiberD1_u","MiniFiberD1_v",
+					  "MiniFiberD2_x","MiniFiberD2_u","MiniFiberD2_v","PSCE","PSFE","PSCE","PSBE"};
 
 	      int temp_i = 0;
 	      for(int i=0;i<11;++i)

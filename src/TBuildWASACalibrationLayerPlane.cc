@@ -29,12 +29,11 @@ TBuildWASACalibrationLayerPlane::TBuildWASACalibrationLayerPlane(const THyphiAtt
     {
       std::string tempName(listNodes->At(i)->GetName());
       if(tempName == "MD17_1")
-	index_lastMDC = i;
+        index_lastMDC = i;
       if(tempName == "PSCE_1")
-	index_firstPSCE = i;
+        index_firstPSCE = i;
     }
   offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC + 17 -1;
-
 }
 
 TBuildWASACalibrationLayerPlane::~TBuildWASACalibrationLayerPlane() {}
@@ -82,6 +81,7 @@ void TBuildWASACalibrationLayerPlane::SelectHists()
           LocalHisto.hfiber_13_2[i][j] = AnaHisto->CloneAndRegister(AnaHisto->hfiber_13_2[i][j]);
           LocalHisto.hfiber_13_3[i][j] = AnaHisto->CloneAndRegister(AnaHisto->hfiber_13_3[i][j]);
           LocalHisto.hfiber_13_4[i][j] = AnaHisto->CloneAndRegister(AnaHisto->hfiber_13_4[i][j]);
+          LocalHisto.h75[i][j]         = AnaHisto->CloneAndRegister(AnaHisto->h75[i][j]);
         }
       LocalHisto.h16[i]   = AnaHisto->CloneAndRegister(AnaHisto->h16[i]);
       LocalHisto.h17[i]   = AnaHisto->CloneAndRegister(AnaHisto->h17[i]);
@@ -161,6 +161,7 @@ void TBuildWASACalibrationLayerPlane::SelectHists()
       LocalHisto.hpsb_3[i] = AnaHisto->CloneAndRegister(AnaHisto->hpsb_3[i]);
       LocalHisto.hpsb_4[i] = AnaHisto->CloneAndRegister(AnaHisto->hpsb_4[i]);
     }
+  LocalHisto.h76 = AnaHisto->CloneAndRegister(AnaHisto->h76);
 
   LocalHisto.hpsfe_0_1 = AnaHisto->CloneAndRegister(AnaHisto->hpsfe_0_1);
   LocalHisto.hpsfe_0_2 = AnaHisto->CloneAndRegister(AnaHisto->hpsfe_0_2);
@@ -305,7 +306,11 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.ListHitsInfo.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
 
+  RecoEvent.InteractionPoint[0] = 0.;
+  RecoEvent.InteractionPoint[1] = 0.;
+  RecoEvent.InteractionPoint[2] = att.Target_PositionZ;
 
+  RecoEvent.PrimVtxRecons.SetXYZ(0., 0., att.Target_PositionZ);
 
   // Trigger //////////////////
   bool trig[16];
@@ -450,7 +455,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     {
       int hitID      = hit_PSB->GetSeg();
       TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")->GetNode(offsetGeoNameID_PSCE + hitID)->GetMatrix(); // PSCE
-      TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();           // INNNER
+      TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();           // INNER
       TGeoMatrix* g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();           // MFLD
       TGeoHMatrix H1(*g1), H2(*g2), H3(*g3);
       TGeoHMatrix H = H2 * H1;
@@ -484,6 +489,8 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
 
       MeasurementInfo measinfo(-9999., hit_PSB->GetTime(), -9999.); //CHECK include dE
       RecoEvent.ListHitsInfo[G4Sol::PSCE].emplace_back(measinfo);
+
+      LocalHisto.h76->Fill(hitID, atan2(shift[1], shift[0]));
     }
 
   for(int i = 0; i < (int)PSBHitCont.size(); ++i)
@@ -843,143 +850,9 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     }
   }
 
-
-
-  RecoEvent.FiberHitClCont = FiberHitClCont;
-
-  int TypeDet[7][3] = {{G4Sol::FiberD1_x, G4Sol::FiberD1_u, G4Sol::FiberD1_v},
-                       {G4Sol::FiberD2_x, G4Sol::FiberD2_u, G4Sol::FiberD2_v},
-                       {G4Sol::FiberD3_x, G4Sol::FiberD3_u, G4Sol::FiberD3_v},
-                       {G4Sol::MiniFiberD1_x1, G4Sol::MiniFiberD1_u1, G4Sol::MiniFiberD1_v1},
-                       {G4Sol::MiniFiberD1_x2, G4Sol::MiniFiberD1_u2, G4Sol::MiniFiberD1_v2},
-                       {G4Sol::FiberD4_x, G4Sol::FiberD4_u, G4Sol::FiberD4_v},
-                       {G4Sol::FiberD5_x, G4Sol::FiberD5_u, G4Sol::FiberD5_v}};
-
-  std::string nameVolDet[7][3] = {{"FiberD1_log_x", "FiberD1_log_u", "FiberD1_log_v"},
-                                  {"FiberD2_log_x", "FiberD2_log_u", "FiberD2_log_v"},
-                                  {"FiberD3_log_x", "FiberD3_log_u", "FiberD3_log_v"},
-                                  {"MiniFiberD1_log_x1", "MiniFiberD1_log_u1", "MiniFiberD1_log_v1"},
-                                  {"MiniFiberD1_log_x2", "MiniFiberD1_log_u2", "MiniFiberD1_log_v2"},
-                                  {"FiberD4_log_x", "FiberD4_log_u", "FiberD4_log_v"},
-                                  {"FiberD5_log_x", "FiberD5_log_u", "FiberD5_log_v"}};
-
-  std::string nameMotherDet[7] = {"FiberD1_log_0",     "FiberD2_log_0", "FiberD3_log_0", "MiniFiberD1_log_0",
-                                  "MiniFiberD2_log_0", "FiberD4_log_0", "FiberD5_log_0"};
-
-  for(int i = 0; i < 7; ++i)
-    {
-      for(int j = 0; j < 3; ++j)
-        {
-          // std::cout << "\nsize before : " << FiberHitCont[i][j].size() << std::endl;
-          // std::cout << "size after  : " << FiberHitClCont[i][j].size() << std::endl;
-          for(int k = 0; k < (int)FiberHitClCont[i][j].size(); ++k)
-            {
-              // FiberHitClCont[i][j][k]->Print();
-              std::string volumeName = nameVolDet[i][j];
-              std::string motherName = nameMotherDet[i];
-
-              int hitID = FiberHitClCont[i][j][k]->GetClFib(); // CHECK
-
-              TGeoMatrix* g1 =
-                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(hitID * 2 + 1)->GetMatrix(); // fiber core
-              TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
-                                   ->GetNode(motherName.c_str())
-                                   ->GetVolume()
-                                   ->GetNode((volumeName + "_0").c_str())
-                                   ->GetMatrix(); // fiber layer
-              TGeoMatrix* g3 =
-                  gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // fiber station
-              TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();     // MFLD
-              TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
-              TGeoHMatrix H = H2 * H1;
-              H             = H3 * H;
-              H             = H4 * H;
-              TGeoHMatrix w1("w1");
-              TGeoHMatrix w2("w2");
-              w1.SetDz(-10);
-              w2.SetDz(10);
-              TGeoHMatrix Hw1 = H * w1;
-              TGeoHMatrix Hw2 = H * w2;
-#ifdef DEBUG_BUILD2
-              H.Print();
-              Hw1.Print();
-              Hw2.Print();
-#endif
-              double* edge1 = Hw1.GetTranslation();
-              double* edge2 = Hw2.GetTranslation();
-              // std::cout << "edge1[0] : " << edge1[0] << std::endl;
-              // std::cout << "edge1[1] : " << edge1[1] << std::endl;
-              // std::cout << "edge1[2] : " << edge1[2] << std::endl;
-              // std::cout << "edge2[0] : " << edge2[0] << std::endl;
-              // std::cout << "edge2[1] : " << edge2[1] << std::endl;
-              // std::cout << "edge2[2] : " << edge2[2] << std::endl;
-              double* shift = H.GetTranslation();
-              // std::cout << "shift[0] : " << shift[0] << std::endl;
-              // std::cout << "shift[1] : " << shift[1] << std::endl;
-              // std::cout << "shift[2] : " << shift[2] << std::endl;
-              TVector3 o(0., 0., shift[2]), zdir(0., 0., 1.);
-              TVector3 fiber_dir(edge2[0] - edge1[0], edge2[1] - edge1[1], edge2[2] - edge1[2]);
-              fiber_dir  = fiber_dir.Unit();
-              TVector3 u = fiber_dir.Cross(zdir);
-              TVector3 v = fiber_dir;
-              genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
-
-              TVectorD hitCoords(1);
-              hitCoords(0) = FiberHitClCont[i][j][k]->GetPos()*0.1; //u.Dot(TVector3(shift[0], shift[1], 0));
-              TMatrixDSym hitCov(1);
-              //hitCov(0, 0) = TMath::Sq(FiberHitClCont[i][j][k]->GetRes()*0.1); // mm to cm // to be adjusted resolution_fiber * resolution_fiber; // Check with or without Square root?
-              hitCov(0, 0) = std::pow(FiberHitClCont[i][j][k]->GetRes()*0.1, 2.); // mm to cm
-              auto measurement =
-                  std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, TypeDet[i][j], hitID, nullptr);
-              dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
-
-              RecoEvent.ListHits[TypeDet[i][j]].emplace_back(measurement.release());
-
-              MeasurementInfo measinfo(FiberHitClCont[i][j][k]->GetTOT(), FiberHitClCont[i][j][k]->GetTime(), -9999.);
-              RecoEvent.ListHitsInfo[TypeDet[i][j]].emplace_back(measinfo);
-            }
-        }
-    }
-
-  for(int i = 0; i < 7; ++i)
-    {
-      for(int j = 0; j < 3; ++j)
-        {
-          LocalHisto.h13[i][j]->Fill(FiberHitCont[i][j].size());
-          LocalHisto.h14[i][j]->Fill(FiberHitClCont[i][j].size());
-
-          for(int k = 0; k < (int)FiberHitCont[i][j].size(); ++k)
-            {
-                            //printf("%d %d %.8f\n", i, j, FiberHitCont[i][j][k]->GetPos());
-
-              LocalHisto.h10[i][j]->Fill(FiberHitCont[i][j][k]->GetFib(), FiberHitCont[i][j][k]->GetTL());
-              LocalHisto.h11[i][j]->Fill(FiberHitCont[i][j][k]->GetPos());
-            }
-
-          for(int k = 0; k < (int)FiberHitClCont[i][j].size(); ++k)
-            {
-              LocalHisto.h12[i][j]->Fill(FiberHitClCont[i][j][k]->GetPos());
-              LocalHisto.h15[i][j]->Fill(FiberHitClCont[i][j][k]->GetClsize());
-            }
-        }
-    }
-
-
     //temp
     std::vector< std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par.get());
     std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
-
-
-    for(int i=0; i<7; ++i)
-      {
-        LocalHisto.h17[i]->Fill( FiberXUVCont[i].size() );
-        for(int j=0; j<(int)FiberXUVCont[i].size(); ++j)
-          {
-            LocalHisto.h16[i]->Fill(FiberXUVCont[i][j]->GetPosX(), FiberXUVCont[i][j]->GetPosY());
-            LocalHisto.h17_2[i]->Fill(FiberXUVCont[i][j]->GetD());
-          }
-      }
-
 
     // MFT12
     int nt_mft12 = 0;
@@ -1397,6 +1270,163 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     LocalHisto.hfiber_3_0_2->Fill(nt_mft12_xuv);
 
     if(par->flag_debug) std::cout << "- mft12 end" << std::endl;
+
+
+  RecoEvent.FiberHitClCont = FiberHitClCont;
+
+  int TypeDet[7][3] = {{G4Sol::FiberD1_x, G4Sol::FiberD1_u, G4Sol::FiberD1_v},
+                       {G4Sol::FiberD2_x, G4Sol::FiberD2_u, G4Sol::FiberD2_v},
+                       {G4Sol::FiberD3_x, G4Sol::FiberD3_u, G4Sol::FiberD3_v},
+                       {G4Sol::MiniFiberD1_x, G4Sol::MiniFiberD1_u, G4Sol::MiniFiberD1_v},
+                       {G4Sol::MiniFiberD2_x, G4Sol::MiniFiberD2_v, G4Sol::MiniFiberD2_u},
+                       {G4Sol::FiberD4_v, G4Sol::FiberD4_u, G4Sol::FiberD4_x},
+                       {G4Sol::FiberD5_x, G4Sol::FiberD5_u, G4Sol::FiberD5_v}};
+
+  std::string nameVolDet[7][3] = {{"FiberD1_log_x", "FiberD1_log_u", "FiberD1_log_v"},
+                                  {"FiberD2_log_x", "FiberD2_log_u", "FiberD2_log_v"},
+                                  {"FiberD3_log_x", "FiberD3_log_u", "FiberD3_log_v"},
+                                  {"MiniFiberD1_log_x", "MiniFiberD1_log_u", "MiniFiberD1_log_v"},
+                                  {"MiniFiberD2_log_x", "MiniFiberD2_log_v", "MiniFiberD2_log_u"},
+                                  {"FiberD4_log_v", "FiberD4_log_u", "FiberD4_log_x"},
+                                  {"FiberD5_log_x", "FiberD5_log_u", "FiberD5_log_v"}};
+
+  std::string nameFiber[7][3] = {{"FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v"},
+                                  {"FiberD2_Core_log_x", "FiberD2_Core_log_u", "FiberD2_Core_log_v"},
+                                  {"FiberD3_Core_log_x", "FiberD3_Core_log_u", "FiberD3_Core_log_v"},
+                                  {"MiniFiberD1_Core_log_x", "MiniFiberD1_Core_log_u", "MiniFiberD1_Core_log_v"},
+                                  {"MiniFiberD2_Core_log_x", "MiniFiberD2_Core_log_v", "MiniFiberD2_Core_log_u"},
+                                  {"FiberD4_Core_log_v", "FiberD4_Core_log_u", "FiberD4_Core_log_x"},
+                                  {"FiberD5_Core_log_x", "FiberD5_Core_log_u", "FiberD5_Core_log_v"}};
+
+  std::string nameMotherDet[7] = {"FiberD1_log_0",     "FiberD2_log_0", "FiberD3_log_0",
+                                  "MiniFiberD1_log_0", "MiniFiberD2_log_0",
+                                  "FiberD4_log_0",     "FiberD5_log_0"};
+
+  for(int i = 0; i < 7; ++i)
+    {
+      for(int j = 0; j < 3; ++j)
+        {
+          // std::cout << "\nsize before : " << FiberHitCont[i][j].size() << std::endl;
+          // std::cout << "size after  : " << FiberHitClCont[i][j].size() << std::endl;
+          for(int k = 0; k < (int)FiberHitClCont[i][j].size(); ++k)
+            {
+              // FiberHitClCont[i][j][k]->Print();
+              std::string volumeName = nameVolDet[i][j];
+              std::string motherName = nameMotherDet[i];
+              std::string fiberName = nameFiber[i][j];
+
+              int hitID = FiberHitClCont[i][j][k]->GetClFib(); // CHECK
+
+              TGeoMatrix* g1 =
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode( (fiberName + Form("_%d", hitID*2)).c_str() )->GetMatrix(); //->GetNode(hitID * 2 + 1)->GetMatrix(); // fiber core
+              TGeoMatrix* g1_pair =
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode( (fiberName + Form("_%d", hitID*2 +1)).c_str() )->GetMatrix(); // minifiber pair core
+              TGeoHMatrix H1(*g1), H1_pair(*g1_pair);
+              Double_t* center_hit = H1.GetTranslation();
+              Double_t* center_pair = H1_pair.GetTranslation();
+              Double_t center_both[3];
+              center_both[0] = (center_hit[0] + center_pair[0]) / 2.;
+              center_both[1] = (center_hit[1] + center_pair[1]) / 2.;
+              center_both[2] = (center_hit[2] + center_pair[2]) / 2.;
+
+              H1.SetTranslation(center_both);
+
+              TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
+                                   ->GetNode(motherName.c_str())
+                                   ->GetVolume()
+                                   ->GetNode((volumeName + "_0").c_str())
+                                   ->GetMatrix(); // fiber layer
+              TGeoMatrix* g3 =
+                  gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // fiber station
+              TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();     // MFLD
+              TGeoHMatrix H2(*g2), H3(*g3), H4(*g4);
+              TGeoHMatrix H = H2 * H1;
+              H             = H3 * H;
+              H             = H4 * H;
+              TGeoHMatrix w1("w1");
+              TGeoHMatrix w2("w2");
+              w1.SetDz(-10);
+              w2.SetDz(10);
+              TGeoHMatrix Hw1 = H * w1;
+              TGeoHMatrix Hw2 = H * w2;
+#ifdef DEBUG_BUILD2
+              H.Print();
+              Hw1.Print();
+              Hw2.Print();
+#endif
+              double* edge1 = Hw1.GetTranslation();
+              double* edge2 = Hw2.GetTranslation();
+              // std::cout << "edge1[0] : " << edge1[0] << std::endl;
+              // std::cout << "edge1[1] : " << edge1[1] << std::endl;
+              // std::cout << "edge1[2] : " << edge1[2] << std::endl;
+              // std::cout << "edge2[0] : " << edge2[0] << std::endl;
+              // std::cout << "edge2[1] : " << edge2[1] << std::endl;
+              // std::cout << "edge2[2] : " << edge2[2] << std::endl;
+              double* shift = H.GetTranslation();
+              // std::cout << "shift[0] : " << shift[0] << std::endl;
+              // std::cout << "shift[1] : " << shift[1] << std::endl;
+              // std::cout << "shift[2] : " << shift[2] << std::endl;
+              //TVector3 o(0., 0., shift[2]), zdir(0., 0., 1.);
+              TVector3 o(0., 0., FiberHitClCont[i][j][k]->GetZ()*0.1), zdir(0., 0., 1.);
+              TVector3 fiber_dir(edge2[0] - edge1[0], edge2[1] - edge1[1], edge2[2] - edge1[2]);
+              fiber_dir  = fiber_dir.Unit();
+              TVector3 u = fiber_dir.Cross(zdir);
+              TVector3 v = fiber_dir;
+              genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
+
+              TVectorD hitCoords(1);
+              hitCoords(0) = FiberHitClCont[i][j][k]->GetPos()*0.1; //u.Dot(TVector3(shift[0], shift[1], 0));
+              TMatrixDSym hitCov(1);
+              //hitCov(0, 0) = TMath::Sq(FiberHitClCont[i][j][k]->GetRes()*0.1); // mm to cm // to be adjusted resolution_fiber * resolution_fiber; // Check with or without Square root?
+              hitCov(0, 0) = std::pow(FiberHitClCont[i][j][k]->GetRes()*0.1, 2.); // mm to cm
+              auto measurement =
+                  std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, TypeDet[i][j], hitID, nullptr);
+              dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+
+              RecoEvent.ListHits[TypeDet[i][j]].emplace_back(measurement.release());
+
+              MeasurementInfo measinfo(FiberHitClCont[i][j][k]->GetTOT(), FiberHitClCont[i][j][k]->GetTime(), -9999.);
+              RecoEvent.ListHitsInfo[TypeDet[i][j]].emplace_back(measinfo);
+            }
+        }
+    }
+
+  for(int i = 0; i < 7; ++i)
+    {
+      for(int j = 0; j < 3; ++j)
+        {
+          LocalHisto.h13[i][j]->Fill(FiberHitCont[i][j].size());
+          LocalHisto.h14[i][j]->Fill(FiberHitClCont[i][j].size());
+
+          for(int k = 0; k < (int)FiberHitCont[i][j].size(); ++k)
+            {
+                            //printf("%d %d %.8f\n", i, j, FiberHitCont[i][j][k]->GetPos());
+
+              LocalHisto.h10[i][j]->Fill(FiberHitCont[i][j][k]->GetFib(), FiberHitCont[i][j][k]->GetTL());
+              LocalHisto.h11[i][j]->Fill(FiberHitCont[i][j][k]->GetPos());
+            }
+
+          for(int k = 0; k < (int)FiberHitClCont[i][j].size(); ++k)
+            {
+              LocalHisto.h12[i][j]->Fill(FiberHitClCont[i][j][k]->GetPos());
+              LocalHisto.h15[i][j]->Fill(FiberHitClCont[i][j][k]->GetClsize());
+              LocalHisto.h75[i][j]->Fill(FiberHitClCont[i][j][k]->GetClFib(), FiberHitClCont[i][j][k]->GetPos());
+            }
+        }
+    }
+
+
+
+    for(int i=0; i<7; ++i)
+      {
+        LocalHisto.h17[i]->Fill( FiberXUVCont[i].size() );
+        for(int j=0; j<(int)FiberXUVCont[i].size(); ++j)
+          {
+            LocalHisto.h16[i]->Fill(FiberXUVCont[i][j]->GetPosX(), FiberXUVCont[i][j]->GetPosY());
+            LocalHisto.h17_2[i]->Fill(FiberXUVCont[i][j]->GetD());
+          }
+      }
+
 
 
     // dft12

@@ -178,6 +178,7 @@ class Ana_Hist
   Hist<TH1D> h13[7][3];
   Hist<TH1D> h14[7][3];
   Hist<TH1D> h15[7][3];
+  Hist<TH2D> h75[7][3];
   Hist<TH2D> h16[7];
   Hist<TH1D> h17[7];
   Hist<TH1D> h17_2[7];
@@ -254,6 +255,7 @@ class Ana_Hist
   Hist<TH1D> hpsb_2[46];
   Hist<TH2D> hpsb_3[46];
   Hist<TH1D> hpsb_4[46];
+  Hist<TH2D> h76;
 
   Hist<TH1D> hpsfe_0_1;
   Hist<TH1D> hpsfe_0_2;
@@ -543,9 +545,6 @@ class Ana_Hist
 
   Hist<TH2F> h_EffPosZPosR_real ;
   Hist<TH2F> h_EffPosZPosR_postKFPart ;
-
-  Hist<TH2F> h_N_SiHits_ReconsTracks ;
-
 
   // CheckFiberXUV
   Hist<TH1F> h_ResidualFiberHitX[7];

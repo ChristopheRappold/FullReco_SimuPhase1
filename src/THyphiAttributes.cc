@@ -506,6 +506,11 @@ int THyphiAttributes::Init_Para()
     {
       Wasa_FieldMap = true;
       Wasa_FieldMapName = "./field/MagField_default.dat";
+      Field_Strength   = Config.IsAvailable("Field_Strength")   ? Config.Get<double>("Field_Strength")   : -1.;
+      Target_PositionX = Config.IsAvailable("Target_PositionX") ? Config.Get<double>("Target_PositionX") : 0.;
+      Target_PositionY = Config.IsAvailable("Target_PositionY") ? Config.Get<double>("Target_PositionY") : 0.;
+      Target_PositionZ = Config.IsAvailable("Target_PositionZ") ? Config.Get<double>("Target_PositionZ") : 196.12;
+      Target_Size      = Config.IsAvailable("Target_Size")      ? Config.Get<double>("Target_Size")      : 3.;
     }
 
   TObjArray* L_vol = gGeoManager->GetListOfVolumes();

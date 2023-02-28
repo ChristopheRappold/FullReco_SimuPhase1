@@ -31,8 +31,8 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
     "TR1_log","TR2_log","Si1_Strip_log_x", "Si1_Strip_log_y", "Si2_Strip_log_x", "Si2_Strip_log_y",
     "SD1_Strip_log_u", "SD1_Strip_log_v", "SD2_Strip_log_u", "SD2_Strip_log_v",
     "SD1pad_Strip_log_u", "SD1pad_Strip_log_v", "SD2pad_Strip_log_u", "SD2pad_Strip_log_v",
-    "MiniFiberD1_Core_log_x1", "MiniFiberD1_Core_log_u1", "MiniFiberD1_Core_log_v1",
-    "MiniFiberD1_Core_log_x2", "MiniFiberD1_Core_log_u2", "MiniFiberD1_Core_log_v2",
+    "MiniFiberD1_Core_log_x", "MiniFiberD1_Core_log_u", "MiniFiberD1_Core_log_v",
+    "MiniFiberD2_Core_log_x", "MiniFiberD2_Core_log_u", "MiniFiberD2_Core_log_v",
     "FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v",
     "FiberD2_Core_log_x", "FiberD2_Core_log_u", "FiberD2_Core_log_v",
     "FiberD3_Core_log_x", "FiberD3_Core_log_u", "FiberD3_Core_log_v",
@@ -653,7 +653,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")
                                        ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1)
                                        ->GetMatrix();                                       // PSCE
-                  TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNNER
+                  TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNER
                   TGeoMatrix* g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
                   TGeoHMatrix H1(*g1), H2(*g2), H3(*g3);
                   TGeoHMatrix H = H2 * H1;
@@ -1012,38 +1012,38 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   int i_lay;
                   switch(TypeDet)
                     {
-                    case G4Sol::MiniFiberD1_x1: {
-                      volumeName = "MiniFiberD1_log_x1";
+                    case G4Sol::MiniFiberD1_x: {
+                      volumeName = "MiniFiberD1_log_x";
                       motherName = "MiniFiberD1_log_0";
                       i_fiber = 3;
                       i_lay   = 0; } ;
                       break;
-                    case G4Sol::MiniFiberD1_u1: {
-                      volumeName = "MiniFiberD1_log_u1";
+                    case G4Sol::MiniFiberD1_u: {
+                      volumeName = "MiniFiberD1_log_u";
                       motherName = "MiniFiberD1_log_0";
                       i_fiber = 3;
                       i_lay   = 1; } ;
                       break;
-                    case G4Sol::MiniFiberD1_v1: {
-                      volumeName = "MiniFiberD1_log_v1";
+                    case G4Sol::MiniFiberD1_v: {
+                      volumeName = "MiniFiberD1_log_v";
                       motherName = "MiniFiberD1_log_0";
                       i_fiber = 3;
                       i_lay   = 2; } ;
                       break;
-                    case G4Sol::MiniFiberD1_x2: {
-                      volumeName = "MiniFiberD1_log_x2";
+                    case G4Sol::MiniFiberD2_x: {
+                      volumeName = "MiniFiberD2_log_x";
                       motherName = "MiniFiberD2_log_0";
                       i_fiber = 4;
                       i_lay   = 0; } ;
                       break;
-                    case G4Sol::MiniFiberD1_u2: {
-                      volumeName = "MiniFiberD1_log_u2";
+                    case G4Sol::MiniFiberD2_u: {
+                      volumeName = "MiniFiberD2_log_u";
                       motherName = "MiniFiberD2_log_0";
                       i_fiber = 4;
                       i_lay   = 1; } ;
                       break;
-                    case G4Sol::MiniFiberD1_v2: {
-                      volumeName = "MiniFiberD1_log_v2";
+                    case G4Sol::MiniFiberD2_v: {
+                      volumeName = "MiniFiberD2_log_v";
                       motherName = "MiniFiberD2_log_0";
                       i_fiber = 4;
                       i_lay   = 2; } ;
@@ -1369,7 +1369,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               if(TypeDet >= G4Sol::TR1 && TypeDet <= G4Sol::TR2)
                 fillOutHit(OutTree->TR, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
-              if(TypeDet >= G4Sol::MiniFiberD1_x1 && TypeDet <= G4Sol::FiberD5_v)
+              if(TypeDet >= G4Sol::MiniFiberD1_x && TypeDet <= G4Sol::FiberD5_v)
                 fillOutHit(OutTree->Fiber, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet >= G4Sol::CDC_layer0 && TypeDet <= G4Sol::CDC_layer14)

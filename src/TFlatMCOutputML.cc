@@ -97,7 +97,7 @@ void DataML_momfit::FillEvent(FullRecoEvent& REvent)
                 }
             }
 
-          if(id_det >= G4Sol::MiniFiberD1_x1 && id_det <= G4Sol::MiniFiberD1_v2)
+          if(id_det >= G4Sol::MiniFiberD1_x && id_det <= G4Sol::MiniFiberD2_u)
             {
 #ifdef DEBUG_FLATTEN
               att._logger->debug("MiniFiber: ");

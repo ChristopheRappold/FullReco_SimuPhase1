@@ -165,12 +165,12 @@ constexpr bool IsFiberU(G4Sol::SolDet idDet) {
   case G4Sol::FiberD5_x : ;
   case G4Sol::FiberD5_u : ;
   case G4Sol::FiberD5_v : ;
-  // case G4Sol::MiniFiberD1_x1 : ;
-  // case G4Sol::MiniFiberD1_u1 : ;
-  // case G4Sol::MiniFiberD1_v1 : ;
-  // case G4Sol::MiniFiberD1_x2 : ;
-  // case G4Sol::MiniFiberD1_u2 : ;
-  // case G4Sol::MiniFiberD1_v2 : ;
+  // case G4Sol::MiniFiberD1_x : ;
+  // case G4Sol::MiniFiberD1_u : ;
+  // case G4Sol::MiniFiberD1_v : ;
+  // case G4Sol::MiniFiberD2_x : ;
+  // case G4Sol::MiniFiberD2_u : ;
+  // case G4Sol::MiniFiberD2_v : ;
     return true;
   default:
     return false;
@@ -180,12 +180,12 @@ constexpr bool IsFiberU(G4Sol::SolDet idDet) {
 
 constexpr bool IsFiberM(G4Sol::SolDet idDet) {
   switch (idDet) {
-    case G4Sol::MiniFiberD1_x1 : ;
-    case G4Sol::MiniFiberD1_u1 : ;
-    case G4Sol::MiniFiberD1_v1 : ;
-    case G4Sol::MiniFiberD1_x2 : ;
-    case G4Sol::MiniFiberD1_u2 : ;
-    case G4Sol::MiniFiberD1_v2 : ;
+    case G4Sol::MiniFiberD1_x : ;
+    case G4Sol::MiniFiberD1_u : ;
+    case G4Sol::MiniFiberD1_v : ;
+    case G4Sol::MiniFiberD2_x : ;
+    case G4Sol::MiniFiberD2_u : ;
+    case G4Sol::MiniFiberD2_v : ;
       return true;
     default:
       return false;

@@ -14,8 +14,8 @@
 
 //#define DEBUG_DECAYVTX
 
-#define REAL_PIONS_CHECK
-#define CUT_PIONS_CHECK
+//#define REAL_PIONS_CHECK
+//#define CUT_PIONS_CHECK
 #define CENTROID_METHOD
 #define VFUNCTION_METHOD 
 
@@ -24,9 +24,11 @@ using namespace G4Sol;
 
 template <class Out>
 TDecayVertex<Out>::TDecayVertex(const THyphiAttributes& attribut)
-    : TDataProcessInterface<Out>("DecayVertexReco"), att(attribut), fieldWASA(att.Field)
+    : TDataProcessInterface<Out>("DecayVertex_Reco"), att(attribut), fieldWASA(att.Field)
   {
-    TranslationZ_Target_System(att.Target_PositionZ);
+    Zo_target = -att.Target_Size; // in cm
+    Zf_target =  att.Target_Size; // in cm
+    Zo_minifibers = 226.93; // in cm
   }
 
 template <class Out>
@@ -284,10 +286,9 @@ void TDecayVertex<Out>::SelectHists()
   LocalHisto.h_EffPosZPosR_real       = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZPosR_real);
   LocalHisto.h_EffPosZPosR_postKFPart = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_EffPosZPosR_postKFPart);
 
-
+/*
   LocalHisto.h_N_SiHits_ReconsTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_N_SiHits_ReconsTracks);
 
-/*
   LocalHisto.h_N_Si_MotherTracks = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_N_Si_MotherTracks);
 
   LocalHisto.h_DecayVertexDistance_AllVfunc = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_DecayVertexDistance_AllVfunc);
@@ -311,28 +312,17 @@ void TDecayVertex<Out>::SelectHists()
 template <class Out>
 int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 {
-
-/*
-  Magnetic field type CHECK
-  KFParticle MF_Check;
-  int MF_IsHomogeneous = MF_Check.IsHomogeneous();
-  if(MF_IsHomogeneous == 1)
-    std::cout << "MF is homogeneous\n";
-  else if(MF_IsHomogeneous == 10)
-    std::cout << "MF is not homogeneous\n";
-  else
-    std::cout << "Error with MF\n";
-*/
-
   TVector3 InteractionPoint_real(RecoEvent.InteractionPoint[0], RecoEvent.InteractionPoint[1], RecoEvent.InteractionPoint[2]);
   TVector3 DecayVertex_real(RecoEvent.DecayVertex[0], RecoEvent.DecayVertex[1], RecoEvent.DecayVertex[2]);
 
-  LocalHisto.h_DecayVertexPosZ_real->Fill(DecayVertex_real.Z(), 1.);
-  LocalHisto.h_EffPosZ_real->Fill(DecayVertex_real.Z(), 1.);
-  LocalHisto.h_EffPosZPosR_real->Fill(DecayVertex_real.Z(), DecayVertex_real.Perp(), 1.);
+  LocalHisto.h_DecayVertexPosZ_real->Fill(DecayVertex_real.Z() - att.Target_PositionZ, 1.);
+  LocalHisto.h_EffPosZ_real->Fill(DecayVertex_real.Z() - att.Target_PositionZ, 1.);
+  double PosR_real = std::sqrt(std::pow(DecayVertex_real.X() - att.Target_PositionX, 2.)
+                                + std::pow(DecayVertex_real.Y() - att.Target_PositionY, 2.));
+  LocalHisto.h_EffPosZPosR_real->Fill(DecayVertex_real.Z() - att.Target_PositionZ, PosR_real, 1.);
   LocalHisto.h_Hyp_RealLifeTime->Fill(RecoEvent.Hyp_LifeTime, 1.);
 
-  StudyCaseSelector(att.StudyCase, Hyp_pdg, Fragment_pdg);
+  StudyCaseSelector_Hyp(att.StudyCase, Hyp_pdg);
   Hyp_charge = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Charge()/3.;
   Hyp_mass = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Mass();
 
@@ -351,25 +341,76 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
   std::vector<KFParticle> FragmentTracks_All {};
   std::vector<KFFitInfo> Fragment_FitInfo {};
   
-  if(recons_from_FRS_MDC == 1)
-    RealTracksFinder(RecoEvent.TrackDAFSim, Fragment_pdg, No_cutconditions, FragmentTracks_All, Fragment_FitInfo);
-  
-  else if(recons_from_FRS_MDC == 2)
-    FragmentMDCTracksFinder(RecoEvent.DAF_results, Fragment_pdg, FragmentTracks_All);
+  for(size_t i = 0; i < RecoEvent.FragmentTracks.size(); ++i)
+    {
+      double temp_fP[] = {RecoEvent.FragmentTracks[i].GetPos().X(),  // x
+                          RecoEvent.FragmentTracks[i].GetPos().Y(),  // y
+                          RecoEvent.FragmentTracks[i].GetPos().Z(),  // z
+                          RecoEvent.FragmentTracks[i].GetMom().X(),  // px
+                          RecoEvent.FragmentTracks[i].GetMom().Y(),  // py
+                          RecoEvent.FragmentTracks[i].GetMom().Z()}; // pz
 
+      double temp_fC[] = {RecoEvent.FragmentTracks[i].GetCovMatrix()[0],   //x-x
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[1],   //x-y
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[2],   //y-y
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[3],   //x-z
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[4],   //y-z
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[5],   //z-z
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[6],   //x-px
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[7],   //y-px
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[8],   //z-px
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[9],   //px-px
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[10],  //x-py
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[11],  //y-py
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[12],  //z-py
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[13],  //px-py
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[14],  //py-py
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[15],  //x-pz
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[16],  //y-pz
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[17],  //z-pz
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[18],  //px-pz
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[19],  //py-pz
+                          RecoEvent.FragmentTracks[i].GetCovMatrix()[20]}; //pz-pz
+
+      int temp_charge = TDatabasePDG::Instance()->GetParticle(RecoEvent.FragmentTracks[i].GetPID())->Charge()/3.;
+      double temp_mass = TDatabasePDG::Instance()->GetParticle(RecoEvent.FragmentTracks[i].GetPID())->Mass();
+
+      KFParticle temp_particle;
+      temp_particle.Create(temp_fP, temp_fC, temp_charge, temp_mass);
+      temp_particle.SetId(i);
+
+      temp_particle.SetNDF(1); //CHECK Change !
+      temp_particle.SetChi2(RecoEvent.FragmentTracks[i].GetChi2NDF()); //CHECK Change !
+
+      temp_particle.SetField(att.Field);
+
+      KFFitInfo temp_FitInfo;
+      temp_FitInfo.Pvalue = 0.; //CHECK Change!
+      temp_FitInfo.NHitsMDC = 0;
+      temp_FitInfo.NHitsMinifiber = 0;
+
+
+      FragmentTracks_All.emplace_back(temp_particle);
+      Fragment_FitInfo.emplace_back(temp_FitInfo);
+    };
 
   if(FragmentTracks_All.size() == 0)
     return -1;
   
-  std::unordered_map<int, InfoInit>::iterator itr_fragment;
-  for(size_t i = 0; i < FragmentTracks_All.size(); ++i)
+  if(att.G4_simu)
     {
-      for(itr_fragment = RecoEvent.DaughtersTrackDAFInit.begin(); itr_fragment != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_fragment)
+      std::unordered_map<int, InfoInit>::iterator itr_fragment;
+      for(size_t i = 0; i < FragmentTracks_All.size(); ++i)
         {
-          if(itr_fragment->first == FragmentTracks_All[i].Id())
-            ref_RealFragment = i;
+          for(itr_fragment = RecoEvent.DaughtersTrackDAFInit.begin(); itr_fragment != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_fragment)
+            {
+              if(itr_fragment->first == FragmentTracks_All[i].Id())
+                ref_RealFragment = i;
+            }
         }
     }
+  else
+    ref_RealFragment = 0; //CHECK Change!
 
   if(ifOnlyRealFragment && (ref_RealFragment == -1))
     return -1;
@@ -611,7 +652,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
       CloseDist(FragmentTracks_All[ref_RealFragment], CutPionTracks[i], closedist_cutdistance, closedist_cutpos);
       LocalHisto.h_Closedist_cutDistance->Fill(closedist_cutdistance, 1.);
-      LocalHisto.h_Closedist_cutPosZ->Fill(closedist_cutpos.Z(), 1.);
+      LocalHisto.h_Closedist_cutPosZ->Fill(closedist_cutpos.Z() - att.Target_PositionZ, 1.);
 
       ThetaDist_TrackPrimVtx(CutPionTracks[i], RecoEvent.PrimVtxRecons, theta_cutDecayTrackPrimVtx, dist_cutDecayTrackPrimVtx);
       LocalHisto.h_Dist_cutDecayTrackPrimVtx->Fill(dist_cutDecayTrackPrimVtx, "All", 1.);
@@ -756,13 +797,17 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_DecayVertexcutDistanceY_KFPart_PrimVtx->Fill(cutdistanceY_KFPart_PrimVtx, 1.);
       LocalHisto.h_DecayVertexcutDistanceZ_KFPart_PrimVtx->Fill(cutdistanceZ_KFPart_PrimVtx, 1.);
 
-      LocalHisto.h_EffPosZ_preKF->Fill(CutMotherTracks_PrimVtx[i].GetZ(), 1.);
+      LocalHisto.h_EffPosZ_preKF->Fill(CutMotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ, 1.);
 
       double cutTimeLife_PrimVtx = CutMotherTracks_PrimVtx[i].GetLifeTime() / c_light_speed_cmps; //in ps
       LocalHisto.h_HypcutLifeTime_PrimVtx->Fill(cutTimeLife_PrimVtx, 1.);
 
       LocalHisto.h_Hyp_CutArmenterosPodolanski->Fill(armenterosQtAlfa[1], armenterosQtAlfa[0], 1.);
     }
+
+    TLorentzVector CutMother_LorentzVector;
+    CutMother_LorentzVector = Fragment_LorentzVector + CutPion_LorentzVector;   
+    LocalHisto.h_HypInvariantMass_CutLorentzVect->Fill(CutMother_LorentzVector.M(), 1.);
 
 #endif
 
@@ -805,7 +850,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       vect_closedist_pos.emplace_back(temp_closedist_pos);
 
       LocalHisto.h_Closedist_Distance->Fill(closedist_distance, 1.);
-      LocalHisto.h_Closedist_PosZ->Fill(temp_closedist_pos.Z(), 1.);
+      LocalHisto.h_Closedist_PosZ->Fill(temp_closedist_pos.Z() - att.Target_PositionZ, 1.);
 
       ThetaDist_TrackPrimVtx(PionTracks[i], RecoEvent.PrimVtxRecons, theta_DecayTrackPrimVtx, dist_DecayTrackPrimVtx);
       LocalHisto.h_Dist_DecayTrackPrimVtx->Fill(dist_DecayTrackPrimVtx, "All", 1.);
@@ -901,12 +946,6 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
         RecoEvent.Hyp_Vect.emplace_back(temp_Hyp_LV);
       }
 
-    
-
-    TLorentzVector CutMother_LorentzVector;
-    CutMother_LorentzVector = Fragment_LorentzVector + CutPion_LorentzVector;   
-    LocalHisto.h_HypInvariantMass_CutLorentzVect->Fill(CutMother_LorentzVector.M(), 1.);
-
 #ifdef CENTROID_METHOD
 
   TVector3 closedist_pos;
@@ -929,7 +968,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexDistanceY_centroid->Fill(distanceY_centroid, 1.);
   LocalHisto.h_DecayVertexDistanceZ_centroid->Fill(distanceZ_centroid, 1.);
 
-  LocalHisto.h_DecayVertexPosZ_centroid->Fill(closedist_pos.Z(), 1.);
+  LocalHisto.h_DecayVertexPosZ_centroid->Fill(closedist_pos.Z() - att.Target_PositionZ, 1.);
 
 #endif
 
@@ -951,7 +990,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
   LocalHisto.h_DecayVertexDistanceY->Fill(distanceY, 1.);
   LocalHisto.h_DecayVertexDistanceZ->Fill(distanceZ, 1.);
 
-  LocalHisto.h_DecayVertexPosZ_vfunction->Fill(DecayVertexRecons.Z(), 1.);
+  LocalHisto.h_DecayVertexPosZ_vfunction->Fill(DecayVertexRecons.Z() - att.Target_PositionZ, 1.);
 
 #endif
 
@@ -982,7 +1021,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_DecayVertexDistanceY_KFPart->Fill(distanceY_KFPart, 1.);
       LocalHisto.h_DecayVertexDistanceZ_KFPart->Fill(distanceZ_KFPart, 1.);
 
-      LocalHisto.h_DecayVertexPosZ_KFPart->Fill(MotherTracks[i].GetZ(), 1.);
+      LocalHisto.h_DecayVertexPosZ_KFPart->Fill(MotherTracks[i].GetZ() - att.Target_PositionZ, 1.);
     }
 
 
@@ -1115,10 +1154,11 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_Dist_MotherTrackPrimVtx->Fill(dist_MotherTrackPrimVtx, MotherTracks_PrimVtx[i].GetMass(), 1.);
       LocalHisto.h_Theta_MotherTrackPrimVtx->Fill(theta_MotherTrackPrimVtx, MotherTracks_PrimVtx[i].GetMass(), 1.);
 
-      LocalHisto.h_EffPosZ_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ(), 1.);
-      double PosR_DecayVertex = std::sqrt(std::pow(MotherTracks_PrimVtx[i].GetX(), 2.) + std::pow(MotherTracks_PrimVtx[i].GetY(), 2.));
-      LocalHisto.h_EffPosZPosR_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ(), PosR_DecayVertex, 1.);
-      LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx->Fill(MotherTracks_PrimVtx[i].GetZ(), MotherTracks_PrimVtx[i].GetMass(), 1.);
+      LocalHisto.h_EffPosZ_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ, 1.);
+      double PosR_DecayVertex = std::sqrt(std::pow(MotherTracks_PrimVtx[i].GetX() - att.Target_PositionX, 2.)
+                                            + std::pow(MotherTracks_PrimVtx[i].GetY() - att.Target_PositionY, 2.));
+      LocalHisto.h_EffPosZPosR_postKFPart->Fill(MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ, PosR_DecayVertex, 1.);
+      LocalHisto.h_DecayVertexPosZ_KFPart_PrimVtx->Fill(MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ, MotherTracks_PrimVtx[i].GetMass(), 1.);
 
       LocalHisto.h_DecayFragmentMomZ_KFPart_PrimVtx->Fill(FragmentTracks[temp_id_fragment].GetPz(), MotherTracks_PrimVtx[i].GetMass(), 1.);
       LocalHisto.h_DecayPionMomZ_KFPart_PrimVtx->Fill(PionTracks[temp_id_pion].GetPz(), MotherTracks_PrimVtx[i].GetMass(), 1.);
@@ -1437,7 +1477,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_DecayVertexDistanceY_AllVfunc->Fill(AllVfunc_distanceY, 1.);
       LocalHisto.h_DecayVertexDistanceZ_AllVfunc->Fill(AllVfunc_distanceZ, 1.);
 
-      LocalHisto.h_DecayVertexPosZ_AllVfunc->Fill(AllVfunc_DecayVertexRecons.Z(), 1.);
+      LocalHisto.h_DecayVertexPosZ_AllVfunc->Fill(AllVfunc_DecayVertexRecons.Z() - att.Target_PositionZ, 1.);
 
 
 
@@ -1456,7 +1496,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_DecayVertexDistanceY_AllCentroid->Fill(AllCentroid_distanceY, 1.);
       LocalHisto.h_DecayVertexDistanceZ_AllCentroid->Fill(AllCentroid_distanceZ, 1.);
 
-      LocalHisto.h_DecayVertexPosZ_AllCentroid->Fill(AllCentroid_DecayVertexRecons.Z(), 1.);
+      LocalHisto.h_DecayVertexPosZ_AllCentroid->Fill(AllCentroid_DecayVertexRecons.Z() - att.Target_PositionZ, 1.);
 
 
 
@@ -1487,7 +1527,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_DecayVertexDistanceY_AllKFPart->Fill(AllKFPart_distanceY, 1.);
       LocalHisto.h_DecayVertexDistanceZ_AllKFPart->Fill(AllKFPart_distanceZ, 1.);
 
-      LocalHisto.h_DecayVertexPosZ_AllKFPart->Fill(AllKFPart_DecayVertexRecons.Z(), 1.);
+      LocalHisto.h_DecayVertexPosZ_AllKFPart->Fill(AllKFPart_DecayVertexRecons.Z() - att.Target_PositionZ, 1.);
 */
 
 
@@ -1497,42 +1537,36 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
 template <class Out>
-void TDecayVertex<Out>::StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg)
+void TDecayVertex<Out>::StudyCaseSelector_Hyp(std::string StudyCase, int& Hyp_pdg)
 {
   if(StudyCase.compare("H3L") == 0)
     {
       Hyp_pdg = H3L_pdg;
-      Fragment_pdg = He3_pdg;
       recons_from_FRS_MDC = 1;
     }
   else if(StudyCase.compare("H4L") == 0)
     {
       Hyp_pdg = H4L_pdg;
-      Fragment_pdg = He4_pdg;
       recons_from_FRS_MDC = 1;
     }
   else if(StudyCase.compare("nnL") == 0)
     {
-      //Hyp_pdg =
-      Fragment_pdg = deuteron_pdg;
+      Hyp_pdg = nnL_pdg;
       recons_from_FRS_MDC = 1;
     }
   else if(StudyCase.compare("lambda") == 0)
     {
       Hyp_pdg = lambda_pdg;
-      Fragment_pdg = proton_pdg;
       recons_from_FRS_MDC = 2;
     }
   else if(StudyCase.compare("background_H3L") == 0)
     {
       Hyp_pdg = H3L_pdg;
-      Fragment_pdg = He3_pdg;
       recons_from_FRS_MDC = 1;
     }
   else if(StudyCase.compare("background_H4L") == 0)
     {
       Hyp_pdg = H4L_pdg;
-      Fragment_pdg = He4_pdg;
       recons_from_FRS_MDC = 1;
     }
 
@@ -1550,7 +1584,6 @@ void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std
   for(itr = TrackDAFSim.begin(); itr != TrackDAFSim.end(); ++itr)
     {
       size_t iDetFirst = -1;
-      size_t iDetLast = -1;
       
       size_t nHits_MDC = 0;
       size_t nHits_MiniFiber = 0;
@@ -1566,23 +1599,16 @@ void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std
             iDetFirst = iDet;
           if(iDet >= G4Sol::MG01 && iDet <= G4Sol::MG17)
             nHits_MDC += 1;
-          if(iDet >= G4Sol::MiniFiberD1_x1 && iDet <= G4Sol::MiniFiberD1_v2)
+          if(iDet >= G4Sol::MiniFiberD1_x && iDet <= G4Sol::MiniFiberD2_u)
             nHits_MiniFiber += 1;
           if(iDet == G4Sol::PSCE)
             nHits_PSCE += 1;
           if(iDet == G4Sol::PSBE)
             nHits_PSBE += 1;
-
-          iDetLast = iDet;
         }
 
       if(iDetFirst == -1)
         continue;
-
-      //Fragment case -> Data from last detector
-      if(pdgParticle == Fragment_pdg)
-        iDetFirst = iDetLast;
-
 
       if(itr->second[iDetFirst][0].pdg == pdgParticle)
         {
@@ -1624,6 +1650,7 @@ void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std
   return;
 }
 
+/*
 template <class Out>
 void TDecayVertex<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
                                     std::vector<KFParticle>& FragmentMDCTracks)
@@ -1652,11 +1679,6 @@ void TDecayVertex<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDA
           temp_particle.SetId(itr->first);
 
           temp_particle.SetField(att.Field);
-
-/*
-          for(int iF = 0; iF < 10; ++iF)
-            temp_particle.SetFieldCoeff(fieldMDCParameters[iF], iF);
-*/
           temp_particle.SetNDF(itr->second.ndf);
           temp_particle.SetChi2(itr->second.chi2);
 
@@ -1666,7 +1688,7 @@ void TDecayVertex<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDA
 
   return;
 }
-
+*/
 
 template <class Out>
 void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks)
@@ -2193,7 +2215,7 @@ void TDecayVertex<Out>::MotherSelector(std::vector<KFParticle>& MotherTracks_All
       if( ifCut_MaxAngle_MotherTrackPrimVtx && (Angle_MotherTrackPrimVtx > MaxAngle_MotherTrackPrimVtx))
         continue;
 
-      PosZ_DecayVertex = MotherTracks_All[i].GetZ();
+      PosZ_DecayVertex = MotherTracks_All[i].GetZ() - att.Target_PositionZ;
       if( ifCut_MaxPosZ_DecayVertex && (PosZ_DecayVertex > MaxPosZ_DecayVertex) )
         continue;
 
@@ -2212,7 +2234,7 @@ void TDecayVertex<Out>::MotherSelector(std::vector<KFParticle>& MotherTracks_All
   return;
 }
 
-
+/*
 template <class Out>
 void TDecayVertex<Out>::SiHitsFinder(KFParticle& Track, std::vector<std::vector<double> >& Hits_Si,
                                   std::vector<std::vector<double> >& Track_Sihit)
@@ -2521,7 +2543,7 @@ void TDecayVertex<Out>::MotherDaughtersTrack_SiHits2(std::vector<KFParticle>& Fr
 
   return;
 }
-
+*/
 /*
   TVector3 Mother_Hit_Si1;
   MotherTrack_SiHit(PrimVtxRecons, DecayVtxRecons, Z_plane_Si1, Hits_Si1, Mother_Hit_Si1);
@@ -2643,17 +2665,6 @@ void TDecayVertex<Out>::AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>
   DecayVertexRecons *= 1. / static_cast<double>(Vect_Centroids.size());
 }
 
-template<class Out>
-void TDecayVertex<Out>::TranslationZ_Target_System(double Target_PosZ)
-{
-  double Dist_to_TransZ = Target_PosZ - 25.; // Reference target PosZ = 25.
-  Zo_target += Dist_to_TransZ;
-  Zf_target += Dist_to_TransZ;
-/* 
-  Z_plane_Si1 += Dist_to_TransZ;
-  Z_plane_Si2 += Dist_to_TransZ;
-*/
-}
 
 template class TDecayVertex<MCAnaEventG4Sol>;
 template class TDecayVertex<Ana_WasaEvent>;
