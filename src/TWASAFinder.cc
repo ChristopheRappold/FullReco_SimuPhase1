@@ -218,7 +218,6 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
             //printf("TrackHit: %d ; ListHists: %d \n", TrackHitCont[i]->GetFiberHit()[j], RecoEvent.ListHits[G4Sol::MiniFiberD1_x + j][k]->getHitId());
             if(TrackHitCont[i]->GetFiberHit()[j] == RecoEvent.ListHits[G4Sol::MiniFiberD1_x + j][k]->getHitId())
               {
-                //continue; //CHECK Remove when FiberID is same for data and simu
                 tempSetHit[G4Sol::MiniFiberD1_x + j] = k;
                 InfoPar tmp_infopar;
                 tmp_infopar.pdg    = -211;
@@ -226,8 +225,9 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
                 //tmp_infopar.momY   = hit.MomY;
                 //tmp_infopar.momZ   = hit.MomZ;
                 //tmp_infopar.mass   = hit.Mass;
-                //tmp_infopar.Eloss  = hit.Energy;
-                //tmp_infopar.time   = hit.Time;
+                tmp_infopar.Eloss  = RecoEvent.ListHitsInfo[G4Sol::MiniFiberD1_x + j][k].dE;
+                tmp_infopar.time   = RecoEvent.ListHitsInfo[G4Sol::MiniFiberD1_x + j][k].time;
+                tmp_infopar.TOT    = RecoEvent.ListHitsInfo[G4Sol::MiniFiberD1_x + j][k].TOT;
                 //tmp_infopar.length = hit.TrackLength;
                 tempSetInfo[G4Sol::MiniFiberD1_x + j] = tmp_infopar;
                 flag_found = true;
@@ -250,12 +250,13 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
                 tempSetHit[G4Sol::MG01 + j] = k;
                 InfoPar tmp_infopar;
                 tmp_infopar.pdg    = -211;
-                //tmp_infopar.momX   = hit.MomX;
-                //tmp_infopar.momY   = hit.MomY;
-                //tmp_infopar.momZ   = hit.MomZ;
-                //tmp_infopar.mass   = hit.Mass;
-                //tmp_infopar.Eloss  = hit.Energy;
-                //tmp_infopar.time   = hit.Time;
+                //tmp_infopar.momX;
+                //tmp_infopar.momY;
+                //tmp_infopar.momZ;
+                //tmp_infopar.mass;
+                tmp_infopar.Eloss  = RecoEvent.ListHitsInfo[G4Sol::MG01 + j][k].dE;
+                tmp_infopar.time   = RecoEvent.ListHitsInfo[G4Sol::MG01 + j][k].time;
+                tmp_infopar.TOT    = RecoEvent.ListHitsInfo[G4Sol::MG01 + j][k].TOT;
                 //tmp_infopar.length = hit.TrackLength;
                 tempSetInfo[G4Sol::MG01 + j] = tmp_infopar;
                 flag_found = true;
@@ -281,8 +282,9 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
                 //tmp_infopar.momY   = hit.MomY;
                 //tmp_infopar.momZ   = hit.MomZ;
                 //tmp_infopar.mass   = hit.Mass;
-                //tmp_infopar.Eloss  = hit.Energy;
-                //tmp_infopar.time   = hit.Time;
+                tmp_infopar.Eloss  = RecoEvent.ListHitsInfo[G4Sol::PSCE][j].dE;
+                tmp_infopar.time   = RecoEvent.ListHitsInfo[G4Sol::PSCE][j].time;
+                //tmp_infopar.TOT    = RecoEvent.ListHitsInfo[G4Sol::PSCE][j].TOT;
                 //tmp_infopar.length = hit.TrackLength;
                 tempSetInfo[G4Sol::PSCE] = tmp_infopar;
 
@@ -309,8 +311,9 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
                 //tmp_infopar.momY   = hit.MomY;
                 //tmp_infopar.momZ   = hit.MomZ;
                 //tmp_infopar.mass   = hit.Mass;
-                //tmp_infopar.Eloss  = hit.Energy;
-                //tmp_infopar.time   = hit.Time;
+                tmp_infopar.Eloss  = RecoEvent.ListHitsInfo[G4Sol::PSFE][j].dE;
+                tmp_infopar.time   = RecoEvent.ListHitsInfo[G4Sol::PSFE][j].time;
+                //tmp_infopar.TOT    = RecoEvent.ListHitsInfo[G4Sol::PSFE][j].TOT;
                 //tmp_infopar.length = hit.TrackLength;
                 tempSetInfo[G4Sol::PSFE] = tmp_infopar;
 
@@ -325,12 +328,15 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
     RecoEvent.TrackDAF.insert(std::make_pair(i, tempSetHit));
     RecoEvent.TrackInfo.insert(std::make_pair(i, tempSetInfo));
 
+    TVector3 tmp_closepoint_Pos;
+    double tmp_closepoint_Dist;
+    CloseDist(RecoEvent.FragmentTracks[0], TrackHitCont[i], tmp_closepoint_Dist, tmp_closepoint_Pos);
 
     InfoInit tempInit;
     tempInit.charge = -1;
-    tempInit.posX = TrackHitCont[i]->GetTrackX() *0.1;
-    tempInit.posY = TrackHitCont[i]->GetTrackY() *0.1;
-    tempInit.posZ = TrackHitCont[i]->GetTrackZ() *0.1;
+    tempInit.posX = tmp_closepoint_Pos.X();
+    tempInit.posY = tmp_closepoint_Pos.Y();
+    tempInit.posZ = tmp_closepoint_Pos.Z();
 
     double tmp_momZ = 1.;
     tempInit.momX = tmp_momZ*TrackHitCont[i]->GetTrackA();
@@ -338,6 +344,45 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
     tempInit.momZ = tmp_momZ;
 
     RecoEvent.TrackDAFInit.insert(std::make_pair(i, tempInit));
+
+
+    SimHit tempFirstHit;
+    double posZ_firstHit = -999.;
+    for(int j = 0; j < TrackHitCont[i]->GetFiberHit().size(); ++j)
+      {
+        int i_fiber = TrackHitCont[i]->GetFiberHit()[j];
+        if(i_fiber==-1)
+          continue;
+
+        int i_ud; // upstream -> 0 , downstream -> 1
+
+        if(j/3 == 0)
+          {
+            posZ_firstHit = att.fiber_mft1_pos_z;
+            if(i_fiber < 128) i_ud = (i_fiber%2 == 0);
+            else              i_ud = (i_fiber%2 == 1);
+          }
+        else
+          {
+            posZ_firstHit = att.fiber_mft2_pos_z;
+            if(i_fiber < 128) i_ud = (i_fiber%2 == 1);
+            else              i_ud = (i_fiber%2 == 0);
+          }
+
+        posZ_firstHit += 0.4*(j%3-1);
+        posZ_firstHit += 0.02*(2*i_ud-1);
+
+        //std::cout << Form("j, i_ud, posZ_firstHit: %d, %d, %f ", j, i_ud, posZ_firstHit) << std::endl;
+        
+        break;
+      }
+
+
+    tempFirstHit.hitX = TrackHitCont[i]->GetTrackX() *0.1 + TrackHitCont[i]->GetTrackA() * (posZ_firstHit - TrackHitCont[i]->GetTrackZ() *0.1);
+    tempFirstHit.hitY = TrackHitCont[i]->GetTrackY() *0.1 + TrackHitCont[i]->GetTrackB() * (posZ_firstHit - TrackHitCont[i]->GetTrackZ() *0.1);
+    tempFirstHit.hitZ = posZ_firstHit;
+
+    RecoEvent.TrackFirstHit.insert(std::make_pair(i, tempFirstHit));
   }
 
   return 0;
@@ -390,6 +435,51 @@ double TWASAFinder<Out>::GetPSB_Phi(int _seg)
   if( _phi > TMath::Pi() ) _phi -= 2*TMath::Pi();
 
   return _phi;
+}
+
+
+template <class Out>
+void TWASAFinder<Out>::CloseDist(FragmentTrack FragTrack, TrackHit* WASATrack, double& distance, TVector3& centroid)
+{
+//WASATrack->Pz = 1.
+//Pos and dist in cm
+  TVector3 n(FragTrack.GetMom().Y() * 1. - FragTrack.GetMom().Z() * WASATrack->GetTrackB(),
+             FragTrack.GetMom().Z() * WASATrack->GetTrackA() - FragTrack.GetMom().X() * 1.,
+             FragTrack.GetMom().X() * WASATrack->GetTrackB() - FragTrack.GetMom().Y() * WASATrack->GetTrackA());
+
+  TVector3 n1(FragTrack.GetMom().Y() * n.Z() - FragTrack.GetMom().Z() * n.Y(),
+              FragTrack.GetMom().Z() * n.X() - FragTrack.GetMom().X() * n.Z(),
+              FragTrack.GetMom().X() * n.Y() - FragTrack.GetMom().Y() * n.X());
+
+  TVector3 n2(WASATrack->GetTrackB() * n.Z() - 1. * n.Y(),
+              1. * n.X() - WASATrack->GetTrackA() * n.Z(),
+              WASATrack->GetTrackA() * n.Y() - WASATrack->GetTrackB() * n.X());
+
+  double FragmentFactor = ((WASATrack->GetTrackX()*0.1 - FragTrack.GetPos().X()) * n2.X()
+                            + (WASATrack->GetTrackY()*0.1 - FragTrack.GetPos().Y()) * n2.Y()
+                            + (WASATrack->GetTrackZ()*0.1 - FragTrack.GetPos().Z()) * n2.Z()) /
+                                  (FragTrack.GetMom().X() * n2.X() + FragTrack.GetMom().Y() * n2.Y()
+                                   + FragTrack.GetMom().Z() * n2.Z());
+
+  double PionFactor = -((WASATrack->GetTrackX()*0.1 - FragTrack.GetPos().X()) * n1.X()
+                         + (WASATrack->GetTrackY()*0.1 - FragTrack.GetPos().Y()) * n1.Y()
+                         + (WASATrack->GetTrackZ()*0.1 - FragTrack.GetPos().Z()) * n1.Z()) /
+                                (WASATrack->GetTrackA() * n1.X() + WASATrack->GetTrackB() * n1.Y()
+                                 + 1. * n1.Z());
+  
+  TVector3 c1(FragTrack.GetPos().X() + FragmentFactor * FragTrack.GetMom().X(),
+              FragTrack.GetPos().Y() + FragmentFactor * FragTrack.GetMom().Y(),
+              FragTrack.GetPos().Z() + FragmentFactor * FragTrack.GetMom().Z());
+  
+  TVector3 c2(WASATrack->GetTrackX()*0.1 + PionFactor * WASATrack->GetTrackA(),
+              WASATrack->GetTrackY()*0.1 + PionFactor * WASATrack->GetTrackB(),
+              WASATrack->GetTrackZ()*0.1 + PionFactor * 1.);;
+
+  distance = (c2 - c1).Mag();
+  centroid = (c1 + c2);
+  centroid *= 0.5;
+
+  return;
 }
 
 

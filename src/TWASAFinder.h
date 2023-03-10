@@ -56,9 +56,7 @@ private:
   double GetPSB_R(int _seg);
   double GetPSB_Phi(int _seg);
 
-
-
-
+  void CloseDist(FragmentTrack FragTrack, TrackHit* WASATrack, double& distance, TVector3& centroid);
 
 
   struct LocalHists

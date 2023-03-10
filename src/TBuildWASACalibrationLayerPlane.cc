@@ -442,11 +442,14 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
         }
       if(flag_u && flag_d)
         {
+          double t_t0 = 0.;
+          if(hit_t0_main) t_t0 = hit_t0_main->GetTime();
+
           int t_u            = event.s2tq1->tdc_psb[i][0][i_u];
           int t_d            = event.s2tq1->tdc_psb[i][1][i_d];
           int q_u            = event.s2tq1->qdc_psb[i][0];
           int q_d            = event.s2tq1->qdc_psb[i][1];
-          PSBHitAna* hit_ana = new PSBHitAna(i, t_u, t_d, q_u, q_d, par.get());
+          PSBHitAna* hit_ana = new PSBHitAna(i, t_u, t_d, q_u, q_d, par.get(), t_t0);
           PSBHitCont.emplace_back(hit_ana);
         }
     }
@@ -511,9 +514,12 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       {
         if(par->psfe_tcut_min < event.s2tq2->tdc_psfe[i][j] && event.s2tq2->tdc_psfe[i][j] < par->psfe_tcut_max)
           {
+            double t_t0 = 0.;
+            if(hit_t0_main) t_t0 = hit_t0_main->GetTime();
+
             int t_buf           = event.s2tq2->tdc_psfe[i][j];
             int q_buf           = event.s2tq2->qdc_psfe[i];
-            PSFEHitAna* hit_ana = new PSFEHitAna(i, t_buf, q_buf, par.get());
+            PSFEHitAna* hit_ana = new PSFEHitAna(i, t_buf, q_buf, par.get(), t_t0);
             PSFEHitCont.emplace_back(hit_ana);
           }
       }
@@ -564,6 +570,9 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
       RecoEvent.ListHits[G4Sol::PSFE].emplace_back(measurement.release());
+
+      MeasurementInfo measinfo(-9999., hit_PSFE->GetTime(), -9999.);
+      RecoEvent.ListHitsInfo[G4Sol::PSFE].emplace_back(measinfo);
     }
 
   for(int i = 0; i < (int)PSFEHitCont.size(); ++i)
@@ -809,8 +818,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   for(int i = 0; i < (int)event.s2fiber->fiberhit.size(); ++i)
     {
       double t_t0 = 0.;
-      if(hit_t0_main)
-        t_t0 = hit_t0_main->GetTime();
+      if(hit_t0_main) t_t0 = hit_t0_main->GetTime();
       FiberHitAna* hit_ana = new FiberHitAna(event.s2fiber->fiberhit[i], par.get(), t_r, t_t0);
 
       if(!hit_ana->IsValid())

@@ -52,7 +52,7 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   field = 1; // Tesla
 
   //  WASA  //////
-  wasa_tof_offset = 0;
+  wasa_tof_offset = 3.402;
 
   //  Fiber  //////
   double s2fiber_sfp0_mean = -1510; // mft12

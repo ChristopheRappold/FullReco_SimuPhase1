@@ -141,7 +141,11 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
             break;
           case Task::TASKDECAYVTX:
             if(Attributes.TaskConfig.Task_DecayVtx)
-              list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes));
+              list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes, 0)); // 0-> pi- analysis
+            break;
+          case Task::TASKDECAYVTX_PIPLUS:
+            if(Attributes.TaskConfig.Task_DecayVtx_piplus)
+              list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes, 1)); // 1-> pi+ analysis
             break;
           default:
             break;
@@ -265,19 +269,19 @@ int FullRecoTask<TEOut>::EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* Ou
 template<class TEOut>
 int FullRecoTask<TEOut>::EventProcess(FullRecoEvent& RecoEvent,TEOut* OutTree)
 {
-
   for(auto process = list_processMC.begin(), process_last = list_processMC.end(); process!=process_last;++process)
     {
       //std::std::cout<<"courrent process:"<<(*process)->signature<<std::endl;
       if( (*(*process))(RecoEvent,OutTree) != 0)
-	{
-	  AnaHisto->h_task_exit.h->Fill((*process)->signature.c_str(),1);
-	  Attributes._logger->warn("current process:{} failed", (*process)->signature);
-	  return -1;
-	}
+        {
+          AnaHisto->h_task_exit.h->Fill((*process)->signature.c_str(),1);
+          Attributes._logger->warn("current process:{} failed", (*process)->signature);
+          return -1;
+        }
     }
   return 0;
 }
+
 
 template class FullRecoTask<MCAnaEventG4Sol>;
 template class FullRecoTask<Ana_WasaEvent>;

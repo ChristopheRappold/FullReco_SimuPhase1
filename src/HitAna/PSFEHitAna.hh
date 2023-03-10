@@ -6,7 +6,7 @@
 class PSFEHitAna
 {
   public:
-    PSFEHitAna(int seg, int t, int q, ParaManager *par);
+    PSFEHitAna(int seg, int t, int q, ParaManager *par, double t_t0);
     ~PSFEHitAna();
     int GetSeg(){return _seg;};
     int GetT(){return _t;};

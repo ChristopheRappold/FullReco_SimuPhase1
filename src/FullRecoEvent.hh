@@ -447,6 +447,7 @@ struct InfoPar
   double mass   = -999.;
   double Eloss  = 0.;
   double time   = 0.;
+  double TOT    = 0.;
   double length = 0.;
 };
 
@@ -666,6 +667,7 @@ struct Hyp
   Int_t Mother_IsFromHyp;
 
   //Daughters:
+  Int_t PDG_Fragment;
   Int_t Id_Fragment;
   TLorentzVector MomE_Fragment;
   Double32_t Chi2ndf_Fragment;
@@ -674,6 +676,7 @@ struct Hyp
   Double32_t Angle_MotherFragment;
   Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
 
+  Int_t PDG_Pion;
   Int_t Id_Pion;
   TLorentzVector MomE_Pion;
   Double32_t Chi2ndf_Pion;
@@ -782,6 +785,7 @@ public:
   std::unordered_map<int, std::vector<std::vector<SimHit> > > TrackDAFSim;
   std::unordered_map<int, InfoInit> TrackDAFInit;
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
+  std::unordered_map<int, SimHit > TrackFirstHit;
 
   std::vector<CandTrack> TracksFound;
   std::vector<IdHit> IdHitsToMeasurement;

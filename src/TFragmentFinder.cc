@@ -54,7 +54,7 @@ int TFragmentFinder<Out>::FinderFragment(FullRecoEvent& RecoEvent)
 
   if(recons_from_FRS_MDC == 2)
     {
-      FragmentMDCTracksFinder(RecoEvent.DAF_results, Fragment_pdg, RecoEvent.FragmentTracks);
+      //FragmentMDCTracksFinder(RecoEvent.DAF_results, Fragment_pdg, RecoEvent.FragmentTracks);
       LocalHisto.hopt_1_4->Fill(RecoEvent.FragmentTracks.size());
       return 0;
     }
@@ -212,7 +212,7 @@ void TFragmentFinder<Out>::RealFragmentFinder(std::unordered_map<int, std::vecto
   return;
 }
 
-
+/*
 template <class Out>
 void TFragmentFinder<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
                                                     std::vector<FragmentTrack>& FragmentMDCTracks)
@@ -249,7 +249,7 @@ void TFragmentFinder<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSo
 
   return;
 }
-
+*/
 
 template class TFragmentFinder<MCAnaEventG4Sol>;
 template class TFragmentFinder<Ana_WasaEvent>;

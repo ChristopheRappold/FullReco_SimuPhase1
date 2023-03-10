@@ -5,15 +5,15 @@
 #include <iostream>
 #include <math.h>
 
-PSBHitAna::PSBHitAna(int seg, int t_u, int t_d, int q_u, int q_d, ParaManager *par){
+PSBHitAna::PSBHitAna(int seg, int t_u, int t_d, int q_u, int q_d, ParaManager *par, double t_t0){
   _seg     = seg;
   _t_u     = t_u;
   _t_d     = t_d;
   _q_u     = q_u;
   _q_d     = q_d;
   SetRPhi();
-  _time_u = t_u * par->psb_ch2ns[seg][0] + par->psb_off_time[seg][0];
-  _time_d = t_d * par->psb_ch2ns[seg][1] + par->psb_off_time[seg][1];
+  _time_u = t_u * par->psb_ch2ns[seg][0] + par->psb_off_time[seg][0] - t_t0 + par->wasa_tof_offset;
+  _time_d = t_d * par->psb_ch2ns[seg][1] + par->psb_off_time[seg][1] - t_t0 + par->wasa_tof_offset;
   _time   = (_time_u + _time_d)/2.;
   _z      = (_time_u - _time_d) * par->psb_zpar[seg];
   //_time = (t_u * par->psb_ch2ns + t_d * par->psb_ch2ns)/2. + par->psb_off_time[seg];

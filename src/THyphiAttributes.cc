@@ -87,8 +87,11 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   RF_OutputEvents = false;
 
+
   //Optics parameters
-  optics_name  = config.Get<std::string>("Optics_name");
+  if(Config.IsAvailable("Optics_name")) optics_name = Config.Get<std::string>("Optics_name");
+  else                                  optics_name = "./calib/optics/optics_par.csv";
+
   std::ifstream ifs_optics ( optics_name );
   if(ifs_optics.is_open()){
     const std::string CommentSymbol("#");
@@ -121,6 +124,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   optics_s2z = 4187.5; //Ti: 4150 mm, take this value just for easy expression
   
+  fiber_mft1_pos_z = 226.93 - 0.6 - 0.02;
+  fiber_mft2_pos_z = 230.93 - 0.6 + 0.02;
+
   psb_pos_x = 0.5; psb_pos_y = 5.5; psb_pos_z = 2760.;
   psb_rot_z = -0.4;
   cut_psb_phi = 0.4;
@@ -139,7 +145,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
         for(int l=0; l<3; ++l)
           fiber_mft_cor_par[i][j][k][l] = 0.;
 
-  fiber_name_mftcor  = config.Get<std::string>("Fiber_MFTCor_name");
+  if(Config.IsAvailable("Fiber_MFTCor_name")) fiber_name_mftcor = Config.Get<std::string>("Fiber_MFTCor_name");
+  else                                        fiber_name_mftcor = "./calib/fiber_mftcor/fiber_mftcor.csv";
+
   std::ifstream ifs_mftcorfiber ( fiber_name_mftcor );
   if(ifs_mftcorfiber.is_open())
   {
@@ -176,6 +184,19 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     printf(" ! fail to open  : %s\n", fiber_name_mftcor.c_str());
     exit(-1);
   }
+
+
+  // PID Cuts
+  if(Config.IsAvailable("Pion_Cut_name"))
+    pi_cut_name = Config.Get<std::string>("Pion_Cut_name");
+  else
+    pi_cut_name = "./calib/pid_cuts/cut_pi.root";
+
+  TFile *f_cut = new TFile(pi_cut_name.c_str());
+  cut_pi = (TCutG*)f_cut->Get("cut_pi");
+
+  printf("pion cut loaded : %s\n", pi_cut_name.c_str());
+
 
   TaskConfig.Init(Config);
 
@@ -709,6 +730,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
   if(Config.IsAvailable("Task_DecayVtx"))
     Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
+  if(Config.IsAvailable("Task_DecayVtx_pi+"))
+    Task_DecayVtx_piplus = Config.Get<bool>("Task_DecayVtx_pi+");
   if(Config.IsAvailable("Task_ReStart"))
     Task_ReStart = Config.Get<bool>("Task_ReStart");
 
@@ -756,6 +779,8 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKKALMANDAF);
 	  if(s == "Task_DecayVtx")
 	    Task_Order.push_back(TASKDECAYVTX);
+    if(s == "Task_DecayVtx_pi+")
+      Task_Order.push_back(TASKDECAYVTX_PIPLUS);
 	  if(s == "Task_ReStart")
 	    Task_Order.push_back(TASKRESTART);
 	}
@@ -803,6 +828,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Task_CheckRZ         = TaskConfig.Task_CheckRZ;
   out.RunTask.Task_KalmanDAF       = TaskConfig.Task_KalmanDAF;
   out.RunTask.Task_DecayVtx        = TaskConfig.Task_DecayVtx;
+  out.RunTask.Task_DecayVtx_piplus = TaskConfig.Task_DecayVtx_piplus;
   out.RunTask.Task_ReStart         = TaskConfig.Task_ReStart;
 
   out.RunAttrGeneral.Hash = Hash;

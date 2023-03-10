@@ -52,8 +52,8 @@ private:
   void RealFragmentFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                          int& fragment_pdg, std::vector<FragmentTrack>& RealFragmentTracks);
 
-  void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
-                                std::vector<FragmentTrack>& FragmentMDCTracks);
+//  void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
+//                                std::vector<FragmentTrack>& FragmentMDCTracks);
 
   PDG_fromName pid_fromName;
 

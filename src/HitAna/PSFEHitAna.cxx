@@ -5,12 +5,12 @@
 #include <iostream>
 #include <math.h>
 
-PSFEHitAna::PSFEHitAna(int seg, int t, int q, ParaManager *par){
+PSFEHitAna::PSFEHitAna(int seg, int t, int q, ParaManager *par, double t_t0){
   _seg     = seg;
   _t       = t;
   _q       = q;
   SetZRPhi(par);
-  _time = t * par->psfe_ch2ns;
+  _time = t * par->psfe_ch2ns - t_t0 + par->wasa_tof_offset;
 }
 
 PSFEHitAna::~PSFEHitAna() {}

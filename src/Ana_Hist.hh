@@ -36,6 +36,7 @@ enum StateHist : int
   PRIMVTX,
   PRIMVTX_SI,
   DECAYVTX,
+  DECAYVTX_PIPLUS,
   FRAGMENT,
   WASA,
   SIZEOF_STATEHIST
@@ -130,7 +131,10 @@ class Ana_Hist
   Hist<TH2F> h_beta_mom;
   Hist<TH2F> h_beta_mom2;
   Hist<TH2F> h_beta_mom3;
-  
+  Hist<TH2F> h_beta_momcharge;
+  Hist<TH2F> h_beta_momcharge2;
+  Hist<TH2F> h_beta_momcharge3;
+
   Hist<TH2F> h_pv_mom;
   Hist<TH2F> h_pv_beta;
   Hist<TH2F> h_pv_mass;
@@ -435,116 +439,142 @@ class Ana_Hist
 
 
   // Decay Vertex
-  Hist<TH1F> h_P_fragments ;
-  Hist<TH1F> h_Pt_fragments ;
-  Hist<TH1F> h_Pz_fragments ;
-  Hist<TH1F> h_Dist_FragmentTrackPrimVtx ;
+  Hist<TH1F> h_P_fragments[2] ;
+  Hist<TH1F> h_Pt_fragments[2] ;
+  Hist<TH1F> h_Pz_fragments[2] ;
+  Hist<TH1F> h_Dist_FragmentTrackPrimVtx[2] ;
 
-  Hist<TH1F> h_P_pions ;
-  Hist<TH1F> h_Pt_pions ;
-  Hist<TH1F> h_Pz_pions ;
-  Hist<TH1F> h_Chi2ndf_pions ;
+  Hist<TH1F> h_P_pions[2] ;
+  Hist<TH1F> h_Pt_pions[2] ;
+  Hist<TH1F> h_Pz_pions[2] ;
+  Hist<TH1F> h_Chi2ndf_pions[2] ;
 
-  Hist<TH1F> h_Pt_cutpions ;
-  Hist<TH1F> h_Pz_cutpions ;
+  Hist<TH1F> h_Pt_cutpions[2] ;
+  Hist<TH1F> h_Pz_cutpions[2] ;
 
-  Hist<TH1F> h_Nrealpions ;
-  Hist<TH1F> h_Ncutpions ;
-  Hist<TH1F> h_Npions ;
+  Hist<TH1F> h_Nrealpions[2] ;
+  Hist<TH1F> h_Ncutpions[2] ;
+  Hist<TH1F> h_Npions[2] ;
 
-  Hist<TH1F> h_Closedist_Distance ;
-  Hist<TH1F> h_Closedist_PosZ ;
-  Hist<TH2F> h_Dist_DecayTrackPrimVtx ;
+  Hist<TH1F> h_Closedist_Distance[2] ;
+  Hist<TH1F> h_Closedist_PosZ[2] ;
+  Hist<TH2F> h_Dist_DecayTrackPrimVtx[2] ;
 
-  Hist<TH1F> h_Closedist_cutDistance ;
-  Hist<TH1F> h_Closedist_cutPosZ ;
-  Hist<TH2F> h_Dist_cutDecayTrackPrimVtx ;
+  Hist<TH1F> h_Closedist_cutDistance[2] ;
+  Hist<TH1F> h_Closedist_cutPosZ[2] ;
+  Hist<TH2F> h_Dist_cutDecayTrackPrimVtx[2] ;
 
-  Hist<TH1F> h_DecayVertexDistance ;
-  Hist<TH1F> h_DecayVertexDistanceX ;
-  Hist<TH1F> h_DecayVertexDistanceY ;
-  Hist<TH1F> h_DecayVertexDistanceZ ;
+  Hist<TH1F> h_DecayVertexDistance[2] ;
+  Hist<TH1F> h_DecayVertexDistanceX[2] ;
+  Hist<TH1F> h_DecayVertexDistanceY[2] ;
+  Hist<TH1F> h_DecayVertexDistanceZ[2] ;
 
-  Hist<TH1F> h_DecayVertexDistance_centroid ;
-  Hist<TH1F> h_DecayVertexDistanceX_centroid ;
-  Hist<TH1F> h_DecayVertexDistanceY_centroid ;
-  Hist<TH1F> h_DecayVertexDistanceZ_centroid ;
+  Hist<TH1F> h_DecayVertexDistance_centroid[2] ;
+  Hist<TH1F> h_DecayVertexDistanceX_centroid[2] ;
+  Hist<TH1F> h_DecayVertexDistanceY_centroid[2] ;
+  Hist<TH1F> h_DecayVertexDistanceZ_centroid[2] ;
 
-  Hist<TH1F> h_DecayVertexDistance_KFPart ;
-  Hist<TH1F> h_DecayVertexDistanceX_KFPart ;
-  Hist<TH1F> h_DecayVertexDistanceY_KFPart ;
-  Hist<TH1F> h_DecayVertexDistanceZ_KFPart ;
+  Hist<TH1F> h_DecayVertexDistance_KFPart[2] ;
+  Hist<TH1F> h_DecayVertexDistanceX_KFPart[2] ;
+  Hist<TH1F> h_DecayVertexDistanceY_KFPart[2] ;
+  Hist<TH1F> h_DecayVertexDistanceZ_KFPart[2] ;
 
-  Hist<TH1F> h_DecayVertexDistance_KFPart_PrimVtx ;
-  Hist<TH1F> h_DecayVertexDistanceX_KFPart_PrimVtx ;
-  Hist<TH1F> h_DecayVertexDistanceY_KFPart_PrimVtx ;
-  Hist<TH1F> h_DecayVertexDistanceZ_KFPart_PrimVtx ;
+  Hist<TH1F> h_DecayVertexDistance_KFPart_PrimVtx[2] ;
+  Hist<TH1F> h_DecayVertexDistanceX_KFPart_PrimVtx[2] ;
+  Hist<TH1F> h_DecayVertexDistanceY_KFPart_PrimVtx[2] ;
+  Hist<TH1F> h_DecayVertexDistanceZ_KFPart_PrimVtx[2] ;
 
-  Hist<TH1F> h_DecayVertexDistance_KFPart_PrimVtx_Mass ;
-  Hist<TH1F> h_DecayVertexDistanceX_KFPart_PrimVtx_Mass ;
-  Hist<TH1F> h_DecayVertexDistanceY_KFPart_PrimVtx_Mass ;
-  Hist<TH1F> h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass ;
+  Hist<TH1F> h_DecayVertexDistance_KFPart_PrimVtx_Mass[2] ;
+  Hist<TH1F> h_DecayVertexDistanceX_KFPart_PrimVtx_Mass[2] ;
+  Hist<TH1F> h_DecayVertexDistanceY_KFPart_PrimVtx_Mass[2] ;
+  Hist<TH1F> h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass[2] ;
 
-  Hist<TH1F> h_DecayVertexcutDistance ;
-  Hist<TH1F> h_DecayVertexcutDistanceX ;
-  Hist<TH1F> h_DecayVertexcutDistanceY ;
-  Hist<TH1F> h_DecayVertexcutDistanceZ ;
+  Hist<TH1F> h_DecayVertexcutDistance[2] ;
+  Hist<TH1F> h_DecayVertexcutDistanceX[2] ;
+  Hist<TH1F> h_DecayVertexcutDistanceY[2] ;
+  Hist<TH1F> h_DecayVertexcutDistanceZ[2] ;
 
 /*
-  Hist<TH1F> h_DecayVertexcutDistance_KFPart ;
-  Hist<TH1F> h_DecayVertexcutDistanceX_KFPart ;
-  Hist<TH1F> h_DecayVertexcutDistanceY_KFPart ;
-  Hist<TH1F> h_DecayVertexcutDistanceZ_KFPart ;
+  Hist<TH1F> h_DecayVertexcutDistance_KFPart[2] ;
+  Hist<TH1F> h_DecayVertexcutDistanceX_KFPart[2] ;
+  Hist<TH1F> h_DecayVertexcutDistanceY_KFPart[2] ;
+  Hist<TH1F> h_DecayVertexcutDistanceZ_KFPart[2] ;
 */
 
-  Hist<TH1F> h_DecayVertexcutDistance_KFPart_PrimVtx ;
-  Hist<TH1F> h_DecayVertexcutDistanceX_KFPart_PrimVtx ;
-  Hist<TH1F> h_DecayVertexcutDistanceY_KFPart_PrimVtx ;
-  Hist<TH1F> h_DecayVertexcutDistanceZ_KFPart_PrimVtx ;
+  Hist<TH1F> h_DecayVertexcutDistance_KFPart_PrimVtx[2] ;
+  Hist<TH1F> h_DecayVertexcutDistanceX_KFPart_PrimVtx[2] ;
+  Hist<TH1F> h_DecayVertexcutDistanceY_KFPart_PrimVtx[2] ;
+  Hist<TH1F> h_DecayVertexcutDistanceZ_KFPart_PrimVtx[2] ;
 
-  Hist<TH1F> h_DecayVertexPosZ_real ;
-  Hist<TH1F> h_DecayVertexPosZ_vfunction ;
-  Hist<TH1F> h_DecayVertexPosZ_centroid ;
-  Hist<TH1F> h_DecayVertexPosZ_KFPart ;
-  Hist<TH1F> h_DecayVertexPosZ_AllVfunc ;
-  Hist<TH1F> h_DecayVertexPosZ_AllCentroid ;
-  Hist<TH1F> h_DecayVertexPosZ_AllKFPart ;
+  Hist<TH1F> h_DecayVertexPosZ_real[2] ;
+  Hist<TH1F> h_DecayVertexPosZ_vfunction[2] ;
+  Hist<TH1F> h_DecayVertexPosZ_centroid[2] ;
+  Hist<TH1F> h_DecayVertexPosZ_KFPart[2] ;
+  Hist<TH1F> h_DecayVertexPosZ_AllVfunc[2] ;
+  Hist<TH1F> h_DecayVertexPosZ_AllCentroid[2] ;
+  Hist<TH1F> h_DecayVertexPosZ_AllKFPart[2] ;
 
-  Hist<TH2F> h_N_MotherTracks ;
-  Hist<TH2F> h_Dist_DaughterTracks ;
-  Hist<TH2F> h_Angle_MotherFragment ;
-  Hist<TH2F> h_Angle_MotherPion ;
-  Hist<TH2F> h_Chi2ndf_MotherTracks ;
-  Hist<TH2F> h_Dist_MotherTrackPrimVtx ;
-  Hist<TH2F> h_Theta_MotherTrackPrimVtx ;
-  Hist<TH2F> h_DecayVertexPosZ_KFPart_PrimVtx ;
-  Hist<TH2F> h_DecayFragmentMomZ_KFPart_PrimVtx ;
-  Hist<TH2F> h_DecayPionMomZ_KFPart_PrimVtx ;
-  Hist<TH2F> h_Hyp_ArmenterosPodolanski ;
-  Hist<TH2F> h_Hyp_CutArmenterosPodolanski ;
+  Hist<TH2F> h_N_MotherTracks[2] ;
+  Hist<TH2F> h_Dist_DaughterTracks[2] ;
+  Hist<TH2F> h_Angle_MotherFragment[2] ;
+  Hist<TH2F> h_Angle_MotherPion[2] ;
+  Hist<TH2F> h_Chi2ndf_MotherTracks[2] ;
+  Hist<TH2F> h_Dist_MotherTrackPrimVtx[2] ;
+  Hist<TH2F> h_Theta_MotherTrackPrimVtx[2] ;
+  Hist<TH2F> h_DecayVertexPosZ_KFPart_PrimVtx[2] ;
+  Hist<TH2F> h_DecayFragmentMomZ_KFPart_PrimVtx[2] ;
+  Hist<TH2F> h_DecayPionMomZ_KFPart_PrimVtx[2] ;
+  Hist<TH2F> h_Hyp_ArmenterosPodolanski[2] ;
+  Hist<TH2F> h_Hyp_CutArmenterosPodolanski[2] ;
   
-  Hist<TH1F> h_HypInvariantMass ;
-  Hist<TH1F> h_HypErrorInvariantMass ;
+  Hist<TH1F> h_HypInvariantMass[2] ;
+  Hist<TH1F> h_HypInvariantMass_Z05[2] ;
+  Hist<TH1F> h_HypInvariantMass_Z10[2] ;
+  Hist<TH1F> h_HypInvariantMass_Z15[2] ;
+  Hist<TH1F> h_HypInvariantMass_Z20[2] ;
+  Hist<TH1F> h_HypErrorInvariantMass[2] ;
 
-  Hist<TH1F> h_Hyp_RealLifeTime ;
-  Hist<TH1F> h_HypLifeTime_PrimVtx ;
-  Hist<TH1F> h_HypErrorLifeTime_PrimVtx ;
-  Hist<TH1F> h_HypcutLifeTime_PrimVtx ;
+  Hist<TH1F> h_Hyp_RealLifeTime[2] ;
+  Hist<TH1F> h_HypLifeTime_PrimVtx[2] ;
+  Hist<TH1F> h_HypErrorLifeTime_PrimVtx[2] ;
+  Hist<TH1F> h_HypcutLifeTime_PrimVtx[2] ;
 
-  Hist<TH2F> h_HypInvariantMassCheck ;
-  Hist<TH2F> h_HypInvariantErrorMassCheck ;
+  Hist<TH2F> h_HypInvariantMassCheck[2] ;
+  Hist<TH2F> h_HypInvariantErrorMassCheck[2] ;
 
-  Hist<TH1F> h_HypInvariantMass_LorentzVect ;
-  Hist<TH1F> h_HypInvariantMass_CutLorentzVect ;
+  Hist<TH1F> h_HypInvariantMass_LorentzVect[2] ;
+  Hist<TH1F> h_HypInvariantMass_CutLorentzVect[2] ;
 
-  Hist<TH1F> h_EffPosZ_real ;
-  Hist<TH1F> h_EffPosZ_preKF ;
-  Hist<TH1F> h_EffPosZ_postKF ;
-  Hist<TH1F> h_EffPosZ_preKFPart ;
-  Hist<TH1F> h_EffPosZ_postKFPart ;
+  Hist<TH1F> h_EffPosZ_real[2] ;
+  Hist<TH1F> h_EffPosZ_preKF[2] ;
+  Hist<TH1F> h_EffPosZ_postKF[2] ;
+  Hist<TH1F> h_EffPosZ_preKFPart[2] ;
+  Hist<TH1F> h_EffPosZ_postKFPart[2] ;
 
-  Hist<TH2F> h_EffPosZPosR_real ;
-  Hist<TH2F> h_EffPosZPosR_postKFPart ;
+  Hist<TH2F> h_EffPosZPosR_real[2] ;
+  Hist<TH2F> h_EffPosZPosR_postKFPart[2] ;
+
+/*
+  Hist<TH1F> h_N_Si_MotherTracks[2] ;
+
+  Hist<TH1F> h_DecayVertexDistance_AllVfunc[2] ;
+  Hist<TH1F> h_DecayVertexDistanceX_AllVfunc[2] ;
+  Hist<TH1F> h_DecayVertexDistanceY_AllVfunc[2] ;
+  Hist<TH1F> h_DecayVertexDistanceZ_AllVfunc[2] ;
+
+  Hist<TH1F> h_DecayVertexDistance_AllCentroid[2] ;
+  Hist<TH1F> h_DecayVertexDistanceX_AllCentroid[2] ;
+  Hist<TH1F> h_DecayVertexDistanceY_AllCentroid[2] ;
+  Hist<TH1F> h_DecayVertexDistanceZ_AllCentroid[2] ;
+
+  Hist<TH1F> h_DecayVertexDistance_AllKFPart[2] ;
+  Hist<TH1F> h_DecayVertexDistanceX_AllKFPart[2] ;
+  Hist<TH1F> h_DecayVertexDistanceY_AllKFPart[2] ;
+  Hist<TH1F> h_DecayVertexDistanceZ_AllKFPart[2] ;
+*/
+
+  Hist<TH1F> h_DecayVtxstats[2] ;
+
 
   // CheckFiberXUV
   Hist<TH1F> h_ResidualFiberHitX[7];
@@ -595,30 +625,12 @@ class Ana_Hist
   Hist<TH2F> h_ResidualFiberX_Angle[11][2];
   Hist<TH2F> h_ResidualFiberY_Angle[11][2];
 
-/*
-  Hist<TH1F> h_N_Si_MotherTracks ;
-
-
-  Hist<TH1F> h_DecayVertexDistance_AllVfunc ;
-  Hist<TH1F> h_DecayVertexDistanceX_AllVfunc ;
-  Hist<TH1F> h_DecayVertexDistanceY_AllVfunc ;
-  Hist<TH1F> h_DecayVertexDistanceZ_AllVfunc ;
-
-  Hist<TH1F> h_DecayVertexDistance_AllCentroid ;
-  Hist<TH1F> h_DecayVertexDistanceX_AllCentroid ;
-  Hist<TH1F> h_DecayVertexDistanceY_AllCentroid ;
-  Hist<TH1F> h_DecayVertexDistanceZ_AllCentroid ;
-
-  Hist<TH1F> h_DecayVertexDistance_AllKFPart ;
-  Hist<TH1F> h_DecayVertexDistanceX_AllKFPart ;
-  Hist<TH1F> h_DecayVertexDistanceY_AllKFPart ;
-  Hist<TH1F> h_DecayVertexDistanceZ_AllKFPart ;
-*/
-  Hist<TH1F> h_DecayVtxstats ;
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false, bool Builder = false, bool PrimVtx = true, bool PrimVtx_Si = false, bool DecayVtx = true, bool FragmentFinder = true, bool WASAFinder = true);
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false,
+            bool Builder = false, bool PrimVtx = true, bool PrimVtx_Si = false, bool DecayVtx = true,  bool DecayVtx_piplus = true,
+            bool FragmentFinder = true, bool WASAFinder = true);
   ~Ana_Hist();
 
   int Write(TFile*);

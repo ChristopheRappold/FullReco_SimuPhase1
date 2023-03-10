@@ -169,6 +169,9 @@ void TKalmanFilter_DAF<Out>::SelectHists()
   LocalHisto.h_beta_mom         = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta_mom);
   LocalHisto.h_beta_mom2        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta_mom2);
   LocalHisto.h_beta_mom3        = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta_mom3);
+  LocalHisto.h_beta_momcharge   = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta_momcharge);
+  LocalHisto.h_beta_momcharge2  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta_momcharge2);
+  LocalHisto.h_beta_momcharge3  = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_beta_momcharge3);
   LocalHisto.h_pv_mom           = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_pv_mom);
   LocalHisto.h_pv_beta          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_pv_beta);
   LocalHisto.h_pv_mass          = this->AnaHisto->CloneAndRegister(this->AnaHisto->h_pv_mass);
@@ -356,6 +359,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       const int id_track = it_trackInfo.first;
       auto it_ListHits   = RecoEvent.TrackDAF.find(id_track);
       auto it_ListHitsSim = RecoEvent.TrackDAFSim.find(id_track);
+      auto it_ListFirstHit = RecoEvent.TrackFirstHit.find(id_track);
 
       auto getZpos = [](genfit::AbsMeasurement* m) {
         TVectorD& HitrawRef = m->getRawHitCoords();
@@ -395,7 +399,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             ++n_MiniFiber;
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
-          total_dE += it_trackInfo.second[id_det].Eloss;
+          total_dE += it_trackInfo.second[id_det].Eloss;   //CHECK Change!!
           // std::cout << "id_det : " << id_det << std::endl;
           // std::cout << "id_hit : " << id_hit << std::endl;
           // id_dets.insert(std::make_tuple(getZpos(currentHit), id_det, id_hit));
@@ -563,9 +567,11 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       // const TVector3 firstPos(tempHitrawRef[0], tempHitrawRef[1], getZpos(tempHit));
       //const TVector3 firstPos(0, 0, 0);
 
-      SimHit it_hitFirstSim;
-      if(it_ListHitsSim != RecoEvent.TrackDAFSim.end()) it_hitFirstSim = it_ListHitsSim->second[id_firstDet][0];
-      const TVector3 firstPos(it_hitFirstSim.hitX, it_hitFirstSim.hitY, it_hitFirstSim.hitZ);
+      SimHit it_hitFirst;
+      if(it_ListHitsSim != RecoEvent.TrackDAFSim.end()) it_hitFirst = it_ListHitsSim->second[id_firstDet][0]; //CHECK keep this one?
+      else                                              it_hitFirst = it_ListFirstHit->second;
+
+      const TVector3 firstPos(it_hitFirst.hitX, it_hitFirst.hitY, it_hitFirst.hitZ);
 
       const int PDG     = static_cast<int>(track_state.pdg);
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(PDG);
@@ -738,11 +744,14 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
       //const TVector3 init_point(HitrawRef[0], HitrawRef[1], getZpos(FirstHit));
 
-      double init_x = gRandom->Gaus(it_init->second.posX, 1.0);
-      double init_y = gRandom->Gaus(it_init->second.posY, 1.0);
-      double init_z = gRandom->Gaus(it_init->second.posZ, 3.0);
+      double init_x = it_init->second.posX;
+      double init_y = it_init->second.posY;
+      double init_z = it_init->second.posZ;
+      //double init_x = gRandom->Gaus(it_init->second.posX, 1.0);
+      //double init_y = gRandom->Gaus(it_init->second.posY, 1.0);
+      //double init_z = gRandom->Gaus(it_init->second.posZ, 3.0);
       const TVector3 init_point(init_x, init_y, init_z);
-      //const TVector3 init_point(it_hitFirstSim.hitX, it_hitFirstSim.hitY, it_hitFirstSim.hitZ);
+      //const TVector3 init_point(it_hitFirst.hitX, it_hitFirst.hitY, it_hitFirst.hitZ);
 
       // TVector3 init_point(track_state[9],track_state[10],track_state[11]);
 
@@ -913,9 +922,11 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               assert(kfsop != nullptr);
 
               ResSolDAF tempResults;
-              tempResults.charge    = charge;
+              tempResults.charge    = kfsop->getCharge();
               tempResults.pdg_ini   = PDG;
-              tempResults.pdg_guess = PDG;
+              //tempResults.pdg_guess = PDG; //CHECK modify with PID cuts!!
+              //std::cout << Form("Fit Charge, iniPDG, guessPDG  : %f , %f ,  %d , %d", kfsop->getCharge(), PDG, kfsop->getPDG()) << std::endl;
+
               // Forward
               const TVectorD& referenceState = stateRefOrig.getState();
               // const TVectorD& referenceState = stateToFinalRef.getState();
@@ -969,14 +980,14 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                 unsigned int np = fitTrack->getNumPointsWithMeasurement();
                 //std::cout << "np : " << np << std::endl;
                 for(int i = 0; i < np; ++i)
-		  {
+                  {
                     genfit::TrackPoint* tp_tmp    = fitTrack->getPointWithMeasurementAndFitterInfo(i);//, REP);
-		    if(tp_tmp==nullptr)
-		      {
-			att._logger->debug("E> TrackPoint null ! #i {} / {}\n",i,np);
-			continue;
-		      }
-		    genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(REP));
+                      if(tp_tmp==nullptr)
+                        {
+                          att._logger->debug("E> TrackPoint null ! #i {} / {}\n",i,np);
+                          continue;
+                        }
+                    genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(REP));
                     std::vector<double> weights   = kfi->getWeights();
                     int id_det                    = tp_tmp->getRawMeasurement(0)->getDetId();
                     // std::cout << "id_det : " << id_det << std::endl;
@@ -1009,15 +1020,16 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                         tempResults.ResFiber[id_det - G4Sol::FiberD1_x]    = res;
                         tempResults.WeightFiber[id_det - G4Sol::FiberD1_x] = weights[0];
                       }
-                    else if(id_det>=G4Sol::MiniFiberD1_x && id_det<=G4Sol::MiniFiberD2_u){
-                      const genfit::MeasurementOnPlane& residual = kfi->getResidual(0, false, true);
-                      const TVectorD& resid(residual.getState());
-                      double res = resid(0);
-                      //std::cout << "res : " << res << std::endl;
-                      LocalHisto.h_ResMiniFiber[id_det-G4Sol::MiniFiberD1_x]->Fill(res);
-                      tempResults.ResMiniFiber[id_det-G4Sol::MiniFiberD1_x] = res;
-                      tempResults.WeightMiniFiber[id_det-G4Sol::MiniFiberD1_x] = weights[0];
-                    }
+                    else if(id_det>=G4Sol::MiniFiberD1_x && id_det<=G4Sol::MiniFiberD2_u)
+                      {
+                        const genfit::MeasurementOnPlane& residual = kfi->getResidual(0, false, true);
+                        const TVectorD& resid(residual.getState());
+                        double res = resid(0);
+                        //std::cout << "res : " << res << std::endl;
+                        LocalHisto.h_ResMiniFiber[id_det-G4Sol::MiniFiberD1_x]->Fill(res);
+                        tempResults.ResMiniFiber[id_det-G4Sol::MiniFiberD1_x] = res;
+                        tempResults.WeightMiniFiber[id_det-G4Sol::MiniFiberD1_x] = weights[0];
+                      }
                     else if(id_det == G4Sol::PSCE)
                       {
                         const genfit::MeasurementOnPlane& residual = kfi->getResidual(0, false, true);
@@ -1033,9 +1045,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                         tempResults.WeightPSCE[0] = weights[0];
                       }
                     else
-                      {
-                        continue;
-                      }
+                      continue;
                   }
               }
 
@@ -1060,7 +1070,8 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
               // n_status[static_cast<int>(charge)+1]++;
 
-              if(charge > 0)
+              //if(charge > 0)
+              if(kfsop->getCharge() > 0)
                 {
                   LocalHisto.hd_chi[0]->Fill(chi2 / ndf);
                   LocalHisto.hd_pv[0]->Fill(p_value2);
@@ -1128,9 +1139,12 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               // double Path_lengthMean = Path_length + Path_lengthB;
               double Path_lengthMean = Path_length;
               // Path_lengthMean/=2.;
-              Path_lengthMean += TMath::Sqrt(TMath::Sq(firstPos.X()-att.Target_PositionX)+TMath::Sq(firstPos.Y()-att.Target_PositionY)+TMath::Sq(firstPos.Z()-att.Target_PositionZ)); // DistToTR1;
+              Path_lengthMean += (firstPos-init_point).Mag();
+              //Path_lengthMean += TMath::Sqrt(TMath::Sq(firstPos.X()-att.Target_PositionX)+TMath::Sq(firstPos.Y()-att.Target_PositionY)+TMath::Sq(firstPos.Z()-att.Target_PositionZ)); // DistToTR1;
                                                  // 	  if(ndf==1)
                                                  // 	    Path_lengthMean=Path_length;
+              
+              //std::cout << Form("FirstPos-init_point: %f , %f , %f", (firstPos-init_point).X(), (firstPos-init_point).Y(), (firstPos-init_point).Z()) << std::endl;
 
               LocalHisto.h_Path->Fill(Path_length);
               // LocalHisto.h_Path_Back->Fill(Path_lengthB);
@@ -1209,22 +1223,29 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
               LocalHisto.h_beta->Fill(beta);
               LocalHisto.h_Mass_All->Fill(mass);
-              LocalHisto.h_Mass_charge_All->Fill(mass, charge);
+              //LocalHisto.h_Mass_charge_All->Fill(mass, charge);
+              LocalHisto.h_Mass_charge_All->Fill(mass, kfsop->getCharge());
               LocalHisto.h_beta_mom->Fill(p, beta);
+              LocalHisto.h_beta_momcharge->Fill(p*kfsop->getCharge(), beta);
               LocalHisto.h_path_tof->Fill(Path_lengthMean / 30., time_of_flight);
 
               LocalHisto.h_pv_mom->Fill(p, p_value2);
               LocalHisto.h_pv_beta->Fill(beta, p_value2);
               LocalHisto.h_pv_mass->Fill(mass, p_value2);
 
+              int PDG_guess = 2212;
+              if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()>0) PDG_guess =  211;
+              if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()<0) PDG_guess = -211;
+
               const std::vector<int> hist_to_pdg = {2212, -211, 211, -321, 321};
               for(size_t it_pdg = 0; it_pdg < hist_to_pdg.size(); ++it_pdg)
                 {
-                  if(hist_to_pdg[it_pdg] == PDG)
+                  if(hist_to_pdg[it_pdg] == PDG_guess)
                     {
                       LocalHisto.h_mom_res[it_pdg]->Fill(init_p.Mag(), (init_p.Mag() - p3.Mag()) / init_p.Mag());
 
-                      LocalHisto.h_ResPull[it_pdg][0]->Fill((charge / stateFit[0] - init_p.Mag()));
+                      //LocalHisto.h_ResPull[it_pdg][0]->Fill((charge / stateFit[0] - init_p.Mag()));
+                      LocalHisto.h_ResPull[it_pdg][0]->Fill((kfsop->getCharge() / stateFit[0] - init_p.Mag()));
                       LocalHisto.h_ResPull_normal[it_pdg][0]->Fill(init_p.Mag(), (charge / stateFit[0] - init_p.Mag()) /
                                                                                      init_p.Mag());
                       for(int i_Res = 1; i_Res < 5; ++i_Res)
@@ -1244,14 +1265,18 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                   LocalHisto.h_beta2->Fill(beta);
                   LocalHisto.h_Mass_All2->Fill(mass);
                   LocalHisto.h_beta_mom2->Fill(p, beta);
-                  LocalHisto.h_Mass_charge_All2->Fill(mass, charge);
+                  LocalHisto.h_beta_momcharge2->Fill(p*kfsop->getCharge(), beta);
+                  //LocalHisto.h_Mass_charge_All2->Fill(mass, charge);
+                  LocalHisto.h_Mass_charge_All2->Fill(mass, kfsop->getCharge());
                 }
               if(p_value2 < .1)
                 {
                   LocalHisto.h_beta3->Fill(beta);
                   LocalHisto.h_Mass_All3->Fill(mass);
                   LocalHisto.h_beta_mom3->Fill(p, beta);
-                  LocalHisto.h_Mass_charge_All3->Fill(mass, charge);
+                  LocalHisto.h_beta_momcharge3->Fill(p*kfsop->getCharge(), beta);
+                  //LocalHisto.h_Mass_charge_All3->Fill(mass, charge);
+                  LocalHisto.h_Mass_charge_All3->Fill(mass, kfsop->getCharge());
                   LocalHisto.h_mom_tof_cut->Fill(p, time_of_flight);
                   LocalHisto.h_path_mom_cut->Fill(Path_lengthMean / 30., p);
                   LocalHisto.h_path_tof_cut->Fill(Path_lengthMean / 30., time_of_flight);
@@ -1259,7 +1284,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               tempResults.firstHit     = id_firstDet;
               tempResults.lastHit      = id_lastDet;
               tempResults.Ncentral     = n_Central;
-              tempResults.Nmfiber  = n_MiniFiber;
+              tempResults.Nmfiber      = n_MiniFiber;
               tempResults.dE           = dE;
               tempResults.path_time    = Path_time;
               tempResults.path_length  = Path_lengthMean;
@@ -1270,13 +1295,15 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               tempResults.beta2        = beta_FirstToLast;
               tempResults.mass         = mass;
               tempResults.mass2        = mass2;
+              tempResults.pdg_guess    = PDG_guess;
 
               double m_range[4]  = {0.9383, 3.72738, 0.1396, 2.809};
               double m_charge[4] = {1., 2., -1., 2.};
 
               for(int i = 0; i < 4; i++)
                 // if (TMath::Abs(mass-m_range[i])<0.25*m_range[i] && TMath::Abs(charge-m_charge[i])<0.1)
-                if(TMath::Abs(charge - m_charge[i]) < 0.1)
+                //if(TMath::Abs(charge - m_charge[i]) < 0.1)
+                if(TMath::Abs(kfsop->getCharge() - m_charge[i]) < 0.1)
                   {
                     // double dmass = TMath::Abs(mass-m_range[i])/m_range[i];
                     LocalHisto.h_Mass[i]->Fill(mass);

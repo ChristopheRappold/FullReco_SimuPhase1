@@ -8,6 +8,10 @@
 #include <vector>
 #include <fstream>
 //#include "TRandom3.h"
+
+#include "TFile.h"
+#include "TCutG.h"
+
 #include "FullRecoConfig.hh"
 
 #include "FairBase/FrsSksHypFieldMapFull.h"
@@ -87,22 +91,18 @@ struct Task
   bool Task_CheckRZ = true;
   bool Task_KalmanDAF = true;
   bool Task_DecayVtx = false;
+  bool Task_DecayVtx_piplus = false;
   enum Task_Id
   {
     TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
-    TASKKALMANDAF, TASKDECAYVTX, NBTASKID
+    TASKKALMANDAF, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKFRAGMENTFINDER, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
 
-// struct KF
-// {
-
-
-// };
 
 struct RunDoneDef
   {
@@ -157,6 +157,7 @@ struct RunTaskDef
   bool Task_CheckRZ;
   bool Task_KalmanDAF;
   bool Task_DecayVtx;
+  bool Task_DecayVtx_piplus;
   bool Task_ReStart;
 };
 struct RunAttrGeneralDef
@@ -278,7 +279,8 @@ inline auto InitStorage()
 				 make_column("Task_FindingPerf", &RunTaskDef::Task_FindingPerf),
 				 make_column("Task_CheckRZ", &RunTaskDef::Task_CheckRZ),
 				 make_column("Task_KalmanDAF", &RunTaskDef::Task_KalmanDAF),
-				 make_column("Task_DecayVtx", &RunTaskDef::Task_DecayVtx),
+         make_column("Task_DecayVtx", &RunTaskDef::Task_DecayVtx),
+         make_column("Task_DecayVtx_pi+", &RunTaskDef::Task_DecayVtx_piplus),
 				 make_column("Task_ReStart", &RunTaskDef::Task_ReStart)
 				 ),
 		      make_table(
@@ -355,7 +357,15 @@ class THyphiAttributes
   std::string fiber_name_mftcor;
   std::array<std::array<std::array<std::array<double, 3>, 2>, 3>, 2> fiber_mft_cor_par;
 
-  //PSB
+  // PID Cuts
+  std::string pi_cut_name;
+  TCutG *cut_pi;
+  
+  // MFT
+  double fiber_mft1_pos_z;
+  double fiber_mft2_pos_z;
+
+  // PSB
   double psb_pos_x;
   double psb_pos_y;
   double psb_pos_z;
