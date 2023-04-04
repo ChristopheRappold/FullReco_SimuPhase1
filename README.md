@@ -63,10 +63,11 @@ src/ \
 src/.deps \
 lib/ \
 input/ \
+calib/ \
 field/ \
 config/
 
-The following directories are mandatory : geo/, src/, src/.deps, lib/ and config/. 
+The following directories are mandatory : geo/, src/, src/.deps, lib/, config/ and calib/. 
 If lib or .deps or config is missing just:
 ```sh
 mkdir lib
@@ -78,9 +79,16 @@ mkdir config
 | geo/    | Gathers geometry rootfiles                        | 
 | src/    | Source directory                                  |
 | lib/    | Installation directory for the compiled libraries |
-| input/  | Gathers parameter files for calibrations          |
+| input/  |                                                   |
+| calib/  | Gathers parameter files for calibrations          |
 | field/  | Gathers field map files                           |
 | config/ | Gathers the configuration files                   |
+
+5. The parameter files for the experiment WASA@FRS-S447 must be cloned from the git repository in calib/:
+```sh
+cd calib
+git clone https://gitlab.com/HypHI-GSI/wasa-frs-s447calib.git .
+```
 
 ## Requirements
 
@@ -216,7 +224,7 @@ make -j#
 cd ..
 ```
 
-You will have the libraries in lib/ and the executable ./MainSimu
+You will have the libraries in lib/ and the executables ./MainSimu for simulation input and ./MainData for experimental input
 
 
 ## Usage example
