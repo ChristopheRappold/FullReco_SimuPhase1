@@ -79,6 +79,7 @@ private:
 
   // genfit::DAF* Fitter;
   genfit::AbsKalmanFitter* Fitter;
+  genfit::AbsKalmanFitter* Fitter_pid;
   genfit::AbsKalmanFitter* Fitter_rescue;
   genfit::Track* Vtracks;
   genfit::RKTrackRep* rep;

@@ -138,54 +138,6 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   flag_trackhit_inclusive = true;
 
 
-  //MFT Cor parameters
-  for(int i=0; i<2; ++i)
-    for(int j=0; j<3; ++j)
-      for(int k=0; k<2; ++k)
-        for(int l=0; l<3; ++l)
-          fiber_mft_cor_par[i][j][k][l] = 0.;
-
-  if(Config.IsAvailable("Fiber_MFTCor_name")) fiber_name_mftcor = Config.Get<std::string>("Fiber_MFTCor_name");
-  else                                        fiber_name_mftcor = "./calib/fiber_mftcor/fiber_mftcor.csv";
-
-  std::ifstream ifs_mftcorfiber ( fiber_name_mftcor );
-  if(ifs_mftcorfiber.is_open())
-  {
-    const std::string CommentSymbol("#");
-
-    std::string temp_line;
-    while(std::getline(ifs_mftcorfiber,temp_line))
-    {
-      std::stringstream stream(temp_line);
-      std::string testComment(stream.str());
-      std::size_t it_comment = testComment.find(CommentSymbol);
-      if(it_comment!=std::string::npos)
-      {
-        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
-        continue;
-      }
-
-      int det, lay, seg;
-      double p0, p1, p2;
-
-      stream >> det >> lay >> seg >> p0 >> p1 >> p2;
-      //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
-
-      fiber_mft_cor_par[det][lay][seg][0] = p0;
-      fiber_mft_cor_par[det][lay][seg][1] = p1;
-      fiber_mft_cor_par[det][lay][seg][2] = p2;
-    }
-    //std::cout << "done " << mdc_name_map << std::endl;
-    printf("fiber mft cor loaded : %s\n", fiber_name_mftcor.c_str());
-  }
-  else
-  {
-    //std::cout << " ! fail to open " << mdc_name_map << std::endl;
-    printf(" ! fail to open  : %s\n", fiber_name_mftcor.c_str());
-    exit(-1);
-  }
-
-
   // PID Cuts
   if(Config.IsAvailable("Pion_Cut_name"))
     pi_cut_name = Config.Get<std::string>("Pion_Cut_name");
@@ -196,6 +148,12 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   cut_pi = (TCutG*)f_cut->Get("cut_pi");
 
   printf("pion cut loaded : %s\n", pi_cut_name.c_str());
+
+  // MWDC Par load
+  if(Config.IsAvailable("MWDC_Par_FitorHist"))
+    mwdc_par_fitorhist = Config.Get<int>("MWDC_Par_FitorHist");
+  else
+    mwdc_par_fitorhist = 0;
 
 
   TaskConfig.Init(Config);

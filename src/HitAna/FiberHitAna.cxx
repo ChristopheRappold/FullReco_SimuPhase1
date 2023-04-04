@@ -55,6 +55,34 @@ FiberHitAna::FiberHitAna(FiberHitAna *a){
   i_valid    = a->IsValid();
 }
 
+FiberHitAna::FiberHitAna(int detector, int layer, int fiber, double time, double energy, ParaManager *par)
+{
+  if(detector == 3 || detector == 4) i_sfp = 0; // MFT12
+  if(detector == 2)                  i_sfp = 1; // UFT3
+  if(detector == 0 || detector == 1) i_sfp = 2; // UFT12
+  if(detector == 5 || detector == 6) i_sfp = 3; // DFT12
+  //i_ctdc   = ;
+  //i_ch     = ;
+  i_detector = detector;
+  i_layer    = layer;
+  i_fiber    = fiber;
+  i_clsize   = 1;
+  //t_leading  =  ;
+  //t_trailing =  ;
+  i_ang     = GetAngFiber(par);
+  i_pos     = GetPosFiber(par);
+  i_pos_org = GetPosFiber(par);
+  t_tot = 1.;
+  t_time     = time;
+  i_cl_fiber = fiber;
+  i_z        = GetZFiber(par);
+  i_z_org    = GetZFiber(par);
+  i_res      = par->fiber_res;
+  i_dE       = energy;
+  i_did      = i_detector * 10 + i_layer;
+  i_valid    = true;
+}
+
 FiberHitAna::~FiberHitAna() {}
 
 

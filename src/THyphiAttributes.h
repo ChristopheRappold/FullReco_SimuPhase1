@@ -353,14 +353,13 @@ class THyphiAttributes
   std::map<std::string, std::vector<float>> optics_par;
   double optics_s2z;
 
-  // MFT cor parameters
-  std::string fiber_name_mftcor;
-  std::array<std::array<std::array<std::array<double, 3>, 2>, 3>, 2> fiber_mft_cor_par;
-
   // PID Cuts
   std::string pi_cut_name;
   TCutG *cut_pi;
   
+  // MWDC Par load
+  int mwdc_par_fitorhist; // 0 -> fit ; 1 -> Hist
+
   // MFT
   double fiber_mft1_pos_z;
   double fiber_mft2_pos_z;

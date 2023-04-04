@@ -64,12 +64,7 @@ enum SolDet : int
   Si1y_SD_pad,
   Si2x_SD_pad,
   Si2y_SD_pad, /*17*/
-  MiniFiberD1_x, /*18*/
-  MiniFiberD1_u,
-  MiniFiberD1_v,
-  MiniFiberD2_x,
-  MiniFiberD2_v,
-  MiniFiberD2_u, /*23*/
+  TO_Counter, /*39*/
   FiberD1_x, /*24*/
   FiberD1_u,
   FiberD1_v,
@@ -79,14 +74,19 @@ enum SolDet : int
   FiberD3_x, /*30*/
   FiberD3_u,
   FiberD3_v,
-  FiberD4_x, /*33*/
+  MiniFiberD1_x,
+  MiniFiberD1_u,
+  MiniFiberD1_v,
+  MiniFiberD2_x,
+  MiniFiberD2_v,
+  MiniFiberD2_u,
+  FiberD4_v, /*33*/
   FiberD4_u,
-  FiberD4_v,
+  FiberD4_x,
   FiberD5_x, /*36*/
   FiberD5_u,
   FiberD5_v,
-  TO_Counter, /*39*/
-  PSFE, /*40*/
+  PSFE, /*40*/ //PSB_F
   MG01, /*41*/
   MG02,
   MG03,
@@ -104,8 +104,8 @@ enum SolDet : int
   MG15,
   MG16,
   MG17, /*57*/
-  PSCE, /*58*/
-  PSBE, /*59*/
+  PSCE, /*58*/   //PSB
+  PSBE, /*59*/   //PSB_B
   MWDC01, /*60*/
   MWDC02,
   MWDC03,
@@ -160,11 +160,12 @@ constexpr auto nameLiteralDet = {
     "InSi0"         ,          "InSi1",          "InSi2",          "InSi3",            "TR1",            "TR2",
     "Si1x"          ,           "Si1y",           "Si2x",           "Si2y",
     "Si1x_SD"          ,           "Si1y_SD",           "Si2x_SD",           "Si2y_SD",
-    "Si1x_SD_pad"          ,           "Si1y_SD_pad",           "Si2x_SD_pad",           "Si2y_SD_pad",
-    "MiniFiberD1_x", "MiniFiberD1_u", "MiniFiberD1_v", "MiniFiberD2_x", "MiniFiberD2_v", "MiniFiberD2_u",
+    "Si1x_SD_pad"          ,       "Si1y_SD_pad",       "Si2x_SD_pad",       "Si2y_SD_pad",       "T0_Counter",
     "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
-    "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      "FiberD4_x",      "FiberD4_u",      "FiberD4_v",
-    "FiberD5_x",           "FiberD5_u",      "FiberD5_v", "T0_Counter",   "PSFE",     "MG01",           "MG02",
+    "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      
+    "MiniFiberD1_x", "MiniFiberD1_u", "MiniFiberD1_v", "MiniFiberD2_x", "MiniFiberD2_v", "MiniFiberD2_u",
+    "FiberD4_v",      "FiberD4_u",      "FiberD4_x",           "FiberD5_x",      "FiberD5_u",      "FiberD5_v",
+    "PSFE",     "MG01",           "MG02",
     "MG03",                     "MG04",           "MG05",           "MG06",           "MG07",           "MG08",
     "MG09",                     "MG10",           "MG11",           "MG12",           "MG13",           "MG14",
     "MG15",                     "MG16",           "MG17",           "PSCE",           "PSBE",
@@ -210,11 +211,10 @@ constexpr T EnumIter<T, args...>::values[];
   using SolDetIter = struct EnumIter<
     SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/,
     Si1x, Si1y, Si2x, Si2y,
-    Si1x_SD, Si1y_SD, Si2x_SD, Si2y_SD,
+    Si1x_SD, Si1y_SD, Si2x_SD, Si2y_SD, TO_Counter,
+    FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x, FiberD2_u, FiberD2_v, FiberD3_x, FiberD3_u, FiberD3_v,
     MiniFiberD1_x, MiniFiberD1_u, MiniFiberD1_v, MiniFiberD2_x, MiniFiberD2_v, MiniFiberD2_u,
-    FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x, FiberD2_u, FiberD2_v,
-    FiberD3_x, FiberD3_u, FiberD3_v, FiberD4_x, FiberD4_u, FiberD4_v,FiberD5_x, FiberD5_u, FiberD5_v,
-    TO_Counter,
+    FiberD4_v, FiberD4_u, FiberD4_x, FiberD5_x, FiberD5_u, FiberD5_v,
     PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07,
     MG08, MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/,
     FiberD1_xy,FiberD2_xy,FiberD3_xy,FiberD4_xy,FiberD5_xy,MiniFiberD1_xy,MiniFiberD2_xy,
@@ -758,6 +758,7 @@ struct MeasurementInfo
 
   MeasurementInfo() = default;
   MeasurementInfo(double TOT_, double time_, double dE_):TOT(TOT_),time(time_),dE(dE_) {};
+  void SetInfo(double TOT_, double time_, double dE_) { TOT = TOT_; time = time_; dE = dE_;};
 };
 
 

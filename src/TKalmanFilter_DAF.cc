@@ -60,20 +60,33 @@ TKalmanFilter_DAF<Out>::TKalmanFilter_DAF(const THyphiAttributes& attribut)
   Fitter_rescue->setMinIterations(2);
   Fitter_rescue->setMaxIterations(nIter);
 
-  Fitter = nullptr;
+  Fitter     = nullptr;
+  Fitter_pid = nullptr;
 
   if(att.KF_Kalman || att.KF_KalmanSqrt)
-    Fitter = new genfit::KalmanFitter(10, dPVal, 1e3, att.KF_KalmanSqrt); //
+    {
+      Fitter     = new genfit::KalmanFitter(10, dPVal, 1e3, att.KF_KalmanSqrt); //
+      Fitter_pid = new genfit::KalmanFitter(10, dPVal, 1e3, att.KF_KalmanSqrt); //
+    }
   else if(att.KF_KalmanRef)
-    Fitter = new genfit::KalmanFitterRefTrack(nIter, dPVal); //,1e4);
-  //Fitter->setMultipleMeasurementHandling(mmHandling);
+    {
+      Fitter     = new genfit::KalmanFitterRefTrack(nIter, dPVal); //,1e4);
+      Fitter_pid = new genfit::KalmanFitterRefTrack(nIter, dPVal); //,1e4);
+    //Fitter->setMultipleMeasurementHandling(mmHandling);
+    }
   else if(att.KF_DAF || att.KF_DAFRef)
-    Fitter = new genfit::DAF(att.KF_DAFRef);
+    {
+      Fitter     = new genfit::DAF(att.KF_DAFRef);
+      Fitter_pid = new genfit::DAF(att.KF_DAFRef);
+    }
   else
     att._logger->error("E> Kalman Filter fitter not set correctly !");
 
   Fitter->setMinIterations(3);
   Fitter->setMaxIterations(nIter);
+
+  Fitter_pid->setMinIterations(3);
+  Fitter_pid->setMaxIterations(nIter);
 
   Nb_CentralCut = att.KF_NbCentralCut;
   Nb_MiniFiberCut = att.KF_NbMiniFiberCut;
@@ -104,6 +117,11 @@ TKalmanFilter_DAF<Out>::~TKalmanFilter_DAF()
     {
       delete Fitter;
       Fitter = nullptr;
+    }
+  if(Fitter_pid != nullptr)
+    {
+      delete Fitter_pid;
+      Fitter_pid = nullptr;
     }
   if(Fitter_rescue != nullptr)
     {
@@ -383,7 +401,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       double total_dE = 0.;
       int n_Central   = 0;
       int n_MiniFiber = 0;
-      // std::cout << "it_ListHits->second.size : " << it_ListHits->second.size() << std::endl;
+
       for(size_t id_det = 0; id_det < it_ListHits->second.size(); ++id_det)
         {
           int id_hit = it_ListHits->second[id_det];
@@ -400,38 +418,9 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
           total_dE += it_trackInfo.second[id_det].Eloss;   //CHECK Change!!
-          // std::cout << "id_det : " << id_det << std::endl;
-          // std::cout << "id_hit : " << id_hit << std::endl;
-          // id_dets.insert(std::make_tuple(getZpos(currentHit), id_det, id_hit));
+
           id_dets.insert(std::make_tuple(id_det, id_det, id_hit));
-          // std::cout << " id_det : " << id_det << std::endl;
         }
-      // std::cout << "n_Central : " << n_Central << std::endl;
-      // std::cout << "id_dets : " << id_dets.size() << std::endl;
-
-      // if(id_firstDet != std::get<1>(*firstHit) )
-      //  {
-      //    std::cout<<"!> Kalman: firstHit not matched !"<<id_firstDet<<" "<<std::get<1>(*firstHit)<<"\n";
-      //    auto Decay = RecoEvent.TrackMother.find(id_track);
-      //    bool IsDecay = Decay != RecoEvent.TrackMother.end();
-      //    std::cout<<"track #"<<id_track<<" "<<PDG<<" "<<IsDecay<<"\n";
-      //    for(auto ii : id_dets)
-      //      std::cout<<"| :"<<std::get<0>(ii)<<" "<<std::get<1>(ii)<<" "<<std::get<2>(ii)<<"\n";
-      //    std::cout<<" +---\n";
-      //  }
-
-      // for(size_t idTempDet = 0; idTempDet < it_ListHits->second.size(); ++idTempDet)
-      //   if(it_ListHits->second[idTempDet] != -1)
-      //     {
-      //       if(id_firstDet == -1 && idTempDet != G4Sol::PSFE)
-      //         id_firstDet = idTempDet;
-
-      //       ++nb_ValidHits;
-      //       // break;
-      //     }
-
-      // if(id_firstDet == -1)
-      //   continue;
 
       if(id_dets.size() < 3) //(nb_ValidHits < 3)
         {
@@ -446,15 +435,13 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                 idPDG = it_trackInfo.second[i].pdg;
                 break;
               }
-	  if(idPDG==0)
-	    {
-	      att._logger->debug("!> less than 3 measurements: PDG = 0 : id# {}" , id_track);
-	      for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
-		{
-		  att._logger->debug("!> #{} : {} {} {}",i,it_trackInfo.second[i].pdg, it_trackInfo.second[i].mass);
-		}
-	    }
-		std::string namePDG = std::to_string(idPDG);
+          if(idPDG==0)
+            {
+              att._logger->debug("!> less than 3 measurements: PDG = 0 : id# {}" , id_track);
+              for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+                att._logger->debug("!> #{} : {} {} {}",i,it_trackInfo.second[i].pdg, it_trackInfo.second[i].mass);
+            }
+          std::string namePDG = std::to_string(idPDG);
           LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(), "Less3Mes", 1.);
 
           continue;
@@ -474,19 +461,19 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           continue;
         }
       if(n_MiniFiber< Nb_MiniFiberCut)
-      {
-        LocalHisto.h_stats->Fill("LessMiniFiber<4",1);
-        int idPDG = 0;
-        for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
-          if(it_trackInfo.second[i].pdg!=idPDG)
-          {
-            idPDG = it_trackInfo.second[i].pdg;
-            break;
-          }
-        std::string namePDG = std::to_string(idPDG);
-        LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(),"LessMiniFiber<4",1.);
-        continue;
-      }
+        {
+          LocalHisto.h_stats->Fill("LessMiniFiber<4",1);
+          int idPDG = 0;
+          for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+            if(it_trackInfo.second[i].pdg!=idPDG)
+            {
+              idPDG = it_trackInfo.second[i].pdg;
+              break;
+            }
+          std::string namePDG = std::to_string(idPDG);
+          LocalHisto.h_statsLess3Mes->Fill(namePDG.c_str(),"LessMiniFiber<4",1.);
+          continue;
+        }
 
       auto f_LastHitIsValid = [](const auto& it_ListHits, const std::set<G4Sol::SolDet>& listToTest) {
         for(auto it_det : listToTest)
@@ -556,20 +543,15 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       att._logger->debug(" Id_track: {}", id_track);
 #endif
 
-
-
       const InfoPar track_state(it_trackInfo.second[id_firstDet]);
 
       genfit::AbsMeasurement* tempHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
       TVectorD& tempHitrawRef         = tempHit->getRawHitCoords();
-      // std::cout << "tempHitrawRef 0 : " << tempHitrawRef[0] << std::endl;
-      // std::cout << "tempHitrawRef 1 : " << tempHitrawRef[1] << std::endl;
-      // const TVector3 firstPos(tempHitrawRef[0], tempHitrawRef[1], getZpos(tempHit));
-      //const TVector3 firstPos(0, 0, 0);
 
       SimHit it_hitFirst;
-      if(it_ListHitsSim != RecoEvent.TrackDAFSim.end()) it_hitFirst = it_ListHitsSim->second[id_firstDet][0]; //CHECK keep this one?
-      else                                              it_hitFirst = it_ListFirstHit->second;
+//      if(it_ListHitsSim != RecoEvent.TrackDAFSim.end()) it_hitFirst = it_ListHitsSim->second[id_firstDet][0]; //CHECK keep this one?
+//      else                                              it_hitFirst = it_ListFirstHit->second;
+      it_hitFirst = it_ListFirstHit->second;
 
       const TVector3 firstPos(it_hitFirst.hitX, it_hitFirst.hitY, it_hitFirst.hitZ);
 
@@ -590,7 +572,6 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
         }
       const double charge = PDG_particle->Charge() / 3.;
 
-      // std::cout<<"id_dets:"<<id_dets.size()<<" ";
       if(charge <= 1)
         {
           std::set<std::tuple<double, int, int> > temp_id_dets;
@@ -602,8 +583,6 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
           std::swap(id_dets, temp_id_dets);
         }
-
-      // cout<<"after :"<<id_dets.size()<<"\n";
 
       firstHit             = id_dets.cbegin();
       id_firstDet          = std::get<1>(*firstHit);
@@ -621,21 +600,18 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       const InfoPar track_stateLast(it_trackInfo.second[id_lastDet]);
 
       // Forward
-      // TVector3 init_p(track_state.momX, track_state.momY, track_state.momZ);
-      // init_p.SetMag(0.5);
+
       auto it_init   = RecoEvent.TrackDAFInit.find(id_track);
       double init_px = gRandom->Gaus(it_init->second.momX, it_init->second.momX * 0.2);
       double init_py = gRandom->Gaus(it_init->second.momY, it_init->second.momY * 0.2);
       double init_pz = gRandom->Gaus(it_init->second.momZ, it_init->second.momZ * 0.2);
       TVector3 init_p(init_px, init_py, init_pz);
-      // TVector3 init_p(track_stateLast.momX, track_stateLast.momY, track_stateLast.momZ);
 
       double seed_Mom_Mag = init_p.Mag();
       if(TMath::Abs(seed_Mom_Mag) < 1e-9)
         {
-	  //#ifdef DEBUG_KALMAN
           att._logger->debug("!> Seed Momemtum with TVector3 is zero ! correcting ");
-	  //#endif
+
           auto tempLastHit = id_dets.crbegin();
           ++tempLastHit;
           auto lastHit2 = tempLastHit;
@@ -686,9 +662,6 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                   att._logger->error("time :{}", s66[i].str());
                 }
 
-              // for(auto id_hit : track.second)
-              //  std::cout<<" "<<id_hit<<", ";
-              // std::cout<<"] "<<std::endl;
               continue;
             }
           else
@@ -714,9 +687,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                   att._logger->debug("stat :{}", s3[i].str());
                 }
               for(auto idet : id_dets)
-                {
                   att._logger->debug("det:{} [{}] at Z:{}", std::get<1>(idet), std::get<2>(idet), std::get<0>(idet));
-                }
 #endif
             }
         }
@@ -733,42 +704,18 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       // Forward
       genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG, 1);
       // REP->setDebugLvl(2);
-      // genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG,-1);
-
-      // std::cout<<" -- :"<<id_firstDet<<" "<<std::get<2>(*firstHit)<<" \n";
-      // std::cout<<" -- :"<<id_lastDet<<" "<<std::get<2>(*lastHit)<<" \n";
-
-      // Forward
-      //genfit::AbsMeasurement* FirstHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
-      //TVectorD& HitrawRef              = FirstHit->getRawHitCoords();
-
-      //const TVector3 init_point(HitrawRef[0], HitrawRef[1], getZpos(FirstHit));
 
       double init_x = it_init->second.posX;
       double init_y = it_init->second.posY;
       double init_z = it_init->second.posZ;
-      //double init_x = gRandom->Gaus(it_init->second.posX, 1.0);
-      //double init_y = gRandom->Gaus(it_init->second.posY, 1.0);
-      //double init_z = gRandom->Gaus(it_init->second.posZ, 3.0);
-      const TVector3 init_point(init_x, init_y, init_z);
-      //const TVector3 init_point(it_hitFirst.hitX, it_hitFirst.hitY, it_hitFirst.hitZ);
 
-      // TVector3 init_point(track_state[9],track_state[10],track_state[11]);
+      const TVector3 init_point(init_x, init_y, init_z);
 
       TMatrixDSym CovM(6);
-      // double resolution = 0.1;
       for(int i = 0; i < 6; ++i)
         CovM(i, i) = 1000.;
 
-      ////Backward
-      // genfit::MeasuredStateOnPlane stateToFinalRef(REP);
-      // TVector3 momFinalRef(track_state.momX,track_state.momY,track_state.momZ);
-      // if(momFinalRef.Mag()<1e-8)
-      //  att._logger->error("E> momFinalRef null !{} {} {}", track_state.momX, track_state.momY, track_state.momZ);
-      // REP->setPosMomCov(stateToFinalRef, firstPos, momFinalRef, CovM);
-
       genfit::MeasuredStateOnPlane stateRef(REP);
-      // TEP->setPDG(infoTrack.PDG);
       REP->setPosMomCov(stateRef, init_point, seed_p, CovM);
       // remember original initial state
       const genfit::StateOnPlane stateRefOrig(stateRef.getState(), stateRef.getPlane(), REP, stateRef.getAuxInfo());
@@ -801,20 +748,11 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
         att._logger->debug("rep done");
 #endif
 
-        // std::auto_ptr<genfit::Track> fitTrack(new genfit::Track(REP, seedState, seedCov));
 #ifndef DISPLAY
       std::unique_ptr<genfit::Track> fitTrack = std::make_unique<genfit::Track>(REP, seedState, seedCov);
 #else
       std::shared_ptr<genfit::Track> fitTrack = std::make_shared<genfit::Track>(REP, seedState, seedCov);
 #endif
-
-      // std::tuple<int, double> lastHit = std::make_tuple(-1, -9999.);
-
-      //// Backward
-      // std::set<std::tuple<double,int,int> > temp_id_det2;
-      // for(auto ids = id_dets.crbegin(), ids_end = id_dets.crend(); ids != ids_end ; ++ids)
-      //  temp_id_det2.insert(*ids);
-      // std::swap(id_dets,temp_id_det2);
 
       for(auto ids : id_dets)
         {
@@ -827,19 +765,11 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                              fmt::ptr(currentHit));
           currentHit->Print();
 #endif
-          // if(std::get<1>(lastHit) < currentHit->getRawHitCoords()(2))
-          //   {
-          //     lastHit = std::make_tuple(id_det, currentHit->getRawHitCoords()(2));
-          //   }
 
-          // Vtracks->insertPoint(new genfit::TrackPoint(RecoEvent.ListHitsDAF[id_track][ii],Vtracks));
           fitTrack->insertPoint(new genfit::TrackPoint(currentHit, fitTrack.get(), false));
-          // id_lastDet = id_det;
         }
 
-      // InfoPar track_stateLast(it_trackInfo.second[id_lastDet]);
 
-      // assert(fitTrack->checkConsistency());
       fitTrack->checkConsistency();
 #ifdef DEBUG_KALMAN2
       att._logger->debug("track n'{}", ntrack);
@@ -856,138 +786,302 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           att._logger->info(e1.what());
           LocalHisto.h_stats->Fill("Exc:RescueFit", 1.);
 
-	  try
-	    {
-	      whoDoFit = 2;
-	      Fitter_rescue->processTrack(fitTrack.get(), true);
-	    }
-	  catch(genfit::Exception& e2)
-	    {
-	      att._logger->info("*** FITTER Rescue EXCEPTION *** cancel fit !");
-	      att._logger->info(e2.what());
-	      LocalHisto.h_stats->Fill("Exc:FitFail", 1.);
-	      
-	      continue;
-	    }
-	}
+          try
+            {
+              whoDoFit = 2;
+              Fitter_rescue->processTrack(fitTrack.get(), true);
+            }
+          catch(genfit::Exception& e2)
+            {
+              att._logger->info("*** FITTER Rescue EXCEPTION *** cancel fit !");
+              att._logger->info(e2.what());
+              LocalHisto.h_stats->Fill("Exc:FitFail", 1.);
+              
+              continue;
+            }
+        }
       
 #ifdef DISPLAY
-          display->addEvent(fitTrack.get()); // Vtracks);
+      display->addEvent(fitTrack.get()); // Vtracks);
 #endif
 
 #ifdef DEBUG_KALMAN2
-          att._logger->debug("SUCCESSFUL FIT!");
-          att._logger->debug("track n'{} / {}", ntrack, fitTrack->getFitStatus(REP)->isFitConverged());
-          fitTrack->Print();
+      att._logger->debug("SUCCESSFUL FIT!");
+      att._logger->debug("track n'{} / {}", ntrack, fitTrack->getFitStatus(REP)->isFitConverged());
+      fitTrack->Print();
 #endif
 
-          if(fitTrack->getFitStatus(REP)->isFitConverged())
+      if(fitTrack->getFitStatus(REP)->isFitConverged())
+        {
+          assert(fitTrack->hasKalmanFitStatus() == true);
+          // assert(fitTrack->checkConsistency());
+          
+          LocalHisto.h_stats->Fill("Converged Kalman", 1.);
+          LocalHisto.h_statsLess3Mes->Fill(temp_namePDG.c_str(),"Converged Kalman", 1.);
+
+          fitTrack->checkConsistency();
+          genfit::TrackPoint* tp = fitTrack->getPointWithMeasurementAndFitterInfo(0, REP);
+          if(tp == NULL)
             {
-              assert(fitTrack->hasKalmanFitStatus() == true);
+              att._logger->info("Track has no TrackPoint with fitterInfo!");
+              LocalHisto.h_stats->Fill("Exc:NoTrackPointInfo", 1.);
+              continue;
+            }
+
+          genfit::KalmanFittedStateOnPlane* kfsop = nullptr;
+#ifdef DISPLAY
+          kfsop = (dynamic_cast<genfit::KalmanFitterInfo*>(tp->getFitterInfo(REP))->getBackwardUpdate());
+#else
+          try
+            {
+              kfsop = (dynamic_cast<genfit::KalmanFitterInfo*>(tp->getFitterInfo(REP))->getBackwardUpdate());
+              // Forward
+              REP->extrapolateToPlane(*kfsop, stateRefOrig.getPlane());
+            }
+          catch(genfit::Exception& e)
+            {
+              // std::cerr << "Exception, next track" << std::endl;
+              LocalHisto.h_stats->Fill("Exc:FitBacktoOrig", 1.);
+              // std::cerr << e.what();
+              continue;
+            }
+#endif
+
+          assert(kfsop != nullptr);
+
+          TVector3 p3, posRef;
+          TMatrixDSym covFit(6);
+          kfsop->getPosMomCov(posRef, p3, covFit);
+
+          double p = p3.Mag();
+          double Path_length = -999.;
+          try
+            {
+              Path_length = fitTrack->getTrackLen(REP);
+            }
+          catch(genfit::Exception& e)
+            {
+              att._logger->info("could not get TrackLen ! ");
+              att._logger->info(e.what());
+              LocalHisto.h_stats->Fill("Exc:TrackLen", 1.);
+              continue;
+            }
+
+          double Path_lengthMean = Path_length;
+          Path_lengthMean += (firstPos-init_point).Mag();
+          double time_of_flight          = track_stateLast.time;
+          double beta = 1. / 29.9792458 * Path_lengthMean / time_of_flight;
+          double mass  = p * sqrt(1. / (beta * beta) - 1.);
+
+          int PDG_guess = 2212;
+          if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()>0) PDG_guess =  211;
+          if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()<0) PDG_guess = -211;
+
+
+          // GENFIT PID
+          genfit::AbsTrackRep* rep_pid = new genfit::RKTrackRep(PDG_guess, 1);
+
+          // smeared start state
+          genfit::MeasuredStateOnPlane state_pid(rep_pid);
+
+          TVector3 posM_pid = posRef;
+          TVector3 momM_pid = p3;
+
+          state_pid.setPosMomCov(posM_pid, momM_pid, covFit);
+
+          // create track
+          TVectorD seedState_pid(6);
+          TMatrixDSym seedCov_pid(6);
+          state_pid.get6DStateCov(seedState_pid, seedCov_pid);
+
+          if(rep_pid == NULL)
+            att._logger->error("E> no Rep build");
+#ifdef DEBUG_KALMAN
+          else
+            att._logger->debug("rep done");
+#endif
+
+#ifndef DISPLAY
+          std::unique_ptr<genfit::Track> fitTrack_pid = std::make_unique<genfit::Track>(rep_pid, seedState_pid, seedCov_pid);
+#else
+          std::shared_ptr<genfit::Track> fitTrack_pid = std::make_shared<genfit::Track>(rep_pid, seedState_pid, seedCov_pid);
+#endif
+
+          for(auto ids : id_dets)
+            {
+              int id_det = std::get<1>(ids);
+              int id_hit = std::get<2>(ids);
+
+              genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
+#ifdef DEBUG_KALMAN
+              att._logger->debug("Loop insertPoint 2nd fit: #det:{} #hit {} {}", G4Sol::nameLiteralDet.begin()[id_det], id_hit,
+                                 fmt::ptr(currentHit));
+              currentHit->Print();
+#endif
+
+              fitTrack_pid->insertPoint(new genfit::TrackPoint(currentHit, fitTrack_pid.get(), false));
+            }
+
+
+          fitTrack_pid->checkConsistency();
+
+          int whoDoFit_pid = 1;
+          try
+            {
+              Fitter_pid->processTrack(fitTrack_pid.get(), true);
+            }
+          catch(genfit::Exception& e1)
+            {
+
+              att._logger->info("*** FITTER EXCEPTION *** Rescue fitter take place - 2nd fit!");
+              att._logger->info(e1.what());
+              LocalHisto.h_stats->Fill("Exc:RescueFit-2", 1.);
+
+              try
+                {
+                  whoDoFit_pid = 2;
+                  Fitter_rescue->processTrack(fitTrack_pid.get(), true);
+                }
+              catch(genfit::Exception& e2)
+                {
+                  att._logger->info("*** FITTER Rescue EXCEPTION *** cancel fit - 2nd fit!");
+                  att._logger->info(e2.what());
+                  LocalHisto.h_stats->Fill("Exc:FitFail-2", 1.);
+                  
+                  continue;
+                }
+            }
+          
+#ifdef DISPLAY
+          display->addEvent(fitTrack_pid.get());
+#endif
+
+#ifdef DEBUG_KALMAN2
+          att._logger->debug("SUCCESSFUL FIT - 2nd!");
+          att._logger->debug("track n'{} / {}", ntrack, fitTrack_pid->getFitStatus(rep_pid)->isFitConverged());
+          fitTrack_pid->Print();
+#endif
+
+
+          if(fitTrack_pid->getFitStatus(rep_pid)->isFitConverged())
+            {
+              assert(fitTrack_pid->hasKalmanFitStatus() == true);
               // assert(fitTrack->checkConsistency());
               
-              LocalHisto.h_stats->Fill("Converged Kalman", 1.);
-              LocalHisto.h_statsLess3Mes->Fill(temp_namePDG.c_str(),"Converged Kalman", 1.);
+              LocalHisto.h_stats->Fill("Converged Kalman - 2nd", 1.);
+              LocalHisto.h_statsLess3Mes->Fill(temp_namePDG.c_str(),"Converged Kalman - 2nd", 1.);
 
-              fitTrack->checkConsistency();
-              genfit::TrackPoint* tp = fitTrack->getPointWithMeasurementAndFitterInfo(0, REP);
-              if(tp == NULL)
+              fitTrack_pid->checkConsistency();
+              genfit::TrackPoint* tp_pid = fitTrack_pid->getPointWithMeasurementAndFitterInfo(0, rep_pid);
+              if(tp_pid == NULL)
                 {
-                  att._logger->info("Track has no TrackPoint with fitterInfo!");
-                  LocalHisto.h_stats->Fill("Exc:NoTrackPointInfo", 1.);
+                  att._logger->info("Track has no TrackPoint with fitterInfo - 2nd!");
+                  LocalHisto.h_stats->Fill("Exc:NoTrackPointInfo-2", 1.);
                   continue;
                 }
 
-              genfit::KalmanFittedStateOnPlane* kfsop = nullptr;
+              genfit::KalmanFittedStateOnPlane* kfsop_pid = nullptr;
+
 #ifdef DISPLAY
-              kfsop = (dynamic_cast<genfit::KalmanFitterInfo*>(tp->getFitterInfo(REP))->getBackwardUpdate());
+              kfsop_pid = (dynamic_cast<genfit::KalmanFitterInfo*>(tp_pid->getFitterInfo(rep_pid))->getBackwardUpdate());
 #else
               try
                 {
-                  kfsop = (dynamic_cast<genfit::KalmanFitterInfo*>(tp->getFitterInfo(REP))->getBackwardUpdate());
-
+                  kfsop_pid = (dynamic_cast<genfit::KalmanFitterInfo*>(tp_pid->getFitterInfo(rep_pid))->getBackwardUpdate());
                   // Forward
-                  REP->extrapolateToPlane(*kfsop, stateRefOrig.getPlane());
-                  // REP->extrapolateToPlane(*kfsop, stateToFinalRef.getPlane());
+                  rep_pid->extrapolateToPlane(*kfsop_pid, state_pid.getPlane());
                 }
               catch(genfit::Exception& e)
                 {
                   // std::cerr << "Exception, next track" << std::endl;
-                  LocalHisto.h_stats->Fill("Exc:FitBacktoOrig", 1.);
+                  LocalHisto.h_stats->Fill("Exc:FitBacktoOrig-2", 1.);
                   // std::cerr << e.what();
                   continue;
                 }
 #endif
 
-              assert(kfsop != nullptr);
+              assert(kfsop_pid != nullptr);
+
+              TVector3 p3_pid, posRef_pid;
+              TMatrixDSym covFit_pid(6);
+              kfsop_pid->getPosMomCov(posRef_pid, p3_pid, covFit_pid);
+
+              double p_pid = p3_pid.Mag();
+              double Path_length_pid = -999.;
+              try
+                {
+                  Path_length_pid = fitTrack_pid->getTrackLen(rep_pid);
+                }
+              catch(genfit::Exception& e)
+                {
+                  att._logger->info("could not get TrackLen - 2nd! ");
+                  att._logger->info(e.what());
+                  LocalHisto.h_stats->Fill("Exc:TrackLen-2", 1.);
+                  continue;
+                }
+
+              double Path_lengthMean_pid = Path_length_pid;
+              Path_lengthMean_pid += (firstPos-posM_pid).Mag();
+              double time_of_flight_pid          = track_stateLast.time;
+              double beta_pid = 1. / 29.9792458 * Path_lengthMean_pid / time_of_flight_pid;
+              double mass_pid  = p_pid * sqrt(1. / (beta_pid * beta_pid) - 1.);
+
+              int PDG_guess_pid = 2212;
+              if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()>0) PDG_guess_pid =  211;
+              if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()<0) PDG_guess_pid = -211;
+
+              if(PDG_guess != PDG_guess_pid)
+                PDG_guess_pid = -1;
 
               ResSolDAF tempResults;
-              tempResults.charge    = kfsop->getCharge();
-              tempResults.pdg_ini   = PDG;
-              //tempResults.pdg_guess = PDG; //CHECK modify with PID cuts!!
-              //std::cout << Form("Fit Charge, iniPDG, guessPDG  : %f , %f ,  %d , %d", kfsop->getCharge(), PDG, kfsop->getPDG()) << std::endl;
+              tempResults.charge    = kfsop_pid->getCharge();
+              tempResults.pdg_ini   = PDG_guess;
+
 
               // Forward
-              const TVectorD& referenceState = stateRefOrig.getState();
-              // const TVectorD& referenceState = stateToFinalRef.getState();
-              const TVectorD& stateFit = kfsop->getState();
+              tempResults.momX_init = momM_pid.X();
+              tempResults.momY_init = momM_pid.Y();
+              tempResults.momZ_init = momM_pid.Z();
 
-              const TMatrixDSym& covPull = kfsop->getCov();
+              tempResults.momX = p3_pid.X();
+              tempResults.momY = p3_pid.Y();
+              tempResults.momZ = p3_pid.Z();
 
-              TVector3 p3, posRef;
-              TMatrixDSym covFit(6);
-
-              kfsop->getPosMomCov(posRef, p3, covFit);
-              // std::cout << Form("pos pi  : %.2f ,  %.2f , %.2f",posRef.X(), posRef.Y(), posRef.Z()) << std::endl;
-
-              // Forward
-              tempResults.momX_init = init_p.X();
-              tempResults.momY_init = init_p.Y();
-              tempResults.momZ_init = init_p.Z();
-              // tempResults.momX_init = track_state.momX;
-              // tempResults.momY_init = track_state.momY;
-              // tempResults.momZ_init = track_state.momZ;
-
-              tempResults.momX = p3.X();
-              tempResults.momY = p3.Y();
-              tempResults.momZ = p3.Z();
-
-              tempResults.posX = posRef.X();
-              tempResults.posY = posRef.Y();
-              tempResults.posZ = posRef.Z();
+              tempResults.posX = posRef_pid.X();
+              tempResults.posY = posRef_pid.Y();
+              tempResults.posZ = posRef_pid.Z();
 
               for(int row = 0; row < 6; ++row)
                 for(int col = 0; col < 6; ++col)
-                  tempResults.cov_matrix[row][col] = covFit(row, col);
+                  tempResults.cov_matrix[row][col] = covFit_pid(row, col);
 
-              const double chi2 = whoDoFit == 1
-                                      ? Fitter->getChiSqu(fitTrack.get(), REP)
-                                      : Fitter_rescue->getChiSqu(fitTrack.get(), REP); // Vtracks->getChiSqu();
+              const double chi2_pid = whoDoFit_pid == 1
+                                      ? Fitter_pid->getChiSqu(fitTrack_pid.get(), rep_pid)
+                                      : Fitter_rescue->getChiSqu(fitTrack_pid.get(), rep_pid);
 
-              const double ndf =
-                  whoDoFit == 1 ? Fitter->getNdf(fitTrack.get(), REP)
-                                : Fitter_rescue->getNdf(fitTrack.get(), REP); // static_cast<int>(Vtracks->getNDF());
+              const double ndf_pid =
+                  whoDoFit_pid == 1 ? Fitter_pid->getNdf(fitTrack_pid.get(), rep_pid)
+                                    : Fitter_rescue->getNdf(fitTrack_pid.get(), rep_pid);
 
-              tempResults.chi2    = chi2;
-              tempResults.ndf     = ndf;
-              tempResults.fitter  = whoDoFit;
-              tempResults.iterNum = (int)(fitTrack->getKalmanFitStatus()->getNumIterations());
+              tempResults.chi2    = chi2_pid;
+              tempResults.ndf     = ndf_pid;
+              tempResults.fitter  = whoDoFit_pid;
+              tempResults.iterNum = (int)(fitTrack_pid->getKalmanFitStatus()->getNumIterations());
 #ifdef DEBUG_KALMAN2
-              att._logger->debug(" / chi2 ={} / ndf ={}", chi2, ndf);
+              att._logger->debug(" / chi2 ={} / ndf ={}", chi2_pid, ndf_pid);
 #endif
 
-              {
-                unsigned int np = fitTrack->getNumPointsWithMeasurement();
-                //std::cout << "np : " << np << std::endl;
-                for(int i = 0; i < np; ++i)
+              { //CHECK why this parenthesis?
+                unsigned int np_pid = fitTrack_pid->getNumPointsWithMeasurement();
+                for(int i = 0; i < np_pid; ++i)
                   {
-                    genfit::TrackPoint* tp_tmp    = fitTrack->getPointWithMeasurementAndFitterInfo(i);//, REP);
+                    genfit::TrackPoint* tp_tmp    = fitTrack_pid->getPointWithMeasurementAndFitterInfo(i);
                       if(tp_tmp==nullptr)
                         {
-                          att._logger->debug("E> TrackPoint null ! #i {} / {}\n",i,np);
+                          att._logger->debug("E> TrackPoint null - 2nd! #i {} / {}\n",i,np_pid);
                           continue;
                         }
-                    genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(REP));
+                    genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(rep_pid));
                     std::vector<double> weights   = kfi->getWeights();
                     int id_det                    = tp_tmp->getRawMeasurement(0)->getDetId();
                     // std::cout << "id_det : " << id_det << std::endl;
@@ -999,7 +1093,6 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                             const genfit::MeasurementOnPlane& residual = kfi->getResidual(j, false, true);
                             const TVectorD& resid(residual.getState());
                             double res = resid(0);
-                            // double weight = residual.getWeight();
                             if(fabs(res) < fabs(res_min))
                               res_min = res;
                             // std::cout << "res : " << res << std::endl;
@@ -1036,7 +1129,6 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                         const TVectorD& resid(residual.getState());
                         double res  = resid(0);
                         double resz = resid(1);
-                        // double resz  = -999;
                         // std::cout << "res : " << res << std::endl;
                         LocalHisto.h_ResPSCE[0]->Fill(res);
                         LocalHisto.h_ResPSCE[1]->Fill(resz);
@@ -1047,282 +1139,165 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                     else
                       continue;
                   }
-              }
+              } //CHECK why this parenthesis?
 
-              // double p_value = TMath::Prob(chi2,ndf);
-              // double p_value = MathKalman::Prob()(chi2,ndf);
-              // double p_value2= 1.-p_value;
-              const double p_value = whoDoFit == 1
-                                         ? Fitter->getPVal(fitTrack.get(), REP)
-                                         : Fitter_rescue->getPVal(fitTrack.get(), REP); // TMath::Prob(chi2,ndf);
-              const double p_value2 = 1. - p_value;
+              const double p_value_pid = whoDoFit_pid == 1
+                                         ? Fitter_pid->getPVal(fitTrack_pid.get(), rep_pid)
+                                         : Fitter_rescue->getPVal(fitTrack_pid.get(), rep_pid); // TMath::Prob(chi2,ndf);
+              const double p_value2_pid = 1. - p_value_pid;
 
-              tempResults.pvalue = p_value;
+              tempResults.pvalue = p_value_pid;
 
-              LocalHisto.h_pv->Fill(p_value2);
-              LocalHisto.h_chi2->Fill(chi2);
+              LocalHisto.h_pv->Fill(p_value2_pid);
+              LocalHisto.h_chi2->Fill(chi2_pid);
 
-              // h_chi2_smooth->Fill(Vtracks[itr]->getChiSquSmooth());
 
 #ifdef DEBUG_KALMAN2
-              att._logger->debug(" / 1-p_value ={}", 1 - p_value);
+              att._logger->debug(" / 1-p_value ={}", 1 - p_value_pid);
 #endif
 
-              // n_status[static_cast<int>(charge)+1]++;
-
-              //if(charge > 0)
-              if(kfsop->getCharge() > 0)
+              if(kfsop_pid->getCharge() > 0)
                 {
-                  LocalHisto.hd_chi[0]->Fill(chi2 / ndf);
-                  LocalHisto.hd_pv[0]->Fill(p_value2);
+                  LocalHisto.hd_chi[0]->Fill(chi2_pid / ndf_pid);
+                  LocalHisto.hd_pv[0]->Fill(p_value2_pid);
                 }
               else
                 {
-                  LocalHisto.hd_chi[1]->Fill(chi2 / ndf);
-                  LocalHisto.hd_pv[1]->Fill(p_value2);
+                  LocalHisto.hd_chi[1]->Fill(chi2_pid / ndf_pid);
+                  LocalHisto.hd_pv[1]->Fill(p_value2_pid);
                 }
 
-              // GFDetPlane InitPlane(RecoEvent.ListHitsDAF[id_track][TR1X][0]->getDetPlane(rep));
-              // TVector3 TR1x_Pos(Vtracks->getPos(InitPlane));
-
-              // double DistToTR1= 0;
-              // try
-              //   {
-              //     const genfit::MeasuredStateOnPlane
-              //     TR1PlaneState(fitTrack->getFittedState(find_tr1->second,REP,true)); TVector3
-              //     TR1x_Pos(TR1PlaneState.getPos()); HitTR1 = TR1x_Pos; DistToTR1=(TR1x_Pos-Plane_time).Mag();
-              //   }
-              // catch(genfit::Exception& e)
-              //   {
-              //     std::cerr<<"Exception in TR1PlaneState, next track"<<std::endl;
-              //     std::cerr << e.what();
-              //     continue;
-              //   }
-
-              const double p = p3.Mag();
-
-              // if(att.G4_simu==false)
-              // DistToTR1+=5.; // distance from Start to TR1
-
-              double Path_length = -999;
-              double Path_time   = -999;
+              double Path_time_pid   = -999;
               try
                 {
-                  Path_length = fitTrack->getTrackLen(REP); // getTotalLength();
-                  // Path_length = -fitTrack->getTrackLen(REP); // getTotalLength();
-                  // double Path_length = Vtracks->getTotalLength();
-                  // double Path_lengthB = Vtracks->getTotalLengthBack();
+                  Path_time_pid = fitTrack_pid->getTOF(rep_pid);
                 }
               catch(genfit::Exception& e)
                 {
-                  att._logger->info("could not get TrackLen ! ");
+                  att._logger->info("could not get TOF - 2nd! ");
                   att._logger->info(e.what());
-                  LocalHisto.h_stats->Fill("Exc:TrackLen", 1.);
-                  continue;
-                }
-              try
-                {
-                  Path_time = fitTrack->getTOF(REP);
-                  // Path_length = fitTrack->getTrackLen(REP);//getTotalLength();
-                  // double Path_length = Vtracks->getTotalLength();
-                  // double Path_lengthB = Vtracks->getTotalLengthBack();
-                }
-              catch(genfit::Exception& e)
-                {
-                  att._logger->info("could not get TOF! ");
-                  att._logger->info(e.what());
-                  LocalHisto.h_stats->Fill("Exc:TOF", 1.);
+                  LocalHisto.h_stats->Fill("Exc:TOF-2", 1.);
                   continue;
                 }
 
-              // double Path_timeB = Vtracks->getTotalTimeBack();
-              // double Path_lengthMean = Path_length + Path_lengthB;
-              double Path_lengthMean = Path_length;
-              // Path_lengthMean/=2.;
-              Path_lengthMean += (firstPos-init_point).Mag();
-              //Path_lengthMean += TMath::Sqrt(TMath::Sq(firstPos.X()-att.Target_PositionX)+TMath::Sq(firstPos.Y()-att.Target_PositionY)+TMath::Sq(firstPos.Z()-att.Target_PositionZ)); // DistToTR1;
-                                                 // 	  if(ndf==1)
-                                                 // 	    Path_lengthMean=Path_length;
-              
-              //std::cout << Form("FirstPos-init_point: %f , %f , %f", (firstPos-init_point).X(), (firstPos-init_point).Y(), (firstPos-init_point).Z()) << std::endl;
+              LocalHisto.h_Path->Fill(Path_length_pid);
+              LocalHisto.h_MeanPath->Fill(Path_lengthMean_pid);
 
-              LocalHisto.h_Path->Fill(Path_length);
-              // LocalHisto.h_Path_Back->Fill(Path_lengthB);
-              LocalHisto.h_MeanPath->Fill(Path_lengthMean);
-              // LocalHisto.h_dpath->Fill(Path_lengthB-Path_length);
+              double dE_pid                      = track_stateLast.Eloss;
+              double time_fromFirstToLastHit_pid = track_stateLast.time - track_state.time;
 
-              // double rapidity = 0.5 * TMath::Log(( TMath::Sqrt(rep_length->getMass()*rep_length->getMass() +
-              // p3.Mag2()) +p3.Z())/( TMath::Sqrt(rep_length->getMass()*rep_length->getMass() + p3.Mag2()) - p3.Z()));
-              // for(unsigned int vol = 0 ; vol < att.name_GeoVolumes.size() ; ++vol)
-              //   {
-              //     LocalHisto.Material_XX0_y[vol]->Fill(rapidity,rep_length->getXX0(att.name_GeoVolumes[vol]));
-              //     LocalHisto.Material_dE_y[vol]->Fill(rapidity,rep_length->getDE(att.name_GeoVolumes[vol]));
-              //   }
+              double beta_FirstToLast_pid = 1. / 29.9792458 * Path_length_pid / time_fromFirstToLastHit_pid;
+              double mass2_pid = p * sqrt(1. / (beta_FirstToLast_pid * beta_FirstToLast_pid) - 1.);
 
-#ifdef VERBOSE_EVE
-
-              att._logger->debug("$$$$$$$$$$$$-----------------------$$$$$$$$$$$$$$$");
-              att._logger->debug("DAF Length :ListTrackPoints :");
-              att._logger->debug("TEveLine* EveTrack_DAF1 = new TEveLine(TrackRepList_DAF,{});",
-                                 rep_length->EveListTrackPoint.size());
-
-              for(unsigned int i = 0; i < rep_length->EveListTrackPoint.size(); ++i)
+              if(beta_pid < 0.)
                 {
-                  att._logger->debug("EveTrack_DAF1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", i,
-                                     rep_length->EveListTrackPoint[i].X(), rep_length->EveListTrackPoint[i].Y(),
-                                     rep_length->EveListTrackPoint[i].Z());
+                  att._logger->error("E> Beta Negative - 2nd! {} {} | {}", Path_lengthMean_pid, time_of_flight_pid, Path_length_pid);
+                  att._logger->info("{} {} {} {} {}", kfsop_pid->getCharge(), p_pid, chi2_pid, ndf_pid, p_value2_pid);
                 }
 
-              att._logger->debug("Fitted Hit :");
-              att._logger->debug("TEvePointSet* EveHitFitter1 = new TEvePointSet(HitFitter1,5)");
-              att._logger->debug("EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 0, HitTR1.X(), HitTR1.Y(),
-                                 HitTR1.Z());
-              att._logger->debug("EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 1, HitDC1.X(), HitDC1.Y(),
-                                 HitDC1.Z());
-              att._logger->debug("EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 2, HitTR2.X(), HitTR2.Y(),
-                                 HitTR2.Z());
-              att._logger->debug("EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 3, HitDC2.X(), HitDC2.Y(),
-                                 HitDC2.Z());
-              att._logger->debug("EveHitFitter1->SetPoint({}, {:0.10f},{:0.10f},{:0.10f});", 4, HitTOF.X(), HitTOF.Y(),
-                                 HitTOF.Z());
+    #ifdef DEBUG_KALMAN2
+              att._logger->debug("charge: {} / time = {} / Path = {} PathMean = {} / Beta = {} / Mass = {}",
+                                  kfsop_pid->getCharge(), time_of_flight_pid, Path_length_pid, Path_lengthMean_pid,
+                                  beta_pid, mass_pid);
+    #endif
 
-              att._logger->debug("DAF Track :");
-              att._logger->debug("TEveRecTrack *DAF_track_rc = new TEveRecTrack();");
-              att._logger->debug("DAF_track_rc->fV.Set({},{},{});", HitTR1.X(), HitTR1.Y(), HitTR1.Z());
-              att._logger->debug("DAF_track_rc->fP.Set({},{},{});", p3.X(), p3.Y(), p3.Z());
-              // std::cout<<"int sign = -"<<list_MC[current_idMC]->Charge<<std::endl;
-              att._logger->debug("DAF_track_rc->fSign = -{};", charge);
-              att._logger->debug("$$$$$$$$$$$$-----------------------$$$$$$$$$$$$$$$");
+              LocalHisto.h_beta->Fill(beta_pid);
+              LocalHisto.h_Mass_All->Fill(mass_pid);
+              LocalHisto.h_Mass_charge_All->Fill(mass_pid, kfsop_pid->getCharge());
+              LocalHisto.h_beta_mom->Fill(p_pid, beta_pid);
+              LocalHisto.h_beta_momcharge->Fill(p_pid*kfsop_pid->getCharge(), beta_pid);
+              LocalHisto.h_path_tof->Fill(Path_lengthMean_pid / 30., time_of_flight_pid);
 
-#endif
+              LocalHisto.h_pv_mom->Fill(p_pid, p_value2_pid);
+              LocalHisto.h_pv_beta->Fill(beta_pid, p_value2_pid);
+              LocalHisto.h_pv_mass->Fill(mass_pid, p_value2_pid);
 
-              const double dE                      = track_stateLast.Eloss;
-              const double time_of_flight          = track_stateLast.time; // Vtracks->getTimeOfFlight();//+6.;
-              const double time_fromFirstToLastHit = track_stateLast.time - track_state.time;
+              // Forward
+              const TVectorD& referenceState = stateRefOrig.getState();
+              const TVectorD& stateFit_pid = kfsop_pid->getState();
 
-              const double beta = 1. / 29.9792458 * Path_lengthMean /
-                                  time_of_flight; /// beta = dL[m]/(c[m/s]* dT[s]) = dL[mm]/(300[mm/ns] * dT[ns])
-              const double beta_FirstToLast = 1. / 29.9792458 * Path_length / time_fromFirstToLastHit;
-              // double beta = 1./30.*new_Total_Length/time_of_flight; ///beta = dL[m]/(c[m/s]* dT[s]) =
-              // dL[mm]/(300[mm/ns] * dT[ns]) double gamma = 1./sqrt(1.-beta*beta);
-              const double mass  = p * sqrt(1. / (beta * beta) - 1.);
-              const double mass2 = p * sqrt(1. / (beta_FirstToLast * beta_FirstToLast) - 1.);
-
-              if(beta < 0.)
-                {
-                  att._logger->error("E> Beta Negative ! {} {} | {}", Path_lengthMean, time_of_flight, Path_length);
-                  //<<Path_lengthB<<" "<<endl;
-                  att._logger->info("{} {} {} {} {}", charge, p, chi2, ndf, p_value2);
-                }
-
-#ifdef DEBUG_KALMAN2
-              att._logger->debug("charge: {} / time = {} / Path = {} PathMean = {} / Beta = {} / Mass = {}", charge,
-                                 time_of_flight /*Detectors_UTr["TOF"][id_track][3]*/, Path_length, Path_lengthMean,
-                                 beta, mass);
-#endif
-
-              LocalHisto.h_beta->Fill(beta);
-              LocalHisto.h_Mass_All->Fill(mass);
-              //LocalHisto.h_Mass_charge_All->Fill(mass, charge);
-              LocalHisto.h_Mass_charge_All->Fill(mass, kfsop->getCharge());
-              LocalHisto.h_beta_mom->Fill(p, beta);
-              LocalHisto.h_beta_momcharge->Fill(p*kfsop->getCharge(), beta);
-              LocalHisto.h_path_tof->Fill(Path_lengthMean / 30., time_of_flight);
-
-              LocalHisto.h_pv_mom->Fill(p, p_value2);
-              LocalHisto.h_pv_beta->Fill(beta, p_value2);
-              LocalHisto.h_pv_mass->Fill(mass, p_value2);
-
-              int PDG_guess = 2212;
-              if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()>0) PDG_guess =  211;
-              if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()<0) PDG_guess = -211;
+              const TMatrixDSym& covPull_pid = kfsop_pid->getCov();
 
               const std::vector<int> hist_to_pdg = {2212, -211, 211, -321, 321};
               for(size_t it_pdg = 0; it_pdg < hist_to_pdg.size(); ++it_pdg)
                 {
-                  if(hist_to_pdg[it_pdg] == PDG_guess)
+                  if(hist_to_pdg[it_pdg] == PDG_guess_pid)
                     {
-                      LocalHisto.h_mom_res[it_pdg]->Fill(init_p.Mag(), (init_p.Mag() - p3.Mag()) / init_p.Mag());
-
-                      //LocalHisto.h_ResPull[it_pdg][0]->Fill((charge / stateFit[0] - init_p.Mag()));
-                      LocalHisto.h_ResPull[it_pdg][0]->Fill((kfsop->getCharge() / stateFit[0] - init_p.Mag()));
-                      LocalHisto.h_ResPull_normal[it_pdg][0]->Fill(init_p.Mag(), (charge / stateFit[0] - init_p.Mag()) /
-                                                                                     init_p.Mag());
+                      LocalHisto.h_mom_res[it_pdg]->Fill(momM_pid.Mag(), (momM_pid.Mag() - p3_pid.Mag()) / momM_pid.Mag());
+                      LocalHisto.h_ResPull[it_pdg][0]->Fill((kfsop_pid->getCharge() / stateFit_pid[0] - momM_pid.Mag()));
+                      LocalHisto.h_ResPull_normal[it_pdg][0]->Fill(momM_pid.Mag(), (kfsop_pid->getCharge() / stateFit_pid[0] - momM_pid.Mag()) /
+                                                                                     momM_pid.Mag());
                       for(int i_Res = 1; i_Res < 5; ++i_Res)
                         {
-                          LocalHisto.h_ResPull[it_pdg][i_Res]->Fill((stateFit[i_Res] - referenceState[i_Res]));
+                          LocalHisto.h_ResPull[it_pdg][i_Res]->Fill((stateFit_pid[i_Res] - referenceState[i_Res]));
                           LocalHisto.h_ResPull_normal[it_pdg][i_Res]->Fill(
-                              referenceState[i_Res], (stateFit[i_Res] - referenceState[i_Res]) / referenceState[i_Res]);
+                              referenceState[i_Res], (stateFit_pid[i_Res] - referenceState[i_Res]) / referenceState[i_Res]);
                         }
                       for(int i_Pull = 0; i_Pull < 5; ++i_Pull)
-                        LocalHisto.h_ResPull[it_pdg][i_Pull + 5]->Fill((stateFit[i_Pull] - referenceState[i_Pull]) /
-                                                                       sqrt(covPull[i_Pull][i_Pull]));
+                        LocalHisto.h_ResPull[it_pdg][i_Pull + 5]->Fill((stateFit_pid[i_Pull] - referenceState[i_Pull]) /
+                                                                       sqrt(covPull_pid[i_Pull][i_Pull]));
                     }
                 }
 
-              if(p_value2 < .75)
+              if(p_value2_pid < .75)
                 {
-                  LocalHisto.h_beta2->Fill(beta);
-                  LocalHisto.h_Mass_All2->Fill(mass);
-                  LocalHisto.h_beta_mom2->Fill(p, beta);
-                  LocalHisto.h_beta_momcharge2->Fill(p*kfsop->getCharge(), beta);
-                  //LocalHisto.h_Mass_charge_All2->Fill(mass, charge);
-                  LocalHisto.h_Mass_charge_All2->Fill(mass, kfsop->getCharge());
+                  LocalHisto.h_beta2->Fill(beta_pid);
+                  LocalHisto.h_Mass_All2->Fill(mass_pid);
+                  LocalHisto.h_beta_mom2->Fill(p_pid, beta_pid);
+                  LocalHisto.h_beta_momcharge2->Fill(p_pid*kfsop_pid->getCharge(), beta_pid);
+                  LocalHisto.h_Mass_charge_All2->Fill(mass_pid, kfsop_pid->getCharge());
                 }
-              if(p_value2 < .1)
+              if(p_value2_pid < .1)
                 {
-                  LocalHisto.h_beta3->Fill(beta);
-                  LocalHisto.h_Mass_All3->Fill(mass);
-                  LocalHisto.h_beta_mom3->Fill(p, beta);
-                  LocalHisto.h_beta_momcharge3->Fill(p*kfsop->getCharge(), beta);
-                  //LocalHisto.h_Mass_charge_All3->Fill(mass, charge);
-                  LocalHisto.h_Mass_charge_All3->Fill(mass, kfsop->getCharge());
-                  LocalHisto.h_mom_tof_cut->Fill(p, time_of_flight);
-                  LocalHisto.h_path_mom_cut->Fill(Path_lengthMean / 30., p);
-                  LocalHisto.h_path_tof_cut->Fill(Path_lengthMean / 30., time_of_flight);
+                  LocalHisto.h_beta3->Fill(beta_pid);
+                  LocalHisto.h_Mass_All3->Fill(mass_pid);
+                  LocalHisto.h_beta_mom3->Fill(p_pid, beta_pid);
+                  LocalHisto.h_beta_momcharge3->Fill(p_pid*kfsop_pid->getCharge(), beta_pid);
+                  LocalHisto.h_Mass_charge_All3->Fill(mass_pid, kfsop_pid->getCharge());
+                  LocalHisto.h_mom_tof_cut->Fill(p_pid, time_of_flight_pid);
+                  LocalHisto.h_path_mom_cut->Fill(Path_lengthMean_pid / 30., p_pid);
+                  LocalHisto.h_path_tof_cut->Fill(Path_lengthMean_pid / 30., time_of_flight_pid);
                 }
+
               tempResults.firstHit     = id_firstDet;
               tempResults.lastHit      = id_lastDet;
               tempResults.Ncentral     = n_Central;
               tempResults.Nmfiber      = n_MiniFiber;
-              tempResults.dE           = dE;
-              tempResults.path_time    = Path_time;
-              tempResults.path_length  = Path_lengthMean;
-              tempResults.path_length2 = Path_length;
-              tempResults.tof          = time_of_flight;
-              tempResults.tof2         = time_fromFirstToLastHit;
-              tempResults.beta         = beta;
-              tempResults.beta2        = beta_FirstToLast;
-              tempResults.mass         = mass;
-              tempResults.mass2        = mass2;
-              tempResults.pdg_guess    = PDG_guess;
+              tempResults.dE           = dE_pid;
+              tempResults.path_time    = Path_time_pid;
+              tempResults.path_length  = Path_lengthMean_pid;
+              tempResults.path_length2 = Path_length_pid;
+              tempResults.tof          = time_of_flight_pid;
+              tempResults.tof2         = time_fromFirstToLastHit_pid;
+              tempResults.beta         = beta_pid;
+              tempResults.beta2        = beta_FirstToLast_pid;
+              tempResults.mass         = mass_pid;
+              tempResults.mass2        = mass2_pid;
+              tempResults.pdg_guess    = PDG_guess_pid;
 
               double m_range[4]  = {0.9383, 3.72738, 0.1396, 2.809};
               double m_charge[4] = {1., 2., -1., 2.};
 
               for(int i = 0; i < 4; i++)
-                // if (TMath::Abs(mass-m_range[i])<0.25*m_range[i] && TMath::Abs(charge-m_charge[i])<0.1)
-                //if(TMath::Abs(charge - m_charge[i]) < 0.1)
-                if(TMath::Abs(kfsop->getCharge() - m_charge[i]) < 0.1)
+                if(TMath::Abs(kfsop_pid->getCharge() - m_charge[i]) < 0.1)
                   {
-                    // double dmass = TMath::Abs(mass-m_range[i])/m_range[i];
-                    LocalHisto.h_Mass[i]->Fill(mass);
-                    LocalHisto.h_chi2_particle[i]->Fill(chi2);
-                    LocalHisto.h_pv_particle[i]->Fill(p_value2);
+                    LocalHisto.h_Mass[i]->Fill(mass_pid);
+                    LocalHisto.h_chi2_particle[i]->Fill(chi2_pid);
+                    LocalHisto.h_pv_particle[i]->Fill(p_value2_pid);
                   }
 
-#ifdef DEBUG_KALMAN
-              att._logger->debug("Temp :{} {} {}", ntrack, p_value2, mass);
-              att._logger->debug("MomRef :{} {} {}", id_track, p_value, mass);
-#endif
+    #ifdef DEBUG_KALMAN
+              att._logger->debug("Temp :{} {} {}", ntrack, p_value2_pid, mass_pid);
+              att._logger->debug("MomRef :{} {} {}", id_track, p_value_pid, mass_pid);
+              att._logger->debug("Kalman pval {} charge {}", p_value2_pid, kfsop_pid->getCharge());
+
+    #endif
 
               RecoEvent.DAF_results.insert(std::make_pair(id_track, tempResults));
-              // RecoEvent.Sigma[ntrack]=CovSigma;
-#ifdef DEBUG_KALMAN
-              att._logger->debug("Kalman pval {} charge {}", p_value2, charge);
-#endif
-            }
-        }
+
+            } // if second fit converged
+        } // if first fit converged
+    } //loop over tracks
   
   return 0;
 }

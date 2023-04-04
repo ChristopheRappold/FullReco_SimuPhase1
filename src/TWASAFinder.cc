@@ -92,7 +92,6 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
                 {
                   if(RecoEvent.FiberTrackCont[track_type][i]->IsFlagPSB())
                     {
-                      //double phi_psb_buf = RecoEvent.FiberTrackCont[track_type][i]->GetPSBHit()->GetPhi();
                       if( fabs( fiberana->CalcPhiDif(phi_psb, phi_fiber) ) < fabs( RecoEvent.FiberTrackCont[track_type][i]->GetPSBDifPhi() ) )
                         {
                           RecoEvent.FiberTrackCont[track_type][i]->SetSegPSB(RecoEvent.ListHits[G4Sol::PSCE][j]->getHitId());
@@ -330,13 +329,17 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
 
     TVector3 tmp_closepoint_Pos;
     double tmp_closepoint_Dist;
-    CloseDist(RecoEvent.FragmentTracks[0], TrackHitCont[i], tmp_closepoint_Dist, tmp_closepoint_Pos);
+    if(!RecoEvent.FragmentTracks.empty())
+      CloseDist(RecoEvent.FragmentTracks[0], TrackHitCont[i], tmp_closepoint_Dist, tmp_closepoint_Pos);
 
     InfoInit tempInit;
     tempInit.charge = -1;
     tempInit.posX = tmp_closepoint_Pos.X();
     tempInit.posY = tmp_closepoint_Pos.Y();
     tempInit.posZ = tmp_closepoint_Pos.Z();
+    //tempInit.posX = att.Target_PositionX;
+    //tempInit.posY = att.Target_PositionY;
+    //tempInit.posZ = att.Target_PositionZ;
 
     double tmp_momZ = 1.;
     tempInit.momX = tmp_momZ*TrackHitCont[i]->GetTrackA();
@@ -347,36 +350,7 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
 
 
     SimHit tempFirstHit;
-    double posZ_firstHit = -999.;
-    for(int j = 0; j < TrackHitCont[i]->GetFiberHit().size(); ++j)
-      {
-        int i_fiber = TrackHitCont[i]->GetFiberHit()[j];
-        if(i_fiber==-1)
-          continue;
-
-        int i_ud; // upstream -> 0 , downstream -> 1
-
-        if(j/3 == 0)
-          {
-            posZ_firstHit = att.fiber_mft1_pos_z;
-            if(i_fiber < 128) i_ud = (i_fiber%2 == 0);
-            else              i_ud = (i_fiber%2 == 1);
-          }
-        else
-          {
-            posZ_firstHit = att.fiber_mft2_pos_z;
-            if(i_fiber < 128) i_ud = (i_fiber%2 == 1);
-            else              i_ud = (i_fiber%2 == 0);
-          }
-
-        posZ_firstHit += 0.4*(j%3-1);
-        posZ_firstHit += 0.02*(2*i_ud-1);
-
-        //std::cout << Form("j, i_ud, posZ_firstHit: %d, %d, %f ", j, i_ud, posZ_firstHit) << std::endl;
-        
-        break;
-      }
-
+    double posZ_firstHit = GetFirstMFT_Z(TrackHitCont[i]);
 
     tempFirstHit.hitX = TrackHitCont[i]->GetTrackX() *0.1 + TrackHitCont[i]->GetTrackA() * (posZ_firstHit - TrackHitCont[i]->GetTrackZ() *0.1);
     tempFirstHit.hitY = TrackHitCont[i]->GetTrackY() *0.1 + TrackHitCont[i]->GetTrackB() * (posZ_firstHit - TrackHitCont[i]->GetTrackZ() *0.1);
@@ -435,6 +409,42 @@ double TWASAFinder<Out>::GetPSB_Phi(int _seg)
   if( _phi > TMath::Pi() ) _phi -= 2*TMath::Pi();
 
   return _phi;
+}
+
+
+template<class Out>
+double TWASAFinder<Out>::GetFirstMFT_Z(TrackHit* Track)
+{
+  double firstMFT_Z = -999.;
+  int i_fiber = -1;
+  for(int i = 0; i < Track->GetFiberHit().size(); ++i)
+    {
+      i_fiber = Track->GetFiberHit()[i];
+      if(i_fiber==-1)
+        continue;
+
+      int i_ud; // upstream -> 0 , downstream -> 1
+
+      if(i/3 == 0)
+        {
+          firstMFT_Z = att.fiber_mft1_pos_z;
+          if(i_fiber < 128) i_ud = (i_fiber%2 == 0);
+          else              i_ud = (i_fiber%2 == 1);
+        }
+      else
+        {
+          firstMFT_Z = att.fiber_mft2_pos_z;
+          if(i_fiber < 128) i_ud = (i_fiber%2 == 1);
+          else              i_ud = (i_fiber%2 == 0);
+        }
+
+      firstMFT_Z += 0.4*(i%3-1);
+      firstMFT_Z += 0.02*(2*i_ud-1);
+      
+      break;
+    }
+
+  return firstMFT_Z;
 }
 
 

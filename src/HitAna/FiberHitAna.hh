@@ -9,6 +9,7 @@ class FiberHitAna
   public:
     FiberHitAna(FiberHit a, ParaManager *par, int tref, double t_t0 = 0);
     FiberHitAna(FiberHitAna *a);
+    FiberHitAna(int detector, int layer, int fiber, double time, double energy, ParaManager *par);
     FiberHitAna(double pos, double ang, double z, double res);
     ~FiberHitAna();
     int    GetSfp(){   return i_sfp;};
@@ -24,6 +25,7 @@ class FiberHitAna
     double GetPos(){   return i_pos;};
     double GetPosOrg(){return i_pos_org;};
     double GetPosL(){  return i_posl;};
+    double GetdE(){    return i_dE;};
     double GetAng(){   return i_ang;};
     double GetTOT(){   return t_tot;};
     double GetTime(){  return t_time;};
@@ -38,6 +40,7 @@ class FiberHitAna
     void   SetZ(double _z){i_z = _z;};
     void   SetPos(double _pos){i_pos = _pos;};
     void   SetPosL(double _pos){i_posl = _pos;};
+    void   SetdE(double _dE){i_dE = _dE;};
     void   SetUsed(){   i_used = true;};
     void   SetNoUsed(){ i_used = false;};
     void   Print();
@@ -62,6 +65,7 @@ class FiberHitAna
     double i_z_org = -9999.;
     double i_res   = -9999.;
     double i_posl  = -9999.;
+    double i_dE    = -9999.;
     int  i_did = -1;
     int  i_ud = 0; // 0:upstream 1:downstream
     bool i_valid = false;

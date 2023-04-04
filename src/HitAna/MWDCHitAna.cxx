@@ -20,19 +20,21 @@ MWDCHitAna::MWDCHitAna(MWDCHit a, ParaManager *par, int tref){
 MWDCHitAna::~MWDCHitAna(){};
 
 void MWDCHitAna::SetDriftTime(ParaManager *par){
-  double drift_time = t_leading;//*par->mwdc_ch2ns - par->mwdc_t0_off; 
+  double drift_time = t_leading - par->mwdc_t0_off[i_plane]; 
   /// here we use t_leading w/o offset and ch2ns...
   i_dt = drift_time;
 };
 
 void MWDCHitAna::SetDriftLength(ParaManager *par){
-  double par_dl[16][4]; // load from txt in ParaManager
-  par_dl[i_plane][0] = par->mwdc_dtdx_par[i_plane][0];
-  par_dl[i_plane][1] = par->mwdc_dtdx_par[i_plane][1];
-  par_dl[i_plane][2] = par->mwdc_dtdx_par[i_plane][2];
-  par_dl[i_plane][3] = par->mwdc_dtdx_par[i_plane][3];
+  int npar = 8;
+  double par_dl[16][npar]; // load from txt in ParaManager
+  for(int i = 0; i < npar ; ++i)
+    par_dl[i_plane][i] = par->mwdc_dtdx_par[i_plane][i];
+
   double dl_tmp = 0.;
-  dl_tmp = par_dl[i_plane][3]+par_dl[i_plane][2]/TMath::Exp((i_dt-par_dl[i_plane][0])/par_dl[i_plane][1]);
+  for(int i = 0; i < npar; ++i)
+    dl_tmp += par_dl[i_plane][i]*pow(i_dt,i);
+
   if(dl_tmp<0) dl_tmp = 0.;
   if(dl_tmp>2.5) dl_tmp = 2.5; //max_dl
   i_dl = dl_tmp;

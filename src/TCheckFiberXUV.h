@@ -123,9 +123,9 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
 
   std::vector<int> id_detector = {G4Sol::FiberD1_x, G4Sol::FiberD2_x, G4Sol::FiberD3_x,
                                             G4Sol::MiniFiberD1_x, G4Sol::MiniFiberD2_x,
-                                                    G4Sol::FiberD4_x, G4Sol::FiberD5_x};
+                                                    G4Sol::FiberD4_v, G4Sol::FiberD5_x};
 
-  double ang[7][3] = {
+  double ang[7][3] = { //CHECK order of G4Sol detectors changed!
     {  0.,  30., -30.},  // UFT1
     {  0.,  30., -30.},  // UFT2 
     {  0.,  30., -30.},  // UFT3
@@ -134,7 +134,7 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
     { 30., -30.,   0.},  // DFT1
     {  0.,  30., -30.}}; // DFT2
 
-  int id_mid[7] = {1, 1, 1, 1, 2, 1, 1};
+  int id_mid[7] = {1, 1, 1, 1, 1, 1, 1};
 
   bool ifcut_MFTtheta_UFT3 = false;
   double maxMFTtheta = 18.;

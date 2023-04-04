@@ -217,6 +217,17 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 
 			    double phi = TMath::ATan2( it_tmpFiber[0].momY , it_tmpFiber[0].momX )  * 180. / M_PI;;
 
+			    if(i_det == 4)
+				    {
+				    	std::swap(tmp_hit_u  ,   tmp_hit_v);
+				    	std::swap(tmp_idhit_u, tmp_idhit_u);
+				    }
+			    else if(i_det == 5)
+				    {
+				    	std::swap(tmp_hit_x  ,   tmp_hit_v);
+				    	std::swap(tmp_idhit_x, tmp_idhit_u);
+				    }
+
 					vect_realCombHit[i_det].emplace_back(std::make_tuple(tmp_hit_x, tmp_hit_u, tmp_hit_v));
 					vect_realCombIdHit[i_det].insert(std::make_pair(id_track, std::make_tuple(tmp_idhit_x, tmp_idhit_u, tmp_idhit_v)));
 	  			vect_realHitXYAngId[i_det].emplace_back(std::make_tuple(tmp_realHitXY, theta, id_track));

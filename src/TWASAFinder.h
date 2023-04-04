@@ -54,7 +54,10 @@ private:
   int FinderWASA(FullRecoEvent& RecoEvent);
 
   double GetPSB_R(int _seg);
+
   double GetPSB_Phi(int _seg);
+
+  double GetFirstMFT_Z(TrackHit* Track);
 
   void CloseDist(FragmentTrack FragTrack, TrackHit* WASATrack, double& distance, TVector3& centroid);
 

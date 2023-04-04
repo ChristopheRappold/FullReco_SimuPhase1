@@ -16,8 +16,11 @@
 #include "Ana_Event/Ana_WasaEvent.hh"
 #include "HitAna/FiberAnalyzer.hh"
 #include "HitAna/FiberHitAna.hh"
+#include "HitAna/PSBHitAna.hh"
 #include "HitAna/FiberHitXUV.hh"
 #include "HitAna/FiberTrackAna.hh"
+#include "HitAna/ParaManager.hh"
+#include "HitAna/ConstantParameter.hh"
 
 //#include "MathematicalTools.hh"
 #include "Debug.hh"
@@ -148,7 +151,7 @@ constexpr bool IsFiberU_Vetoed(G4Sol::SolDet idDet) {
   };
 };
 
-constexpr bool IsFiberU(G4Sol::SolDet idDet) {
+constexpr bool IsFiber(G4Sol::SolDet idDet) {
   switch (idDet) {
   case G4Sol::FiberD1_x : ;
   case G4Sol::FiberD1_u : ;
@@ -159,38 +162,39 @@ constexpr bool IsFiberU(G4Sol::SolDet idDet) {
   case G4Sol::FiberD3_x : ;
   case G4Sol::FiberD3_u : ;
   case G4Sol::FiberD3_v : ;
-  case G4Sol::FiberD4_x : ;
-  case G4Sol::FiberD4_u : ;
+  case G4Sol::MiniFiberD1_x : ;
+  case G4Sol::MiniFiberD1_u : ;
+  case G4Sol::MiniFiberD1_v : ;
+  case G4Sol::MiniFiberD2_x : ;
+  case G4Sol::MiniFiberD2_v : ;
+  case G4Sol::MiniFiberD2_u : ;
   case G4Sol::FiberD4_v : ;
+  case G4Sol::FiberD4_u : ;
+  case G4Sol::FiberD4_x : ;
   case G4Sol::FiberD5_x : ;
   case G4Sol::FiberD5_u : ;
   case G4Sol::FiberD5_v : ;
-  // case G4Sol::MiniFiberD1_x : ;
-  // case G4Sol::MiniFiberD1_u : ;
-  // case G4Sol::MiniFiberD1_v : ;
-  // case G4Sol::MiniFiberD2_x : ;
-  // case G4Sol::MiniFiberD2_u : ;
-  // case G4Sol::MiniFiberD2_v : ;
     return true;
   default:
     return false;
   };
 };
 
-
+/*
 constexpr bool IsFiberM(G4Sol::SolDet idDet) {
   switch (idDet) {
     case G4Sol::MiniFiberD1_x : ;
     case G4Sol::MiniFiberD1_u : ;
     case G4Sol::MiniFiberD1_v : ;
     case G4Sol::MiniFiberD2_x : ;
-    case G4Sol::MiniFiberD2_u : ;
     case G4Sol::MiniFiberD2_v : ;
+    case G4Sol::MiniFiberD2_u : ;
       return true;
     default:
       return false;
   };
 };
+*/
 
 constexpr bool IsWire(G4Sol::SolDet idDet) {
   switch (idDet) {
@@ -252,6 +256,9 @@ private :
   ReturnRes::InfoM SoftExit(int) final;
   void SelectHists() final;
 
+  double GetPSB_R(int _seg);
+  double GetPSB_Phi(int _seg);
+
 private:
   
   //std::vector<std::vector<GFAbsRecoHit*> > ListAllHits;
@@ -267,6 +274,84 @@ private:
   int offsetGeoNameID_PSCE = 0;
   struct LocalHists
   {
+    TH2D* h10[7][3];
+    TH1D* h11[7][3];
+    TH1D* h12[7][3];
+    TH1D* h13[7][3];
+    TH1D* h14[7][3];
+    TH1D* h15[7][3];
+    TH2D* h75[7][3];
+    TH2D* h16[7];
+    TH1D* h17[7];
+    TH1D* h17_2[7];
+    TH1D* h18_3_1;
+    TH1D* h18_3_2;
+    TH2D* h18_3_3;
+    TH2D* h18_3_4;
+    TH1D* h18_3_5;
+    TH1D* h18_3_6;
+    TH1D* h18_3_7;
+    TH1D* h18_3_8;
+    TH1D* hfiber_13_0[7][3];
+    TH1D* hfiber_13_1[7][3];
+    TH1D* hfiber_13_2[7][3];
+    TH2D* hfiber_13_3[7][3];
+    TH2D* hfiber_13_4[7][3];
+    TH2D* h51[3][3][2];
+
+    //PSB
+    TH2D* h76;
+
+    //MFT12
+    TH1D* hfiber_1_1;
+    TH1D* hfiber_1_2;
+    TH1D* hfiber_1_3;
+    TH1D* hfiber_1_4;
+    TH1D* hfiber_1_5;
+    TH1D* hfiber_1_6;
+    TH1D* hfiber_1_7;
+    TH1D* hfiber_1_9;
+    TH1D* hfiber_2_1_1;
+    TH1D* hfiber_2_1_2;
+    TH1D* hfiber_2_2_1;
+    TH1D* hfiber_2_2_2;
+    TH1D* hfiber_2_3;
+    TH1D* hfiber_3_0;
+    TH1D* hfiber_3_0_2;
+    TH1D* hfiber_6_1;
+    TH1D* hfiber_6_2;
+    TH2D* hfiber_6_3;
+    TH2D* hfiber_6_4;
+    TH2D* hfiber_12_1_1;
+    TH2D* hfiber_12_2_1;
+    TH2D* hfiber_12_3_1;
+    TH2D* hfiber_12_1_2;
+    TH2D* hfiber_12_2_2;
+    TH2D* hfiber_12_3_2;
+
+    //DFT12
+    TH1D* hfiber_4_1;
+    TH2D* hfiber_4_2_1;
+    TH2D* hfiber_4_3_1;
+    TH2D* hfiber_4_4_1;
+    TH1D* hfiber_4_5_1;
+    TH2D* hfiber_4_2_2;
+    TH2D* hfiber_4_3_2;
+    TH2D* hfiber_4_4_2;
+    TH1D* hfiber_4_5_2;
+    TH1D* hfiber_4_1_3;
+    TH2D* hfiber_4_2_3;
+    TH2D* hfiber_4_3_3;
+    TH2D* hfiber_4_4_3;
+    TH1D* hfiber_4_5_3;
+    TH1D* hfiber_5_1;
+    TH1D* hfiber_5_2;
+    TH1D* hfiber_5_3;
+    TH1D* hfiber_5_4;
+    TH1D* hfiber_5_5;
+    TH1D* hfiber_5_6;
+    TH1D* hfiber_5_7;
+
     TH1I* h_stats;
   };
   

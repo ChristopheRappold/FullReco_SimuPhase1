@@ -87,10 +87,7 @@ class ParaManager
   double cut_chi2_mft12;
   double cut_chi2_dft12;
   double cut_chi2_uft12;
-  double cut_phi_fm;
   int    cut_num_mdc;
-  double cut_psb_phi;
-  double cut_psb_z;
   double cut_psfe_phi;
   double cut_psbe_phi;
   double cut_t0_time;
@@ -134,6 +131,7 @@ class ParaManager
   double fiber_dft2_cut_d;
 
   double fiber_ch2ns;
+  double fiber_res;
 
   double fiber_tgt_pos_x;   double fiber_tgt_pos_y;   double fiber_tgt_pos_z; //CHECK possibly duplicated
   double fiber_tgt_size_x;  double fiber_tgt_size_y;  double fiber_tgt_size_z;
@@ -169,21 +167,19 @@ class ParaManager
   std::array<std::array<std::array<double, 384>, 3>, 7> fiber_time_offset;
   std::string fiber_name_angleoffset;
   std::array<std::array<std::array<double, 2>, 3>, 7> fiber_angle_offset;
-  std::string fiber_name_mftcor;
-  std::array<std::array<std::array<std::array<double, 3>, 2>, 3>, 2> fiber_mft_cor_par;
 
   double fiber_mft1_off_ang_x1; double fiber_mft1_off_ang_u1; double fiber_mft1_off_ang_v1;
   double fiber_mft1_off_ang_x2; double fiber_mft1_off_ang_u2; double fiber_mft1_off_ang_v2;
   double fiber_mft2_off_ang_x1; double fiber_mft2_off_ang_u1; double fiber_mft2_off_ang_v1;
   double fiber_mft2_off_ang_x2; double fiber_mft2_off_ang_u2; double fiber_mft2_off_ang_v2;
 
-  double fiber_res;
+  std::string fiber_name_mftcor;
+  std::array<std::array<std::array<std::array<double, 3>, 2>, 3>, 2> fiber_mft_cor_par;
 
 
   //  PSB  //////
   double psb_tcut_min; double psb_tcut_max;
   double psb_pos_x;  double psb_pos_y;  double psb_pos_z;
-  double psb_rot_z;
   double psb_res_phi;
   double psb_res_z;
   std::string psb_name_time;
@@ -278,9 +274,10 @@ class ParaManager
   int mwdc_tdccut_timing_threshold[2]; // used in TFRSUserProc.cxx [0]:begin, [1]: end
 
   //// mwdc drift time to drift length convert parameter, later fit for each run with Fermi function
-  double mwdc_dtdx_par[16][4];
+  double mwdc_dtdx_par[16][8];
+  double mwdc_t0_off[16];
+  double mwdc_tmax[16];
   double mwdc_ch2ns;
-  double mwdc_t0_off;
 
   /// --- S3, S4 Scintillators -- //
   double mtdc_ch2ns;
@@ -304,13 +301,6 @@ class ParaManager
   int tcut_sc43_4_max;
   double offset_tof_sc3141;
   double offset_tof_sc4143;
-
-/*
-  // Optics
-  std::string optics_name;
-  std::map<std::string, std::vector<float>> optics_par;
-  double optics_s2z;
-*/
 
 
   std::unordered_map<std::string,std::string>::const_iterator itr_ParamFiles;

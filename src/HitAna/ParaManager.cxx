@@ -33,10 +33,7 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   cut_chi2_gf = 50;
   cut_chi2_dft12 = 10.;
   cut_chi2_mft12 = 10.;
-  cut_phi_fm  = 0.3;
   cut_num_mdc = 3;
-  cut_psb_phi = 0.4;
-  cut_psb_z   = 150;
   cut_psfe_phi = 0.6;
   cut_psbe_phi = 0.6;
   cut_mft12_combi = 1e5;
@@ -84,6 +81,7 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   fiber_dft2_cut_d = 6.;
 
   fiber_ch2ns = 0.416666;
+  fiber_res = 0.2;
 
   double buf_mft1 = -6.0;
   double buf_mft2 = -6.0;
@@ -128,38 +126,38 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
 
   std::ifstream ifs_fiber ( fiber_name_offset );
   if(ifs_fiber.is_open())
-  {
-    const std::string CommentSymbol("#");
-
-    std::string temp_line;
-    while(std::getline(ifs_fiber,temp_line))
     {
-      std::stringstream stream(temp_line);
-      std::string testComment(stream.str());
-      std::size_t it_comment = testComment.find(CommentSymbol);
-      if(it_comment!=std::string::npos)
-      {
-        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
-        continue;
-      }
+      const std::string CommentSymbol("#");
 
-      int det_id, lay_id, fib_id;
-      double offset;
+      std::string temp_line;
+      while(std::getline(ifs_fiber,temp_line))
+        {
+          std::stringstream stream(temp_line);
+          std::string testComment(stream.str());
+          std::size_t it_comment = testComment.find(CommentSymbol);
+          if(it_comment!=std::string::npos)
+            {
+              //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
+              continue;
+            }
 
-      stream >> det_id >> lay_id >> fib_id >> offset;
-      //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+          int det_id, lay_id, fib_id;
+          double offset;
 
-      fiber_offset[det_id][lay_id][fib_id] = offset;
+          stream >> det_id >> lay_id >> fib_id >> offset;
+          //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+
+          fiber_offset[det_id][lay_id][fib_id] = offset;
+        }
+      //std::cout << "done " << mdc_name_map << std::endl;
+      printf("fiber offset loaded : %s\n", fiber_name_offset.c_str());
     }
-    //std::cout << "done " << mdc_name_map << std::endl;
-    printf("fiber offset loaded : %s\n", fiber_name_offset.c_str());
-  }
   else
-  {
-    //std::cout << " ! fail to open " << mdc_name_map << std::endl;
-    printf(" ! fail to open  : %s\n", fiber_name_offset.c_str());
-    exit(-1);
-  }
+    {
+      //std::cout << " ! fail to open " << mdc_name_map << std::endl;
+      printf(" ! fail to open  : %s\n", fiber_name_offset.c_str());
+      exit(-1);
+    }
 
 
   itr_ParamFiles = ParamFiles.find("fiber_timeoffset_file");
@@ -174,38 +172,38 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
 
   std::ifstream ifs_timefiber ( fiber_name_timeoffset );
   if(ifs_timefiber.is_open())
-  {
-    const std::string CommentSymbol("#");
-
-    std::string temp_line;
-    while(std::getline(ifs_timefiber,temp_line))
     {
-      std::stringstream stream(temp_line);
-      std::string testComment(stream.str());
-      std::size_t it_comment = testComment.find(CommentSymbol);
-      if(it_comment!=std::string::npos)
-      {
-        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
-        continue;
-      }
+      const std::string CommentSymbol("#");
 
-      int det_id, lay_id, fib_id;
-      double offset;
+      std::string temp_line;
+      while(std::getline(ifs_timefiber,temp_line))
+        {
+          std::stringstream stream(temp_line);
+          std::string testComment(stream.str());
+          std::size_t it_comment = testComment.find(CommentSymbol);
+          if(it_comment!=std::string::npos)
+            {
+              //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
+              continue;
+            }
 
-      stream >> det_id >> lay_id >> fib_id >> offset;
-      //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+          int det_id, lay_id, fib_id;
+          double offset;
 
-      fiber_time_offset[det_id][lay_id][fib_id] = offset;
+          stream >> det_id >> lay_id >> fib_id >> offset;
+          //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+
+          fiber_time_offset[det_id][lay_id][fib_id] = offset;
+        }
+      //std::cout << "done " << mdc_name_map << std::endl;
+      printf("fiber time offset loaded : %s\n", fiber_name_timeoffset.c_str());
     }
-    //std::cout << "done " << mdc_name_map << std::endl;
-    printf("fiber time offset loaded : %s\n", fiber_name_timeoffset.c_str());
-  }
   else
-  {
-    //std::cout << " ! fail to open " << mdc_name_map << std::endl;
-    printf(" ! fail to open  : %s\n", fiber_name_timeoffset.c_str());
-    exit(-1);
-  }
+    {
+      //std::cout << " ! fail to open " << mdc_name_map << std::endl;
+      printf(" ! fail to open  : %s\n", fiber_name_timeoffset.c_str());
+      exit(-1);
+    }
 
 
 
@@ -221,39 +219,38 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
 
   std::ifstream ifs_anglefiber ( fiber_name_angleoffset );
   if(ifs_anglefiber.is_open())
-  {
-    const std::string CommentSymbol("#");
-
-    std::string temp_line;
-    while(std::getline(ifs_anglefiber,temp_line))
     {
-      std::stringstream stream(temp_line);
-      std::string testComment(stream.str());
-      std::size_t it_comment = testComment.find(CommentSymbol);
-      if(it_comment!=std::string::npos)
-      {
-        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
-        continue;
-      }
+      const std::string CommentSymbol("#");
 
-      int det_id, lay_id, seg_id;
-      double angle;
+      std::string temp_line;
+      while(std::getline(ifs_anglefiber,temp_line))
+        {
+          std::stringstream stream(temp_line);
+          std::string testComment(stream.str());
+          std::size_t it_comment = testComment.find(CommentSymbol);
+          if(it_comment!=std::string::npos)
+            {
+              //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
+              continue;
+            }
 
-      stream >> det_id >> lay_id >> seg_id >> angle;
-      //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+          int det_id, lay_id, seg_id;
+          double angle;
 
-      fiber_angle_offset[det_id][lay_id][seg_id] = angle;
+          stream >> det_id >> lay_id >> seg_id >> angle;
+          //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+
+          fiber_angle_offset[det_id][lay_id][seg_id] = angle;
+        }
+      //std::cout << "done " << mdc_name_map << std::endl;
+      printf("fiber angle offset loaded : %s\n", fiber_name_angleoffset.c_str());
     }
-    //std::cout << "done " << mdc_name_map << std::endl;
-    printf("fiber angle offset loaded : %s\n", fiber_name_angleoffset.c_str());
-  }
   else
-  {
-    //std::cout << " ! fail to open " << mdc_name_map << std::endl;
-    printf(" ! fail to open  : %s\n", fiber_name_angleoffset.c_str());
-    exit(-1);
-  }
-
+    {
+      //std::cout << " ! fail to open " << mdc_name_map << std::endl;
+      printf(" ! fail to open  : %s\n", fiber_name_angleoffset.c_str());
+      exit(-1);
+    }
 
   fiber_mft1_off_ang_x1 = fiber_angle_offset[3][0][0];  fiber_mft1_off_ang_x2 = fiber_angle_offset[3][0][1];
   fiber_mft1_off_ang_u1 = fiber_angle_offset[3][1][0];  fiber_mft1_off_ang_u2 = fiber_angle_offset[3][1][1];
@@ -268,57 +265,55 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   if(itr_ParamFiles != ParamFiles.end())
     fiber_name_mftcor  = itr_ParamFiles->second;
 
-
   for(int i=0; i<2; ++i)
     for(int j=0; j<3; ++j)
       for(int k=0; k<2; ++k)
         for(int l=0; l<3; ++l)
           fiber_mft_cor_par[i][j][k][l] = 0.;
 
+
   std::ifstream ifs_mftcorfiber ( fiber_name_mftcor );
   if(ifs_mftcorfiber.is_open())
-  {
-    const std::string CommentSymbol("#");
-
-    std::string temp_line;
-    while(std::getline(ifs_mftcorfiber,temp_line))
     {
-      std::stringstream stream(temp_line);
-      std::string testComment(stream.str());
-      std::size_t it_comment = testComment.find(CommentSymbol);
-      if(it_comment!=std::string::npos)
-      {
-        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
-        continue;
-      }
+      const std::string CommentSymbol("#");
 
-      int det, lay, seg;
-      double p0, p1, p2;
+      std::string temp_line;
+      while(std::getline(ifs_mftcorfiber,temp_line))
+        {
+          std::stringstream stream(temp_line);
+          std::string testComment(stream.str());
+          std::size_t it_comment = testComment.find(CommentSymbol);
+          if(it_comment!=std::string::npos)
+            {
+              //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
+              continue;
+            }
 
-      stream >> det >> lay >> seg >> p0 >> p1 >> p2;
-      //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+          int det, lay, seg;
+          double p0, p1, p2;
 
-      fiber_mft_cor_par[det][lay][seg][0] = p0;
-      fiber_mft_cor_par[det][lay][seg][1] = p1;
-      fiber_mft_cor_par[det][lay][seg][2] = p2;
+          stream >> det >> lay >> seg >> p0 >> p1 >> p2;
+          //printf("%d %d %d : %.2f\n", det_id, lay_id, fib_id, offset );
+
+          fiber_mft_cor_par[det][lay][seg][0] = p0;
+          fiber_mft_cor_par[det][lay][seg][1] = p1;
+          fiber_mft_cor_par[det][lay][seg][2] = p2;
+        }
+      //std::cout << "done " << mdc_name_map << std::endl;
+      printf("fiber mft corrections loaded : %s\n", fiber_name_mftcor.c_str());
     }
-    //std::cout << "done " << mdc_name_map << std::endl;
-    printf("fiber mft cor loaded : %s\n", fiber_name_mftcor.c_str());
-  }
   else
-  {
-    //std::cout << " ! fail to open " << mdc_name_map << std::endl;
-    printf(" ! fail to open  : %s\n", fiber_name_mftcor.c_str());
-    exit(-1);
-  }
+    {
+      //std::cout << " ! fail to open " << mdc_name_map << std::endl;
+      printf(" ! fail to open  : %s\n", fiber_name_mftcor.c_str());
+      exit(-1);
+    }
 
 
-  fiber_res = 0.2;
 
   //  PSB  //////
   psb_tcut_min = -20200; psb_tcut_max = -19400;
   psb_pos_x = 0.5; psb_pos_y = 5.5; psb_pos_z = 2760.;
-  psb_rot_z = -0.4;
   psb_res_phi = 1000.; //mm
   psb_res_z   = 10.; //mm
 
@@ -522,16 +517,17 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   mwdc_min_plane_with_hit_for_tracking = 12;//just initial value. Change it in setup.C
 
   mwdc_ch2ns = 1.0; //modify later
-  mwdc_t0_off = 0.0; //modify later
-
 
   itr_ParamFiles = ParamFiles.find("mwdc_name_dtdx");
   if(itr_ParamFiles != ParamFiles.end())
     mwdc_name_dtdx  = itr_ParamFiles->second;
 
   for(int i=0; i<16; ++i)
-    for(int j=0; j<4; ++j)
-      mwdc_dtdx_par[i][j] = 0.;
+  {
+    mwdc_t0_off[i] = -9999.;
+    mwdc_tmax[i] = -9999.;
+    for(int j=0; j<8; ++j) mwdc_dtdx_par[i][j] = 0.;
+  }
   
 
   std::ifstream ifs_mwdc_dtdx ( mwdc_name_dtdx );
@@ -552,15 +548,23 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
       }
 
       int plane_tmp = -99;
-      double par0_tmp, par1_tmp, par2_tmp, par3_tmp;
+      double mwdc_t0_off_ = -9999.;
+      double mwdc_tmax_ = -9999.;
+      double par0_tmp, par1_tmp, par2_tmp, par3_tmp, par4_tmp, par5_tmp, par6_tmp, par7_tmp;
 
-      stream >> plane_tmp >> par0_tmp >> par1_tmp >> par2_tmp >> par3_tmp;
+      stream >> plane_tmp >> mwdc_t0_off_ >> mwdc_tmax_ >> par0_tmp >> par1_tmp >> par2_tmp >> par3_tmp >> par4_tmp >> par5_tmp >> par6_tmp >> par7_tmp;
+
+      mwdc_t0_off[plane_tmp] = mwdc_t0_off_;
+      mwdc_tmax[plane_tmp] = mwdc_tmax_;
 
       mwdc_dtdx_par[plane_tmp][0] = par0_tmp;
       mwdc_dtdx_par[plane_tmp][1] = par1_tmp;
       mwdc_dtdx_par[plane_tmp][2] = par2_tmp;
       mwdc_dtdx_par[plane_tmp][3] = par3_tmp;
-
+      mwdc_dtdx_par[plane_tmp][4] = par4_tmp;
+      mwdc_dtdx_par[plane_tmp][5] = par5_tmp;
+      mwdc_dtdx_par[plane_tmp][6] = par6_tmp;
+      mwdc_dtdx_par[plane_tmp][7] = par7_tmp;
     }
     //std::cout << "done " << mdc_name_map << std::endl;
     printf("mwdc dtdx loaded : %s\n", mwdc_name_dtdx.c_str());
@@ -723,51 +727,6 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
     strcpy(mwdc_name_dtdxtable, (itr_ParamFiles->second).c_str());
 
   SetMWDCdtdxFromTH1D(mwdc_name_dtdxtable, ptable, (mwdc_dtdxtable_dtmin), (mwdc_dtdxtable_dtmax));
-
-/*
-  // Optics
-  itr_ParamFiles = ParamFiles.find("optics_name");
-  if(itr_ParamFiles != ParamFiles.end())
-    optics_name  = itr_ParamFiles->second;
-
-  std::ifstream ifs_optics ( optics_name );
-  if(ifs_optics.is_open()){
-    const std::string CommentSymbol("#");
-
-    std::string temp_line;
-    while(std::getline(ifs_optics,temp_line)){
-      std::stringstream stream(temp_line);
-      std::string testComment(stream.str());
-      std::size_t it_comment = testComment.find(CommentSymbol);
-      if(it_comment!=std::string::npos){
-        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
-        continue;
-      }
-      char name[8];
-      float par1;
-      float par2;
-      stream >> name >> par1  >> par2;
-
-      optics_par[name].emplace_back(par1);
-      optics_par[name].emplace_back(par2);
-    }
-
-    printf("Optics done : %s\n", optics_name.c_str());
-  }else
-  {
-    printf(" ! fail to open  : %s\n", optics_name.c_str());
-    exit(-1);
-  }
-
-  for(auto it = optics_par.cbegin(); it != optics_par.cend(); ++it)
-  {
-    std::cout << it->first << " " << it->second[0] << " " << it->second[1] << std::endl;
-  }
-
-  //optics_s2z = 3987.5;
-  optics_s2z = 4187.5; //Ti: 4150 mm, take this value just for easy expression
-*/
-
 
 }
 
