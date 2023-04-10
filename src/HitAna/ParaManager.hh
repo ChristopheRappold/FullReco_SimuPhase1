@@ -88,6 +88,8 @@ class ParaManager
   double cut_chi2_dft12;
   double cut_chi2_uft12;
   int    cut_num_mdc;
+  double cut_psb_phi;
+  double cut_psb_z;
   double cut_psfe_phi;
   double cut_psbe_phi;
   double cut_t0_time;
@@ -180,6 +182,7 @@ class ParaManager
   //  PSB  //////
   double psb_tcut_min; double psb_tcut_max;
   double psb_pos_x;  double psb_pos_y;  double psb_pos_z;
+  double psb_rot_z;
   double psb_res_phi;
   double psb_res_z;
   std::string psb_name_time;

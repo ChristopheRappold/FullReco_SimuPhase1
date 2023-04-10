@@ -256,8 +256,8 @@ private :
   ReturnRes::InfoM SoftExit(int) final;
   void SelectHists() final;
 
-  double GetPSB_R(int _seg);
-  double GetPSB_Phi(int _seg);
+  //double GetPSB_R(int _seg);
+  //double GetPSB_Phi(int _seg);
 
 private:
   

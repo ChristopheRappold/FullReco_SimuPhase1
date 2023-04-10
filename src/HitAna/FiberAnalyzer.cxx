@@ -628,5 +628,500 @@ double FiberAnalyzer::CalcPhiDif(const double phi1, const double phi2){
   }
 
   return diff;
-
 }
+
+double FiberAnalyzer::GetPSB_R(int _seg)
+{
+  double _r = -999.;
+
+  if(_seg<23){
+    if (0 == (_seg % 2)) { // inner PSB
+      _r   = 217.;
+    } else { // outer PSB
+      _r   = 227.75;
+    }
+  }
+  else{
+    if (0 == ((_seg-23) % 2)) { // inner PSB
+      _r   = 217.;
+    } else { // outer PSB
+      _r   = 227.75;
+    }
+  }
+  return _r;
+}
+
+
+double FiberAnalyzer::GetPSB_Phi(int _seg)
+{
+  double _phi = -999.;
+
+  if(_seg<23){
+    if (0 == (_seg % 2)) { // inner PSB
+      _phi = TMath::Pi() * (9.15 + 14.7 * ((double)(_seg / 2))) / 180.0;
+    } else { // outer PSB
+      _phi = TMath::Pi() * (16.5 + 14.7 * ((double)((_seg - 1) / 2))) / 180.0;
+    }
+  }
+  else{
+    if (0 == ((_seg-23) % 2)) { // inner PSB
+      _phi = TMath::Pi() * (189.15 + 14.7 * ((float)((_seg-23) / 2))) / 180.0;
+    } else { // outer PSB
+      _phi = TMath::Pi() * (196.5 + 14.7 * ((float)(((_seg-23) - 1) / 2))) / 180.0;
+    }
+  }
+
+  _phi += TMath::Pi()/2.;
+  if( _phi > TMath::Pi() ) _phi -= 2*TMath::Pi();
+
+  return _phi;
+}
+
+
+std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTracking( std::vector< std::vector< std::vector< FiberHitAna* > > >& FiberHitClCont,
+                                                                      ParaManager *par, std::vector<std::unique_ptr<genfit::AbsMeasurement> >& ListHits_PSB)
+{
+  std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
+
+  std::vector< std::vector<FiberHitXUV*> > FiberXUVCont = FindHit(FiberHitClCont, par);
+
+  // MFT12
+  int nt_mft12 = 0;
+  int nt_mft12_xuv = 0;
+  if(FiberXUVCont[3].size()>0 && FiberXUVCont[4].size()>0 && !par->flag_mft12_allcombi){
+    std::vector<FiberTrackAna*> buf_track;
+    for(int i=0; i<(int)FiberXUVCont[3].size(); ++i){
+      for(int j=0; j<(int)FiberXUVCont[4].size(); ++j){
+        std::vector<FiberHitXUV*>   buf_xuv;
+        buf_xuv.emplace_back(FiberXUVCont[3][i]);
+        buf_xuv.emplace_back(FiberXUVCont[4][j]);
+        FiberTrackAna *track = new FiberTrackAna(buf_xuv, par);
+        if(par->flag_mft12_posang){
+          track->CorrectMFT(par);
+          double buf_x = track->GetXmft();
+          double buf_y = track->GetYmft();
+          double buf_a = track->GetA();
+          double buf_b = track->GetB();
+          if( fabs(buf_x * 0.003 - buf_a)>0.3 || fabs(buf_y * 0.003 - buf_b)>0.3 ){ delete track; continue;}
+        }
+        if(!par->flag_mft12_combi)                      buf_track.emplace_back(track);
+        else if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track);
+      }
+    }
+
+    if(par->flag_dup_mft12_xuv && (int)buf_track.size()>0) buf_track = DeleteDup(buf_track);
+    FiberTrackCont["mft12"] = buf_track;
+
+    nt_mft12     = FiberTrackCont["mft12"].size();
+    nt_mft12_xuv = FiberTrackCont["mft12"].size();
+    for(auto v: FiberTrackCont["mft12"]){
+      for(int i=0; i<6; ++i){
+        if(par->flag_dup_mft12_xuv) v->GetContHit().at(i)->SetUsed();
+      }
+      v->CorrectMFT(par);
+      v->SetPosL();
+    }
+  }
+
+  int num_combi_mft12 = 1;
+  for(int i=3; i<5; ++i){
+    for(int j=0; j<3; ++j){
+      num_combi_mft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
+    }
+  }
+
+  if(par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
+
+  if(par->flag_mft12_combi && num_combi_mft12<par->cut_mft12_combi){
+
+    std::vector<FiberTrackAna*> buf_track;
+    for(int a=-1; a<(int)FiberHitClCont[3][0].size(); ++a){
+      for(int b=-1; b<(int)FiberHitClCont[3][1].size(); ++b){
+        for(int c=-1; c<(int)FiberHitClCont[3][2].size(); ++c){
+          for(int d=-1; d<(int)FiberHitClCont[4][0].size(); ++d){
+            for(int e=-1; e<(int)FiberHitClCont[4][1].size(); ++e){
+              for(int f=-1; f<(int)FiberHitClCont[4][2].size(); ++f){
+                std::vector<FiberHitAna*> buf_hit;
+                int count = 0;
+                if(a>-1 && !FiberHitClCont[3][0][a]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[3][0][a]); count++;}
+                if(b>-1 && !FiberHitClCont[3][1][b]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[3][1][b]); count++;}
+                if(c>-1 && !FiberHitClCont[3][2][c]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[3][2][c]); count++;}
+                if(d>-1 && !FiberHitClCont[4][0][d]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][0][d]); count++;}
+                if(e>-1 && !FiberHitClCont[4][1][e]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][1][e]); count++;}
+                if(f>-1 && !FiberHitClCont[4][2][f]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][2][f]); count++;}
+                if(count<4) continue;
+                FiberTrackAna *track = new FiberTrackAna(buf_hit, par);
+                track->SetFlagCombi();
+                if(par->flag_mft12_posang){
+                  track->CorrectMFTCombi(par);
+                  double buf_x = track->GetXmft();
+                  double buf_y = track->GetYmft();
+                  double buf_a = track->GetA();
+                  double buf_b = track->GetB();
+                  if( fabs(buf_x * 0.003 - buf_a)>0.3 || fabs(buf_y * 0.003 - buf_b)>0.3 ){ delete track; continue;}
+                }
+                switch(track->GetNlayer()){
+                  case 4: buf_track.emplace_back(track); break;
+                  case 5: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+                  case 6: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+                  default: break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    for(int i=0; i<(int)buf_track.size(); ++i){
+      for(int j=0; j<(int)ListHits_PSB.size(); ++j){
+        double a_fiber = buf_track[i]->GetA();
+        double b_fiber = buf_track[i]->GetB();
+        double x_fiber = buf_track[i]->GetX();
+        double y_fiber = buf_track[i]->GetY();
+        double phi_psb   = GetPSB_Phi(ListHits_PSB[j]->getHitId()) + par->psb_rot_z*Deg2Rad;
+        double r_psb     = GetPSB_R(ListHits_PSB[j]->getHitId());
+        double z_psb     = ListHits_PSB[j]->getRawHitCoords()[1]*10.; //in mm
+
+        double par_a = pow(a_fiber, 2) + pow(b_fiber, 2);
+        double par_b = a_fiber * (x_fiber - par->psb_pos_x)+ b_fiber * (y_fiber - par->psb_pos_y);
+        double par_c = pow(x_fiber - par->psb_pos_x, 2) + pow(y_fiber - par->psb_pos_y, 2) - pow(r_psb, 2);
+        double z_fiber  = (-par_b + sqrt( pow(par_b,2) - par_a * par_c)) / par_a;
+
+        double fiber_x_buf = x_fiber + a_fiber * z_fiber - par->psb_pos_x;
+        double fiber_y_buf = y_fiber + b_fiber * z_fiber - par->psb_pos_y;
+        double phi_fiber = atan2(fiber_y_buf, fiber_x_buf);
+
+        if( fabs(CalcPhiDif(phi_psb, phi_fiber)) < par->cut_psb_phi ){
+          if(fabs( (z_fiber - par->psb_pos_z) - z_psb)<par->cut_psb_z){
+            if(buf_track[i]->IsFlagPSB()){
+                if( fabs( CalcPhiDif(phi_psb, phi_fiber) ) < fabs( buf_track[i]->GetPSBDifPhi() ) ){
+                  buf_track[i]->SetSegPSB(ListHits_PSB[j]->getHitId());
+                  buf_track[i]->SetPSBDifZ(z_psb - (z_fiber - par->psb_pos_z));
+                  buf_track[i]->SetPSBDifPhi(CalcPhiDif(phi_psb, phi_fiber));
+                }
+            }
+            else{
+              buf_track[i]->SetFlagPSB();
+              buf_track[i]->SetSegPSB(ListHits_PSB[j]->getHitId());
+              buf_track[i]->SetPSBDifZ(z_psb - (z_fiber - par->psb_pos_z));
+              buf_track[i]->SetPSBDifPhi(CalcPhiDif(phi_psb, phi_fiber));
+            }
+          }
+        }
+
+      }
+    }
+
+    int num_buf = buf_track.size();
+    for(int i=num_buf-1; i>=0; --i){
+      if(!buf_track[i]->IsFlagPSB()){
+        delete buf_track[i];
+        buf_track.erase(buf_track.begin() + i);
+      }
+    }
+
+    if(par->flag_dup_mft12_combi){
+      std::vector<FiberTrackAna*> buf_track_tmp = DeleteDupCombi(buf_track);
+      buf_track = buf_track_tmp;
+    }
+
+    for(auto v: buf_track){
+      for(auto v2: v->GetContHit()){ v2->SetUsed(); }
+      v->CorrectMFTCombi(par);
+      v->SetPosL();
+      v->DelFlagPSB();
+    }
+
+    for(auto v : buf_track){
+      FiberTrackCont["mft12"].emplace_back(v);
+    }
+
+    FiberTrackCont["mft12"] = DeleteSame(FiberTrackCont["mft12"]);
+    if(par->flag_debug) std::cout << "- before Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
+    if(par->flag_mft12_inclusive) FiberTrackCont["mft12"] = DeleteInclusive(FiberTrackCont["mft12"]);
+    if(par->flag_debug) std::cout << "- after  Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
+    nt_mft12 = FiberTrackCont["mft12"].size();
+
+  }
+
+  if(par->flag_mft12_pair){
+    std::vector<std::pair<FiberHitAna*, FiberHitAna*> > pair_x;
+    std::vector<std::pair<FiberHitAna*, FiberHitAna*> > pair_u;
+    std::vector<std::pair<FiberHitAna*, FiberHitAna*> > pair_v;
+    for(auto v1: FiberHitClCont[3][0]){
+      for(auto v2: FiberHitClCont[4][0]){
+        double pos1 = v1->GetPos();
+        double pos2 = v2->GetPos();
+        if( fabs(pos1 - pos2) < 20 ) pair_x.emplace_back(std::make_pair(v1, v2));
+      }
+    }
+    for(auto v1: FiberHitClCont[3][1]){
+      for(auto v2: FiberHitClCont[4][2]){
+        double pos1 = v1->GetPos();
+        double pos2 = v2->GetPos();
+        if( fabs(pos1 - pos2) < 20 ) pair_u.emplace_back(std::make_pair(v1, v2));
+      }
+    }
+    for(auto v1: FiberHitClCont[3][2]){
+      for(auto v2: FiberHitClCont[4][1]){
+        double pos1 = v1->GetPos();
+        double pos2 = v2->GetPos();
+        if( fabs(pos1 - pos2) < 20 ) pair_v.emplace_back(std::make_pair(v1, v2));
+      }
+    }
+
+    int num_xp = pair_x.size();
+    int num_up = pair_u.size();
+    int num_vp = pair_v.size();
+    int num_combi_pair = (num_xp+1) * (num_up+1) * (num_vp+1);
+    if(par->flag_debug) std::cout << "- num_combi_pair_mft12 : " << num_combi_pair << std::endl;
+
+    if(num_combi_pair < par->cut_mft12_combi){
+
+      std::vector<FiberTrackAna*> buf_track;
+      for(int a=-1; a<num_xp; ++a){
+        for(int b=-1; b<num_up; ++b){
+          for(int c=-1; c<num_vp; ++c){
+            std::vector<FiberHitAna*> buf_hit;
+            int count = 0;
+            if( a>-1 && !pair_x[a].first->IsUsed() && !pair_x[a].second->IsUsed() ){
+              buf_hit.emplace_back(pair_x[a].first); buf_hit.emplace_back(pair_x[a].second); count+=2; }
+            if( b>-1 && !pair_u[b].first->IsUsed() && !pair_u[b].second->IsUsed() ){
+              buf_hit.emplace_back(pair_u[b].first); buf_hit.emplace_back(pair_u[b].second); count+=2; }
+            if( c>-1 && !pair_v[c].first->IsUsed() && !pair_v[c].second->IsUsed() ){
+              buf_hit.emplace_back(pair_v[c].first); buf_hit.emplace_back(pair_v[c].second); count+=2; }
+            if(count<4) continue;
+            FiberTrackAna *track = new FiberTrackAna(buf_hit, par);
+            track->SetFlagPair();
+            if(par->flag_mft12_posang){
+              track->CorrectMFTCombi(par);
+              double buf_x = track->GetXmft();
+              double buf_y = track->GetYmft();
+              double buf_a = track->GetA();
+              double buf_b = track->GetB();
+              if( fabs(buf_x * 0.003 - buf_a)>0.3 || fabs(buf_y * 0.003 - buf_b)>0.3 ){ delete track; continue;}
+            }
+            switch(track->GetNlayer()){
+              case 4: buf_track.emplace_back(track); break;
+              case 5: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+              case 6: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+              default: break;
+            }
+
+          }
+        }
+      }
+
+      for(int i=0; i<(int)buf_track.size(); ++i){
+        for(int j=0; j<(int)ListHits_PSB.size(); ++j){
+          double a_fiber = buf_track[i]->GetA();
+          double b_fiber = buf_track[i]->GetB();
+          double x_fiber = buf_track[i]->GetX();
+          double y_fiber = buf_track[i]->GetY();
+          double phi_psb   = GetPSB_Phi(ListHits_PSB[j]->getHitId()) + par->psb_rot_z*Deg2Rad;
+          double r_psb     = GetPSB_R(ListHits_PSB[j]->getHitId());
+          double z_psb     = ListHits_PSB[j]->getRawHitCoords()[1]*10.; //in mm
+
+          double par_a = pow(a_fiber, 2) + pow(b_fiber, 2);
+          double par_b = a_fiber * (x_fiber - par->psb_pos_x)+ b_fiber * (y_fiber - par->psb_pos_y);
+          double par_c = pow(x_fiber - par->psb_pos_x, 2) + pow(y_fiber - par->psb_pos_y, 2) - pow(r_psb, 2);
+          double z_fiber  = (-par_b + sqrt( pow(par_b,2) - par_a * par_c)) / par_a;
+
+          double fiber_x_buf = x_fiber + a_fiber * z_fiber - par->psb_pos_x;
+          double fiber_y_buf = y_fiber + b_fiber * z_fiber - par->psb_pos_y;
+          double phi_fiber = atan2(fiber_y_buf, fiber_x_buf);
+          if( fabs(CalcPhiDif(phi_psb, phi_fiber)) < par->cut_psb_phi ){
+            if(fabs( (z_fiber - par->psb_pos_z) - z_psb)<par->cut_psb_z){
+              if(buf_track[i]->IsFlagPSB()){
+                if( fabs( CalcPhiDif(phi_psb, phi_fiber) ) < fabs( buf_track[i]->GetPSBDifPhi() ) ){
+                  buf_track[i]->SetSegPSB(ListHits_PSB[j]->getHitId());
+                  buf_track[i]->SetPSBDifZ(z_psb - (z_fiber - par->psb_pos_z));
+                  buf_track[i]->SetPSBDifPhi(CalcPhiDif(phi_psb, phi_fiber));
+                }
+              }
+
+              else{
+                buf_track[i]->SetFlagPSB();
+                buf_track[i]->SetSegPSB(ListHits_PSB[j]->getHitId());
+                buf_track[i]->SetPSBDifZ(z_psb - (z_fiber - par->psb_pos_z));
+                buf_track[i]->SetPSBDifPhi(CalcPhiDif(phi_psb, phi_fiber));
+              }
+            }
+          }
+
+        }
+      }
+
+      int num_buf = buf_track.size();
+      for(int i=num_buf-1; i>=0; --i){
+        if(!buf_track[i]->IsFlagPSB()){
+          delete buf_track[i];
+          buf_track.erase(buf_track.begin() + i);
+        }
+      }
+
+      ////////////////////////////
+      //  delete dup ???? ////////
+      ////////////////////////////
+
+      for(auto v: buf_track){
+        for(auto v2: v->GetContHit()){ v2->SetUsed(); }
+        v->CorrectMFTCombi(par);
+        v->SetPosL();
+        v->DelFlagPSB();
+      }
+
+      for(auto v : buf_track){
+        FiberTrackCont["mft12"].emplace_back(v);
+      }
+
+      FiberTrackCont["mft12"] = DeleteSame(FiberTrackCont["mft12"]);
+      if(par->flag_debug) std::cout << "- before Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
+      if(par->flag_mft12_inclusive) FiberTrackCont["mft12"] = DeleteInclusive(FiberTrackCont["mft12"]);
+      if(par->flag_debug) std::cout << "- after  Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
+      nt_mft12 = FiberTrackCont["mft12"].size();
+
+    }
+
+  }
+
+  for(auto v: FiberTrackCont["mft12"]){
+    v->SortContHit();
+  }
+
+  if(par->flag_debug) std::cout << "- mft12 end" << std::endl;
+
+
+  // DFT12
+  int nt_dft12 = 0;
+
+  if(FiberXUVCont[5].size()>0 && FiberXUVCont[6].size()>0){
+    std::vector<FiberTrackAna*> buf_track;
+    for(int i=0; i<(int)FiberXUVCont[5].size(); ++i){
+      for(int j=0; j<(int)FiberXUVCont[6].size(); ++j){
+        std::vector<FiberHitXUV*>   buf_xuv;
+        buf_xuv.emplace_back(FiberXUVCont[5][i]);
+        buf_xuv.emplace_back(FiberXUVCont[6][j]);
+        FiberTrackAna *track = new FiberTrackAna(buf_xuv, par);
+        if(par->flag_dft12_cut){
+          double tot_mean = track->GetTOT();
+          double x_buf = track->GetXdet();
+          double y_buf = track->GetYdet();
+          double a_buf = track->GetA() * 1000;
+          double b_buf = track->GetB() * 1000;
+          bool flag_cut = false;
+          if( pow(x_buf/60., 2.) + pow(y_buf/40., 2) > 1. ) flag_cut = true;
+          if( fabs( x_buf * 23./50. - a_buf) > 20. ) flag_cut = true;
+          if( fabs( y_buf * 35./60. - b_buf) > 30. ) flag_cut = true;
+          if( tot_mean < par->cut_dft12_tot_max ) flag_cut = true;
+          if(flag_cut){ delete track; continue; }
+        }
+        if(!par->flag_dft12_combi)                      buf_track.emplace_back(track);
+        else if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track);
+      }
+    }
+    if((int)buf_track.size()>0) FiberTrackCont["dft12"] = DeleteDup(buf_track);
+    nt_dft12     = FiberTrackCont["dft12"].size();
+  }
+
+  for(auto v: FiberTrackCont["dft12"]){
+    for(int i=0; i<6; ++i){
+      v->GetContHit().at(i)->SetUsed();
+    }
+  }
+
+  int num_combi_dft12 = 1;
+  for(int i=5; i<7; ++i){
+    for(int j=0; j<3; ++j){
+      num_combi_dft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
+    }
+  }
+
+  if(par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
+
+  if(par->flag_dft12_combi && num_combi_dft12<par->cut_dft12_combi){
+
+    std::vector<FiberTrackAna*> buf_track;
+    for(int a=-1; a<(int)FiberHitClCont[5][0].size(); ++a){
+      for(int b=-1; b<(int)FiberHitClCont[5][1].size(); ++b){
+        for(int c=-1; c<(int)FiberHitClCont[5][2].size(); ++c){
+          for(int d=-1; d<(int)FiberHitClCont[6][0].size(); ++d){
+            for(int e=-1; e<(int)FiberHitClCont[6][1].size(); ++e){
+              for(int f=-1; f<(int)FiberHitClCont[6][2].size(); ++f){
+                std::vector<FiberHitAna*> buf_hit;
+                int count = 0;
+                if(a>-1 && !FiberHitClCont[5][0][a]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[5][0][a]); count++;}
+                if(b>-1 && !FiberHitClCont[5][1][b]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[5][1][b]); count++;}
+                if(c>-1 && !FiberHitClCont[5][2][c]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[5][2][c]); count++;}
+                if(d>-1 && !FiberHitClCont[6][0][d]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][0][d]); count++;}
+                if(e>-1 && !FiberHitClCont[6][1][e]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][1][e]); count++;}
+                if(f>-1 && !FiberHitClCont[6][2][f]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][2][f]); count++;}
+                if(count<4) continue;
+                FiberTrackAna *track = new FiberTrackAna(buf_hit, par);
+
+                if(par->flag_dft12_cut){
+                  double tot_mean = track->GetTOT();
+                  double x_buf = track->GetXdet();
+                  double y_buf = track->GetYdet();
+                  double a_buf = track->GetA() * 1000;
+                  double b_buf = track->GetB() * 1000;
+                  bool flag_cut = false;
+                  if( pow(x_buf/60., 2.) + pow(y_buf/40., 2) > 1. ) flag_cut = true;
+                  if( fabs( x_buf * 23./50. - a_buf) > 20. ) flag_cut = true;
+                  if( fabs( y_buf * 35./60. - b_buf) > 30. ) flag_cut = true;
+                  if( tot_mean < 75. ) flag_cut = true;
+                  if(flag_cut){ delete track; continue; }
+                }
+
+                switch(track->GetNlayer()){
+                  case 4: buf_track.emplace_back(track); break;
+                  case 5: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
+                  case 6: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
+                  default: break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    if(par->flag_debug) std::cout << "- dft12 combi" << std::endl;
+
+    std::vector<FiberTrackAna*> buf_track_tmp = DeleteDupCombi(buf_track);
+    if(par->flag_debug) std::cout << "- dft12 dup" << std::endl;
+    buf_track = buf_track_tmp;
+
+    for(auto v: buf_track){
+      for(auto v2: v->GetContHit()){ v2->SetUsed(); }
+    }
+
+    for(auto v : buf_track){
+      FiberTrackCont["dft12"].emplace_back(v);
+    }
+    nt_dft12 = FiberTrackCont["dft12"].size();
+
+  }
+
+  int buf_i_dft12 = -1;
+  double buf_diff_dft12 = -9999.;
+  for(int i=0; i<nt_dft12; ++i){
+    FiberTrackAna *track = FiberTrackCont["dft12"][i];
+    double tot_mean  = track->GetTOT();
+    double time_mean = track->GetTime();
+    double dist_dft12 =
+      pow( (tot_mean  - par->cut_dft12_tot_mean)  / par->cut_dft12_tot_sig , 2.) +
+      pow( (time_mean - par->cut_dft12_time_mean) / par->cut_dft12_time_sig, 2.);
+    if(buf_diff_dft12<0 || dist_dft12 < buf_diff_dft12){
+      buf_i_dft12 = i;
+      buf_diff_dft12 = dist_dft12;
+    }
+  }
+
+  if(buf_i_dft12>-1) FiberTrackCont["dft12"][buf_i_dft12]->SetBest();
+
+  if(par->flag_debug) std::cout << "- dft12 end" << std::endl;
+
+  return FiberTrackCont;
+}
+

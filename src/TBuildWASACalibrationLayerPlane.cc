@@ -1000,9 +1000,95 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   }
 
   // Fiber Track Analysis
-  std::vector< std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par.get());
-  std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
 
+  std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont
+                = fiberana->FiberTracking(FiberHitClCont, par.get(), RecoEvent.ListHits[G4Sol::PSCE]);
+
+  RecoEvent.FiberTrackCont = FiberTrackCont;
+
+  int num_combi_mft12 = 1;
+  for(int i=3; i<5; ++i)
+    for(int j=0; j<3; ++j)
+      num_combi_mft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
+
+  if(par->flag_mft12_combi && num_combi_mft12<par->cut_mft12_combi){
+    LocalHisto.hfiber_1_1->Fill(num_combi_mft12);
+    LocalHisto.hfiber_1_2->Fill((double)num_combi_mft12*1e-3);
+    LocalHisto.hfiber_1_3->Fill((double)num_combi_mft12*1e-3);
+    LocalHisto.hfiber_1_4->Fill((double)num_combi_mft12*1e-6);
+  }
+
+  LocalHisto.hfiber_1_5->Fill((double)num_combi_mft12*1e-3);
+  LocalHisto.hfiber_1_6->Fill((double)num_combi_mft12*1e-3);
+  LocalHisto.hfiber_1_7->Fill((double)num_combi_mft12*1e-6);
+  if(par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
+
+  for(auto track: FiberTrackCont["mft12"]){
+    double x1 = -9999.;
+    double x2 = -9999.;
+    double u1 = -9999.;
+    double u2 = -9999.;
+    double v1 = -9999.;
+    double v2 = -9999.;
+    for(auto hit: track->GetContHit()){
+      double pos = hit->GetPos();
+      if(hit->GetDid()==30) x1 = pos;
+      if(hit->GetDid()==31) u1 = pos;
+      if(hit->GetDid()==32) v1 = pos;
+      if(hit->GetDid()==40) x2 = pos;
+      if(hit->GetDid()==41) v2 = pos;
+      if(hit->GetDid()==42) u2 = pos;
+    }
+    if(x1!=-9999. && x2!=-9999.) LocalHisto.hfiber_12_1_1->Fill(x1, x2);
+    if(u1!=-9999. && u2!=-9999.) LocalHisto.hfiber_12_2_1->Fill(u1, u2);
+    if(v1!=-9999. && v2!=-9999.) LocalHisto.hfiber_12_3_1->Fill(v1, v2);
+    if(track->IsFlagPair()){
+      if(x1!=-9999. && x2!=-9999.) LocalHisto.hfiber_12_1_2->Fill(x1, x2);
+      if(u1!=-9999. && u2!=-9999.) LocalHisto.hfiber_12_2_2->Fill(u1, u2);
+      if(v1!=-9999. && v2!=-9999.) LocalHisto.hfiber_12_3_2->Fill(v1, v2);
+    }
+  }
+
+  LocalHisto.hfiber_3_0->Fill(FiberTrackCont["mft12"].size());
+
+  int num_combi_dft12 = 1;
+  for(int i=5; i<7; ++i)
+    for(int j=0; j<3; ++j)
+      num_combi_dft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
+
+  if(par->flag_dft12_combi && num_combi_dft12<par->cut_dft12_combi){
+    LocalHisto.hfiber_5_1->Fill(num_combi_dft12);
+    LocalHisto.hfiber_5_2->Fill((double)num_combi_dft12*1e-3);
+    LocalHisto.hfiber_5_3->Fill((double)num_combi_dft12*1e-3);
+    LocalHisto.hfiber_5_4->Fill((double)num_combi_dft12*1e-6);
+  }
+
+  LocalHisto.hfiber_5_5->Fill((double)num_combi_dft12*1e-3);
+  LocalHisto.hfiber_5_6->Fill((double)num_combi_dft12*1e-3);
+  LocalHisto.hfiber_5_7->Fill((double)num_combi_dft12*1e-6);
+  if(par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
+
+  for(int i=0; i<FiberTrackCont["dft12"].size(); ++i){
+    FiberTrackAna *track = FiberTrackCont["dft12"][i];
+    LocalHisto.hfiber_4_2_3->Fill(track->GetXdet(), track->GetYdet());
+    LocalHisto.hfiber_4_3_3->Fill(track->GetXdet(), track->GetA()*1000);
+    LocalHisto.hfiber_4_4_3->Fill(track->GetYdet(), track->GetB()*1000);
+    LocalHisto.hfiber_4_5_3->Fill(track->GetTOT());
+  }
+
+  LocalHisto.h18_3_1->Fill(FiberTrackCont["dft12"].size());
+  if(FiberTrackCont["dft12"].size()>0){
+    LocalHisto.h18_3_2->Fill(FiberTrackCont["dft12"][0]->GetChi2());
+    LocalHisto.h18_3_3->Fill(FiberTrackCont["dft12"][0]->GetXtgt(), FiberTrackCont["dft12"][0]->GetA()*1000);
+    LocalHisto.h18_3_4->Fill(FiberTrackCont["dft12"][0]->GetYtgt(), FiberTrackCont["dft12"][0]->GetB()*1000);
+    LocalHisto.h18_3_5->Fill(FiberTrackCont["dft12"][0]->GetXtgt());
+    LocalHisto.h18_3_6->Fill(FiberTrackCont["dft12"][0]->GetYtgt());
+    LocalHisto.h18_3_7->Fill(FiberTrackCont["dft12"][0]->GetA()*1000);
+    LocalHisto.h18_3_8->Fill(FiberTrackCont["dft12"][0]->GetB()*1000);
+  }
+
+/*
+  std::vector< std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par.get());
 
   for(int i=0; i<7; ++i)
     {
@@ -1013,6 +1099,8 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
           LocalHisto.h17_2[i]->Fill(FiberXUVCont[i][j]->GetD());
         }
     }
+
+  std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
 
   // MFT12
   int nt_mft12 = 0;
@@ -1037,53 +1125,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
         else if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track);
       }
     }
-/*
-    if(par->flag_mft12_xuv_psb){
-      for(int i=0; i<(int)buf_track.size(); ++i){
-        for(int j=0; j<(int)PSBHitCont.size(); ++j){
-          double a_fiber = buf_track[i]->GetA();
-          double b_fiber = buf_track[i]->GetB();
-          double x_fiber = buf_track[i]->GetX();
-          double y_fiber = buf_track[i]->GetY();
-          double phi_psb   = PSBHitCont[j]->GetPhi() + att.psb_rot_z*Deg2Rad;
-          double r_psb     = PSBHitCont[j]->GetR();
-          double z_psb     = PSBHitCont[j]->GetZ();
 
-          double par_a = pow(a_fiber, 2) + pow(b_fiber, 2);
-          double par_b = a_fiber * (x_fiber - att.psb_pos_x)+ b_fiber * (y_fiber - att.psb_pos_y);
-          double par_c = pow(x_fiber - att.psb_pos_x, 2) + pow(y_fiber - att.psb_pos_y, 2) - pow(r_psb, 2);
-          double z_fiber  = (-par_b + sqrt( pow(par_b,2) - par_a * par_c)) / par_a;
-
-          double fiber_x_buf = x_fiber + a_fiber * z_fiber - att.psb_pos_x;
-          double fiber_y_buf = y_fiber + b_fiber * z_fiber - att.psb_pos_y;
-          double phi_fiber = atan2(fiber_y_buf, fiber_x_buf);
-          if( fabs(fiberana->CalcPhiDif(phi_psb, phi_fiber)) < att.cut_psb_phi ){
-            if(fabs( (z_fiber - att.psb_pos_z) - z_psb)<att.cut_psb_z){
-              if(buf_track[i]->IsFlagPSB()){
-                double phi_psb_buf = buf_track[i]->GetPSBHit()->GetPhi();
-                if( fabs( fiberana->CalcPhiDif(phi_psb, phi_fiber) ) < fabs( fiberana->CalcPhiDif(phi_psb_buf, phi_fiber) ) ){
-                  buf_track[i]->SetSegPSB(PSBHitCont[j]->GetSeg());
-                  buf_track[i]->SetPSBHit(PSBHitCont[j]);
-                }
-              }
-              else{
-                buf_track[i]->SetFlagPSB();
-                buf_track[i]->SetSegPSB(PSBHitCont[j]->GetSeg());
-                buf_track[i]->SetPSBHit(PSBHitCont[j]);
-              }
-            }
-          }
-        }
-      }
-      int num_buf2 = buf_track.size();
-      for(int i=num_buf2-1; i>=0; --i){
-        if(!buf_track[i]->IsFlagPSB()){
-          delete buf_track[i];
-          buf_track.erase(buf_track.begin() + i);
-        }
-      }
-    }
-*/
     if(par->flag_dup_mft12_xuv && (int)buf_track.size()>0) buf_track = fiberana->DeleteDup(buf_track);
     FiberTrackCont["mft12"] = buf_track;
 
@@ -1093,14 +1135,8 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       for(int i=0; i<6; ++i){
         if(par->flag_dup_mft12_xuv) v->GetContHit().at(i)->SetUsed();
       }
-      //std::cout << "-- 1st cor"  << std::endl;
       v->CorrectMFT(par.get());
-      //std::cout << "-- 2nd cor"  << std::endl;
-      //v->CorrectMFT(par);
-      //std::cout << "-- 3rd cor"  << std::endl;
-      //v->CorrectMFT(par);
       v->SetPosL();
-      //if(par->flag_mftcor_xy) v->CorrectMFTXY(par.get());
     }
   }
 
@@ -1113,7 +1149,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   LocalHisto.hfiber_1_5->Fill((double)num_combi_mft12*1e-3);
   LocalHisto.hfiber_1_6->Fill((double)num_combi_mft12*1e-3);
   LocalHisto.hfiber_1_7->Fill((double)num_combi_mft12*1e-6);
-  //std::cout << "num_combi_mft12 : " << num_combi_mft12 << std::endl;
   if(par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
 
   if(par->flag_mft12_combi && num_combi_mft12<par->cut_mft12_combi){
@@ -1121,7 +1156,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     LocalHisto.hfiber_1_2->Fill((double)num_combi_mft12*1e-3);
     LocalHisto.hfiber_1_3->Fill((double)num_combi_mft12*1e-3);
     LocalHisto.hfiber_1_4->Fill((double)num_combi_mft12*1e-6);
-    //std::vector< std::vector<int> > hit_combi;
     std::vector<FiberTrackAna*> buf_track;
     for(int a=-1; a<(int)FiberHitClCont[3][0].size(); ++a){
       for(int b=-1; b<(int)FiberHitClCont[3][1].size(); ++b){
@@ -1138,18 +1172,15 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
                 if(e>-1 && !FiberHitClCont[4][1][e]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][1][e]); count++;}
                 if(f>-1 && !FiberHitClCont[4][2][f]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][2][f]); count++;}
                 if(count<4) continue;
-                //if(count!=4) continue;
                 FiberTrackAna *track = new FiberTrackAna(buf_hit, par.get());
                 track->SetFlagCombi();
                 if(par->flag_mft12_posang){
                   track->CorrectMFTCombi(par.get());
-                  //track->CorrectMFTCombi(par);
                   double buf_x = track->GetXmft();
                   double buf_y = track->GetYmft();
                   double buf_a = track->GetA();
                   double buf_b = track->GetB();
                   if( fabs(buf_x * 0.003 - buf_a)>0.3 || fabs(buf_y * 0.003 - buf_b)>0.3 ){ delete track; continue;}
-                  //if( pow(buf_x, 2.) + pow(buf_y, 2.) > pow(100., 2.)){ delete track; continue;}
                 }
                 switch(track->GetNlayer()){
                   case 4: buf_track.emplace_back(track); break;
@@ -1173,7 +1204,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
         double b_fiber = buf_track[i]->GetB();
         double x_fiber = buf_track[i]->GetX();
         double y_fiber = buf_track[i]->GetY();
-        //double phi_fiber = atan2(b_fiber, a_fiber);
         double phi_psb   = PSBHitCont[j]->GetPhi() + att.psb_rot_z*Deg2Rad;
         double r_psb     = PSBHitCont[j]->GetR();
         double z_psb     = PSBHitCont[j]->GetZ();
@@ -1228,11 +1258,8 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     for(auto v: buf_track){
       for(auto v2: v->GetContHit()){ v2->SetUsed(); }
       v->CorrectMFTCombi(par.get());
-      //v->CorrectMFTCombi(par);
-      //v->CorrectMFTCombi(par);
       v->SetPosL();
       v->DelFlagPSB();
-      //if(par->flag_mftcor_xy) v->CorrectMFTXY(par);
     }
 
     LocalHisto.hfiber_2_2_1->Fill(buf_track.size());
@@ -1302,13 +1329,11 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
             track->SetFlagPair();
             if(par->flag_mft12_posang){
               track->CorrectMFTCombi(par.get());
-              //track->CorrectMFTCombi(par);
               double buf_x = track->GetXmft();
               double buf_y = track->GetYmft();
               double buf_a = track->GetA();
               double buf_b = track->GetB();
               if( fabs(buf_x * 0.003 - buf_a)>0.3 || fabs(buf_y * 0.003 - buf_b)>0.3 ){ delete track; continue;}
-              //if( pow(buf_x, 2.) + pow(buf_y, 2.) > pow(100., 2.)){ delete track; continue;}
             }
             switch(track->GetNlayer()){
               case 4: buf_track.emplace_back(track); break;
@@ -1327,7 +1352,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
           double b_fiber = buf_track[i]->GetB();
           double x_fiber = buf_track[i]->GetX();
           double y_fiber = buf_track[i]->GetY();
-          //double phi_fiber = atan2(b_fiber, a_fiber);
           double phi_psb   = PSBHitCont[j]->GetPhi() + att.psb_rot_z*Deg2Rad;
           double r_psb     = PSBHitCont[j]->GetR();
           double z_psb     = PSBHitCont[j]->GetZ();
@@ -1375,11 +1399,8 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       for(auto v: buf_track){
         for(auto v2: v->GetContHit()){ v2->SetUsed(); }
         v->CorrectMFTCombi(par.get());
-        //v->CorrectMFTCombi(par);
-        //v->CorrectMFTCombi(par);
         v->SetPosL();
         v->DelFlagPSB();
-        //if(par->flag_mftcor_xy) v->CorrectMFTXY(par);
       }
 
       for(auto v : buf_track){
@@ -1482,7 +1503,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     }
   }
 
-
   for(auto v: FiberTrackCont["dft12"]){
     for(int i=0; i<6; ++i){
       v->GetContHit().at(i)->SetUsed();
@@ -1521,7 +1541,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
                 if(e>-1 && !FiberHitClCont[6][1][e]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][1][e]); count++;}
                 if(f>-1 && !FiberHitClCont[6][2][f]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][2][f]); count++;}
                 if(count<4) continue;
-                //if(count!=4) continue;
                 FiberTrackAna *track = new FiberTrackAna(buf_hit, par.get());
 
                 if(par->flag_dft12_cut){
@@ -1589,7 +1608,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
 
   if(buf_i_dft12>-1) FiberTrackCont["dft12"][buf_i_dft12]->SetBest();
 
-
   LocalHisto.h18_3_1->Fill(nt_dft12);
   if(nt_dft12>0){
     LocalHisto.h18_3_2->Fill(FiberTrackCont["dft12"][0]->GetChi2());
@@ -1601,10 +1619,8 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     LocalHisto.h18_3_8->Fill(FiberTrackCont["dft12"][0]->GetB()*1000);
   }
 
-  RecoEvent.FiberTrackCont = FiberTrackCont;
-
   if(par->flag_debug) std::cout << "- dft12 end" << std::endl;
-
+*/
 
   //  S4 Scintillators  //
   S4SciHitAna *s4hit = new S4SciHitAna(event.s4tq, par.get(), att.StudyCase);
@@ -1648,8 +1664,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
       {
         float lt_tmp = mwdc_hit.t_leading - event.s4mwdc->tref[0];
         float tot_tmp = mwdc_hit.t_trailing - mwdc_hit.t_leading;
-        // if(tot_tmp<200) continue;
-        // if(lt_tmp>-600 || lt_tmp<-850) continue;
         if(lt_tmp < par->mwdc_lt_valid_min || lt_tmp > par->mwdc_lt_valid_max) continue;
         float mwdc_length = par->mwdc_dtdxconversion(mwdc_hit.i_plane, lt_tmp);
         float wirepos_tmp = (par->mwdc_plane_sign[mwdc_hit.i_plane])*(5.0)*((float)(mwdc_hit.i_wire)-(par->mwdc_center_id[mwdc_hit.i_plane]));
@@ -1667,7 +1681,6 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
   mwdc_track.SetMinPlaneEnebaled(par->mwdc_min_plane_with_hit_for_tracking);   // 12,13,14,15,16 or something like that
   mwdc_track.SetMaxHitCombination(par->mwdc_max_hit_combination_for_tracking); // around 10. small number for online analysis!
 
-  // bool tracking_status = mwdc_track.Tracking();
   int tracking_status = mwdc_track.Tracking_PairLR();  /// which is better? seems this is faster
   if(tracking_status==1){
     mwdc_chi2 = mwdc_track.GetChi2();

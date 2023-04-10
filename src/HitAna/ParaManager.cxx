@@ -314,6 +314,9 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   //  PSB  //////
   psb_tcut_min = -20200; psb_tcut_max = -19400;
   psb_pos_x = 0.5; psb_pos_y = 5.5; psb_pos_z = 2760.;
+  psb_rot_z = -0.4;
+  cut_psb_phi = 0.4;
+  cut_psb_z   = 150;
   psb_res_phi = 1000.; //mm
   psb_res_z   = 10.; //mm
 
