@@ -792,7 +792,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
             {
               LocalHisto.hmdc_0_5->Fill(MDCHitCont[i][j]->GetTL());
               LocalHisto.hmdc_0_6->Fill(MDCHitCont[i][j]->GetTL(), MDCHitCont[i][j]->GetTot());
-              LocalHisto.hmdc_0_9->Fill(MDCHitCont[i][j]->GetWir(), MDCHitCont[i][j]->GetPhi());
+              LocalHisto.hmdc_0_9->Fill(MDCHitCont[i][j]->GetWir(), MDCHitCont[i][j]->GetPhi()*180./3.141592);
             }
         }
     }

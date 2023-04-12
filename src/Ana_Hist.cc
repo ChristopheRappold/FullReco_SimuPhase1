@@ -187,7 +187,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       h_pv_mass.emplace_back(new TH2F("mass_pv", "mass_pv", 200, 0., 10., 250, 0, 1));
       HistReg.emplace_back(&h_pv_mass.store);
 
-      h_path_tof.emplace_back(new TH2F("Mean_path_TOF", "Mean_path_TOF", 500, 15., 20., 90, 10, 40));
+      h_path_tof.emplace_back(new TH2F("Mean_path_TOF", "Mean_path_TOF", 500, 70., 150., 200, 0, 10.));
       HistReg.emplace_back(&h_path_tof.store);
 
       h_mom_tof_cut.emplace_back(new TH2F("mom_tof_pvcut_0.5", "mom_tof_pvcut_0.5", 200, 0., 20., 500, 0., 50.));

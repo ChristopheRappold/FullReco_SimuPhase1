@@ -113,9 +113,9 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
         }
     }
 
+
   // Fiber MDC ////
   std::vector<TrackHit*> TrackHitCont;
-
 
   for(int i=0; i<RecoEvent.FiberTrackCont[track_type].size(); ++i)
     {
@@ -330,17 +330,18 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
     TVector3 tmp_closepoint_Pos;
     double tmp_closepoint_Dist;
     if(!RecoEvent.FragmentTracks.empty())
-      CloseDist(RecoEvent.FragmentTracks[0], TrackHitCont[i], tmp_closepoint_Dist, tmp_closepoint_Pos);
+      CloseDist(RecoEvent.FragmentTracks[0], TrackHitCont[i], tmp_closepoint_Dist, tmp_closepoint_Pos); //CHECK!!
 
     InfoInit tempInit;
     tempInit.charge = -1;
-    tempInit.posX = tmp_closepoint_Pos.X();
-    tempInit.posY = tmp_closepoint_Pos.Y();
-    tempInit.posZ = tmp_closepoint_Pos.Z();
-    //tempInit.posX = att.Target_PositionX;
-    //tempInit.posY = att.Target_PositionY;
-    //tempInit.posZ = att.Target_PositionZ;
+    //tempInit.posX = tmp_closepoint_Pos.X();
+    //tempInit.posY = tmp_closepoint_Pos.Y();
+    //tempInit.posZ = tmp_closepoint_Pos.Z();
+    tempInit.posX = att.Target_PositionX;
+    tempInit.posY = att.Target_PositionY;
+    tempInit.posZ = att.Target_PositionZ;
 
+    //std::cout << "InitPoint: " << tempInit.posX << "  " << tempInit.posY << "  " << tempInit.posZ << "\n";
     double tmp_momZ = 1.;
     tempInit.momX = tmp_momZ*TrackHitCont[i]->GetTrackA();
     tempInit.momY = tmp_momZ*TrackHitCont[i]->GetTrackB();

@@ -553,7 +553,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 //      else                                              it_hitFirst = it_ListFirstHit->second;
       it_hitFirst = it_ListFirstHit->second;
 
-      const TVector3 firstPos(it_hitFirst.hitX, it_hitFirst.hitY, it_hitFirst.hitZ);
+      //const TVector3 firstPos(it_hitFirst.hitX, it_hitFirst.hitY, it_hitFirst.hitZ);
 
       const int PDG     = static_cast<int>(track_state.pdg);
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(PDG);
@@ -853,6 +853,25 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           TMatrixDSym covFit(6);
           kfsop->getPosMomCov(posRef, p3, covFit);
 
+          TVector3 posBegin;
+          try{
+            genfit::TrackPoint* tp_tmp = fitTrack->getPointWithMeasurementAndFitterInfo(0, REP);
+            genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(REP));
+            const genfit::MeasuredStateOnPlane& buf_state = kfi->getFittedState();
+            TVector3 v_pos;
+            TVector3 v_mom;
+            TMatrixDSym v_cov;
+            buf_state.getPosMomCov(v_pos, v_mom, v_cov);
+            posBegin = v_pos;
+          }
+          catch(genfit::Exception& e){
+            std::cerr<<"Exception posBegin, next track"<<std::endl;
+            std::cerr << e.what();
+            continue;
+          }
+          
+          //std::cout << Form("- posBegin : (%.2f, %.2f, %.2f)",posBegin.x(), posBegin.y(), posBegin.z()) << std::endl;
+
           double p = p3.Mag();
           double Path_length = -999.;
           try
@@ -868,7 +887,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             }
 
           double Path_lengthMean = Path_length;
-          Path_lengthMean += (firstPos-init_point).Mag();
+          Path_lengthMean += (posBegin-init_point).Mag();
           double time_of_flight          = track_stateLast.time;
           double beta = 1. / 29.9792458 * Path_lengthMean / time_of_flight;
           double mass  = p * sqrt(1. / (beta * beta) - 1.);
@@ -1006,6 +1025,23 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               TMatrixDSym covFit_pid(6);
               kfsop_pid->getPosMomCov(posRef_pid, p3_pid, covFit_pid);
 
+              TVector3 posBegin_pid;
+              try{
+                genfit::TrackPoint* tp_tmp = fitTrack_pid->getPointWithMeasurementAndFitterInfo(0, rep_pid);
+                genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(rep_pid));
+                const genfit::MeasuredStateOnPlane& buf_state = kfi->getFittedState();
+                TVector3 v_pos;
+                TVector3 v_mom;
+                TMatrixDSym v_cov;
+                buf_state.getPosMomCov(v_pos, v_mom, v_cov);
+                posBegin_pid = v_pos;
+              }
+              catch(genfit::Exception& e){
+                std::cerr<<"Exception posBegin, next track"<<std::endl;
+                std::cerr << e.what();
+                continue;
+              }
+
               double p_pid = p3_pid.Mag();
               double Path_length_pid = -999.;
               try
@@ -1021,7 +1057,8 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                 }
 
               double Path_lengthMean_pid = Path_length_pid;
-              Path_lengthMean_pid += (firstPos-posM_pid).Mag();
+              Path_lengthMean_pid += (posBegin_pid-init_point).Mag();
+
               double time_of_flight_pid          = track_stateLast.time;
               double beta_pid = 1. / 29.9792458 * Path_lengthMean_pid / time_of_flight_pid;
               double mass_pid  = p_pid * sqrt(1. / (beta_pid * beta_pid) - 1.);
@@ -1206,7 +1243,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               LocalHisto.h_Mass_charge_All->Fill(mass_pid, kfsop_pid->getCharge());
               LocalHisto.h_beta_mom->Fill(p_pid, beta_pid);
               LocalHisto.h_beta_momcharge->Fill(p_pid*kfsop_pid->getCharge(), beta_pid);
-              LocalHisto.h_path_tof->Fill(Path_lengthMean_pid / 30., time_of_flight_pid);
+              LocalHisto.h_path_tof->Fill(Path_lengthMean_pid , time_of_flight_pid);
 
               LocalHisto.h_pv_mom->Fill(p_pid, p_value2_pid);
               LocalHisto.h_pv_beta->Fill(beta_pid, p_value2_pid);
