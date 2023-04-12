@@ -682,12 +682,76 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
                                                                       ParaManager *par, std::vector<std::unique_ptr<genfit::AbsMeasurement> >& ListHits_PSB)
 {
   std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
-
   std::vector< std::vector<FiberHitXUV*> > FiberXUVCont = FindHit(FiberHitClCont, par);
 
+
+  // UFT12
+  int nt_uft12 = 0;
+
+  if(FiberXUVCont[0].size()>0 && FiberXUVCont[1].size()>0)
+    {
+      std::vector<FiberTrackAna*> buf_track;
+      for(int i=0; i<(int)FiberXUVCont[0].size(); ++i)
+        {
+          for(int j=0; j<(int)FiberXUVCont[1].size(); ++j)
+            {
+              std::vector<FiberHitXUV*>   buf_xuv;
+              buf_xuv.emplace_back(FiberXUVCont[0][i]);
+              buf_xuv.emplace_back(FiberXUVCont[1][j]);
+              FiberTrackAna *track = new FiberTrackAna(buf_xuv, par);
+
+              if(!par->flag_uft12_combi)                      buf_track.emplace_back(track);
+              else if(track->GetChi2() < par->cut_chi2_uft12) buf_track.emplace_back(track);
+            }
+        }
+      if((int)buf_track.size()>0) FiberTrackCont["uft12"] = DeleteDup(buf_track);
+      nt_uft12     = FiberTrackCont["uft12"].size();
+    }
+
+  int buf_i_uft12 = -1;
+  double buf_diff_uft12 = -9999.;
+  for(int i=0; i<nt_uft12; ++i)
+    {
+      FiberTrackAna *track = FiberTrackCont["uft12"][i];
+      double time_mean = track->GetTime();
+      double dist_uft12 = fabs(time_mean);
+      if(buf_diff_uft12<0 || dist_uft12 < buf_diff_uft12)
+        {
+          buf_i_uft12 = i;
+          buf_diff_uft12 = dist_uft12;
+        }
+    }
+
+  if(buf_i_uft12>-1) FiberTrackCont["uft12"][buf_i_uft12]->SetBest();
+
+  if(par->flag_debug) std::cout << "- uft12 end" << std::endl;
+
+
+  // UFT3MFT12
+  if(FiberXUVCont[2].size()>0 && FiberXUVCont[3].size()>0 && FiberXUVCont[4].size()>0
+                                  && par->flag_dup_xuv_mft12 && par->flag_dup_xuv_uft3)
+    {
+      std::vector<FiberTrackAna*> buf_track;
+      for(int h=0; h<(int)FiberXUVCont[2].size(); ++h)
+        for(int i=0; i<(int)FiberXUVCont[3].size(); ++i)
+          for(int j=0; j<(int)FiberXUVCont[4].size(); ++j)
+            {
+              std::vector<FiberHitXUV*>   buf_xuv;
+              buf_xuv.emplace_back(FiberXUVCont[2][h]);
+              buf_xuv.emplace_back(FiberXUVCont[3][i]);
+              buf_xuv.emplace_back(FiberXUVCont[4][j]);
+              FiberTrackAna *track = new FiberTrackAna(buf_xuv, par);
+              //track->CorrectMFT(par);
+              buf_track.emplace_back(track);
+            }
+
+      FiberTrackCont["uft3mft12"] = DeleteDup(buf_track);
+    }
+
+
   // MFT12
-  int nt_mft12 = 0;
-  int nt_mft12_xuv = 0;
+  //int nt_mft12 = 0;
+  //int nt_mft12_xuv = 0;
   if(FiberXUVCont[3].size()>0 && FiberXUVCont[4].size()>0 && !par->flag_mft12_allcombi){
     std::vector<FiberTrackAna*> buf_track;
     for(int i=0; i<(int)FiberXUVCont[3].size(); ++i){
@@ -712,8 +776,8 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
     if(par->flag_dup_mft12_xuv && (int)buf_track.size()>0) buf_track = DeleteDup(buf_track);
     FiberTrackCont["mft12"] = buf_track;
 
-    nt_mft12     = FiberTrackCont["mft12"].size();
-    nt_mft12_xuv = FiberTrackCont["mft12"].size();
+    //nt_mft12     = FiberTrackCont["mft12"].size();
+    //nt_mft12_xuv = FiberTrackCont["mft12"].size();
     for(auto v: FiberTrackCont["mft12"]){
       for(int i=0; i<6; ++i){
         if(par->flag_dup_mft12_xuv) v->GetContHit().at(i)->SetUsed();
@@ -841,7 +905,7 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
     if(par->flag_debug) std::cout << "- before Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
     if(par->flag_mft12_inclusive) FiberTrackCont["mft12"] = DeleteInclusive(FiberTrackCont["mft12"]);
     if(par->flag_debug) std::cout << "- after  Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
-    nt_mft12 = FiberTrackCont["mft12"].size();
+    //nt_mft12 = FiberTrackCont["mft12"].size();
 
   }
 
@@ -980,7 +1044,7 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
       if(par->flag_debug) std::cout << "- before Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
       if(par->flag_mft12_inclusive) FiberTrackCont["mft12"] = DeleteInclusive(FiberTrackCont["mft12"]);
       if(par->flag_debug) std::cout << "- after  Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
-      nt_mft12 = FiberTrackCont["mft12"].size();
+      //nt_mft12 = FiberTrackCont["mft12"].size();
 
     }
 

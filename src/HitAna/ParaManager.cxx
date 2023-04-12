@@ -22,6 +22,7 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   flag_mft12_pair = true;
   flag_mft12_xuv_psb = false;
   flag_dup_mft12_xuv = false;
+  flag_uft12_combi = false;
 
   //  Trig  //////
   trig_main  = false;
@@ -33,6 +34,7 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
   cut_chi2_gf = 50;
   cut_chi2_dft12 = 10.;
   cut_chi2_mft12 = 10.;
+  cut_chi2_uft12 = 10.;
   cut_num_mdc = 3;
   cut_psfe_phi = 0.6;
   cut_psbe_phi = 0.6;

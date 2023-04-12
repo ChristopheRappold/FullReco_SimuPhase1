@@ -75,6 +75,7 @@ class ParaManager
   bool flag_mft12_pair;
   bool flag_mft12_xuv_psb;
   bool flag_dup_mft12_xuv;
+  bool flag_uft12_combi;
 
   //  Trig  //////
   bool trig_main;
