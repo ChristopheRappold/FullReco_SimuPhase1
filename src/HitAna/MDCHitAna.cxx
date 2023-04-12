@@ -5,7 +5,7 @@
 #include <iostream>
 #include <math.h>
 
-MDCHitAna::MDCHitAna(MDCHit a, ParaManager *par, int tref){
+MDCHitAna::MDCHitAna(MDCHit a, ParaManager *par, int tref, double t_t0){
   i_ctdc     = a.i_ctdc;
   i_ch       = a.ch_ctdc;
   i_layer    = a.i_layer;
@@ -15,7 +15,7 @@ MDCHitAna::MDCHitAna(MDCHit a, ParaManager *par, int tref){
   t_tot      = a.t_trailing - a.t_leading;
   i_valid = GetValidMDC(par);
   SetPhys(par);
-  SetDriftTime(par);
+  SetDriftTime(par, t_t0);
   SetDriftLength(par);
   //i_dl = i_wsize/2.;
   //i_dl = 0;
@@ -95,9 +95,9 @@ void MDCHitAna::SetPhys(ParaManager *par){
 
 }
 
-void MDCHitAna::SetDriftTime(ParaManager *par){
+void MDCHitAna::SetDriftTime(ParaManager *par, double t_t0){
 
-  double drift_time = t_leading * par->mdc_ch2ns - par->mdc_t0_off;
+  double drift_time = t_leading * par->mdc_ch2ns -t_t0 - par->mdc_t0_off[i_layer] - par->mdc_t0_off_wir[i_layer][i_wire];
 
   i_dt =  drift_time;
 

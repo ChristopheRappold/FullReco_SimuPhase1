@@ -25,6 +25,8 @@
 #include "RKTrackRep.h"
 #include "Track.h"
 
+#include "TCutG.h"
+
 //#include "GFRaveVertexFactory.h"
 
 //#include "Math/ProbFunc.h"
@@ -77,6 +79,7 @@ private:
 
   // genfit::DAF* Fitter;
   genfit::AbsKalmanFitter* Fitter;
+  genfit::AbsKalmanFitter* Fitter_pid;
   genfit::AbsKalmanFitter* Fitter_rescue;
   genfit::Track* Vtracks;
   genfit::RKTrackRep* rep;
@@ -117,6 +120,9 @@ private:
     TH2F* h_beta_mom;
     TH2F* h_beta_mom2;
     TH2F* h_beta_mom3;
+    TH2F* h_beta_momcharge;
+    TH2F* h_beta_momcharge2;
+    TH2F* h_beta_momcharge3;
 
     TH2F* h_pv_mom;
     TH2F* h_pv_beta;

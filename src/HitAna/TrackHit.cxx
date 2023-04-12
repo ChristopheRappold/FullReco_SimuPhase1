@@ -9,69 +9,122 @@
 #include <iostream>
 #include <math.h>
 
-TrackHit::TrackHit(){}
+TrackHit::TrackHit(){_mdchit_dif.resize(17); }
 TrackHit::~TrackHit(){}
 
-void TrackHit::Print(){
-  for( auto v: _fiber_cont) v->Print();
-  for( auto v: _mdc_cont)   v->Print();
-}
 
 
-void TrackHit::Add(FiberHitAna *hit_fiber){
-  _fiber_cont.emplace_back(hit_fiber);
+void TrackHit::AddFiber(int layer, int fiberID){
+  _fiberhit[layer]=fiberID;
 }
 
-void TrackHit::Add(MDCHitAna *hit_mdc){
-  _mdc_cont.emplace_back(hit_mdc);
+void TrackHit::AddPSB(int psbID){
+  _psbhit=psbID;
 }
+
+void TrackHit::AddPSFE(int psfeID){
+  _psfehit=psfeID;
+}
+
 
 void TrackHit::DeleteDupMDC(){
+  for(int i=0; i<(int)17; ++i)
+  {
+    double min_dif=9999.;
+    int min_hit=-1;
 
-  for(int i=0; i<(int)_mdc_cont.size(); ++i){
-    int lay_i = _mdc_cont[i]->GetLay();
-    int tot_i = _mdc_cont[i]->GetTot();
-    double dl_i = _mdc_cont[i]->GetDl();
-    double dif_i = _mdc_cont[i]->GetDif();
-    for(int j=(int)_mdc_cont.size()-1; j>=0; --j){
-      int lay_j = _mdc_cont[j]->GetLay();
-      int tot_j = _mdc_cont[j]->GetTot();
-      double dl_j = _mdc_cont[j]->GetDl();
-      double dif_j = _mdc_cont[j]->GetDif();
-      //if(lay_i==lay_j && tot_j < tot_i){
-      //if(lay_i==lay_j && dl_i < dl_j){
-      if(lay_i==lay_j && fabs(dif_i) < fabs(dif_j)){
-        _mdc_cont.erase(_mdc_cont.begin() + j);
-        if(j<i) i--;
+    for(auto x : _mdchit_dif[i])
+    {
+      if(x.second < min_dif)
+      {
+        min_dif=x.second;
+        min_hit=x.first;
       }
     }
-  }
 
+    _mdchit_bestdif[i]=min_hit;
+  }
 }
 
 
 
 
-FiberHitAna*  TrackHit::GetFiberHit(int i){
-  if(i<0 || i >= (int)_fiber_cont.size()){
-    std::cout << "i is wrong" << std::endl;
-    return 0;
+bool TrackHit::IsInclusive(TrackHit* track){
+
+  bool flag = false;
+
+  if( GetNum() <= track->GetNum()) flag = false;
+  else{
+    bool flag_tmp = true;
+    std::vector<int> fiberhit1 = GetFiberHit();
+    std::vector<int> fiberhit2 = track->GetFiberHit();
+    for(size_t i = 0; i < 6; ++i)
+      {
+        if(fiberhit2[i] == -1) continue;
+        if(fiberhit1[i] != fiberhit2[i]) flag_tmp = false;
+      }
+
+    std::vector<int> mdchit1 = GetMDCHit();
+    std::vector<int> mdchit2 = track->GetMDCHit();
+    for(size_t i = 0; i < 17; ++i)
+      {
+        if(mdchit2[i] == -1) continue;
+        if(mdchit1[i] != mdchit2[i]) flag_tmp = false;
+      }
+
+    if(flag_tmp) flag = true;
   }
-  return _fiber_cont[i];
+
+  return flag;
+
 }
 
-MDCHitAna*  TrackHit::GetMDCHit(int i){
-  if(i<0 || i >= (int)_mdc_cont.size()){
-    std::cout << "i is wrong" << std::endl;
-    return 0;
-  }
-  return _mdc_cont[i];
-}
-
-void TrackHit::SetTrack(FiberTrackAna *track, ParaManager *par){
+void TrackHit::SetTrack(FiberTrackAna *track, double tgt_posz){
   _x = track->GetXtgt();
   _y = track->GetYtgt();
   _a = track->GetA();
   _b = track->GetB();
-  _z = par->fiber_tgt_pos_z;
+  _z = tgt_posz;
 }
+
+/*
+void TrackHit::ReplaceMDC(std::map<int, std::pair<TVector3, TVector3> > track_pos_mom, ParaManager *par){
+
+  for(int i=0; i<GetNumMDC(); ++i){
+    int did   = _mdc_cont[i]->GetDid();
+    int layer = _mdc_cont[i]->GetLay();
+    int wire  = _mdc_cont[i]->GetWir();
+    if(track_pos_mom.find(did)!=track_pos_mom.end() && _mdc_layer_cont[layer].size()>1){
+      TVector3 track_pos = track_pos_mom[did].first;
+      TVector3 track_mom = track_pos_mom[did].second;
+      double dist_min = 9999;
+      MDCHitAna *hit_buf;
+      for(auto hit: _mdc_layer_cont[layer]){
+        TVector3 mdc_pos = hit->GetWirPos(par, track_pos.z());
+        TVector3 mdc_dir = hit->GetWirDir(par);
+        double dist = -9999;
+        //TVector3 buf_vertex = ana->GetVertexPoint( track_pos, mdc_pos, track_mom, mdc_dir, dist);
+
+        double xi=track_pos.x(), yi=track_pos.y(), xo=mdc_pos.x(), yo=mdc_pos.y();
+        double ui=track_mom.x()/track_mom.z(), vi=track_mom.y()/track_mom.z();
+        double uo=mdc_dir.x()/mdc_dir.z(), vo=mdc_dir.y()/mdc_dir.z();
+
+        double z=((xi-xo)*(uo-ui)+(yi-yo)*(vo-vi))/
+          ((uo-ui)*(uo-ui)+(vo-vi)*(vo-vi));
+        double x1=xi+ui*z, y1=yi+vi*z;
+        double x2=xo+uo*z, y2=yo+vo*z;
+        dist=sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+
+        if(dist < dist_min){
+          hit_buf = hit;
+          dist_min = dist;
+        }
+      }
+
+      _mdc_cont.erase(_mdc_cont.begin() + i);
+      _mdc_cont.insert(_mdc_cont.begin() + i, hit_buf);
+
+    }
+  }
+}
+*/

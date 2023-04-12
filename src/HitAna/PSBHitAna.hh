@@ -6,7 +6,7 @@
 class PSBHitAna
 {
   public:
-    PSBHitAna(int seg, int t_u, int t_d, int q_u, int q_d, ParaManager *par);
+    PSBHitAna(int seg, int t_u, int t_d, int q_u, int q_d, ParaManager *par, double t_t0);
     ~PSBHitAna();
     int GetSeg(){return _seg;};
     int GetTU(){return _t_u;};

@@ -56,10 +56,13 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
                       const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
 
   void FindHitXUV_v2(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
-                    const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
+                      const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
 
   void FindHitXUV_v3(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
-                    const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
+                      const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
+
+  void FindHitXUV_v4(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                      const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
 
   void FindSingleHitXUVId_v1(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
                               const std::vector<genfit::AbsMeasurement*>& hitv, int id_det, int id_track);
@@ -68,6 +71,9 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
                               const std::vector<genfit::AbsMeasurement*>& hitv, int id_det, int id_track);
 
   void FindSingleHitXUVId_v3(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                              const std::vector<genfit::AbsMeasurement*>& hitv, int id_det, int id_track);
+
+  void FindSingleHitXUVId_v4(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
                               const std::vector<genfit::AbsMeasurement*>& hitv, int id_det, int id_track);
 
   double FindHitReal_dvalue(double hitx, double hitu, double hitv, int id_det);
@@ -88,9 +94,8 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
 
 
   //std::vector<double> cut_d = {0.4, 0.4, 2., 0.4, 0.4, 0.6, 0.6}; //in cm
-  //std::vector<double> cut_d = {0.4, 0.4, 0.8, 0.4, 0.4, 0.6, 0.6}; //in cm
-  std::vector<double> cut_d = {1., 1., 2., 2., 2., 1., 1.}; //in cm
-  std::vector<double> cut_diff_d = {1., 1., 2., 2., 2., 1., 1.}; //in cm
+  std::vector<double> cut_d = {1., 1., 2., 0.4, 0.4, 0.4, 0.4}; //in cm
+  std::vector<double> cut_diff_d = {1., 1., 1., 0.3, 0.3, 0.35, 0.35}; //in cm
 
   double fiber_resolution = 0.015; // in cm
   double fiber_width = 0.11; // in cm
@@ -99,28 +104,28 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
   std::vector<double> Zpos_Fiber = {154.77, 171.17, 199.67, 226.93, 230.93, 396.00, 405.63}; //in cm
 
   std::vector< std::tuple<double, double, double, double, double> > param_d_funct1 = // p0, p1, p2, p3, phi_offset
-               {std::make_tuple(     0.,     0.,    0.,     0.,   0.),  // UFT1
-                std::make_tuple(     0.,     0.,    0.,     0.,   0.),  // UFT2
-                std::make_tuple(     0.,  2.364,    0., -0.189,  10.),  // UFT3
-                std::make_tuple( 0.0004, -0.945,    0.,   2.04, -30.),  // MFT1
-                std::make_tuple(-0.0008, -0.976, 0.048,   2.75,  30.),  // MFT2
-                std::make_tuple(     0.,  2.111,    0.,     0., -12.),  // DFT1
-                std::make_tuple( 0.0005,  2.122,    0.,     0.,   5.)}; // DFT2
+               {std::make_tuple(     0.,     0.,     0.,     0.,   0.),  // UFT1
+                std::make_tuple(     0.,     0.,     0.,     0.,   0.),  // UFT2
+                std::make_tuple(-0.0006, 2.1169, 0.0014, -0.001,  11.),  // UFT3
+                std::make_tuple(-0.0010, -0.785,  0.054,  -0.18, -30.),  // MFT1
+                std::make_tuple(-0.0009, -0.786,  0.029,  -0.25,  30.),  // MFT2
+                std::make_tuple( 0.0002,     2.,     0.,     0., -13.),  // DFT1
+                std::make_tuple(-0.0010,   2.21,     0.,     0.,  13.)}; // DFT2
 
   std::vector< std::tuple<double, double, double, double> > param_d_funct2 = // p0, p1, p2, p3
-               {std::make_tuple(      0.,       0.,       0.,       0.),  // UFT1
-                std::make_tuple(      0.,       0.,       0.,       0.),  // UFT2
-                std::make_tuple(  0.0006,    0.736,   0.0002,  -0.0069),  // UFT3
-                std::make_tuple( -0.0009, -0.02648, 0.000055, 0.000049),  // MFT1
-                std::make_tuple(      0., -0.02333, 0.000042, 0.000031),  // MFT2
-                std::make_tuple(  0.0006,   0.0104,  0.00004,       0.),  // DFT1
-                std::make_tuple( 0.00056,  0.01008, 0.000028,       0.)}; // DFT2
+               {std::make_tuple(     0.,       0.,       0.,       0.),  // UFT1
+                std::make_tuple(     0.,       0.,       0.,       0.),  // UFT2
+                std::make_tuple( 0.0035,  0.31200,  -0.0017,   0.0552),  // UFT3
+                std::make_tuple( 0.0010, -0.02370,       0.,       0.),  // MFT1
+                std::make_tuple( 0.0008, -0.02147,       0.,       0.),  // MFT2
+                std::make_tuple( 0.0012,  0.01001,       0.,       0.),  // DFT1
+                std::make_tuple( 0.0001,  0.00985,       0.,       0.)}; // DFT2
 
   std::vector<int> id_detector = {G4Sol::FiberD1_x, G4Sol::FiberD2_x, G4Sol::FiberD3_x,
-                                          G4Sol::MiniFiberD1_x1, G4Sol::MiniFiberD1_x2,
-                                                    G4Sol::FiberD4_x, G4Sol::FiberD5_x};
+                                            G4Sol::MiniFiberD1_x, G4Sol::MiniFiberD2_x,
+                                                    G4Sol::FiberD4_v, G4Sol::FiberD5_x};
 
-  double ang[7][3] = {
+  double ang[7][3] = { //CHECK order of G4Sol detectors changed!
     {  0.,  30., -30.},  // UFT1
     {  0.,  30., -30.},  // UFT2 
     {  0.,  30., -30.},  // UFT3
@@ -129,7 +134,7 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
     { 30., -30.,   0.},  // DFT1
     {  0.,  30., -30.}}; // DFT2
 
-  int id_mid[7] = {1, 1, 1, 1, 2, 1, 1};
+  int id_mid[7] = {1, 1, 1, 1, 1, 1, 1};
 
   bool ifcut_MFTtheta_UFT3 = false;
   double maxMFTtheta = 18.;
@@ -174,14 +179,17 @@ class TCheckFiberXUV final :  public TDataProcessInterface<Out>
     TH1F* h_FiberHitSingle_dvalue[7];
     TH1F* h_FiberHitReal_dvalue[7];
     TH2F* h_FiberHitReal_dvalue_Theta[7];
+    TH2F* h_FiberHitReal_dvalue_Phi[7];
     TH2F* h_FiberHitReal_dvalue_Theta03_Phi[7];
     TH2F* h_FiberHitReal_dvalue_Theta310_Phi[7];
     TH2F* h_FiberHitReal_dvalue_Theta1020_Phi[7];
     TH2F* h_FiberHitReal_dvalue_HitX[7];
     TH2F* h_FiberHitReal_dvalue_HitY[7];
     TH2F* h_FiberHitReal_dvalue_PosX[7];
+    TH2F* h_FiberHitReal_dvalue_tanThetacosPhi[7];
     TH2F* h_FiberHitReal_dvalue_dfunction[7];
     TH1F* h_FiberHit_Residualdvalue[7];
+    TH2F* h_FiberHit_Residualdvalue_Realdvalue[7];
   };
   LocalHists LocalHisto;
 };

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <math.h>
 
-FiberHitAna::FiberHitAna(FiberHit a, ParaManager *par, int tref){
+FiberHitAna::FiberHitAna(FiberHit a, ParaManager *par, int tref, double t_t0){
   i_sfp      = a.i_sfp;
   i_ctdc     = a.i_ctdc;
   i_ch       = a.i_ch;
@@ -16,9 +16,15 @@ FiberHitAna::FiberHitAna(FiberHit a, ParaManager *par, int tref){
   t_trailing = a.t_trailing - tref;
   i_ang = GetAngFiber(par);
   i_pos = GetPosFiber(par);
+  i_pos_org = GetPosFiber(par);
   t_tot = t_trailing - t_leading;
+  t_time = (t_leading + par->fiber_time_offset[i_detector][i_layer][i_fiber]) * par->fiber_ch2ns - t_t0;
+  //std::cout << t_leading << "\n";
+
+  //std::cout << par->fiber_time_offset[i_detector][i_layer][i_fiber] << "\n";
   i_cl_fiber = a.i_fiber;
   i_z        = GetZFiber(par);
+  i_z_org    = GetZFiber(par);
   //i_res      = 0.15;
   i_res      = par->fiber_res;
   i_did   = i_detector * 10 + i_layer;
@@ -37,12 +43,44 @@ FiberHitAna::FiberHitAna(FiberHitAna *a){
   t_trailing = a->GetTT();
   i_ang      = a->GetAng();
   i_pos      = a->GetPos();
-  t_tot      = a->GetTot();
+  i_pos_org  = a->GetPosOrg();
+  t_tot      = a->GetTOT();
+  t_time     = a->GetTime();
   i_cl_fiber = a->GetClFib();
   i_z        = a->GetZ();
+  i_z_org    = a->GetZOrg();
   i_res      = a->GetRes();
   i_did      = a->GetDid();
+  i_ud       = a->GetUD();
   i_valid    = a->IsValid();
+}
+
+FiberHitAna::FiberHitAna(int detector, int layer, int fiber, double time, double energy, ParaManager *par)
+{
+  if(detector == 3 || detector == 4) i_sfp = 0; // MFT12
+  if(detector == 2)                  i_sfp = 1; // UFT3
+  if(detector == 0 || detector == 1) i_sfp = 2; // UFT12
+  if(detector == 5 || detector == 6) i_sfp = 3; // DFT12
+  //i_ctdc   = ;
+  //i_ch     = ;
+  i_detector = detector;
+  i_layer    = layer;
+  i_fiber    = fiber;
+  i_clsize   = 1;
+  //t_leading  =  ;
+  //t_trailing =  ;
+  i_ang     = GetAngFiber(par);
+  i_pos     = GetPosFiber(par);
+  i_pos_org = GetPosFiber(par);
+  t_tot = 1.;
+  t_time     = time;
+  i_cl_fiber = fiber;
+  i_z        = GetZFiber(par);
+  i_z_org    = GetZFiber(par);
+  i_res      = par->fiber_res;
+  i_dE       = energy;
+  i_did      = i_detector * 10 + i_layer;
+  i_valid    = true;
 }
 
 FiberHitAna::~FiberHitAna() {}
@@ -53,6 +91,7 @@ void FiberHitAna::Print(void){
   std::cout << "det : " << i_detector << std::endl;
   std::cout << "lay : " << i_layer << std::endl;
   std::cout << "fib : " << i_fiber << std::endl;
+  std::cout << "ud  : " << i_ud    << std::endl;
   std::cout << "clsize : " << i_clsize << std::endl;
   std::cout << Form("fib_cl : %.1f", i_cl_fiber)  << std::endl;
   std::cout << Form("pos    : %.1f", i_pos)  << std::endl;
@@ -78,6 +117,7 @@ double FiberHitAna::GetPosFiber(ParaManager *par){
         default: break;
       }
       pos = pos + par->fiber_offset[i_detector][i_layer][i_fiber];
+      i_ud = (i_fiber%2 == 0);
       break;
 
     // UFT2
@@ -91,6 +131,7 @@ double FiberHitAna::GetPosFiber(ParaManager *par){
         default: break;
       }
       pos = pos + par->fiber_offset[i_detector][i_layer][i_fiber];
+      i_ud = (i_fiber%2 == 0);
       break;
 
     // UFT3
@@ -104,6 +145,8 @@ double FiberHitAna::GetPosFiber(ParaManager *par){
         default: break;
       }
       pos = pos + par->fiber_offset[i_detector][i_layer][i_fiber];
+      if(i_layer==0) i_ud = (i_fiber%2 == 1);
+      else           i_ud = (i_fiber%2 == 0);
       break;
 
     // MFT1,2
@@ -148,6 +191,21 @@ double FiberHitAna::GetPosFiber(ParaManager *par){
         default: break;
       }
       pos = pos + par->fiber_offset[i_detector][i_layer][i_fiber];
+
+      switch(i_detector){
+        case 3:
+          if(i_fiber< 128) i_ud = (i_fiber%2 == 0);
+          else             i_ud = (i_fiber%2 == 1);
+          break;
+
+        case 4:
+          if(i_fiber< 128) i_ud = (i_fiber%2 == 1);
+          else             i_ud = (i_fiber%2 == 0);
+          break;
+
+        default: break;
+      }
+
       break;
 
     // DFT1
@@ -161,6 +219,7 @@ double FiberHitAna::GetPosFiber(ParaManager *par){
         default: break;
       }
       pos = pos + par->fiber_offset[i_detector][i_layer][i_fiber];
+      i_ud = (i_fiber%2 == 1);
       break;
 
     // DFT2
@@ -174,6 +233,7 @@ double FiberHitAna::GetPosFiber(ParaManager *par){
         default: break;
       }
       pos = pos + par->fiber_offset[i_detector][i_layer][i_fiber];
+      i_ud = (i_fiber%2 == 0);
       break;
 
   }
@@ -231,18 +291,37 @@ double FiberHitAna::GetZFiber(ParaManager *par){
     default: break;
   }
 
+  if(i_ud==0) pos_z -= 0.2;
+  else        pos_z += 0.2;
+
   return pos_z;
 
 }
 
 bool FiberHitAna::GetValidFiber(ParaManager *par){
-  bool judge = false;
+  bool judge = true;
 
   switch(i_sfp){
-    case 0: if( par->fiber_mft_cut_min   < t_leading && par->fiber_mft_cut_max   > t_leading) judge = true; break;
-    case 1: if( par->fiber_uft3_cut_min  < t_leading && par->fiber_uft3_cut_max  > t_leading) judge = true; break;
-    case 2: if( par->fiber_uft12_cut_min < t_leading && par->fiber_uft12_cut_max > t_leading) judge = true; break;
-    case 3: if( par->fiber_dft12_cut_min < t_leading && par->fiber_dft12_cut_max > t_leading) judge = true; break;
+    case 0: if( par->fiber_mft_cut_min   > t_leading || par->fiber_mft_cut_max   < t_leading) judge = false; break;
+    case 1: if( par->fiber_uft3_cut_min  > t_leading || par->fiber_uft3_cut_max  < t_leading) judge = false; break;
+    case 2: if( par->fiber_uft12_cut_min > t_leading || par->fiber_uft12_cut_max < t_leading) judge = false; break;
+    case 3: if( par->fiber_dft12_cut_min > t_leading || par->fiber_dft12_cut_max < t_leading) judge = false; break;
+    default: break;
+  }
+
+  switch(i_sfp){
+    case 0: if( par->fiber_tot_mft_cut_min   > t_tot || par->fiber_tot_mft_cut_max   < t_tot) judge = false; break;
+    case 1: if( par->fiber_tot_uft3_cut_min  > t_tot || par->fiber_tot_uft3_cut_max  < t_tot) judge = false; break;
+    case 2: if( par->fiber_tot_uft12_cut_min > t_tot || par->fiber_tot_uft12_cut_max < t_tot) judge = false; break;
+    case 3: if( par->fiber_tot_dft12_cut_min > t_tot || par->fiber_tot_dft12_cut_max < t_tot) judge = false; break;
+    default: break;
+  }
+
+  switch(i_sfp){
+    case 0: if( par->fiber_time_mft_cut_min   > t_time || par->fiber_time_mft_cut_max   < t_time) judge = false; break;
+    case 1: if( par->fiber_time_uft3_cut_min  > t_time || par->fiber_time_uft3_cut_max  < t_time) judge = false; break;
+    case 2: if( par->fiber_time_uft12_cut_min > t_time || par->fiber_time_uft12_cut_max < t_time) judge = false; break;
+    case 3: if( par->fiber_time_dft12_cut_min > t_time || par->fiber_time_dft12_cut_max < t_time) judge = false; break;
     default: break;
   }
 
@@ -251,16 +330,17 @@ bool FiberHitAna::GetValidFiber(ParaManager *par){
 
 void FiberHitAna::Add(FiberHitAna *hit){
 
-  if(t_tot < hit->GetTot()){
+  if(t_tot < hit->GetTOT()){
     i_ch    = hit->GetCh();
     i_fiber = hit->GetFib();
     t_leading  = hit->GetTL();
     t_trailing = hit->GetTT();
-    t_tot    = hit->GetTot();
+    t_tot    = hit->GetTOT();
   }
 
   i_pos      = ( i_pos      * i_clsize + hit->GetPos()   * hit->GetClsize() ) / ( i_clsize + hit->GetClsize() );
   i_cl_fiber = ( i_cl_fiber * i_clsize + hit->GetClFib() * hit->GetClsize() ) / ( i_clsize + hit->GetClsize() );
+  i_z        = ( i_z        * i_clsize + hit->GetZ()     * hit->GetClsize() ) / ( i_clsize + hit->GetClsize() );
   i_clsize += hit->GetClsize();
 
 }

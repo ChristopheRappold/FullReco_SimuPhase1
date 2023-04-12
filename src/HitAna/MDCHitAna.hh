@@ -7,7 +7,7 @@
 class MDCHitAna
 {
   public:
-    MDCHitAna(MDCHit a, ParaManager *par, int tref);
+    MDCHitAna(MDCHit a, ParaManager *par, int tref, double t_t0);
     ~MDCHitAna();
     int GetCtdc(){   return i_ctdc    ;};
     int GetCh(){     return i_ch      ;};
@@ -60,7 +60,7 @@ class MDCHitAna
     int  i_did   = -1;
     bool i_valid = false;
     bool GetValidMDC(ParaManager *par);
-    void SetDriftTime(ParaManager *par);
+    void SetDriftTime(ParaManager *par, double t_t0);
     void SetDriftLength(ParaManager *par);
     void SetPhys(ParaManager *par);
 };

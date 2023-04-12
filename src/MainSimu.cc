@@ -205,14 +205,21 @@ int main(int argc, char** argv)
 #else
       std::vector<TClonesArray*> AllHits;
       if(Restarting == false)
-	{
-	  for(const auto& name : *InputPar.nameDet)
-	    {
-	      AllHits.emplace_back(new TClonesArray("TG4Sol_Hit", 20));
-	      InTree->SetBranchAddress(name.c_str(), &AllHits.back());
-	      AllHits.back()->SetName(name.c_str());
-	    }
-	}
+        {
+          //for(const auto& name : *InputPar.nameDet)
+            //std::cout << "Det list: " << name.c_str() << "\n";
+
+          for(const auto& name : *InputPar.nameDet)
+            {
+              std::string newname = name;
+              AllHits.emplace_back(new TClonesArray("TG4Sol_Hit", 20));
+
+              InTree->SetBranchAddress(name.c_str(), &AllHits.back());
+              AllHits.back()->SetName(newname.c_str());
+
+              //std::cout << "NEW Det list: " << newname.c_str() << "\n";
+            }
+        }
 #endif
 
 #ifdef TREEPERF
@@ -251,7 +258,8 @@ int main(int argc, char** argv)
 
 
       Ana_Hist ListHisto(true /*Daf*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Riemann*/, false /*Hough*/,
-                            true /*Simu*/, true /*Builder*/, true /*PrimVtx*/, false /*PrimVtx_Si*/, true /*DecayVtx*/);
+                  true /*Simu*/, true /*Builder*/, true /*PrimVtx*/, false /*PrimVtx_Si*/, true /*DecayVtx*/, true /*DecayVtx_pi+*/,
+                  true /*FragmentFinder*/, true /*WASAFinder*/);
 
 
       AnaEvent_Metadata metadata;

@@ -68,6 +68,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   Debug_DAF         = false;
   DoNoMaterial      = false;
 
+  PV_RealXUVComb   = false;
+  PV_RealPrimTrack = false;
+
   RZ_ChangeMiniFiber = false;
   RZ_MDCProlate      = true;
   RZ_MDCWire2        = false;
@@ -83,6 +86,75 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   KF_NbMiniFiberCut = 4;
 
   RF_OutputEvents = false;
+
+
+  //Optics parameters
+  if(Config.IsAvailable("Optics_name")) optics_name = Config.Get<std::string>("Optics_name");
+  else                                  optics_name = "./calib/optics/optics_par.csv";
+
+  std::ifstream ifs_optics ( optics_name );
+  if(ifs_optics.is_open()){
+    const std::string CommentSymbol("#");
+
+    std::string temp_line;
+    while(std::getline(ifs_optics,temp_line)){
+      std::stringstream stream(temp_line);
+      std::string testComment(stream.str());
+      std::size_t it_comment = testComment.find(CommentSymbol);
+      if(it_comment!=std::string::npos){
+        //std::cout<<"!> Skip comment"<<temp_line<<std::endl;
+        continue;
+      }
+      char name[8];
+      float par1;
+      float par2;
+      stream >> name >> par1  >> par2;
+
+      optics_par[name].emplace_back(par1);
+      optics_par[name].emplace_back(par2);
+    }
+
+    printf("Optics done : %s\n", optics_name.c_str());
+  }
+  else
+  {
+    printf(" ! fail to open  : %s\n", optics_name.c_str());
+    exit(-1);
+  }
+
+  optics_s2z = 4187.5; //Ti: 4150 mm, take this value just for easy expression
+  
+  fiber_mft1_pos_z = 226.93 - 0.6 - 0.02;
+  fiber_mft2_pos_z = 230.93 - 0.6 + 0.02;
+
+  psb_pos_x = 0.5; psb_pos_y = 5.5; psb_pos_z = 2760.;
+  psb_rot_z = -0.4;
+  cut_psb_phi = 0.4;
+  cut_psb_z   = 150;
+  cut_phi_fm  = 0.3;
+
+  flag_dup_trackhit = true;
+  flag_dup_trackhit_mdc = false;
+  flag_trackhit_inclusive = true;
+
+
+  // PID Cuts
+  if(Config.IsAvailable("Pion_Cut_name"))
+    pi_cut_name = Config.Get<std::string>("Pion_Cut_name");
+  else
+    pi_cut_name = "./calib/pid_cuts/cut_pi.root";
+
+  TFile *f_cut = new TFile(pi_cut_name.c_str());
+  cut_pi = (TCutG*)f_cut->Get("cut_pi");
+
+  printf("pion cut loaded : %s\n", pi_cut_name.c_str());
+
+  // MWDC Par load
+  if(Config.IsAvailable("MWDC_Par_FitorHist"))
+    mwdc_par_fitorhist = Config.Get<int>("MWDC_Par_FitorHist");
+  else
+    mwdc_par_fitorhist = 0;
+
 
   TaskConfig.Init(Config);
 
@@ -100,6 +172,12 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     Debug_DAF = true;
   if(Config.IsAvailable("NoMaterial"))
     DoNoMaterial = true;
+
+  if(Config.IsAvailable("PV_RealXUVComb"))
+    PV_RealXUVComb = Config.Get<bool>("PV_RealXUVComb");
+  if(Config.IsAvailable("PV_RealPrimTrack"))
+    PV_RealPrimTrack = Config.Get<bool>("PV_RealPrimTrack");
+
   if(Config.IsAvailable("RZ_ChangeMiniFiber"))
     RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
   if(Config.IsAvailable("RZ_MDCProlate"))
@@ -109,7 +187,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("RZ_MDCBiasCorr"))
     RZ_MDCBiasCorr = Config.Get<bool>("RZ_MDCBiasCorr");
 
-  _logger->info("RZ Settting: Prolate? {} Wire2? {} BiasCorr? {} ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
+  _logger->info("RZ Setting: Prolate? {} / Wire2? {} / BiasCorr? {} / ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
                 RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
 
   if(Config.IsAvailable("KF_Kalman"))
@@ -182,13 +260,29 @@ if(Config.IsAvailable("CalibFile_MDCphys"))
   else
     map_ParamFiles.insert({"mdc_phys_file","./calib/mdc_mapping/MDC_PhysicalMap.csv"});
 
-if(Config.IsAvailable("CalibFile_MDCpar"))
+if(Config.IsAvailable("CalibFile_MDCdrift"))
   {
-    auto tmpStr = Config.Get<std::string>("CalibFile_MDCpar");
-    map_ParamFiles.insert({"mdc_par_file",tmpStr});
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCdrift");
+    map_ParamFiles.insert({"mdc_drift_file",tmpStr});
   }
   else
-    map_ParamFiles.insert({"mdc_par_file","./calib/mdc_driftparam/MDC_DriftParam.txt"});
+    map_ParamFiles.insert({"mdc_drift_file","./calib/mdc_driftparam/MDC_DriftParam.txt"});
+
+if(Config.IsAvailable("CalibFile_MDCparT0"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCparT0");
+    map_ParamFiles.insert({"mdc_parT0_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_parT0_file","./calib/mdc_driftparam/MDC_T0Param.csv"});
+
+if(Config.IsAvailable("CalibFile_MDCparT0_Wir"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MDCparT0_Wir");
+    map_ParamFiles.insert({"mdc_parT0wir_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mdc_parT0wir_file","./calib/mdc_driftparam/MDC_T0Param_Wir.csv"});
 
 if(Config.IsAvailable("CalibFile_Fiberoffset"))
   {
@@ -197,6 +291,30 @@ if(Config.IsAvailable("CalibFile_Fiberoffset"))
   }
   else
     map_ParamFiles.insert({"fiber_offset_file","./calib/fiber_offset/fiber_offset.csv"});
+
+if(Config.IsAvailable("CalibFile_FiberTimeoffset"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_FiberTimeoffset");
+    map_ParamFiles.insert({"fiber_timeoffset_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"fiber_timeoffset_file","./calib/fiber_offset/fiber_timeoffset.csv"});
+
+if(Config.IsAvailable("CalibFile_FiberAngleoffset"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_FiberAngleoffset");
+    map_ParamFiles.insert({"fiber_angleoffset_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"fiber_angleoffset_file","./calib/fiber_offset/fiber_angleoffset.csv"});
+
+if(Config.IsAvailable("Fiber_MFTCor_name"))
+  {
+    auto tmpStr = Config.Get<std::string>("Fiber_MFTCor_name");
+    map_ParamFiles.insert({"fiber_mftcor_file",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"fiber_mftcor_file","./calib/fiber_mftcor/fiber_mftcor.csv"});
 
 if(Config.IsAvailable("CalibFile_PSBtime"))
   {
@@ -214,6 +332,30 @@ if(Config.IsAvailable("CalibFile_T0time"))
   else
     map_ParamFiles.insert({"t0_time_file","./calib/t0_param/t0_time.csv"});
 
+if(Config.IsAvailable("CalibFile_MWDCDtDx"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MWDCDtDx");
+    map_ParamFiles.insert({"mwdc_name_dtdx",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mwdc_name_dtdx","./calib/mwdc_dtdx/mwdc_dtdx_param.txt"});
+
+if(Config.IsAvailable("CalibFile_MWDCDtDxtable"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_MWDCDtDxtable");
+    map_ParamFiles.insert({"mwdc_name_dtdxtable",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"mwdc_name_dtdxtable","./calib/mwdc_dtdx/mwdc_dtdxtable.root"});
+/*
+if(Config.IsAvailable("CalibFile_Optics"))
+  {
+    auto tmpStr = Config.Get<std::string>("CalibFile_Optics");
+    map_ParamFiles.insert({"optics_name",tmpStr});
+  }
+  else
+    map_ParamFiles.insert({"optics_name","./calib/optics/optics_par.csv"});
+*/
 
   if(Wasa_FieldMap)
     {
@@ -319,23 +461,36 @@ int THyphiAttributes::Init_Para()
   // Nb_CPU = 1;
   // Nb_Fraction = 1;
 
-  auto posTargetX  = InputPar.simParameters->find("Target_PosX");
-  Target_PositionX = posTargetX->second;
-  auto posTargetY  = InputPar.simParameters->find("Target_PosY");
-  Target_PositionY = posTargetY->second;
-  auto posTargetZ  = InputPar.simParameters->find("Target_PosZ");
-  Target_PositionZ = posTargetZ->second;
-  auto sizeTarget  = InputPar.simParameters->find("Target_Size");
-  Target_Size      = sizeTarget->second;
-  auto fieldV      = InputPar.simParameters->find("Field_CDS_Bz");
-  Field_Strength   = fieldV->second;
-  auto WasaS       = InputPar.simParameters->find("Wasa_Side");
-  Wasa_Side        = WasaS->second;
+  if(InputPar.simParameters != nullptr)
+    {
+      auto posTargetX  = InputPar.simParameters->find("Target_PosX");
+      Target_PositionX = posTargetX->second;
+      auto posTargetY  = InputPar.simParameters->find("Target_PosY");
+      Target_PositionY = posTargetY->second;
+      auto posTargetZ  = InputPar.simParameters->find("Target_PosZ");
+      Target_PositionZ = posTargetZ->second;
+      auto sizeTarget  = InputPar.simParameters->find("Target_Size");
+      Target_Size      = sizeTarget->second;
+      auto fieldV      = InputPar.simParameters->find("Field_CDS_Bz");
+      Field_Strength   = fieldV->second;
+      auto WasaS       = InputPar.simParameters->find("Wasa_Side");
+      Wasa_Side        = WasaS->second;
 
-  auto WasaMap  = InputPar.simParameters->find("Field_CDS_FieldMap");
-  Wasa_FieldMap = WasaMap != InputPar.simParameters->end() ? true : false;
-  if(Wasa_FieldMap)
-    Wasa_FieldMapName = "./field/MagField_default.dat";
+      auto WasaMap  = InputPar.simParameters->find("Field_CDS_FieldMap");
+      Wasa_FieldMap = WasaMap != InputPar.simParameters->end() ? true : false;
+      if(Wasa_FieldMap)
+        Wasa_FieldMapName = "./field/MagField_default.dat";
+    }
+  else
+    {
+      Wasa_FieldMap = true;
+      Wasa_FieldMapName = "./field/MagField_default.dat";
+      Field_Strength   = Config.IsAvailable("Field_Strength")   ? Config.Get<double>("Field_Strength")   : -1.;
+      Target_PositionX = Config.IsAvailable("Target_PositionX") ? Config.Get<double>("Target_PositionX") : 0.;
+      Target_PositionY = Config.IsAvailable("Target_PositionY") ? Config.Get<double>("Target_PositionY") : 0.;
+      Target_PositionZ = Config.IsAvailable("Target_PositionZ") ? Config.Get<double>("Target_PositionZ") : 196.12;
+      Target_Size      = Config.IsAvailable("Target_Size")      ? Config.Get<double>("Target_Size")      : 3.;
+    }
 
   TObjArray* L_vol = gGeoManager->GetListOfVolumes();
   int n_volume     = L_vol->GetEntries();
@@ -515,6 +670,10 @@ void Task::Init(const FullRecoConfig& Config)
     Task_CheckFiberXUV = Config.Get<bool>("Task_CheckFiberXUV");
   if(Config.IsAvailable("Task_CheckFiberTrack"))
     Task_CheckFiberTrack = Config.Get<bool>("Task_CheckFiberTrack");
+  if(Config.IsAvailable("Task_FragmentFinder"))
+    Task_FragmentFinder = Config.Get<bool>("Task_FragmentFinder");
+  if(Config.IsAvailable("Task_WASAFinder"))
+    Task_WASAFinder = Config.Get<bool>("Task_WASAFinder");
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
   if(Config.IsAvailable("Task_RiemannFinder"))
@@ -529,6 +688,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
   if(Config.IsAvailable("Task_DecayVtx"))
     Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
+  if(Config.IsAvailable("Task_DecayVtx_pi+"))
+    Task_DecayVtx_piplus = Config.Get<bool>("Task_DecayVtx_pi+");
   if(Config.IsAvailable("Task_ReStart"))
     Task_ReStart = Config.Get<bool>("Task_ReStart");
 
@@ -558,7 +719,11 @@ void Task::Init(const FullRecoConfig& Config)
       Task_Order.push_back(TASKCHECKFIBERXUV);
 	  if(s == "Task_CheckFiberTrack")
 	    Task_Order.push_back(TASKCHECKFIBERTRACK);
-  	  if(s == "Task_BayesFinder")
+    if(s == "Task_FragmentFinder")
+      Task_Order.push_back(TASKFRAGMENTFINDER);
+    if(s == "Task_WASAFinder")
+      Task_Order.push_back(TASKWASAFINDER);
+  	if(s == "Task_BayesFinder")
 	    Task_Order.push_back(TASKBAYESFINDER);
 	  if(s == "Task_RiemannFinder")
 	    Task_Order.push_back(TASKRIEMANNFINDER);
@@ -572,6 +737,8 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKKALMANDAF);
 	  if(s == "Task_DecayVtx")
 	    Task_Order.push_back(TASKDECAYVTX);
+    if(s == "Task_DecayVtx_pi+")
+      Task_Order.push_back(TASKDECAYVTX_PIPLUS);
 	  if(s == "Task_ReStart")
 	    Task_Order.push_back(TASKRESTART);
 	}
@@ -610,6 +777,8 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Task_PrimaryVtx      = TaskConfig.Task_PrimaryVtx;
   out.RunTask.Task_PrimaryVtx_Si   = TaskConfig.Task_PrimaryVtx_Si;
   out.RunTask.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
+  out.RunTask.Task_FragmentFinder  = TaskConfig.Task_FragmentFinder;
+  out.RunTask.Task_WASAFinder      = TaskConfig.Task_WASAFinder;
   out.RunTask.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
   out.RunTask.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;
   out.RunTask.Task_FinderCM        = TaskConfig.Task_FinderCM;
@@ -617,6 +786,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Task_CheckRZ         = TaskConfig.Task_CheckRZ;
   out.RunTask.Task_KalmanDAF       = TaskConfig.Task_KalmanDAF;
   out.RunTask.Task_DecayVtx        = TaskConfig.Task_DecayVtx;
+  out.RunTask.Task_DecayVtx_piplus = TaskConfig.Task_DecayVtx_piplus;
   out.RunTask.Task_ReStart         = TaskConfig.Task_ReStart;
 
   out.RunAttrGeneral.Hash = Hash;
@@ -645,6 +815,8 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.Hash = Hash;
   out.RunTaskAttr.Debug_DAF          = Debug_DAF;
   out.RunTaskAttr.DoNoMaterial       = DoNoMaterial;
+  out.RunTaskAttr.PV_RealXUVComb     = PV_RealXUVComb;
+  out.RunTaskAttr.PV_RealPrimTrack   = PV_RealPrimTrack;
   out.RunTaskAttr.RZ_ChangeMiniFiber = RZ_ChangeMiniFiber;
   out.RunTaskAttr.RZ_MDCProlate      = RZ_MDCProlate;
   out.RunTaskAttr.RZ_MDCWire2        = RZ_MDCWire2;

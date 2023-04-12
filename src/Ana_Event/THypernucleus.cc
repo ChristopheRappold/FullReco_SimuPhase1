@@ -28,6 +28,7 @@ THypernucleus::THypernucleus()
 
 
   //Daughters:
+  PDG_Fragment=-1;
   Id_Fragment=-1;
   MomE_Fragment.SetXYZT(0.,0.,0.,0.);
   Chi2ndf_Fragment=-1.;
@@ -36,6 +37,7 @@ THypernucleus::THypernucleus()
   Angle_MotherFragment=-1.;
   Fragment_IsFromHyp=-1;
 
+  PDG_Pion=-1;
   Id_Pion=-1;
   MomE_Pion.SetXYZT(0.,0.,0.,0.);
   Chi2ndf_Pion=-1.;
@@ -76,6 +78,7 @@ THypernucleus::THypernucleus(const THypernucleus& H)
   Mother_IsFromHyp=H.Mother_IsFromHyp;
 
   //Daughters:
+  PDG_Fragment=H.PDG_Fragment;
   Id_Fragment=H.Id_Fragment;
   MomE_Fragment=H.MomE_Fragment;
   Chi2ndf_Fragment=H.Chi2ndf_Fragment;
@@ -84,6 +87,7 @@ THypernucleus::THypernucleus(const THypernucleus& H)
   Angle_MotherFragment=H.Angle_MotherFragment;
   Fragment_IsFromHyp=H.Fragment_IsFromHyp;
 
+  PDG_Pion=H.PDG_Pion;
   Id_Pion=H.Id_Pion;
   MomE_Pion=H.MomE_Pion;
   Chi2ndf_Pion=H.Chi2ndf_Pion;
@@ -135,6 +139,7 @@ void THypernucleus::Clear(Option_t *option)
   Mother_IsFromHyp=-1;
   
   //Daughters:
+  PDG_Fragment=-1;
   Id_Fragment=-1;
   MomE_Fragment.SetXYZT(0.,0.,0.,0.);
   Chi2ndf_Fragment=-1.;
@@ -143,6 +148,7 @@ void THypernucleus::Clear(Option_t *option)
   Angle_MotherFragment=-1.;
   Fragment_IsFromHyp=-1;
 
+  PDG_Pion=-1;
   Id_Pion=-1;
   MomE_Pion.SetXYZT(0.,0.,0.,0.);
   Chi2ndf_Pion=-1.;

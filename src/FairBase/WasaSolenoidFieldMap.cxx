@@ -56,7 +56,8 @@ void WasaSolenoidFieldMap::Init()
   fZmin = FieldMap->MinMax_Z[0];
   fZmax = FieldMap->MinMax_Z[1];
 
-  Double_t originField[3] = {0.,0.,0.};
+  //Double_t originField[3] = {0.,0.,0.};
+  Double_t originField[3] = {fPosX,fPosY,fPosZ};
   GetFieldValue(originField, fieldAtOrig);
 }
 

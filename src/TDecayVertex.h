@@ -22,7 +22,7 @@ class TDecayVertex final : public TDataProcessInterface<Out>
 public:
   const THyphiAttributes& att;
 
-  TDecayVertex(const THyphiAttributes& attr);
+  TDecayVertex(const THyphiAttributes& attr, int pi_type=0);
   ~TDecayVertex();
 
   // int Init(Ana_Hist* h);
@@ -37,7 +37,7 @@ private:
 
   int FinderDecayVertex(FullRecoEvent& RecoEvent);
 
-  void StudyCaseSelector(std::string StudyCase, int& Hyp_pdg, int& Fragment_pdg);
+  void StudyCaseSelector_Hyp(std::string StudyCase, int& Hyp_pdg);
 
   void RealTracksFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                          int& pdgParticle, int& cutConditions,
@@ -45,7 +45,10 @@ private:
                          std::vector<KFFitInfo>& Vect_FitInfo);
 
   void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
-                                std::vector<KFParticle>& FragmentMDCTracks);
+                                std::vector<FragmentTrack>& FragmentMDCTracks);
+
+//  void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
+//                                std::vector<KFParticle>& FragmentMDCTracks);
 
   void FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks);
 
@@ -79,7 +82,7 @@ private:
   void MotherSelector(std::vector<KFParticle>& MotherTracks_All, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks_All,
                       std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks, TVector3& PrimVtxRecons,
                       std::vector<KFParticle>& MotherTracks, std::vector<std::tuple<size_t, size_t>>& RefDaughtersTracks);
-
+/*
   void SiHitsFinder(KFParticle& Track, std::vector<std::vector<double> >& Hits_Si, std::vector<std::vector<double> >& Track_Sihit);
 
   void MotherDaughtersTrack_SiHits(std::vector<KFParticle>& FragmentTracks, std::vector<KFParticle>& PionTracks,
@@ -99,14 +102,12 @@ private:
                     std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>>& Fragment_SiHits,
                     std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>>& Pion_SiHits,
                     std::vector<std::tuple<int, std::vector<std::vector<std::vector<double>>>>>& Mother_SiHits);
-
+*/
   void AllTrackstoDecayVertex_Vfunction(std::vector<KFParticle>& AllTracks, TVector3& Old_DecayVertexRecons, TVector3& DecayVertexRecons);
 
   void AllTrackstoDecayVertex_Centroids(std::vector<KFParticle>& AllTracks, TVector3& DecayVertexRecons);
 
-  void TranslationZ_Target_System(double Target_PosZ);
-
-
+/*
   //Silicon details (copy from TPrimaryVertex.h)
 
   double Z_plane_Si1x   = 27.4; // in cm
@@ -137,15 +138,16 @@ private:
   double actlenghtY;
   double sigma;
   int nStrips;
+*/
 
-  double Zo_target = 24.; // in cm
-  double Zf_target = 26.; // in cm
-  double Zo_minifibers = 47.5; // in cm
+  double Zo_target; // in cm
+  double Zf_target; // in cm
+  double Zo_minifibers; // in cm
 
 
-  double Dist_to_Target = 0.5; // in cm
-  double Dist_to_Silicons = 0.5; // in cm
-  double Dist_to_Minifibers = 0.5; // in cm
+//  double Dist_to_Target = 0.5; // in cm
+//  double Dist_to_Silicons = 0.5; // in cm
+//  double Dist_to_Minifibers = 0.5; // in cm
 
   double k_factor       = 3.; // multiplies the fragment track f function value
 
@@ -163,17 +165,20 @@ private:
   
   PDG_fromName pid_fromName;
 
-  int Fragment_pdg;
-
   int He3_pdg = pid_fromName("He3");
   int He4_pdg = pid_fromName("alpha");
   int deuteron_pdg = pid_fromName("deuteron");
   int lambda_pdg = pid_fromName("lambda");
   int proton_pdg = pid_fromName("proton");
-  int pi_pdg = pid_fromName("pi-");
+  int pi_pdg;
+  int piminus_pdg = pid_fromName("pi-");
+  int piplus_pdg = pid_fromName("pi+");
+
+  int pion_type = -1;
 
   int H3L_pdg = 20001;
   int H4L_pdg = 20002;
+  int nnL_pdg = 0; //CHECK Change!
 
   int Hyp_pdg;
   int Hyp_charge;
@@ -189,13 +194,14 @@ private:
 
 
   //Methods for reconstructed fragments
+  int Fragment_pdg;
   int recons_from_FRS_MDC = -1; // 1-> FRS, 2-> MDC
 
   int ref_RealFragment = -1;
   bool ifOnlyRealFragment = false;
 
   //Cut conditions on reconstructed fragments
-  bool ifCut_MaxChi2ndf_FragmentTracks = true;
+  bool ifCut_MaxChi2ndf_FragmentTracks = false;
   double MaxChi2ndf_FragmentTracks = 3.; //Change !
 
   bool ifCut_MinDist_FragmentTracksPrimVtx = false;
@@ -211,7 +217,7 @@ private:
 
   //Cut conditions on reconstructed pions
   bool ifCut_MaxChi2ndf_PionTracks = true;
-  double MaxChi2ndf_PionTracks = 3.; //Change !
+  double MaxChi2ndf_PionTracks = 300.; //Change !
 
   bool ifCut_MinDist_PionTracksPrimVtx = false;
   double MinDist_PionTracksPrimVtx = 0.05; //Change !
@@ -252,155 +258,159 @@ private:
 
   bool ifCut_ArmenterosPodolanski = false;
 
-
+/*
   //Cut conditions on silicons hits from reconstructed tracks
   bool ifCut_MaxDist_SiHit = true;
   double MaxDist_SiHit = 0.05; //Change !
 
   bool ifCut_MinEnergyDeposition_SiHit = true;
   double MinEnergyDeposition_SiHit = 0.1; //Change !
-
+*/
 
 
   struct LocalHists
   {
-    TH1F* h_P_fragments;
-    TH1F* h_Pt_fragments;
-    TH1F* h_Pz_fragments;
-    TH1F* h_Dist_FragmentTrackPrimVtx;
+    TH1F* h_P_fragments[2];
+    TH1F* h_Pt_fragments[2];
+    TH1F* h_Pz_fragments[2];
+    TH1F* h_Dist_FragmentTrackPrimVtx[2];
 
-    TH1F* h_P_pions;
-    TH1F* h_Pt_pions;
-    TH1F* h_Pz_pions;
-    TH1F* h_Chi2ndf_pions;
+    TH1F* h_P_pions[2];
+    TH1F* h_Pt_pions[2];
+    TH1F* h_Pz_pions[2];
+    TH1F* h_Chi2ndf_pions[2];
 
-    TH1F* h_Pt_cutpions;
-    TH1F* h_Pz_cutpions;
+    TH1F* h_Pt_cutpions[2];
+    TH1F* h_Pz_cutpions[2];
 
-    TH1F* h_Nrealpions;
-    TH1F* h_Ncutpions;
-    TH1F* h_Npions;
-
-
-    TH1F* h_Closedist_Distance;
-    TH1F* h_Closedist_PosZ;
-    TH2F* h_Dist_DecayTrackPrimVtx;
-
-    TH1F* h_Closedist_cutDistance;
-    TH1F* h_Closedist_cutPosZ;
-    TH2F* h_Dist_cutDecayTrackPrimVtx;
+    TH1F* h_Nrealpions[2];
+    TH1F* h_Ncutpions[2];
+    TH1F* h_Npions[2];
 
 
-    TH1F* h_DecayVertexDistance;
-    TH1F* h_DecayVertexDistanceX;
-    TH1F* h_DecayVertexDistanceY;
-    TH1F* h_DecayVertexDistanceZ;
+    TH1F* h_Closedist_Distance[2];
+    TH1F* h_Closedist_PosZ[2];
+    TH2F* h_Dist_DecayTrackPrimVtx[2];
 
-    TH1F* h_DecayVertexDistance_centroid;
-    TH1F* h_DecayVertexDistanceX_centroid;
-    TH1F* h_DecayVertexDistanceY_centroid;
-    TH1F* h_DecayVertexDistanceZ_centroid;
+    TH1F* h_Closedist_cutDistance[2];
+    TH1F* h_Closedist_cutPosZ[2];
+    TH2F* h_Dist_cutDecayTrackPrimVtx[2];
 
-    TH1F* h_DecayVertexDistance_KFPart;
-    TH1F* h_DecayVertexDistanceX_KFPart;
-    TH1F* h_DecayVertexDistanceY_KFPart;
-    TH1F* h_DecayVertexDistanceZ_KFPart;
 
-    TH1F* h_DecayVertexDistance_KFPart_PrimVtx;
-    TH1F* h_DecayVertexDistanceX_KFPart_PrimVtx;
-    TH1F* h_DecayVertexDistanceY_KFPart_PrimVtx;
-    TH1F* h_DecayVertexDistanceZ_KFPart_PrimVtx;
+    TH1F* h_DecayVertexDistance[2];
+    TH1F* h_DecayVertexDistanceX[2];
+    TH1F* h_DecayVertexDistanceY[2];
+    TH1F* h_DecayVertexDistanceZ[2];
 
-    TH1F* h_DecayVertexDistance_KFPart_PrimVtx_Mass;
-    TH1F* h_DecayVertexDistanceX_KFPart_PrimVtx_Mass;
-    TH1F* h_DecayVertexDistanceY_KFPart_PrimVtx_Mass;
-    TH1F* h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass;
+    TH1F* h_DecayVertexDistance_centroid[2];
+    TH1F* h_DecayVertexDistanceX_centroid[2];
+    TH1F* h_DecayVertexDistanceY_centroid[2];
+    TH1F* h_DecayVertexDistanceZ_centroid[2];
 
-    TH1F* h_DecayVertexcutDistance;
-    TH1F* h_DecayVertexcutDistanceX;
-    TH1F* h_DecayVertexcutDistanceY;
-    TH1F* h_DecayVertexcutDistanceZ;
+    TH1F* h_DecayVertexDistance_KFPart[2];
+    TH1F* h_DecayVertexDistanceX_KFPart[2];
+    TH1F* h_DecayVertexDistanceY_KFPart[2];
+    TH1F* h_DecayVertexDistanceZ_KFPart[2];
+
+    TH1F* h_DecayVertexDistance_KFPart_PrimVtx[2];
+    TH1F* h_DecayVertexDistanceX_KFPart_PrimVtx[2];
+    TH1F* h_DecayVertexDistanceY_KFPart_PrimVtx[2];
+    TH1F* h_DecayVertexDistanceZ_KFPart_PrimVtx[2];
+
+    TH1F* h_DecayVertexDistance_KFPart_PrimVtx_Mass[2];
+    TH1F* h_DecayVertexDistanceX_KFPart_PrimVtx_Mass[2];
+    TH1F* h_DecayVertexDistanceY_KFPart_PrimVtx_Mass[2];
+    TH1F* h_DecayVertexDistanceZ_KFPart_PrimVtx_Mass[2];
+
+    TH1F* h_DecayVertexcutDistance[2];
+    TH1F* h_DecayVertexcutDistanceX[2];
+    TH1F* h_DecayVertexcutDistanceY[2];
+    TH1F* h_DecayVertexcutDistanceZ[2];
 
 /*
-    TH1F* h_DecayVertexcutDistance_KFPart;
-    TH1F* h_DecayVertexcutDistanceX_KFPart;
-    TH1F* h_DecayVertexcutDistanceY_KFPart;
-    TH1F* h_DecayVertexcutDistanceZ_KFPart;
+    TH1F* h_DecayVertexcutDistance_KFPart[2];
+    TH1F* h_DecayVertexcutDistanceX_KFPart[2];
+    TH1F* h_DecayVertexcutDistanceY_KFPart[2];
+    TH1F* h_DecayVertexcutDistanceZ_KFPart[2];
 */
 
-    TH1F* h_DecayVertexcutDistance_KFPart_PrimVtx;
-    TH1F* h_DecayVertexcutDistanceX_KFPart_PrimVtx;
-    TH1F* h_DecayVertexcutDistanceY_KFPart_PrimVtx;
-    TH1F* h_DecayVertexcutDistanceZ_KFPart_PrimVtx;
+    TH1F* h_DecayVertexcutDistance_KFPart_PrimVtx[2];
+    TH1F* h_DecayVertexcutDistanceX_KFPart_PrimVtx[2];
+    TH1F* h_DecayVertexcutDistanceY_KFPart_PrimVtx[2];
+    TH1F* h_DecayVertexcutDistanceZ_KFPart_PrimVtx[2];
 
 
-    TH1F* h_DecayVertexPosZ_real;
-    TH1F* h_DecayVertexPosZ_vfunction;
-    TH1F* h_DecayVertexPosZ_centroid;
-    TH1F* h_DecayVertexPosZ_KFPart;
-    TH1F* h_DecayVertexPosZ_AllVfunc;
-    TH1F* h_DecayVertexPosZ_AllCentroid;
-    TH1F* h_DecayVertexPosZ_AllKFPart;
+    TH1F* h_DecayVertexPosZ_real[2];
+    TH1F* h_DecayVertexPosZ_vfunction[2];
+    TH1F* h_DecayVertexPosZ_centroid[2];
+    TH1F* h_DecayVertexPosZ_KFPart[2];
+    TH1F* h_DecayVertexPosZ_AllVfunc[2];
+    TH1F* h_DecayVertexPosZ_AllCentroid[2];
+    TH1F* h_DecayVertexPosZ_AllKFPart[2];
 
 
-    TH2F* h_N_MotherTracks;
-    TH2F* h_Dist_DaughterTracks;
-    TH2F* h_Angle_MotherFragment;
-    TH2F* h_Angle_MotherPion;
-    TH2F* h_Chi2ndf_MotherTracks;
-    TH2F* h_Dist_MotherTrackPrimVtx;
-    TH2F* h_Theta_MotherTrackPrimVtx;
-    TH2F* h_DecayVertexPosZ_KFPart_PrimVtx;
-    TH2F* h_DecayFragmentMomZ_KFPart_PrimVtx;
-    TH2F* h_DecayPionMomZ_KFPart_PrimVtx;
-    TH2F* h_Hyp_ArmenterosPodolanski;
-    TH2F* h_Hyp_CutArmenterosPodolanski;
+    TH2F* h_N_MotherTracks[2];
+    TH2F* h_Dist_DaughterTracks[2];
+    TH2F* h_Angle_MotherFragment[2];
+    TH2F* h_Angle_MotherPion[2];
+    TH2F* h_Chi2ndf_MotherTracks[2];
+    TH2F* h_Dist_MotherTrackPrimVtx[2];
+    TH2F* h_Theta_MotherTrackPrimVtx[2];
+    TH2F* h_DecayVertexPosZ_KFPart_PrimVtx[2];
+    TH2F* h_DecayFragmentMomZ_KFPart_PrimVtx[2];
+    TH2F* h_DecayPionMomZ_KFPart_PrimVtx[2];
+    TH2F* h_Hyp_ArmenterosPodolanski[2];
+    TH2F* h_Hyp_CutArmenterosPodolanski[2];
 
 
-    TH1F* h_HypInvariantMass;
-    TH1F* h_HypErrorInvariantMass;
+    TH1F* h_HypInvariantMass[2];
+    TH1F* h_HypInvariantMass_Z05[2];
+    TH1F* h_HypInvariantMass_Z10[2];
+    TH1F* h_HypInvariantMass_Z15[2];
+    TH1F* h_HypInvariantMass_Z20[2];
+    TH1F* h_HypErrorInvariantMass[2];
 
-    TH1F* h_Hyp_RealLifeTime;
-    TH1F* h_HypLifeTime_PrimVtx;
-    TH1F* h_HypErrorLifeTime_PrimVtx;
-    TH1F* h_HypcutLifeTime_PrimVtx;
+    TH1F* h_Hyp_RealLifeTime[2];
+    TH1F* h_HypLifeTime_PrimVtx[2];
+    TH1F* h_HypErrorLifeTime_PrimVtx[2];
+    TH1F* h_HypcutLifeTime_PrimVtx[2];
 
-    TH2F* h_HypInvariantMassCheck;
-    TH2F* h_HypInvariantErrorMassCheck;
+    TH2F* h_HypInvariantMassCheck[2];
+    TH2F* h_HypInvariantErrorMassCheck[2];
 
-    TH1F* h_HypInvariantMass_LorentzVect;
-    TH1F* h_HypInvariantMass_CutLorentzVect;
+    TH1F* h_HypInvariantMass_LorentzVect[2];
+    TH1F* h_HypInvariantMass_CutLorentzVect[2];
 
-    TH1F* h_EffPosZ_real;
-    TH1F* h_EffPosZ_preKF;
-    TH1F* h_EffPosZ_postKF;
-    TH1F* h_EffPosZ_preKFPart;
-    TH1F* h_EffPosZ_postKFPart;
+    TH1F* h_EffPosZ_real[2];
+    TH1F* h_EffPosZ_preKF[2];
+    TH1F* h_EffPosZ_postKF[2];
+    TH1F* h_EffPosZ_preKFPart[2];
+    TH1F* h_EffPosZ_postKFPart[2];
 
-    TH2F* h_EffPosZPosR_real;
-    TH2F* h_EffPosZPosR_postKFPart;
-
-    TH2F* h_N_SiHits_ReconsTracks;
+    TH2F* h_EffPosZPosR_real[2];
+    TH2F* h_EffPosZPosR_postKFPart[2];
 /*
-    TH1F* h_N_Si_MotherTracks;
+    TH2F* h_N_SiHits_ReconsTracks[2];
+
+    TH1F* h_N_Si_MotherTracks[2];
 
 
-    TH1F* h_DecayVertexDistance_AllVfunc;
-    TH1F* h_DecayVertexDistanceX_AllVfunc;
-    TH1F* h_DecayVertexDistanceY_AllVfunc;
-    TH1F* h_DecayVertexDistanceZ_AllVfunc;
+    TH1F* h_DecayVertexDistance_AllVfunc[2];
+    TH1F* h_DecayVertexDistanceX_AllVfunc[2];
+    TH1F* h_DecayVertexDistanceY_AllVfunc[2];
+    TH1F* h_DecayVertexDistanceZ_AllVfunc[2];
 
-    TH1F* h_DecayVertexDistance_AllCentroid;
-    TH1F* h_DecayVertexDistanceX_AllCentroid;
-    TH1F* h_DecayVertexDistanceY_AllCentroid;
-    TH1F* h_DecayVertexDistanceZ_AllCentroid;
+    TH1F* h_DecayVertexDistance_AllCentroid[2];
+    TH1F* h_DecayVertexDistanceX_AllCentroid[2];
+    TH1F* h_DecayVertexDistanceY_AllCentroid[2];
+    TH1F* h_DecayVertexDistanceZ_AllCentroid[2];
 
-    TH1F* h_DecayVertexDistance_AllKFPart;
-    TH1F* h_DecayVertexDistanceX_AllKFPart;
-    TH1F* h_DecayVertexDistanceY_AllKFPart;
-    TH1F* h_DecayVertexDistanceZ_AllKFPart;
+    TH1F* h_DecayVertexDistance_AllKFPart[2];
+    TH1F* h_DecayVertexDistanceX_AllKFPart[2];
+    TH1F* h_DecayVertexDistanceY_AllKFPart[2];
+    TH1F* h_DecayVertexDistanceZ_AllKFPart[2];
 */
-    TH1F* h_DecayVtxstats;
+    TH1F* h_DecayVtxstats[2];
   };
 
   LocalHists LocalHisto;

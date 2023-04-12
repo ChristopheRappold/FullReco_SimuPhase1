@@ -51,7 +51,7 @@ DEPEND        = makedepend $(CXXFLAGS)
 
 #--------------------------------------------------------------------
 
-Headers = FiberAnalyzer.hh FiberHitAna.hh FiberHitXUV.hh FiberTrackAna.hh MDCHitAna.hh ParaManager.hh PSBEHitAna.hh PSBHitAna.hh PSFEHitAna.hh T0HitAna.hh TrackHit.hh
+Headers = FiberAnalyzer.hh FiberHitAna.hh FiberHitXUV.hh FiberTrackAna.hh MDCHitAna.hh ParaManager.hh PSBEHitAna.hh PSBHitAna.hh PSFEHitAna.hh T0HitAna.hh TrackHit.hh MWDCHitAna.hh MWDCTracking.hh OpticsMom.hh S4SciHitAna.hh
 
 Sources = $(patsubst %.$(HeadSuf),%.$(SrcSuf),$(Headers))
 

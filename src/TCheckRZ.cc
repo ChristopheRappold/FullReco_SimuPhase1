@@ -105,7 +105,7 @@ int TCheckRZ<Out>::FinderTrack(FullRecoEvent& RecoEvent)
   for(size_t id_det = G4Sol::MG01; id_det <= G4Sol::MG17; ++id_det)
     RecoEvent.OldListHits[id_det].resize(RecoEvent.ListHits[id_det].size());
 
-  for(size_t id_det = G4Sol::MiniFiberD1_x1; id_det <= G4Sol::MiniFiberD1_v2; ++id_det)
+  for(size_t id_det = G4Sol::MiniFiberD1_x; id_det <= G4Sol::MiniFiberD2_u; ++id_det)
     RecoEvent.OldListHits[id_det].resize(RecoEvent.ListHits[id_det].size());
 
   RecoEvent.OldListHits[G4Sol::PSBE].resize(RecoEvent.ListHits[G4Sol::PSBE].size());
@@ -168,7 +168,7 @@ int TCheckRZ<Out>::FinderTrack(FullRecoEvent& RecoEvent)
               ++n_Central;
               id_dets_MDC.insert(std::make_tuple(id_det, id_hit));
             }
-          if(id_det >= G4Sol::MiniFiberD1_x1 && id_det <= G4Sol::MiniFiberD1_v2)
+          if(id_det >= G4Sol::MiniFiberD1_x && id_det <= G4Sol::MiniFiberD2_u)
             {
               ++n_MiniFiber;
               id_dets_MiniFiber.insert(std::make_tuple(id_det, id_hit));
