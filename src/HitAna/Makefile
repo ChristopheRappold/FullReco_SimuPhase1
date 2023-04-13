@@ -44,6 +44,9 @@ ROOTGLIBS    := $(shell root-config --glibs)
 CXXFLAGS     += $(ROOTCFLAGS) $(WASAUNPACK)
 LIBS         +=-L$(ROOTLIBSDIR) -lPhysics 
 
+GENFITV2FLAGS = -I../Genfit2_v2/include
+CXXFLAGS     += $(GENFITV2FLAGS)
+
 .SUFFIXES : .$(HeadSuf) .$(DictSuf) .$(ObjSuf) .$(SrcSuf) .$(DictObjSuf)
 .PHONY : all clean clean_all
 
