@@ -377,7 +377,6 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       const int id_track = it_trackInfo.first;
       auto it_ListHits   = RecoEvent.TrackDAF.find(id_track);
       auto it_ListHitsSim = RecoEvent.TrackDAFSim.find(id_track);
-      auto it_ListFirstHit = RecoEvent.TrackFirstHit.find(id_track);
 
       auto getZpos = [](genfit::AbsMeasurement* m) {
         TVectorD& HitrawRef = m->getRawHitCoords();
@@ -547,13 +546,6 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
       genfit::AbsMeasurement* tempHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
       TVectorD& tempHitrawRef         = tempHit->getRawHitCoords();
-
-      SimHit it_hitFirst;
-//      if(it_ListHitsSim != RecoEvent.TrackDAFSim.end()) it_hitFirst = it_ListHitsSim->second[id_firstDet][0]; //CHECK keep this one?
-//      else                                              it_hitFirst = it_ListFirstHit->second;
-      it_hitFirst = it_ListFirstHit->second;
-
-      //const TVector3 firstPos(it_hitFirst.hitX, it_hitFirst.hitY, it_hitFirst.hitZ);
 
       const int PDG     = static_cast<int>(track_state.pdg);
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(PDG);

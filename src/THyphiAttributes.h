@@ -201,6 +201,10 @@ struct RunTaskAttrDef
   bool RZ_MDCWire2;
   bool RZ_MDCBiasCorr;
 
+  bool WASAFinder_perfect;
+  bool WASAFinder_PSBHits;
+  bool WASAFinder_PSFEHits;
+
   bool KF_Kalman;
   bool KF_KalmanSqrt;
   bool KF_KalmanRef;
@@ -311,7 +315,10 @@ inline auto InitStorage()
 				 make_column("RZ_ChangeMiniFiber", &RunTaskAttrDef::RZ_ChangeMiniFiber),
 				 make_column("RZ_MDCProlate", &RunTaskAttrDef::RZ_MDCProlate),
 				 make_column("RZ_MDCWire2", &RunTaskAttrDef::RZ_MDCWire2),
-				 make_column("RZ_MDCBiasCorr", &RunTaskAttrDef::RZ_MDCBiasCorr),
+         make_column("RZ_MDCBiasCorr", &RunTaskAttrDef::RZ_MDCBiasCorr),
+         make_column("WASAFinder_perfect", &RunTaskAttrDef::WASAFinder_perfect),
+         make_column("WASAFinder_PSBHits", &RunTaskAttrDef::WASAFinder_PSBHits),
+         make_column("WASAFinder_PSFEHits", &RunTaskAttrDef::WASAFinder_PSFEHits),
 				 make_column("KF_Kalman", &RunTaskAttrDef::KF_Kalman),
 				 make_column("KF_KalmanSqrt", &RunTaskAttrDef::KF_KalmanSqrt),
 				 make_column("KF_KalmanRef", &RunTaskAttrDef::KF_KalmanRef),
@@ -410,6 +417,10 @@ class THyphiAttributes
 
   bool PV_RealXUVComb;
   bool PV_RealPrimTrack;
+
+  bool WASAFinder_perfect;
+  bool WASAFinder_PSBHits;
+  bool WASAFinder_PSFEHits;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;

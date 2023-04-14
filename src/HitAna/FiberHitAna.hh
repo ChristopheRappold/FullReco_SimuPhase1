@@ -9,7 +9,7 @@ class FiberHitAna
   public:
     FiberHitAna(FiberHit a, ParaManager *par, int tref, double t_t0 = 0);
     FiberHitAna(FiberHitAna *a);
-    FiberHitAna(int detector, int layer, int fiber, double time, double energy, ParaManager *par);
+    FiberHitAna(int detector, int layer, int fiber, double time, double energy, int simtrackid, ParaManager *par);
     FiberHitAna(double pos, double ang, double z, double res);
     ~FiberHitAna();
     int    GetSfp(){   return i_sfp;};
@@ -36,6 +36,7 @@ class FiberHitAna
     int    GetDid(){   return i_did;};
     bool   IsValid(){  return i_valid;};
     bool   IsUsed(){   return i_used;};
+    int    GetSimTrackID(){return i_simtrackid;};
     void   Add(FiberHitAna* hit);
     void   SetZ(double _z){i_z = _z;};
     void   SetPos(double _pos){i_pos = _pos;};
@@ -70,6 +71,7 @@ class FiberHitAna
     int  i_ud = 0; // 0:upstream 1:downstream
     bool i_valid = false;
     bool i_used  = false;
+    int i_simtrackid = -1;
     double GetAngFiber(ParaManager *par);
     double GetPosFiber(ParaManager *par);
     double GetZFiber(  ParaManager *par);

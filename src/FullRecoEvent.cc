@@ -46,8 +46,8 @@ void FullRecoEvent::Clear(int toclean)
   TrackDAF.clear();
   TrackDAFSim.clear();
   TrackDAFInit.clear();
+  TrackDAFInitSim.clear();
   TrackInfo.clear();
-  TrackFirstHit.clear();
 
   TracksFound.clear();
   IdHitsToMeasurement.clear();

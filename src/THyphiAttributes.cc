@@ -76,6 +76,10 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   RZ_MDCWire2        = false;
   RZ_MDCBiasCorr     = true;
 
+  WASAFinder_perfect = false;
+  WASAFinder_PSBHits = true;
+  WASAFinder_PSFEHits= false;
+
   KF_Kalman     = false;
   KF_KalmanSqrt = true;
   KF_KalmanRef  = false;
@@ -187,6 +191,13 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("RZ_MDCBiasCorr"))
     RZ_MDCBiasCorr = Config.Get<bool>("RZ_MDCBiasCorr");
 
+  if(Config.IsAvailable("WASAFinder_perfect"))
+    WASAFinder_perfect = Config.Get<bool>("WASAFinder_perfect");
+  if(Config.IsAvailable("WASAFinder_PSBHits"))
+    WASAFinder_PSBHits = Config.Get<bool>("WASAFinder_PSBHits");
+  if(Config.IsAvailable("WASAFinder_PSFEHits"))
+    WASAFinder_PSFEHits = Config.Get<bool>("WASAFinder_PSFEHits");
+  
   _logger->info("RZ Setting: Prolate? {} / Wire2? {} / BiasCorr? {} / ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
                 RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
 
@@ -821,6 +832,9 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.RZ_MDCProlate      = RZ_MDCProlate;
   out.RunTaskAttr.RZ_MDCWire2        = RZ_MDCWire2;
   out.RunTaskAttr.RZ_MDCBiasCorr     = RZ_MDCBiasCorr;
+  out.RunTaskAttr.WASAFinder_perfect = WASAFinder_perfect;
+  out.RunTaskAttr.WASAFinder_PSBHits = WASAFinder_PSBHits;
+  out.RunTaskAttr.WASAFinder_PSFEHits= WASAFinder_PSFEHits;
   out.RunTaskAttr.KF_Kalman          = KF_Kalman;
   out.RunTaskAttr.KF_KalmanSqrt      = KF_KalmanSqrt;
   out.RunTaskAttr.KF_KalmanRef       = KF_KalmanRef;

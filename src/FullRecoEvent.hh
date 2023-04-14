@@ -64,26 +64,26 @@ enum SolDet : int
   Si1y_SD_pad,
   Si2x_SD_pad,
   Si2y_SD_pad, /*17*/
-  TO_Counter, /*39*/
-  FiberD1_x, /*24*/
+  TO_Counter, /*18*/
+  FiberD1_x, /*19*/
   FiberD1_u,
   FiberD1_v,
-  FiberD2_x, /*27*/
+  FiberD2_x, /*22*/
   FiberD2_u,
   FiberD2_v,
-  FiberD3_x, /*30*/
+  FiberD3_x, /*25*/
   FiberD3_u,
   FiberD3_v,
-  MiniFiberD1_x,
+  MiniFiberD1_x, /*28*/
   MiniFiberD1_u,
   MiniFiberD1_v,
   MiniFiberD2_x,
   MiniFiberD2_v,
   MiniFiberD2_u,
-  FiberD4_v, /*33*/
+  FiberD4_v, /*34*/
   FiberD4_u,
   FiberD4_x,
-  FiberD5_x, /*36*/
+  FiberD5_x, /*37*/
   FiberD5_u,
   FiberD5_v,
   PSFE, /*40*/ //PSB_F
@@ -785,8 +785,8 @@ public:
   std::unordered_map<int, std::vector<int> > TrackDAF;
   std::unordered_map<int, std::vector<std::vector<SimHit> > > TrackDAFSim;
   std::unordered_map<int, InfoInit> TrackDAFInit;
+  std::unordered_map<int, InfoInit> TrackDAFInitSim;
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
-  std::unordered_map<int, SimHit > TrackFirstHit;
 
   std::vector<CandTrack> TracksFound;
   std::vector<IdHit> IdHitsToMeasurement;

@@ -387,9 +387,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       if(event.BeamCharges[index] == 0)
         continue;
       int TrackID = event.BeamTrackID[index];
-/*
-      std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
-      RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
 
       InfoInit tempInit;
       tempInit.charge = event.BeamCharges[index];
@@ -399,8 +396,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       tempInit.momX = event.BeamMomentums_X[index];
       tempInit.momY = event.BeamMomentums_Y[index];
       tempInit.momZ = event.BeamMomentums_Z[index];
-      RecoEvent.TrackDAFInit.insert(std::make_pair(TrackID, tempInit));
-*/
+      RecoEvent.TrackDAFInitSim.insert(std::make_pair(TrackID, tempInit));
+
       std::vector<std::vector<SimHit> > tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
       RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));
 
@@ -425,9 +422,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
       int TrackID = event.DaughterTrackID[index];
 
-      //std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
-      //RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
-
       InfoInit tempInit;
       tempInit.charge = event.DaughterCharges[index];
       tempInit.posX = event.DecayVertex_X;
@@ -436,7 +430,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       tempInit.momX = event.DaughterMomentums_X[index];
       tempInit.momY = event.DaughterMomentums_Y[index];
       tempInit.momZ = event.DaughterMomentums_Z[index];
-      //RecoEvent.TrackDAFInit.insert(std::make_pair(TrackID, tempInit));
+      RecoEvent.TrackDAFInitSim.insert(std::make_pair(TrackID, tempInit));
 
       RecoEvent.DaughtersTrackDAFInit.insert(std::make_pair(TrackID, tempInit));
 
@@ -958,11 +952,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                     }
 
                   FiberHitAna* hit_ana = new FiberHitAna(i_fiber, i_layer, LayerID/2,
-                                  gRandom->Gaus(hit.Time, time_res), hit.Energy, par.get());
+                                  gRandom->Gaus(hit.Time, time_res), hit.Energy, TrackID, par.get());
                   FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].emplace_back(hit_ana);
-
-
-                  RecoEvent.ListHitsToTracks[TypeDet].emplace_back(TrackID);
 
                   int pdg_code = pid_fromName(hit.Pname);
                   if(pdg_code == 0)
@@ -1742,6 +1733,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
               MeasurementInfo measinfo(FiberHitClCont[i][j][k]->GetTOT(), FiberHitClCont[i][j][k]->GetTime(), FiberHitClCont[i][j][k]->GetdE());
               RecoEvent.ListHitsInfo[TypeDet[i][j]].emplace_back(measinfo);
+
+              RecoEvent.ListHitsToTracks[TypeDet[i][j]].emplace_back(FiberHitClCont[i][j][k]->GetSimTrackID());
             }
         }
     }
