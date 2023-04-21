@@ -1204,10 +1204,18 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       LocalHisto.h_HypInvariantMass[pion_type]->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
       LocalHisto.h_HypErrorInvariantMass[pion_type]->Fill(MotherTracks_PrimVtx[i].GetErrMass(), 1.);
 
-      if(MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ >= 5.) LocalHisto.h_HypInvariantMass_Z05[pion_type]->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
-      if(MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ >=10.) LocalHisto.h_HypInvariantMass_Z10[pion_type]->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
-      if(MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ >=15.) LocalHisto.h_HypInvariantMass_Z15[pion_type]->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
-      if(MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ >=20.) LocalHisto.h_HypInvariantMass_Z20[pion_type]->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
+      if((MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ >=  5.)
+          && (MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ <= 27.))
+            LocalHisto.h_HypInvariantMass_Z05[pion_type]->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
+      if((MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ >= 10.)
+          && (MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ <= 27.))
+            LocalHisto.h_HypInvariantMass_Z10[pion_type]->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
+      if((MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ >= 15.)
+          && (MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ <= 27.))
+            LocalHisto.h_HypInvariantMass_Z15[pion_type]->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
+      if((MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ >= 20.)
+          && (MotherTracks_PrimVtx[i].GetZ() - att.Target_PositionZ <= 27.))
+            LocalHisto.h_HypInvariantMass_Z20[pion_type]->Fill(MotherTracks_PrimVtx[i].GetMass(), 1.);
 
       float m_getmass;
       float error_getmass;

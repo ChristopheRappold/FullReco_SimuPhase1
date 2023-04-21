@@ -180,22 +180,6 @@ constexpr bool IsFiber(G4Sol::SolDet idDet) {
   };
 };
 
-/*
-constexpr bool IsFiberM(G4Sol::SolDet idDet) {
-  switch (idDet) {
-    case G4Sol::MiniFiberD1_x : ;
-    case G4Sol::MiniFiberD1_u : ;
-    case G4Sol::MiniFiberD1_v : ;
-    case G4Sol::MiniFiberD2_x : ;
-    case G4Sol::MiniFiberD2_v : ;
-    case G4Sol::MiniFiberD2_u : ;
-      return true;
-    default:
-      return false;
-  };
-};
-*/
-
 constexpr bool IsWire(G4Sol::SolDet idDet) {
   switch (idDet) {
   case G4Sol::MG01 : ;
@@ -255,9 +239,6 @@ private :
   
   ReturnRes::InfoM SoftExit(int) final;
   void SelectHists() final;
-
-  //double GetPSB_R(int _seg);
-  //double GetPSB_Phi(int _seg);
 
 private:
   

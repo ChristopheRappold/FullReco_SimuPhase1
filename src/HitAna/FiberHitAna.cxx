@@ -32,27 +32,29 @@ FiberHitAna::FiberHitAna(FiberHit a, ParaManager *par, int tref, double t_t0){
 }
 
 FiberHitAna::FiberHitAna(FiberHitAna *a){
-  i_sfp      = a->GetSfp();
-  i_ctdc     = a->GetCtdc();
-  i_ch       = a->GetCh();
-  i_detector = a->GetDet();
-  i_layer    = a->GetLay();
-  i_fiber    = a->GetFib();
-  i_clsize   = a->GetClsize();
-  t_leading  = a->GetTL();
-  t_trailing = a->GetTT();
-  i_ang      = a->GetAng();
-  i_pos      = a->GetPos();
-  i_pos_org  = a->GetPosOrg();
-  t_tot      = a->GetTOT();
-  t_time     = a->GetTime();
-  i_cl_fiber = a->GetClFib();
-  i_z        = a->GetZ();
-  i_z_org    = a->GetZOrg();
-  i_res      = a->GetRes();
-  i_did      = a->GetDid();
-  i_ud       = a->GetUD();
-  i_valid    = a->IsValid();
+  i_sfp       = a->GetSfp();
+  i_ctdc      = a->GetCtdc();
+  i_ch        = a->GetCh();
+  i_detector  = a->GetDet();
+  i_layer     = a->GetLay();
+  i_fiber     = a->GetFib();
+  i_clsize    = a->GetClsize();
+  t_leading   = a->GetTL();
+  t_trailing  = a->GetTT();
+  i_ang       = a->GetAng();
+  i_pos       = a->GetPos();
+  i_pos_org   = a->GetPosOrg();
+  t_tot       = a->GetTOT();
+  t_time      = a->GetTime();
+  i_cl_fiber  = a->GetClFib();
+  i_z         = a->GetZ();
+  i_z_org     = a->GetZOrg();
+  i_res       = a->GetRes();
+  i_did       = a->GetDid();
+  i_ud        = a->GetUD();
+  i_valid     = a->IsValid();
+  i_used      = a->IsUsed();
+  i_simtrackid= a->GetSimTrackID();
 }
 
 FiberHitAna::FiberHitAna(int detector, int layer, int fiber, double time, double energy, int simtrackid, ParaManager *par)

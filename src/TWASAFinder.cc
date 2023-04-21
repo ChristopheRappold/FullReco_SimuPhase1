@@ -1,6 +1,6 @@
 #include "TWASAFinder.h"
 
-//#define DEBUG_WASAFINDER
+#define DEBUG_WASAFINDER
 
 using namespace std;
 using namespace G4Sol;
@@ -56,11 +56,16 @@ void TWASAFinder<Out>::SelectHists()
 template<class Out>
 int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
 {
-  if(att.G4_simu && att.WASAFinder_perfect)
+  if(att.G4_simu && att.WF_perfect)
     {
-      int track_counter = 0;
+#ifdef DEBUG_WASAFINDER
+      std::cout << "\nInside perfect finder\n";
+#endif
       for(auto it_trackDAFSim : RecoEvent.TrackDAFSim)
         {
+#ifdef DEBUG_WASAFINDER
+          std::cout << "TrackID: " << it_trackDAFSim.first << "\n";
+#endif
           std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
           std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
 
@@ -85,6 +90,12 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
               //tmp_infopar.TOT    = 0.;
               tmp_infopar.length = it_trackDAFSim.second[G4Sol::MiniFiberD1_x + i][0].length;
               tempSetInfo[G4Sol::MiniFiberD1_x + i] = tmp_infopar;
+
+#ifdef DEBUG_WASAFINDER
+              std::cout << "Minifiber Det: " << i
+              << "\t layer(ListHits): " << RecoEvent.ListHits[G4Sol::MiniFiberD1_x + i][index]->getHitId()
+              << "\t layer(TrackDAFSim): " << it_trackDAFSim.second[G4Sol::MiniFiberD1_x + i][0].layerID/2 << "\n";
+#endif
             }
 
           //MDCHits
@@ -108,10 +119,16 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
               //tmp_infopar.TOT    = 0.;
               tmp_infopar.length = it_trackDAFSim.second[G4Sol::MG01 + i][0].length;
               tempSetInfo[G4Sol::MG01 + i] = tmp_infopar;
+
+#ifdef DEBUG_WASAFINDER
+              std::cout << "MDC Det: " << i
+              << "\t layer(ListHits): " << RecoEvent.ListHits[G4Sol::MG01 + i][index]->getHitId()
+              << "\t layer(TrackDAFSim): " << it_trackDAFSim.second[G4Sol::MG01 + i][0].layerID << "\n";
+#endif
             }
 
           //PSBHits
-          if(att.WASAFinder_PSBHits)
+          if(att.WF_PSBHits)
           {
             auto it_trackID = find(RecoEvent.ListHitsToTracks[G4Sol::PSCE].begin(),
                   RecoEvent.ListHitsToTracks[G4Sol::PSCE].end(), it_trackDAFSim.first);
@@ -131,10 +148,16 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
             //tmp_infopar.TOT    = 0.;
             tmp_infopar.length = it_trackDAFSim.second[G4Sol::PSCE][0].length;
             tempSetInfo[G4Sol::PSCE] = tmp_infopar;
+
+#ifdef DEBUG_WASAFINDER
+            std::cout << "PSB:"
+            << "\t layer(ListHits): " << RecoEvent.ListHits[G4Sol::PSCE][index]->getHitId()
+            << "\t layer(TrackDAFSim): " << it_trackDAFSim.second[G4Sol::PSCE][0].layerID << "\n";
+#endif
           }
 
           //PSFEHits
-          if(att.WASAFinder_PSFEHits)
+          if(att.WF_PSFEHits)
           {
             auto it_trackID = find(RecoEvent.ListHitsToTracks[G4Sol::PSFE].begin(),
                   RecoEvent.ListHitsToTracks[G4Sol::PSFE].end(), it_trackDAFSim.first);
@@ -154,16 +177,24 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
             //tmp_infopar.TOT    = 0.;
             tmp_infopar.length = it_trackDAFSim.second[G4Sol::PSFE][0].length;
             tempSetInfo[G4Sol::PSFE] = tmp_infopar;
+
+#ifdef DEBUG_WASAFINDER
+            std::cout << "PSFE:"
+            << "\t layer(ListHits): " << RecoEvent.ListHits[G4Sol::PSFE][index]->getHitId()
+            << "\t layer(TrackDAFSim): " << it_trackDAFSim.second[G4Sol::PSFE][0].layerID << "\n";
+#endif
           }
 
-          RecoEvent.TrackDAF.insert(std::make_pair(track_counter, tempSetHit));
-          RecoEvent.TrackInfo.insert(std::make_pair(track_counter, tempSetInfo));
+          RecoEvent.TrackDAF.insert(std::make_pair(it_trackDAFSim.first, tempSetHit));
+          RecoEvent.TrackInfo.insert(std::make_pair(it_trackDAFSim.first, tempSetInfo));
 
           auto it_TrackDAFInitSim = RecoEvent.TrackDAFInitSim.find(it_trackDAFSim.first);
-          RecoEvent.TrackDAFInit.insert(std::make_pair(track_counter, it_TrackDAFInitSim->second));
-
-          track_counter++;
+          RecoEvent.TrackDAFInit.insert(std::make_pair(it_trackDAFSim.first, it_TrackDAFInitSim->second));
         }
+
+#ifdef DEBUG_WASAFINDER
+      std::cout << "End perfect finder\n";
+#endif
 
       return 0;
     }
@@ -380,7 +411,7 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
       }
 
     //PSBHit
-    if(att.WASAFinder_PSBHits)
+    if(att.WF_PSBHits)
     if(TrackHitCont[i]->IsFlagPSB())
       {
         bool flag_found = false;
@@ -409,7 +440,7 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
       }
 
     //PSFEHit
-    if(att.WASAFinder_PSFEHits)
+    if(att.WF_PSFEHits)
     if(TrackHitCont[i]->IsFlagPSFE())
       {
         bool flag_found = false;
@@ -466,6 +497,7 @@ for(int i = 0; i < TrackHitCont.size(); ++i)
   return 0;
 }
 
+
 template<class Out>
 double TWASAFinder<Out>::GetPSB_R(int _seg)
 {
@@ -515,7 +547,7 @@ double TWASAFinder<Out>::GetPSB_Phi(int _seg)
   return _phi;
 }
 
-
+/*
 template<class Out>
 double TWASAFinder<Out>::GetFirstMFT_Z(TrackHit* Track)
 {
@@ -550,7 +582,7 @@ double TWASAFinder<Out>::GetFirstMFT_Z(TrackHit* Track)
 
   return firstMFT_Z;
 }
-
+*/
 
 template <class Out>
 void TWASAFinder<Out>::CloseDist(FragmentTrack FragTrack, TrackHit* WASATrack, double& distance, TVector3& centroid)

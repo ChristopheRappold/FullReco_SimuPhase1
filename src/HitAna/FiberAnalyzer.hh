@@ -13,7 +13,7 @@ class FiberAnalyzer
   public:
     FiberAnalyzer();
     ~FiberAnalyzer();
-    std::vector< std::vector< std::vector< FiberHitAna* > > > Clusterize(std::vector< std::vector< std::vector< FiberHitAna* > > > &cont);
+    std::vector< std::vector< std::vector< FiberHitAna* > > > Clusterize(std::vector< std::vector< std::vector< FiberHitAna* > > > &cont, bool WF_perfect);
     std::vector< std::vector< FiberHitXUV* > > FindHit( std::vector< std::vector< std::vector< FiberHitAna* > > > &cont, ParaManager *par);
     std::vector< FiberTrackAna* > DeleteDup(               std::vector< FiberTrackAna* > &cont);
     std::vector< FiberTrackAna* > DeleteDupCombi(          std::vector< FiberTrackAna* > &cont);

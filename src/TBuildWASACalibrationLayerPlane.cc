@@ -830,7 +830,7 @@ int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullReco
     }
 
   FiberAnalyzer* fiberana = new FiberAnalyzer();
-  FiberHitClCont          = fiberana->Clusterize(FiberHitCont);
+  FiberHitClCont          = fiberana->Clusterize(FiberHitCont, false);
 
   RecoEvent.FiberHitClCont = FiberHitClCont;
 

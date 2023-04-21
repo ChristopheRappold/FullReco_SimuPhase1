@@ -12,7 +12,7 @@ FiberAnalyzer::FiberAnalyzer(){}
 FiberAnalyzer::~FiberAnalyzer() {}
 
 
-std::vector< std::vector< std::vector< FiberHitAna* > > > FiberAnalyzer::Clusterize(std::vector< std::vector< std::vector< FiberHitAna* > > > &cont){
+std::vector< std::vector< std::vector< FiberHitAna* > > > FiberAnalyzer::Clusterize(std::vector< std::vector< std::vector< FiberHitAna* > > > &cont, bool WF_perfect){
 
   std::vector< std::vector< std::vector< FiberHitAna* > > > buf_cont;
   for(int i=0; i<7; ++i){
@@ -47,10 +47,11 @@ std::vector< std::vector< std::vector< FiberHitAna* > > > FiberAnalyzer::Cluster
           double edge_right = pos_cluster;
           for(size_t l = k+1; l < buf_cont[i][j].size(); ++l)
             {
-
               //printf("%d %d %.8f\n" , i, j, fabs(buf_cont[i][j][k]->GetPos()-buf_cont[i][j][l]->GetPos()));
 
               if(flag_used.size()>0 && flag_used.find(l)!=flag_used.end()) continue;
+
+              if(WF_perfect && buf_cont[i][j][k]->GetSimTrackID() != buf_cont[i][j][l]->GetSimTrackID()) continue;
 
               if( (buf_cont[i][j][l]->GetPos()>=edge_left &&  buf_cont[i][j][l]->GetPos()<=edge_right)
                 || fabs(edge_left - buf_cont[i][j][l]->GetPos())<1.1 || fabs(edge_left - buf_cont[i][j][l]->GetPos())-1.1 <1e-4

@@ -54,7 +54,7 @@ ORMFLAGS = -I./sqlite_orm/include
 
 CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
 LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3
-LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventWASAUnpack -lHitAna -lEventG4Sol -lTreePlayer -lHyphiFairBase -lAna_Event -lMCAnaEventG4Sol -lsqlite3
+LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3
 
 GENFIT_LIB = -lgenfit2
 SPDLOG_LIB = -lspdlog

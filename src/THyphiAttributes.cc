@@ -76,9 +76,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   RZ_MDCWire2        = false;
   RZ_MDCBiasCorr     = true;
 
-  WASAFinder_perfect = false;
-  WASAFinder_PSBHits = true;
-  WASAFinder_PSFEHits= false;
+  WF_perfect  = false;
+  WF_PSBHits  = true;
+  WF_PSFEHits = false;
 
   KF_Kalman     = false;
   KF_KalmanSqrt = true;
@@ -163,7 +163,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   TaskConfig.Init(Config);
 
   if(Config.IsAvailable("G4_simu"))
-    G4_simu = true;
+    G4_simu = Config.Get<bool>("G4_simu");
   if(Config.IsAvailable("G4_TimeReso"))
     G4_TimeResolution = true;
   if(Config.IsAvailable("G4_GeoReso"))
@@ -191,12 +191,12 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("RZ_MDCBiasCorr"))
     RZ_MDCBiasCorr = Config.Get<bool>("RZ_MDCBiasCorr");
 
-  if(Config.IsAvailable("WASAFinder_perfect"))
-    WASAFinder_perfect = Config.Get<bool>("WASAFinder_perfect");
-  if(Config.IsAvailable("WASAFinder_PSBHits"))
-    WASAFinder_PSBHits = Config.Get<bool>("WASAFinder_PSBHits");
-  if(Config.IsAvailable("WASAFinder_PSFEHits"))
-    WASAFinder_PSFEHits = Config.Get<bool>("WASAFinder_PSFEHits");
+  if(Config.IsAvailable("WF_perfect"))
+    WF_perfect = Config.Get<bool>("WF_perfect");
+  if(Config.IsAvailable("WF_PSBHits"))
+    WF_PSBHits = Config.Get<bool>("WF_PSBHits");
+  if(Config.IsAvailable("WF_PSFEHits"))
+    WF_PSFEHits = Config.Get<bool>("WF_PSFEHits");
   
   _logger->info("RZ Setting: Prolate? {} / Wire2? {} / BiasCorr? {} / ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
                 RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
@@ -832,9 +832,9 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.RZ_MDCProlate      = RZ_MDCProlate;
   out.RunTaskAttr.RZ_MDCWire2        = RZ_MDCWire2;
   out.RunTaskAttr.RZ_MDCBiasCorr     = RZ_MDCBiasCorr;
-  out.RunTaskAttr.WASAFinder_perfect = WASAFinder_perfect;
-  out.RunTaskAttr.WASAFinder_PSBHits = WASAFinder_PSBHits;
-  out.RunTaskAttr.WASAFinder_PSFEHits= WASAFinder_PSFEHits;
+  out.RunTaskAttr.WF_perfect         = WF_perfect;
+  out.RunTaskAttr.WF_PSBHits         = WF_PSBHits;
+  out.RunTaskAttr.WF_PSFEHits        = WF_PSFEHits;
   out.RunTaskAttr.KF_Kalman          = KF_Kalman;
   out.RunTaskAttr.KF_KalmanSqrt      = KF_KalmanSqrt;
   out.RunTaskAttr.KF_KalmanRef       = KF_KalmanRef;
