@@ -13,6 +13,7 @@
 #include "CheckField.h"
 #include "TCheckFiberTrack.h"
 #include "TCheckRZ.h"
+#include "TRPhiZTrackMDC.h"
 #include "TFlatMCOutputML.h"
 #include "TPrimaryVertex.h"
 #include "TDecayVertex.h"
@@ -116,6 +117,10 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
 	  if(Attributes.TaskConfig.Task_CheckRZ)
 	    list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
 	  break;
+	case Task::TASKRPHIZTRACKMDC:
+	  if(Attributes.TaskConfig.Task_RPhiZTrackMDC)
+	    list_processMC.emplace_back(new TRPhiZTrackMDC<TEOut>(Attributes));
+	  break;
 	case Task::TASKKALMANDAF:
 	  if(Attributes.TaskConfig.Task_KalmanDAF)
 	    list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
@@ -171,7 +176,7 @@ void FullRecoTask<TEOut>::SetEventMetadata(AnaEvent_Metadata& metadata)
   metadata.DateOfRun = Attributes.DateOfRun;
   metadata.Hash = Attributes.Hash;
   metadata.FirstStep = det_build->signature;
-  metadata.FinalStep = list_processMC.back()->signature;
+  metadata.FinalStep = list_processMC.size() != 0 ? list_processMC.back()->signature : det_build->signature;
   metadata.G4_simu = Attributes.G4_simu;
   metadata.NEvent = Attributes.NEvent;
   metadata.StartEvent = Attributes.Config.Get<uint>("Start_Event");

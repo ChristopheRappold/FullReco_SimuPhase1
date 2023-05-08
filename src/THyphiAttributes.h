@@ -78,14 +78,15 @@ struct Task
   bool Task_FinderCM = false;
   bool Task_FindingPerf = false;
   bool Task_CheckRZ = true;
+  bool Task_RPhiZTrackMDC = false;
   bool Task_KalmanDAF = true;
   bool Task_DecayVtx = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKFLATMCOUTPUTML, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, NBTASKID
+    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKFLATMCOUTPUTML, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ, TASKRPHIZTRACKMDC, TASKKALMANDAF, TASKDECAYVTX, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKRPHIZTRACKMDC, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -142,10 +143,12 @@ struct RunTaskDef
   bool Task_FinderCM;
   bool Task_FindingPerf;
   bool Task_CheckRZ;
+  bool Task_RPhiZTrackMDC;
   bool Task_KalmanDAF;
   bool Task_DecayVtx;
   bool Task_ReStart;
 };
+
 struct RunAttrGeneralDef
 {
   std::string Hash;
@@ -179,6 +182,8 @@ struct RunTaskAttrDef
   bool Debug_DAF;
   bool DoNoMaterial;
 
+  bool CFT_RZfit;
+
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
   bool RZ_MDCWire2;
@@ -203,12 +208,15 @@ struct RunTaskAttrDef
   std::string DataML_Out;
 
   bool RF_OutputEvents;
+  bool CFT_OutputEvents;
 };
+
 struct RunFullConfigDef
 {
   std::string Hash;
   std::vector<char> ConfigJson;
 };
+
 struct AttrOut
 {
   RunDoneDef RunDone;
@@ -264,6 +272,7 @@ inline auto InitStorage()
 				 make_column("Task_FinderCM", &RunTaskDef::Task_FinderCM),
 				 make_column("Task_FindingPerf", &RunTaskDef::Task_FindingPerf),
 				 make_column("Task_CheckRZ", &RunTaskDef::Task_CheckRZ),
+				 make_column("Task_RPhiZTrackMDC", &RunTaskDef::Task_RPhiZTrackMDC),
 				 make_column("Task_KalmanDAF", &RunTaskDef::Task_KalmanDAF),
 				 make_column("Task_DecayVtx", &RunTaskDef::Task_DecayVtx),
 				 make_column("Task_ReStart", &RunTaskDef::Task_ReStart)
@@ -291,6 +300,7 @@ inline auto InitStorage()
 				 make_column("HashId", &RunTaskAttrDef::Hash),
 				 make_column("Debug_DAF", &RunTaskAttrDef::Debug_DAF),
 				 make_column("DoNoMaterial", &RunTaskAttrDef::DoNoMaterial),
+				 make_column("CFT_RZfit", &RunTaskAttrDef::CFT_RZfit),
 				 make_column("RZ_ChangeMiniFiber", &RunTaskAttrDef::RZ_ChangeMiniFiber),
 				 make_column("RZ_MDCProlate", &RunTaskAttrDef::RZ_MDCProlate),
 				 make_column("RZ_MDCWire2", &RunTaskAttrDef::RZ_MDCWire2),
@@ -304,7 +314,8 @@ inline auto InitStorage()
 				 make_column("KF_MbMiniFiberCut", &RunTaskAttrDef::KF_NbMiniFiberCut),
 				 make_column("FlatML_namefile", &RunTaskAttrDef::FlatML_namefile),
 				 make_column("DataML_Out", &RunTaskAttrDef::DataML_Out),
-				 make_column("RF_OutputEvents", &RunTaskAttrDef::RF_OutputEvents)
+				 make_column("RF_OutputEvents", &RunTaskAttrDef::RF_OutputEvents),
+				 make_column("CFT_OutputEvents", &RunTaskAttrDef::CFT_OutputEvents)
 				 ),
 		      make_table(
 				 "RunFullConfig",
@@ -361,6 +372,8 @@ class THyphiAttributes
   bool Debug_DAF;
   bool DoNoMaterial;
 
+  bool CFT_RZfit;
+
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
   bool RZ_MDCWire2;
@@ -388,6 +401,7 @@ class THyphiAttributes
   std::string DataML_Out;
 
   bool RF_OutputEvents;
+  bool CFT_OutputEvents;
 
   FairField* Field;
 

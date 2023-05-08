@@ -90,6 +90,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   KF_NbMiniFiberCut = 4;
 
   RF_OutputEvents = false;
+  CFT_OutputEvents = false;
 
   TaskConfig.Init(Config);
 
@@ -107,6 +108,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     Debug_DAF = true;
   if(Config.IsAvailable("NoMaterial"))
     DoNoMaterial = true;
+  if(Config.IsAvailable("CFT_RZfit"))
+    CFT_RZfit = Config.Get<bool>("CFT_RZfit");
   if(Config.IsAvailable("RZ_ChangeMiniFiber"))
     RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
   if(Config.IsAvailable("RZ_MDCProlate"))
@@ -166,6 +169,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   if(Config.IsAvailable("RF_OutputEvents"))
     RF_OutputEvents = Config.Get<bool>("RF_OutputEvents");
+
+  if(Config.IsAvailable("CFT_OutputEvents"))
+    CFT_OutputEvents = Config.Get<bool>("CFT_OutputEvents");
 
   DataML_Out = Config.IsAvailable("DataML_Out") ? Config.Get<std::string>("DataML_Out") : "NoneInConfig";
 
@@ -510,6 +516,9 @@ void Task::Init(const FullRecoConfig& Config)
   if(Config.IsAvailable("Task_CheckRZ"))
     Task_CheckRZ = Config.Get<bool>("Task_CheckRZ");
 
+  if(Config.IsAvailable("Task_RPhiZTrackMDC"))
+    Task_CheckRZ = Config.Get<bool>("Task_RPhiZTrackMDC");
+
   if(Config.IsAvailable("Task_KalmanDAF"))
     Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
 
@@ -551,6 +560,8 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKFINDERCM);
 	  if(s == "Task_CheckRZ")
 	    Task_Order.push_back(TASKCHECKRZ);
+	  if(s == "Task_RPhiZTrackMDC")
+	    Task_Order.push_back(TASKRPHIZTRACKMDC);
 	  if(s == "Task_KalmanDAF")
 	    Task_Order.push_back(TASKKALMANDAF);
 	  if(s == "Task_DecayVtx")
@@ -627,6 +638,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.Hash = Hash;
   out.RunTaskAttr.Debug_DAF          = Debug_DAF;
   out.RunTaskAttr.DoNoMaterial       = DoNoMaterial;
+  out.RunTaskAttr.CFT_RZfit          = CFT_RZfit;
   out.RunTaskAttr.RZ_ChangeMiniFiber = RZ_ChangeMiniFiber;
   out.RunTaskAttr.RZ_MDCProlate      = RZ_MDCProlate;
   out.RunTaskAttr.RZ_MDCWire2        = RZ_MDCWire2;
@@ -641,6 +653,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.FlatML_namefile    = FlatML_namefile;
   out.RunTaskAttr.DataML_Out         = DataML_Out;
   out.RunTaskAttr.RF_OutputEvents    = RF_OutputEvents;
+  out.RunTaskAttr.CFT_OutputEvents    = CFT_OutputEvents;
 
   out.RunFullConfig.Hash = Hash;
   std::string tempCj;
