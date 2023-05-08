@@ -39,6 +39,9 @@ void FullRecoEvent::Clear(int toclean)
   //     }
   ListHits.clear();
   OldListHits.clear();
+
+  SegmentHit1Ds.clear();
+
   ListHitsToTracks.clear();
 
   TrackDAF.clear();
