@@ -2,6 +2,7 @@
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "Ana_Event/Ana_WasaEvent.hh"
+#include "FullRecoEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
 #include "StateOnPlane.h"
@@ -74,6 +75,7 @@ TKalmanFilter_DAF<Out>::TKalmanFilter_DAF(const THyphiAttributes& attribut)
 
   if(att.KF_G4e)
     {
+      att._logger->error("!> Start KF_G4e !");
       std::string nameField = att.Wasa_FieldMapName;
       double signDir = att.Wasa_Side ? 1.0 : -1.0;
       std::array<double,3> fieldValues = {att.Field_Strength*signDir*0.1, 0., 0.}; 
@@ -83,9 +85,11 @@ TKalmanFilter_DAF<Out>::TKalmanFilter_DAF(const THyphiAttributes& attribut)
       // 								//{"MagFieldDiff","0.01",},
       // 								{"MaxEnergyLoss","0.0005"}
 
-      std::unordered_map<std::string, std::string> G4eConfig = {{"FullProp",att.G4e_FullProp},{"G4eBasf2PhysicsList",att.G4e_Basf2List},
+      std::unordered_map<std::string, std::string> G4eConfig = {{"FullProp",att.G4e_FullProp},
+								{"G4eBasf2PhysicsList",att.G4e_Basf2List},
 								{"ExactJac",att.G4e_ExactJac},
-								//,{"TrackingVerbose","10"},{"ControlVerbose","2"},{"G4eVerbose","4"}};
+								//,{"TrackingVerbose","10"},{"ControlVerbose","2"},
+								{"G4eVerbose",att.G4e_Verbose},
 								//{"StepLength","25 mm"},
 								//{"MagFieldDiff","0.01",},
 								{"MaxEnergyLoss", att.G4e_MaxEnergyLoss}};
@@ -339,7 +343,7 @@ int TKalmanFilter_DAF<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 }
 
 template<class Out>
-ReturnRes::InfoM TKalmanFilter_DAF<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
+ReturnRes::InfoM TKalmanFilter_DAF<Out>::SoftExit(int ) { return ReturnRes::Fine; }
 
 template<class Out>
 int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
@@ -415,7 +419,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             continue;
           if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
             ++n_Central;
-          if(id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2)
+          if( (id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2) || (id_det>=G4Sol::MiniFiberD1_x && id_det< G4Sol::FiberD1_x))
             ++n_MiniFiber;
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
@@ -990,7 +994,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               {
                 unsigned int np = fitTrack->getNumPointsWithMeasurement();
                 //std::cout << "np : " << np << std::endl;
-                for(int i = 0; i < np; ++i)
+                for(unsigned int i = 0; i < np; ++i)
 		  {
                     genfit::TrackPoint* tp_tmp    = fitTrack->getPointWithMeasurementAndFitterInfo(i);//, REP);
 		    if(tp_tmp==nullptr)
@@ -1005,7 +1009,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                     if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
                       {
                         double res_min = 9999999;
-                        for(int j = 0; j < weights.size() ; ++j)
+                        for(size_t j = 0; j < weights.size() ; ++j)
                           {
                             const genfit::MeasurementOnPlane& residual = kfi->getResidual(j, false, true);
                             const TVectorD& resid(residual.getState());
