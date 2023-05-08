@@ -45,6 +45,7 @@ ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
 
 GEANTCFLAGS := $(shell geant4-config --cflags)
+#GEANTCFLAGS := -DG4UI_USE_TCSH -Wwrite-strings -Wpointer-arith -Woverloaded-virtual -Wno-variadic-macros -Wshadow -pipe -pthread -ftls-model=initial-exec -std=c++17 -I/home/christophe/Geant4/geant4/include/Geant4
 GEANTLIBS   := $(shell geant4-config --libs)
 
 GENFITV2FLAGS = -I./Genfit2_v2/include
@@ -85,7 +86,7 @@ Sources_Comm = FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana_Hist.c
 Headers_Comm = $(patsubst %.cc,%.hh,$(Sources_Comm))
 Objects_Comm = $(patsubst %.cc,%.o,$(Sources_Comm))
  
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBuildWASACalibrationLayerPlane.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc TCheckFiberTrack.cc #TFinderCM.cc
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBuildWASACalibrationLayerPlane.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc TCheckFiberTrack.cc TRPhiZTrackMDC.cc #TFinderCM.cc
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
