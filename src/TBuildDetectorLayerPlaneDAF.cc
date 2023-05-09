@@ -675,7 +675,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               if(IsPSCE(TypeDet))
                 {
                   LayerID--;
-//#ifdef DEBUG_BUILD2
+#ifdef DEBUG_BUILD2
                   std::cout << "PSC" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
                   std::cout << "name : " << tmpName << std::endl;
@@ -692,7 +692,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
                   gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
                   gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
-//#endif
+#endif
                   TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")
                                        ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID)
                                        ->GetMatrix();                                       // PSCE
@@ -731,6 +731,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(2) = hit.HitPosZ;
 
                   LocalHisto.h76->Fill(LayerID, atan2(shift[1], shift[0]));
+
+                  //std::cout << "PSB Det: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
               else if(IsPSBE(TypeDet))
                 {
@@ -933,6 +935,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   
                   fillOutHit(OutTree->Fiber, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
                   
+                  //if(i_fiber == 3 || i_fiber == 4)
                   //std::cout << "Fiber Det: " << i_fiber << " layer: " << i_layer << " hit: " << LayerID/2 << " TrackID: " << TrackID << "\n";
 
                   continue;
@@ -1074,6 +1077,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
+
+                  //std::cout << "MDC Layer: " << TypeDet-G4Sol::MG01+1 << " hit: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
               else
                 {

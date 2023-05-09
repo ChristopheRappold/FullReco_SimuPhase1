@@ -90,15 +90,16 @@ struct Task
   bool Task_FindingPerf = false;
   bool Task_CheckRZ = true;
   bool Task_KalmanDAF = true;
+  bool Task_KalmanDAFPID = true;
   bool Task_DecayVtx = false;
   bool Task_DecayVtx_piplus = false;
   enum Task_Id
   {
     TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
-    TASKKALMANDAF, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, NBTASKID
+    TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -156,6 +157,7 @@ struct RunTaskDef
   bool Task_FindingPerf;
   bool Task_CheckRZ;
   bool Task_KalmanDAF;
+  bool Task_KalmanDAFPID;
   bool Task_DecayVtx;
   bool Task_DecayVtx_piplus;
   bool Task_ReStart;
@@ -282,7 +284,8 @@ inline auto InitStorage()
 				 make_column("Task_FinderCM", &RunTaskDef::Task_FinderCM),
 				 make_column("Task_FindingPerf", &RunTaskDef::Task_FindingPerf),
 				 make_column("Task_CheckRZ", &RunTaskDef::Task_CheckRZ),
-				 make_column("Task_KalmanDAF", &RunTaskDef::Task_KalmanDAF),
+         make_column("Task_KalmanDAF", &RunTaskDef::Task_KalmanDAF),
+         make_column("Task_KalmanDAFPID", &RunTaskDef::Task_KalmanDAFPID),
          make_column("Task_DecayVtx", &RunTaskDef::Task_DecayVtx),
          make_column("Task_DecayVtx_pi+", &RunTaskDef::Task_DecayVtx_piplus),
 				 make_column("Task_ReStart", &RunTaskDef::Task_ReStart)

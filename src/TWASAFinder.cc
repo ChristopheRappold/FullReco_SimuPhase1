@@ -1,6 +1,6 @@
 #include "TWASAFinder.h"
 
-#define DEBUG_WASAFINDER
+//#define DEBUG_WASAFINDER
 
 using namespace std;
 using namespace G4Sol;
@@ -92,7 +92,7 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
               tempSetInfo[G4Sol::MiniFiberD1_x + i] = tmp_infopar;
 
 #ifdef DEBUG_WASAFINDER
-              std::cout << "Minifiber Det: " << i
+              std::cout << "Minifiber Det: " << i << " index: " << index
               << "\t layer(ListHits): " << RecoEvent.ListHits[G4Sol::MiniFiberD1_x + i][index]->getHitId()
               << "\t layer(TrackDAFSim): " << it_trackDAFSim.second[G4Sol::MiniFiberD1_x + i][0].layerID/2 << "\n";
 #endif
@@ -121,7 +121,7 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
               tempSetInfo[G4Sol::MG01 + i] = tmp_infopar;
 
 #ifdef DEBUG_WASAFINDER
-              std::cout << "MDC Det: " << i
+              std::cout << "MDC Det: " << i+1 << " index: " << index
               << "\t layer(ListHits): " << RecoEvent.ListHits[G4Sol::MG01 + i][index]->getHitId()
               << "\t layer(TrackDAFSim): " << it_trackDAFSim.second[G4Sol::MG01 + i][0].layerID << "\n";
 #endif
@@ -150,7 +150,7 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
             tempSetInfo[G4Sol::PSCE] = tmp_infopar;
 
 #ifdef DEBUG_WASAFINDER
-            std::cout << "PSB:"
+            std::cout << "PSB:" << " index: " << index
             << "\t layer(ListHits): " << RecoEvent.ListHits[G4Sol::PSCE][index]->getHitId()
             << "\t layer(TrackDAFSim): " << it_trackDAFSim.second[G4Sol::PSCE][0].layerID << "\n";
 #endif
@@ -193,7 +193,7 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
         }
 
 #ifdef DEBUG_WASAFINDER
-      std::cout << "End perfect finder\n";
+      std::cout << "End perfect finder\n\n";
 #endif
 
       return 0;

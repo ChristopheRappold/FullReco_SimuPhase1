@@ -697,6 +697,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_CheckRZ = Config.Get<bool>("Task_CheckRZ");
   if(Config.IsAvailable("Task_KalmanDAF"))
     Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
+  if(Config.IsAvailable("Task_KalmanDAFPID"))
+    Task_KalmanDAFPID = Config.Get<bool>("Task_KalmanDAFPID");
   if(Config.IsAvailable("Task_DecayVtx"))
     Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
   if(Config.IsAvailable("Task_DecayVtx_pi+"))
@@ -746,6 +748,8 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKCHECKRZ);
 	  if(s == "Task_KalmanDAF")
 	    Task_Order.push_back(TASKKALMANDAF);
+    if(s == "Task_KalmanDAFPID")
+      Task_Order.push_back(TASKKALMANDAFPID);
 	  if(s == "Task_DecayVtx")
 	    Task_Order.push_back(TASKDECAYVTX);
     if(s == "Task_DecayVtx_pi+")
@@ -796,6 +800,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Task_FindingPerf     = TaskConfig.Task_FindingPerf;
   out.RunTask.Task_CheckRZ         = TaskConfig.Task_CheckRZ;
   out.RunTask.Task_KalmanDAF       = TaskConfig.Task_KalmanDAF;
+  out.RunTask.Task_KalmanDAFPID    = TaskConfig.Task_KalmanDAFPID;
   out.RunTask.Task_DecayVtx        = TaskConfig.Task_DecayVtx;
   out.RunTask.Task_DecayVtx_piplus = TaskConfig.Task_DecayVtx_piplus;
   out.RunTask.Task_ReStart         = TaskConfig.Task_ReStart;

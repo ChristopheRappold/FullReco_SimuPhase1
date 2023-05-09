@@ -10,6 +10,7 @@
 //#include "TFinderCM.h"
 #include "TFindingPerf.h"
 #include "TKalmanFilter_DAF.h"
+#include "TKalmanFilter_DAF_PID.h"
 #include "CheckField.h"
 #include "TCheckFiberXUV.h"
 #include "TCheckFiberTrack.h"
@@ -138,6 +139,10 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
           case Task::TASKKALMANDAF:
             if(Attributes.TaskConfig.Task_KalmanDAF)
               list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
+            break;
+          case Task::TASKKALMANDAFPID:
+            if(Attributes.TaskConfig.Task_KalmanDAFPID)
+              list_processMC.emplace_back(new TKalmanFilter_DAF_PID<TEOut>(Attributes));
             break;
           case Task::TASKDECAYVTX:
             if(Attributes.TaskConfig.Task_DecayVtx)

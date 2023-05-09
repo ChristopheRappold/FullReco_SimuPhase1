@@ -1,5 +1,5 @@
-#ifndef TKALMANFILTERDAF
-#define TKALMANFILTERDAF
+#ifndef TKALMANFILTERDAFPID
+#define TKALMANFILTERDAFPID
 
 #include "Debug.hh"
 #include "FullRecoEvent.hh"
@@ -24,6 +24,8 @@
 #include "KalmanFitterRefTrack.h"
 #include "RKTrackRep.h"
 #include "Track.h"
+
+#include "TCutG.h"
 
 //#include "GFRaveVertexFactory.h"
 
@@ -53,13 +55,13 @@ using TDataProcessInterface = TDataProcess<FullRecoEvent, Out>;
 //}
 
 template<class Out>
-class TKalmanFilter_DAF final : public TDataProcessInterface<Out>
+class TKalmanFilter_DAF_PID final : public TDataProcessInterface<Out>
 {
 public:
   const THyphiAttributes& att;
 
-  explicit TKalmanFilter_DAF(const THyphiAttributes& attr);
-  ~TKalmanFilter_DAF() final;
+  explicit TKalmanFilter_DAF_PID(const THyphiAttributes& attr);
+  ~TKalmanFilter_DAF_PID() final;
 
   // int Init(Ana_Hist* h);
   ReturnRes::InfoM operator()(FullRecoEvent& RecoEvent, Out* OutTree) final;
@@ -77,6 +79,7 @@ private:
 
   // genfit::DAF* Fitter;
   genfit::AbsKalmanFitter* Fitter;
+  genfit::AbsKalmanFitter* Fitter_pid;
   genfit::AbsKalmanFitter* Fitter_rescue;
   genfit::Track* Vtracks;
   genfit::RKTrackRep* rep;
@@ -117,6 +120,9 @@ private:
     TH2F* h_beta_mom;
     TH2F* h_beta_mom2;
     TH2F* h_beta_mom3;
+    TH2F* h_beta_momcharge;
+    TH2F* h_beta_momcharge2;
+    TH2F* h_beta_momcharge3;
 
     TH2F* h_pv_mom;
     TH2F* h_pv_beta;
