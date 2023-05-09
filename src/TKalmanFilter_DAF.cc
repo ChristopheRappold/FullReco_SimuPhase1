@@ -387,7 +387,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
       auto getZpos = [](genfit::AbsMeasurement* m) {
         TVectorD& HitrawRef = m->getRawHitCoords();
-        if(HitrawRef.GetNrows() == 2)
+        if(HitrawRef.GetNrows() == 2 || HitrawRef.GetNrows() == 1)
           {
             genfit::StateOnPlane dummy;
             genfit::SharedPlanePtr plane = dynamic_cast<genfit::PlanarMeasurement*>(m)->constructPlane(dummy);
@@ -396,6 +396,10 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           }
         else if(HitrawRef.GetNrows() == 3)
           return HitrawRef[2];
+	else if(HitrawRef.GetNrows() == 7)
+	  {
+	    return 0.5*(HitrawRef[2]+HitrawRef[5]);
+	  }
         else
           {
             fmt::print("E> rawref not proper ! {}", HitrawRef.GetNrows());
@@ -403,7 +407,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             return -999.;
           }
       };
-      std::set<std::tuple<double, int, int> > id_dets;
+      std::set<std::tuple<double, int, int, double> > id_dets;
       double total_dE = 0.;
       int n_Central   = 0;
       int n_MiniFiber = 0;
@@ -419,15 +423,15 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             continue;
           if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
             ++n_Central;
-          if( (id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2) || (id_det>=G4Sol::MiniFiberD1_x && id_det< G4Sol::FiberD1_x))
+          if( (id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2) || (id_det>=G4Sol::MiniFiberD1_x && id_det<= G4Sol::MiniFiberD2_u))
             ++n_MiniFiber;
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
           total_dE += it_trackInfo.second[id_det].Eloss;
-          // std::cout << "id_det : " << id_det << std::endl;
-          // std::cout << "id_hit : " << id_hit << std::endl;
-          // id_dets.insert(std::make_tuple(getZpos(currentHit), id_det, id_hit));
-          id_dets.insert(std::make_tuple(id_det, id_det, id_hit));
+	  //std::cout << "id_det : " << id_det << std::endl;
+	  //std::cout << "id_hit : " << id_hit << std::endl;
+	  //id_dets.insert(std::make_tuple(getZpos(currentHit), id_det, id_hit));
+          id_dets.insert(std::make_tuple(id_det, id_det, id_hit, getZpos(currentHit)));
           // std::cout << " id_det : " << id_det << std::endl;
         }
       // std::cout << "n_Central : " << n_Central << std::endl;
@@ -613,7 +617,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       // std::cout<<"id_dets:"<<id_dets.size()<<" ";
       if(charge <= 1)
         {
-          std::set<std::tuple<double, int, int> > temp_id_dets;
+          std::set<std::tuple<double, int, int, double> > temp_id_dets;
           for(auto id_det : id_dets)
             {
               if(std::get<1>(id_det) <= G4Sol::RPC_h)
@@ -632,7 +636,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
 #ifdef DEBUG_KALMAN
       for(auto idet : id_dets)
-        att._logger->debug("det:{} [{}] at Z:{}", std::get<1>(idet), std::get<2>(idet), std::get<0>(idet));
+        att._logger->debug("det:{} / {} / [{}] at Z:{}", std::get<1>(idet),G4Sol::nameLiteralDet.begin()[std::get<1>(idet)],  std::get<2>(idet), std::get<3>(idet));
 
       const int PID = charge * charge;
       att._logger->debug(" PID:{} {} {}", PID, charge, PDG);
