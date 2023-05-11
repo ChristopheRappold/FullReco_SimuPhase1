@@ -390,6 +390,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
       InfoInit tempInit;
       tempInit.charge = event.BeamCharges[index];
+      tempInit.time = 0.;
       tempInit.posX = event.InteractionPoint_X;
       tempInit.posY = event.InteractionPoint_Y;
       tempInit.posZ = event.InteractionPoint_Z;
@@ -423,6 +424,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
       InfoInit tempInit;
       tempInit.charge = event.DaughterCharges[index];
+      tempInit.time = event.DecayTime;
       tempInit.posX = event.DecayVertex_X;
       tempInit.posY = event.DecayVertex_Y;
       tempInit.posZ = event.DecayVertex_Z;
@@ -938,6 +940,11 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   //if(i_fiber == 3 || i_fiber == 4)
                   //std::cout << "Fiber Det: " << i_fiber << " layer: " << i_layer << " hit: " << LayerID/2 << " TrackID: " << TrackID << "\n";
 
+                  if(i_fiber == 3 || i_fiber == 4)
+                    {
+                      //std::cout << Form("Simu-Hit: (%.3f, %.3f, %.3f)", hit.HitPosX, hit.HitPosY, hit.HitPosZ) << std::endl;
+                      //std::cout << Form("FiberHit: (%.3f, %.3f, %.3f)", 0., 0., hit_ana->GetZ()/10.) << "\n\n";
+                    }
                   continue;
                 }
               else if(IsWire(TypeDet))

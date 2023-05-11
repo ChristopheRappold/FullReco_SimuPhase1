@@ -430,6 +430,7 @@ struct SimHit
 struct InfoInit
 {
   int charge  = -999 ;
+  double time = -999.;
   double posX = -999.;
   double posY = -999.;
   double posZ = -999.;

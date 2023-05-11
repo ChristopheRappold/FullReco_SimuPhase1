@@ -33,7 +33,7 @@ using namespace std;
 using namespace G4Sol;
 template<class Out>
 TKalmanFilter_DAF_PID<Out>::TKalmanFilter_DAF_PID(const THyphiAttributes& attribut)
-    : TDataProcessInterface<Out>("mom_fit_kalman"), att(attribut)
+    : TDataProcessInterface<Out>("mom_fit_kalman_pid"), att(attribut)
 {
 
   const int nIter    = 10;    // max number of iterations
@@ -246,7 +246,8 @@ int TKalmanFilter_DAF_PID<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
       int Decay               = IsDecay == RecoEvent.TrackMother.end() ? 0 : 1;
 
       THyphiTrack* OutTrack = dynamic_cast<THyphiTrack*>(OutTree->fTrack->ConstructedAt(OutTree->fTrack->GetEntries()));
-      auto PDG_particle     = TDatabasePDG::Instance()->GetParticle(FitRes.pdg_guess);
+//    auto PDG_particle     = TDatabasePDG::Instance()->GetParticle(FitRes.pdg_guess);
+      auto PDG_particle     = TDatabasePDG::Instance()->GetParticle(TInfo->second[FitRes.lastHit].pdg);
       OutTrack->type        = PDG_particle->GetName();
       OutTrack->MC_status   = TrackID + 10000 * Decay;
       OutTrack->Chi2        = FitRes.chi2;
@@ -400,7 +401,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
       int n_Central   = 0;
       int n_MiniFiber = 0;
 
-      std::cout << "\nTrackID: " << it_ListHits->first << "\n";
+      //std::cout << "\nTrackID: " << it_ListHits->first << "\n";
 
       for(size_t id_det = 0; id_det < it_ListHits->second.size(); ++id_det)
         {
@@ -421,7 +422,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
 
           id_dets.insert(std::make_tuple(id_det, id_det, id_hit));
 
-          std::cout << "DetID: " << id_det << "  HitID: " << currentHit->getHitId() << "\n";
+          //std::cout << "DetID: " << id_det << "  HitID: " << currentHit->getHitId() << "\n";
         }
 
       if(id_dets.size() < 3) //(nb_ValidHits < 3)
@@ -579,12 +580,15 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
           std::swap(id_dets, temp_id_dets);
         }
 
-      std::cout << "AfterCuts YES \n\n";
+      //std::cout << "AfterCuts YES \n\n";
 
       firstHit             = id_dets.cbegin();
       id_firstDet          = std::get<1>(*firstHit);
       const auto lastHit   = id_dets.crbegin();
       const int id_lastDet = std::get<1>(*lastHit); // std::get<0>(lastHit);
+
+      //std::cout << "FirstHit: " << id_firstDet << "  #det: " << G4Sol::nameLiteralDet.begin()[id_firstDet] << "\n";
+      //std::cout << " LastHit: " << id_lastDet  << "  #det: " << G4Sol::nameLiteralDet.begin()[id_lastDet]  << "\n";
 
 #ifdef DEBUG_KALMAN
       for(auto idet : id_dets)
@@ -599,9 +603,9 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
       // Forward
 
       auto it_init   = RecoEvent.TrackDAFInit.find(id_track);
-      double init_px = gRandom->Gaus(it_init->second.momX, it_init->second.momX * 0.2);
-      double init_py = gRandom->Gaus(it_init->second.momY, it_init->second.momY * 0.2);
-      double init_pz = gRandom->Gaus(it_init->second.momZ, it_init->second.momZ * 0.2);
+      double init_px = gRandom->Gaus(it_init->second.momX, it_init->second.momX * 0.005);
+      double init_py = gRandom->Gaus(it_init->second.momY, it_init->second.momY * 0.005);
+      double init_pz = gRandom->Gaus(it_init->second.momZ, it_init->second.momZ * 0.005);
       TVector3 init_p(init_px, init_py, init_pz);
 
       double seed_Mom_Mag = init_p.Mag();
@@ -758,7 +762,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
 
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
-          std::cout << "Loop insertPoint: #det: " << G4Sol::nameLiteralDet.begin()[id_det] << " #hit: " << id_hit << "\n";
+          //std::cout << "Loop insertPoint: #det: " << G4Sol::nameLiteralDet.begin()[id_det] << " #hit: " << id_hit << "\n";
 
 #ifdef DEBUG_KALMAN
           att._logger->debug("Loop insertPoint: #det:{} #hit {} {}", G4Sol::nameLiteralDet.begin()[id_det], id_hit,
@@ -870,7 +874,8 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
             continue;
           }
           
-          //std::cout << Form("- posBegin : (%.2f, %.2f, %.2f)",posBegin.x(), posBegin.y(), posBegin.z()) << std::endl;
+          //std::cout << Form("- posBegin   : (%.2f, %.2f, %.2f)",   posBegin.x(),   posBegin.y(),   posBegin.z()) << std::endl;
+          //std::cout << Form("- init_point : (%.2f, %.2f, %.2f)", init_point.x(), init_point.y(), init_point.z()) << std::endl;
 
           double p = p3.Mag();
           double Path_length = -999.;
@@ -886,9 +891,13 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
               continue;
             }
 
+          //std::cout << Form("- TOF : %.4f",   track_stateLast.time) << std::endl;
+
+          double init_time = it_init->second.time;
+
           double Path_lengthMean = Path_length;
           Path_lengthMean += (posBegin-init_point).Mag();
-          double time_of_flight          = track_stateLast.time;
+          double time_of_flight          = track_stateLast.time - init_time;
           double beta = 1. / 29.9792458 * Path_lengthMean / time_of_flight;
           double mass  = p * sqrt(1. / (beta * beta) - 1.);
 
@@ -1045,6 +1054,8 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
                 continue;
               }
 
+              //std::cout << Form("- posBeginPID: (%.3f, %.3f, %.3f)",   posBegin_pid.x(),   posBegin_pid.y(),   posBegin_pid.z()) << std::endl;
+
               double p_pid = p3_pid.Mag();
               double Path_length_pid = -999.;
               try
@@ -1062,7 +1073,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
               double Path_lengthMean_pid = Path_length_pid;
               Path_lengthMean_pid += (posBegin_pid-init_point).Mag();
 
-              double time_of_flight_pid          = track_stateLast.time;
+              double time_of_flight_pid          = track_stateLast.time - init_time;
               double beta_pid = 1. / 29.9792458 * Path_lengthMean_pid / time_of_flight_pid;
               double mass_pid  = p_pid * sqrt(1. / (beta_pid * beta_pid) - 1.);
 
@@ -1071,7 +1082,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
               if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()<0) PDG_guess_pid = -211;
 
               if(PDG_guess != PDG_guess_pid)
-                PDG_guess_pid = -1;
+                PDG_guess_pid = 0;
 
               ResSolDAF tempResults;
               tempResults.charge    = kfsop_pid->getCharge();
@@ -1079,9 +1090,9 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
 
 
               // Forward
-              tempResults.momX_init = momM_pid.X();
-              tempResults.momY_init = momM_pid.Y();
-              tempResults.momZ_init = momM_pid.Z();
+              tempResults.momX_init = it_init->second.momX;
+              tempResults.momY_init = it_init->second.momY;
+              tempResults.momZ_init = it_init->second.momZ;
 
               tempResults.momX = p3_pid.X();
               tempResults.momY = p3_pid.Y();
@@ -1111,7 +1122,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
               att._logger->debug(" / chi2 ={} / ndf ={}", chi2_pid, ndf_pid);
 #endif
 
-              { //CHECK why this parenthesis?
+              {
                 unsigned int np_pid = fitTrack_pid->getNumPointsWithMeasurement();
                 for(int i = 0; i < np_pid; ++i)
                   {
@@ -1179,7 +1190,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
                     else
                       continue;
                   }
-              } //CHECK why this parenthesis?
+              }
 
               const double p_value_pid = whoDoFit_pid == 1
                                          ? Fitter_pid->getPVal(fitTrack_pid.get(), rep_pid)
