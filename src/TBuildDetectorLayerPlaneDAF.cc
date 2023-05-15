@@ -102,7 +102,7 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
   else
     offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC -1;
 
-
+  att._logger->info("Builder : geometry type: {} | offsets MDC {} PSCE {}",newGeoExp,offsetGeoNameID_MDC,offsetGeoNameID_PSCE);
 
 
 }
@@ -656,7 +656,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                 }
               else if(IsPSCE(TypeDet))
                 {
-		  double* shift = nullptr;
+		  std::array<double,3> shift;
 		  TVector3 o,u,v;
 		  if(newGeoExp==2)
 		    {
@@ -673,12 +673,12 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 			->GetNode(LayerID - 1)
 			->GetMatrix()
 			->Print();
+		      gGeoManager->GetVolume("INNER")->GetNode(1)->Print();
+		      gGeoManager->GetVolume("INNER")->GetNode(1)->GetMatrix()->Print();
 		      gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
 		      gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
 		      gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
 		      gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
-		      gGeoManager->GetVolume("INNER")->GetNode(1)->Print();
-		      gGeoManager->GetVolume("INNER")->GetNode(1)->GetMatrix()->Print();
 
 #endif
 		      TGeoMatrix* g0 = gGeoManager->GetVolume("PSCEall")
@@ -692,13 +692,32 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 		      TGeoHMatrix H = H1 * H0;
 		      H             = H2 * H;
 		      H             = H3 * H;
+		      TGeoHMatrix Hinsf1("Hsf1"); // PSCE inner surface
+		      Hinsf1.SetDz(-0.4);
+		      Hinsf1.SetDx(-27.5);
+		      TGeoHMatrix Hinsf2("Hsf2"); // PSCE inner surface
+		      Hinsf2.SetDz(-0.4);
+		      Hinsf2.SetDx(27.5);
+		      TGeoHMatrix       Hsf1      = H * Hinsf1;
+		      TGeoHMatrix       Hsf2      = H * Hinsf2;
 #ifdef DEBUG_BUILD2
 		      H.Print();
+		      Hsf1.Print();
+		      Hsf2.Print();
 #endif
-		      TGeoHMatrix Hsf("Hsf"); // PSCE inner surface
-		      Hsf.SetDz(-0.4);
-		      H             = H * Hsf;
-		      shift = H.GetTranslation();
+		      double* shift1 = Hsf1.GetTranslation();
+		      double* shift2 = Hsf2.GetTranslation();
+
+		      shift[0] = 0.5*(shift1[0]+shift2[0]);
+		      shift[1] = 0.5*(shift1[1]+shift2[1]);
+		      shift[2] = 0.5*(shift1[2]+shift2[2]);
+
+
+#ifdef DEBUG_BUILD2
+		      TVector3 Bar_dir(shift2[0]-shift1[0],shift2[1]-shift1[1],shift2[2]-shift1[2]);
+		      Bar_dir = Bar_dir.Unit();
+		      att._logger->debug("center bar : {} {} {} | Bar dir : {} {} {} unit {} {} {}",shift[0],shift[1],shift[2],shift2[0]-shift1[0],shift2[1]-shift1[1],shift2[2]-shift1[2], Bar_dir.X(), Bar_dir.Y(),Bar_dir.Z());
+#endif
 		      o = TVector3(shift[0], shift[1], shift[2]);
 		      TVector3 phidir(shift[0], shift[1], 0), zdir(0., 0., 1.);
 		      phidir     = phidir.Unit();
@@ -733,13 +752,15 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 		      TGeoHMatrix H1(*g1), H2(*g2), H3(*g3);
 		      TGeoHMatrix H = H2 * H1;
 		      H             = H3 * H;
+
 #ifdef DEBUG_BUILD2
 		      H.Print();
 #endif
 		      TGeoHMatrix Hsf("Hsf"); // PSCE inner surface
 		      Hsf.SetDz(-0.4);
 		      H             = H * Hsf;
-		      shift = H.GetTranslation();
+		      double* shift_temp = H.GetTranslation();
+		      shift = {shift_temp[0], shift_temp[1], shift_temp[2]};
 		      o = TVector3(shift[0], shift[1], shift[2]);
 		      TVector3 phidir(shift[0], shift[1], 0), zdir(0., 0., 1.);
 		      phidir     = phidir.Unit();
@@ -1057,6 +1078,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       std::cerr << "something wrong IsFiberU motherName " << TypeDet <<std::endl;
                       break;
                     }
+
+		  int localFiberID = newGeoExp == 2 ? LayerID + 2 : LayerID * 2 + 1;
+
 #ifdef DEBUG_BUILD2
                   std::cout << "fiber" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
@@ -1065,8 +1089,16 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   std::cout << "HitPosX : " << hit.HitPosX << std::endl;
                   std::cout << "HitPosY : " << hit.HitPosY << std::endl;
                   std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
-                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->Print();
-                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix()->Print();
+		  std::cout<<" from Node index :\n";
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(localFiberID)->Print();
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(localFiberID)->GetMatrix()->Print();
+		  std::string nodeNameD = tmpName;
+		  nodeNameD+="_";
+		  nodeNameD+=std::to_string(LayerID);
+		  std::cout<<" from Node name : "<<nodeNameD<<"\n";
+		  gGeoManager->GetVolume(volumeName.c_str())->GetNode(nodeNameD.c_str())->Print();
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(nodeNameD.c_str())->GetMatrix()->Print();
+
                   gGeoManager->GetVolume("MFLD")
                       ->GetNode(motherName.c_str())
                       ->GetVolume()
@@ -1081,10 +1113,21 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->Print();
                   gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix()->Print();
 #endif
+                  // TGeoMatrix* g1 =
+                  //     gGeoManager->GetVolume(volumeName.c_str())->GetNode(localFiberID)->GetMatrix(); // fiber core
+		  // TGeoShape* tempShape =
+		  //     gGeoManager->GetVolume(volumeName.c_str())->GetNode(localFiberID)->GetVolume()->GetShape();
+
+		  std::string nodeName = orderDetName.find(TypeDet)->second;
+		  nodeName+="_";
+		  nodeName+=std::to_string(LayerID);
+
                   TGeoMatrix* g1 =
-                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // fiber core
+		    gGeoManager->GetVolume(volumeName.c_str())->GetNode(nodeName.c_str())->GetMatrix(); // fiber core
+
 		  TGeoShape* tempShape =
-		      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetVolume()->GetShape();
+		    gGeoManager->GetVolume(volumeName.c_str())->GetNode(nodeName.c_str())->GetVolume()->GetShape();
+
 
                   TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
                                        ->GetNode(motherName.c_str())
@@ -1130,6 +1173,21 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   measurement =
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+
+#ifdef DEBUG_BUILD2
+
+                  TVector3 x1(shift[0], shift[1], shift[2]);
+                  TVector3 p1(edge2[0] - edge1[0], edge2[1] - edge1[1], edge2[2] - edge1[2]);
+                  TVector3 x2(hit.HitPosX, hit.HitPosY, hit.HitPosZ);
+                  TVector3 p2(hit.MomX, hit.MomY, hit.MomZ);
+                  //double dl = CloseDist(x1, x2, p1, p2);
+		  TVector3 ClosestPointFiber, ClosestPointTrack;
+		  double dl  = closestDistanceApproach(x1, x2, p1, p2,ClosestPointFiber,ClosestPointTrack);
+
+		  att._logger->debug("geometry fiber : o {} {} {}, fiber_dir {} {} {}",x1.X(),x1.Y(),x1.Z(), p1.X(),p1.Y(),p1.Z());
+		  att._logger->debug("sim hit : {} {} {}, mom {} {} {}",x2.X(),x2.Y(),x2.Z(), p2.X(),p2.Y(),p2.Z());
+		  att._logger->debug("closest distance :sim vs fiber {} / on fiber {} {} {} / on track {} {} {}",dl, ClosestPointFiber.X(),ClosestPointFiber.Y(),ClosestPointFiber.Z(),ClosestPointTrack.X(),ClosestPointTrack.Y(),ClosestPointTrack.Z());
+#endif
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
@@ -1217,6 +1275,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       std::cerr << "something wrong IsFiberM motherName " <<TypeDet<<std::endl;
                       break;
                     }
+
+		  int localFiberID = newGeoExp == 2 ? LayerID : LayerID * 2 + 1;
+
 #ifdef DEBUG_BUILD2
                   std::cout << "fiberM" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
@@ -1225,9 +1286,16 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   std::cout << "HitPosX : " << hit.HitPosX << std::endl;
                   std::cout << "HitPosY : " << hit.HitPosY << std::endl;
                   std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
-                  // gGeoManager->GetVolume(volumeName.c_str())->Print();
-                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->Print();
-                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix()->Print();
+		  std::cout<<" from Node index :\n";
+		  // gGeoManager->GetVolume(volumeName.c_str())->Print();
+		  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->Print();
+		  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix()->Print();
+		  std::string nodeNameD = tmpName;
+		  nodeNameD+="_";
+		  nodeNameD+=std::to_string(LayerID);
+		  std::cout<<" from Node name : "<<nodeNameD<<"\n";
+		  gGeoManager->GetVolume(volumeName.c_str())->GetNode(nodeNameD.c_str())->Print();
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(nodeNameD.c_str())->GetMatrix()->Print();
                   gGeoManager->GetVolume("MFLD")
                       ->GetNode(motherName.c_str())
                       ->GetVolume()
@@ -1242,11 +1310,21 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->Print();
                   gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix()->Print();
 #endif
+                  // TGeoMatrix* g1 =
+                  //     gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // fiber core
+
+		  // TGeoShape* tempShape =
+		  //     gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetVolume()->GetShape();
+
+		  std::string nodeName = orderDetName.find(TypeDet)->second;
+		  nodeName+="_";
+		  nodeName+=std::to_string(LayerID);
+
                   TGeoMatrix* g1 =
-                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // fiber core
+		    gGeoManager->GetVolume(volumeName.c_str())->GetNode(nodeName.c_str())->GetMatrix(); // fiber core
 
 		  TGeoShape* tempShape =
-		      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetVolume()->GetShape();
+		    gGeoManager->GetVolume(volumeName.c_str())->GetNode(nodeName.c_str())->GetVolume()->GetShape();
 
                   TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
                                        ->GetNode(motherName.c_str())
@@ -1303,6 +1381,21 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
+#ifdef DEBUG_BUILD2
+
+                  TVector3 x1(shift[0], shift[1], shift[2]);
+                  TVector3 p1(edge2[0] - edge1[0], edge2[1] - edge1[1], edge2[2] - edge1[2]);
+                  TVector3 x2(hit.HitPosX, hit.HitPosY, hit.HitPosZ);
+                  TVector3 p2(hit.MomX, hit.MomY, hit.MomZ);
+                  //double dl = CloseDist(x1, x2, p1, p2);
+		  TVector3 ClosestPointFiber, ClosestPointTrack;
+		  double dl  = closestDistanceApproach(x1, x2, p1, p2,ClosestPointFiber,ClosestPointTrack);
+
+		  att._logger->debug("geometry fiber : o {} {} {}, fiber_dir {} {} {}",x1.X(),x1.Y(),x1.Z(), p1.X(),p1.Y(),p1.Z());
+		  att._logger->debug("sim hit : {} {} {}, mom {} {} {}",x2.X(),x2.Y(),x2.Z(), p2.X(),p2.Y(),p2.Z());
+		  att._logger->debug("closest distance :sim vs fiber {} / on fiber {} {} {} / on track {} {} {}",dl, ClosestPointFiber.X(),ClosestPointFiber.Y(),ClosestPointFiber.Z(),ClosestPointTrack.X(),ClosestPointTrack.Y(),ClosestPointTrack.Z());
+#endif
+
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
@@ -1341,6 +1434,18 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 		      gGeoManager->GetVolume("MDC")
 			->GetNode(TypeDet - G4Sol::MG01)
 			->GetVolume()
+			->GetNode(LayerID - 1)->GetVolume()->GetNode(0)
+			->Print();
+		      gGeoManager->GetVolume("MDC")
+			->GetNode(TypeDet - G4Sol::MG01)
+			->GetVolume()
+			->GetNode(LayerID - 1)->GetVolume()->GetNode(0)
+			->GetMatrix()
+			->Print();
+
+		      gGeoManager->GetVolume("MDC")
+			->GetNode(TypeDet - G4Sol::MG01)
+			->GetVolume()
 			->GetNode(LayerID - 1)
 			->Print();
 		      gGeoManager->GetVolume("MDC")
@@ -1355,6 +1460,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 		      gGeoManager->GetVolume("INNER")->GetNode(0)->GetMatrix()->Print();
 		      gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
 		      gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
+		      std::cout<<"WASA geo\n";
 		      gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
 		      gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
 #endif
@@ -1363,12 +1469,11 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 			->GetVolume()
 			->GetNode(LayerID - 1)
 			->GetMatrix(); // ME, MG
-		      TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")->GetNode(0)->GetMatrix(); // ME, MG
-
 		      TGeoShape* tempShape =
 			gGeoManager->GetVolume("MDC")->GetNode(TypeDet - G4Sol::MG01)->GetVolume()->GetShape();
-		      TGeoMatrix* g2 =
+		      TGeoMatrix* g1 =
 			gGeoManager->GetVolume("MDC")->GetNode(TypeDet - G4Sol::MG01)->GetMatrix(); // MD
+		      TGeoMatrix* g2 = gGeoManager->GetVolume("INNER")->GetNode(0)->GetMatrix(); // MDC
 		      TGeoMatrix* g3 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();             // INNER
 		      TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();             // MFLD
 		      TGeoHMatrix H0(*g0), H1(*g1), H2(*g2), H3(*g3), H4(*g4);
@@ -1459,12 +1564,19 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   TVector3 p1(edge2[0] - edge1[0], edge2[1] - edge1[1], edge2[2] - edge1[2]);
                   TVector3 x2(hit.HitPosX, hit.HitPosY, hit.HitPosZ);
                   TVector3 p2(hit.MomX, hit.MomY, hit.MomZ);
-                  //double dl = CloseDist(x1, x2, p1, p2);
+                  //double dl2 = CloseDist(x1, x2, p1, p2);
 		  TVector3 ClosestPointWire, ClosestPointTrack;
 		  double dl  = closestDistanceApproach(x1, x2, p1, p2,ClosestPointWire,ClosestPointTrack);
+#ifdef DEBUG_BUILD2
+		  att._logger->debug("Wire Closest distance : dl {} | dl_2 {}",dl, dl2);
+		  //att._logger->debug("Wire Closest distance : dl {}",dl);
 
-		  //att._logger->debug("Wire Closest distance : dl {} | dl_2 {}",dl, dl_2);
-
+		  att._logger->debug("geometry wire : o {} {} {}, wire_dir {} {} {}",x1.X(),x1.Y(),x1.Z(), p1.X(),p1.Y(),p1.Z());
+		  att._logger->debug("sim hit : {} {} {}, mom {} {} {}",x2.X(),x2.Y(),x2.Z(), p2.X(),p2.Y(),p2.Z());
+		  att._logger->debug("mid hit : {} {} {}",0.5*(hit.HitPosX+hit.ExitPosX),0.5*(hit.HitPosY+hit.ExitPosY),0.5*(hit.HitPosZ+hit.ExitPosZ));
+		  att._logger->debug("closest distance :sim vs wire {} / on fiber {} {} {} / on track {} {} {}",dl, ClosestPointWire.X(),ClosestPointWire.Y(),ClosestPointWire.Z(),ClosestPointTrack.X(),ClosestPointTrack.Y(),ClosestPointTrack.Z());
+		  att._logger->debug("Diff {} {} {} | {}",0.5*(hit.HitPosX+hit.ExitPosX)-ClosestPointTrack.X(),0.5*(hit.HitPosY+hit.ExitPosY)-ClosestPointTrack.Y(),0.5*(hit.HitPosZ+hit.ExitPosZ)-ClosestPointTrack.Z(), TMath::Sqrt(TMath::Sq(0.5*(hit.HitPosX+hit.ExitPosX)-ClosestPointTrack.X())+TMath::Sq(0.5*(hit.HitPosY+hit.ExitPosY)-ClosestPointTrack.Y())+TMath::Sq(0.5*(hit.HitPosZ+hit.ExitPosZ)-ClosestPointTrack.Z())));
+#endif
                   double dlmax = 0;
                   switch(TypeDet - G4Sol::MG01 + 1)
                     {
