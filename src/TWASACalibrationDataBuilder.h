@@ -1,5 +1,5 @@
-#ifndef TDATABUILDWASACALIBPL
-#define TDATABUILDWASACALIBPL
+#ifndef TDATABUILDDATA
+#define TDATABUILDDATA
 
 #include "TDataBuilder.h"
 
@@ -46,15 +46,15 @@
 
 
 
-class TBuildWASACalibrationLayerPlane final : public TDataBuilder
+class TWASACalibrationDataBuilder final : public TDataBuilder
 {
 
 public:
 
   const THyphiAttributes& att;
 
-  explicit TBuildWASACalibrationLayerPlane(const THyphiAttributes& att);
-  ~TBuildWASACalibrationLayerPlane() final;
+  explicit TWASACalibrationDataBuilder(const THyphiAttributes& att);
+  ~TWASACalibrationDataBuilder() final;
 
 #ifdef ROOT6
   ReturnRes::InfoM operator() (const EventWASAUnpack& event, FullRecoEvent& RecoEvent, Ana_WasaEvent* OutTree);

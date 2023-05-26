@@ -17,19 +17,16 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
 {
   att._logger->info("TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF");
 
-  par = std::make_unique<ParaManager>(att.map_ParamFiles);
-
   std::vector<std::string> tempName = {"HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
     "TR1_log","TR2_log","Si1_Strip_log_x", "Si1_Strip_log_y", "Si2_Strip_log_x", "Si2_Strip_log_y",
     "SD1_Strip_log_u", "SD1_Strip_log_v", "SD2_Strip_log_u", "SD2_Strip_log_v",
     "SD1pad_Strip_log_u", "SD1pad_Strip_log_v", "SD2pad_Strip_log_u", "SD2pad_Strip_log_v",
-    "TO_Counter",
+    "MiniFiberD1_Core_log_x1", "MiniFiberD1_Core_log_u1", "MiniFiberD1_Core_log_v1",
+    "MiniFiberD1_Core_log_x2", "MiniFiberD1_Core_log_u2", "MiniFiberD1_Core_log_v2",
     "FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v",
     "FiberD2_Core_log_x", "FiberD2_Core_log_u", "FiberD2_Core_log_v",
     "FiberD3_Core_log_x", "FiberD3_Core_log_u", "FiberD3_Core_log_v",
-    "MiniFiberD1_Core_log_x", "MiniFiberD1_Core_log_u", "MiniFiberD1_Core_log_v",
-    "MiniFiberD2_Core_log_x", "MiniFiberD2_Core_log_v", "MiniFiberD2_Core_log_u",
-    "FiberD4_Core_log_v", "FiberD4_Core_log_u", "FiberD4_Core_log_x",
+    "FiberD4_Core_log_x", "FiberD4_Core_log_u", "FiberD4_Core_log_v",
     "FiberD5_Core_log_x", "FiberD5_Core_log_u", "FiberD5_Core_log_v",
     "PSFE",
     "MG01", "MG02", "MG03", "MG04", "MG05", "MG06", "MG07", "MG08", "MG09", "MG10", "MG11", "MG12",
@@ -56,19 +53,23 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
     }
   
   std::string volMDCfirst = gGeoManager->GetVolume("INNER")->GetNode(0)->GetVolume()->GetName();
-  if(volMDCfirst == "MD01") offsetGeoNameID_MDC = 0;
-  if(volMDCfirst == "SOL")  offsetGeoNameID_MDC = 1;
+  if(volMDCfirst == "MD01")
+    offsetGeoNameID_MDC = 0;
+  if(volMDCfirst == "SOL")
+    offsetGeoNameID_MDC = 1;
 
   auto listNodes = gGeoManager->GetVolume("INNER")->GetNodes();
   int index_lastMDC = -1, index_firstPSCE = -1;
   for(int i=0;i<listNodes->GetEntries();++i)
     {
       std::string tempName(listNodes->At(i)->GetName());
-      if(tempName == "MD17_1") index_lastMDC = i;
-      if(tempName == "PSCE_1") index_firstPSCE = i;
+      if(tempName == "MD17_1")
+	index_lastMDC = i;
+      if(tempName == "PSCE_1")
+	index_firstPSCE = i;
     }
-
   offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC -1;
+  
 }
 
 TBuildDetectorLayerPlaneDAF::~TBuildDetectorLayerPlaneDAF() {}
@@ -99,98 +100,7 @@ ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::operator()(const TG4Sol_Event& eve
 }
 
 #endif
-void TBuildDetectorLayerPlaneDAF::SelectHists()
-{
-  for(int i = 0; i < 7; ++i)
-    {
-      for(int j = 0; j < 3; ++j)
-        {
-          LocalHisto.h10[i][j]         = AnaHisto->CloneAndRegister(AnaHisto->h10[i][j]);
-          LocalHisto.h11[i][j]         = AnaHisto->CloneAndRegister(AnaHisto->h11[i][j]);
-          LocalHisto.h12[i][j]         = AnaHisto->CloneAndRegister(AnaHisto->h12[i][j]);
-          LocalHisto.h13[i][j]         = AnaHisto->CloneAndRegister(AnaHisto->h13[i][j]);
-          LocalHisto.h14[i][j]         = AnaHisto->CloneAndRegister(AnaHisto->h14[i][j]);
-          LocalHisto.h15[i][j]         = AnaHisto->CloneAndRegister(AnaHisto->h15[i][j]);
-          LocalHisto.hfiber_13_0[i][j] = AnaHisto->CloneAndRegister(AnaHisto->hfiber_13_0[i][j]);
-          LocalHisto.hfiber_13_1[i][j] = AnaHisto->CloneAndRegister(AnaHisto->hfiber_13_1[i][j]);
-          LocalHisto.hfiber_13_2[i][j] = AnaHisto->CloneAndRegister(AnaHisto->hfiber_13_2[i][j]);
-          LocalHisto.hfiber_13_3[i][j] = AnaHisto->CloneAndRegister(AnaHisto->hfiber_13_3[i][j]);
-          LocalHisto.hfiber_13_4[i][j] = AnaHisto->CloneAndRegister(AnaHisto->hfiber_13_4[i][j]);
-          LocalHisto.h75[i][j]         = AnaHisto->CloneAndRegister(AnaHisto->h75[i][j]);
-        }
-      LocalHisto.h16[i]   = AnaHisto->CloneAndRegister(AnaHisto->h16[i]);
-      LocalHisto.h17[i]   = AnaHisto->CloneAndRegister(AnaHisto->h17[i]);
-      LocalHisto.h17_2[i] = AnaHisto->CloneAndRegister(AnaHisto->h17_2[i]);
-    }
-  LocalHisto.h18_3_1 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_1);
-  LocalHisto.h18_3_2 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_2);
-  LocalHisto.h18_3_3 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_3);
-  LocalHisto.h18_3_4 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_4);
-  LocalHisto.h18_3_5 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_5);
-  LocalHisto.h18_3_6 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_6);
-  LocalHisto.h18_3_7 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_7);
-  LocalHisto.h18_3_8 = AnaHisto->CloneAndRegister(AnaHisto->h18_3_8);
-  for(int i=0; i<3 ; ++i)
-    for(int j=0; j<3; ++j)
-      for(int k=0; k<2; ++k)
-        LocalHisto.h51[i][j][k] = AnaHisto->CloneAndRegister(AnaHisto->h51[i][j][k]);
-
-  //PSB
-  LocalHisto.h76 = AnaHisto->CloneAndRegister(AnaHisto->h76);
-
-  //MFT12
-  LocalHisto.hfiber_1_1     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_1_1);
-  LocalHisto.hfiber_1_2     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_1_2);
-  LocalHisto.hfiber_1_3     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_1_3);
-  LocalHisto.hfiber_1_4     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_1_4);
-  LocalHisto.hfiber_1_5     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_1_5);
-  LocalHisto.hfiber_1_6     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_1_6);
-  LocalHisto.hfiber_1_7     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_1_7);
-  LocalHisto.hfiber_1_9     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_1_9);
-  LocalHisto.hfiber_2_1_1   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_2_1_1);
-  LocalHisto.hfiber_2_1_2   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_2_1_2);
-  LocalHisto.hfiber_2_2_1   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_2_2_1);
-  LocalHisto.hfiber_2_2_2   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_2_2_2);
-  LocalHisto.hfiber_2_3     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_2_3);
-  LocalHisto.hfiber_3_0     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_3_0);
-  LocalHisto.hfiber_3_0_2   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_3_0_2);
-  LocalHisto.hfiber_6_1     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_6_1);
-  LocalHisto.hfiber_6_2     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_6_2);
-  LocalHisto.hfiber_6_3     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_6_3);
-  LocalHisto.hfiber_6_4     = AnaHisto->CloneAndRegister(AnaHisto->hfiber_6_4);
-  LocalHisto.hfiber_12_1_1  = AnaHisto->CloneAndRegister(AnaHisto->hfiber_12_1_1);
-  LocalHisto.hfiber_12_2_1  = AnaHisto->CloneAndRegister(AnaHisto->hfiber_12_2_1);
-  LocalHisto.hfiber_12_3_1  = AnaHisto->CloneAndRegister(AnaHisto->hfiber_12_3_1);
-  LocalHisto.hfiber_12_1_2  = AnaHisto->CloneAndRegister(AnaHisto->hfiber_12_1_2);
-  LocalHisto.hfiber_12_2_2  = AnaHisto->CloneAndRegister(AnaHisto->hfiber_12_2_2);
-  LocalHisto.hfiber_12_3_2  = AnaHisto->CloneAndRegister(AnaHisto->hfiber_12_3_2);
-
-  //DFT12
-  LocalHisto.hfiber_4_1   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_1);
-  LocalHisto.hfiber_4_2_1 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_2_1);
-  LocalHisto.hfiber_4_3_1 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_3_1);
-  LocalHisto.hfiber_4_4_1 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_4_1);
-  LocalHisto.hfiber_4_5_1 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_5_1);
-  LocalHisto.hfiber_4_2_2 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_2_2);
-  LocalHisto.hfiber_4_3_2 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_3_2);
-  LocalHisto.hfiber_4_4_2 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_4_2);
-  LocalHisto.hfiber_4_5_2 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_5_2);
-  LocalHisto.hfiber_4_1_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_1_3);
-  LocalHisto.hfiber_4_2_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_2_3);
-  LocalHisto.hfiber_4_3_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_3_3);
-  LocalHisto.hfiber_4_4_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_4_3);
-  LocalHisto.hfiber_4_5_3 = AnaHisto->CloneAndRegister(AnaHisto->hfiber_4_5_3);
-  LocalHisto.hfiber_5_1   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_1);
-  LocalHisto.hfiber_5_2   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_2);
-  LocalHisto.hfiber_5_3   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_3);
-  LocalHisto.hfiber_5_4   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_4);
-  LocalHisto.hfiber_5_5   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_5);
-  LocalHisto.hfiber_5_6   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_6);
-  LocalHisto.hfiber_5_7   = AnaHisto->CloneAndRegister(AnaHisto->hfiber_5_7);
-
-
-  LocalHisto.h_stats = AnaHisto->CloneAndRegister(AnaHisto->h_stats);
-}
+void TBuildDetectorLayerPlaneDAF::SelectHists() { LocalHisto.h_stats = AnaHisto->CloneAndRegister(AnaHisto->h_stats); }
 
 ReturnRes::InfoM TBuildDetectorLayerPlaneDAF::SoftExit(int return_build)
 {
@@ -347,23 +257,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
   RecoEvent.DecayVertex[1] = event.DecayVertex_Y;
   RecoEvent.DecayVertex[2] = event.DecayVertex_Z;
 
-  // Fiber ana //////////////////////////////////
-  std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitCont;
-  std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitClCont;
-
-  for(int i = 0; i < 7; ++i)
-    {
-      std::vector<FiberHitAna*> buf_v;
-      std::vector<std::vector<FiberHitAna*> > buf_vv;
-      for(int j = 0; j < 3; ++j)
-        {
-          buf_vv.emplace_back(buf_v);
-        }
-      FiberHitCont.emplace_back(buf_vv);
-      FiberHitClCont.emplace_back(buf_vv);
-    }
-
-
   for(size_t index = 0; index < event.BeamTrackID.size(); ++index)
     {
       TMcParticle* OutParticle =
@@ -388,25 +281,28 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
         continue;
       int TrackID = event.BeamTrackID[index];
 
+      std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
+      RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
+
       InfoInit tempInit;
       tempInit.charge = event.BeamCharges[index];
-      tempInit.time = 0.;
       tempInit.posX = event.InteractionPoint_X;
       tempInit.posY = event.InteractionPoint_Y;
       tempInit.posZ = event.InteractionPoint_Z;
       tempInit.momX = event.BeamMomentums_X[index];
       tempInit.momY = event.BeamMomentums_Y[index];
       tempInit.momZ = event.BeamMomentums_Z[index];
-      RecoEvent.TrackDAFInitSim.insert(std::make_pair(TrackID, tempInit));
+      RecoEvent.TrackDAFInit.insert(std::make_pair(TrackID, tempInit));
 
       std::vector<std::vector<SimHit> > tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
       RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));
 
-      //std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
-      //RecoEvent.TrackInfo.insert(std::make_pair(TrackID, tempSetInfo));
+      std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
+      RecoEvent.TrackInfo.insert(std::make_pair(TrackID, tempSetInfo));
     }
   for(size_t index = 0; index < event.DaughterTrackID.size(); ++index)
     {
+
       TMcParticle* OutParticle =
           dynamic_cast<TMcParticle*>(OutTree->fMC_Particle->ConstructedAt(OutTree->fMC_Particle->GetEntries()));
       OutParticle->type      = event.DaughterNames[index];
@@ -422,34 +318,36 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
       int TrackID = event.DaughterTrackID[index];
 
+      std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
+      RecoEvent.TrackDAF.insert(std::make_pair(TrackID, tempSetHit));
+
       InfoInit tempInit;
       tempInit.charge = event.DaughterCharges[index];
-      tempInit.time = event.DecayTime;
       tempInit.posX = event.DecayVertex_X;
       tempInit.posY = event.DecayVertex_Y;
       tempInit.posZ = event.DecayVertex_Z;
       tempInit.momX = event.DaughterMomentums_X[index];
       tempInit.momY = event.DaughterMomentums_Y[index];
       tempInit.momZ = event.DaughterMomentums_Z[index];
-      RecoEvent.TrackDAFInitSim.insert(std::make_pair(TrackID, tempInit));
-
+      RecoEvent.TrackDAFInit.insert(std::make_pair(TrackID, tempInit));
       RecoEvent.DaughtersTrackDAFInit.insert(std::make_pair(TrackID, tempInit));
 
       std::vector<std::vector<SimHit> > tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
       RecoEvent.TrackDAFSim.insert(std::make_pair(TrackID, tempSetSimHit));
 
+      std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
+      RecoEvent.TrackInfo.insert(std::make_pair(TrackID, tempSetInfo));
+
       RecoEvent.TrackMother.insert(
           std::make_pair(TrackID, std::make_tuple(event.MotherTrackID, event.DecayVertex_X, event.DecayVertex_Y,
                                                   event.DecayVertex_Z, event.DecayTime)));
     }
-
   OutTree->Nmc = OutTree->fMC_Particle->GetEntries();
 
   RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
-  RecoEvent.ListHitsInfo.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.ListHitsToTracks.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.OldListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
-  //RecoEvent.Si_HitsEnergyLayer.resize(8);
+  RecoEvent.Si_HitsEnergyLayer.resize(8);
 
   auto fillOutHit = [](TClonesArray* out, const TG4Sol_Hit& hit, int PDG, double charge, const TVectorD& hitR,
                        int LayerID, int HitID) {
@@ -482,21 +380,14 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       TClonesArray* tempHits = hits[iDet];
       std::string nameTempBr(tempHits->GetName());
 #endif
-
-      //printf("iDet: %d , nameTempBr:  , TypeDet: %d \n", iDet, G4Sol::FiberD5_v, TypeDet);
-
       auto tempPair                                       = orderDetectors.find(iDet);
       G4Sol::SolDet TypeDet                               = G4Sol::SolDet(tempPair->second);
       std::unique_ptr<genfit::AbsMeasurement> measurement = nullptr;
-      MeasurementInfo measinfo;
-
-      //printf("iDet: %d , nameTempBr:  , TypeDet: %d \n", iDet, G4Sol::FiberD5_v, TypeDet);
 
 #ifdef DEBUG_BUILD
       att._logger->debug("iDet # {} {} {}", iDet, nameTempBr, TypeDet);
 #endif
 
-      std::set<int> used_fiber_pair;
       // double resolution_wire = 0.01;
       // double resolution_wire_z = 0.1;
       // double resolution_planar = 0.05; // cm
@@ -504,7 +395,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
       double resolution_wire_z = 10;
       double resolution_planar = 1;    // cm
       double resolution_dl     = 0.02; // cm
-      double resolution_fiber  = 0.015;
+      double resolution_fiber  = 0.0144;
       double resolution_psce   = 1.1; // 3.8/sqrt(12.)
       double resolution_psce_z = 1.0;
       double time_res          = 0.150; // ns
@@ -529,14 +420,35 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 #ifdef DEBUG_BUILD
               att._logger->debug(" hit#{} {} {} {}", indexInBranch, hit.Pname, hit.TrackID, hit.LayerID);
 #endif
-              auto tempTrack = RecoEvent.TrackDAFSim.find(TrackID);
-              if(tempTrack == RecoEvent.TrackDAFSim.end())
+              auto tempTrack = RecoEvent.TrackDAF.find(TrackID);
+              if(tempTrack == RecoEvent.TrackDAF.end())
                 continue;
 
+              TVectorD hitCoords(2);
+              hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_planar);
+              hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_planar);
+              // hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
+
               TVectorD hitCoordsTree(3);
-              hitCoordsTree(0) = gRandom->Gaus(hit.HitPosX, resolution_planar);
-              hitCoordsTree(1) = gRandom->Gaus(hit.HitPosY, resolution_planar);
+              hitCoordsTree(0) = hitCoords(0);
+              hitCoordsTree(1) = hitCoords(1);
               hitCoordsTree(2) = hit.HitPosZ;
+
+              TMatrixDSym hitCov(2);
+              hitCov(0, 0) = resolution_planar * resolution_planar;
+              hitCov(1, 1) = resolution_planar * resolution_planar;
+              // hitCov(2, 2) = resolution * resolution;
+              // measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet) + LayerID, 0,
+              // nullptr);
+
+              // TVector3 o(0.,0.,hit.HitPosZ), u(1.,0.,0.), v(0.,1.,0.);
+              // genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+              // dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
+
+              // RecoEvent.ListHits[TypeDet + LayerID].emplace_back(measurement.release());
+              // int indexHit = RecoEvent.ListHits[TypeDet + LayerID].size() - 1;
+
+              // tempTrack->second[TypeDet + LayerID] = indexHit;
 
               int pdg_code = pid_fromName(hit.Pname);
 
@@ -555,6 +467,16 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               tempHitSim.time    = gRandom->Gaus(hit.Time, time_res);
               tempHitSim.length  = hit.TrackLength;
               tempTrackSimLayers->second[TypeDet + LayerID].emplace_back(tempHitSim);
+
+              auto tempTrackInfo                              = RecoEvent.TrackInfo.find(TrackID);
+              tempTrackInfo->second[TypeDet + LayerID].pdg    = pdg_code;
+              tempTrackInfo->second[TypeDet + LayerID].momX   = hit.MomX;
+              tempTrackInfo->second[TypeDet + LayerID].momY   = hit.MomY;
+              tempTrackInfo->second[TypeDet + LayerID].momZ   = hit.MomZ;
+              tempTrackInfo->second[TypeDet + LayerID].mass   = hit.Mass;
+              tempTrackInfo->second[TypeDet + LayerID].Eloss  = hit.Energy;
+              tempTrackInfo->second[TypeDet + LayerID].time   = hit.Time;
+              tempTrackInfo->second[TypeDet + LayerID].length = hit.TrackLength;
 
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
               if(PDG_particle == nullptr)
@@ -590,16 +512,34 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 #ifdef DEBUG_BUILD
               att._logger->debug(" hit#{} {} {} {}", indexInBranch, hit.Pname, hit.TrackID, hit.LayerID);
 #endif
-              auto tempTrack = RecoEvent.TrackDAFSim.find(TrackID);
-              if(tempTrack == RecoEvent.TrackDAFSim.end())
+              auto tempTrack = RecoEvent.TrackDAF.find(TrackID);
+              if(tempTrack == RecoEvent.TrackDAF.end())
                 continue;
 
               TVectorD hitCoordsTree(3);
+              // std::cout << "\nTypeDet : " << TypeDet << std::endl;
+              // if(IsPlanar(TypeDet))
+              //{
+              //  std::cout << "planar"  << std::endl;
+              //  TVectorD hitCoords(2);
+              //  hitCoords(0) = gRandom->Gaus(hit.HitPosX, resolution_planar);
+              //  hitCoords(1) = gRandom->Gaus(hit.HitPosY, resolution_planar);
+              //  //hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution);
+              //  TMatrixDSym hitCov(2);
+              //  hitCov(0, 0) = resolution_planar * resolution_planar;
+              //  hitCov(1, 1) = resolution_planar * resolution_planar;
+              //  //hitCov(2, 2) = resolution * resolution;
+              //  measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID,
+              //  nullptr);
 
-              if(Fiber_removefragment_flag && hit.Pname == "He3")
-                continue;
+              //  TVector3 o(0.,0.,hit.HitPosZ), u(1.,0.,0.), v(0.,1.,0.);
+              //  genfit::SharedPlanePtr plane(new genfit::DetPlane(o,u,v));
+              //  dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-/*
+              //  hitCoordsTree(0) = hitCoords(0);
+              //  hitCoordsTree(1) = hitCoords(1);
+              //  hitCoordsTree(2) = hit.HitPosZ;
+              //}
               if(IsSilicon(TypeDet))
                 {
                   // void simulHitstoSignals(TTreeReaderArray<TG4Sol_Hit>* DetHits,
@@ -673,21 +613,19 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   //if(idSi == 4)
                     //std::cout << "HitPosX : " << hit.HitPosX << "\tHitPosY : " << hit.HitPosY << std::endl;
                 }
-*/
-              if(IsPSCE(TypeDet))
+              else if(IsPSCE(TypeDet))
                 {
-                  LayerID--;
 #ifdef DEBUG_BUILD2
                   std::cout << "PSC" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
                   std::cout << "name : " << tmpName << std::endl;
-                  std::cout << "LayerID : " << LayerID <<" : " <<TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID <<std::endl;
+                  std::cout << "LayerID : " << LayerID <<" : " <<TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1<<std::endl;
                   std::cout << "HitPosX : " << hit.HitPosX << std::endl;
                   std::cout << "HitPosY : " << hit.HitPosY << std::endl;
                   std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
-                  gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID)->Print();
+                  gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1)->Print();
                   gGeoManager->GetVolume("INNER")
-                      ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID)
+                      ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1)
                       ->GetMatrix()
                       ->Print();
                   gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
@@ -696,9 +634,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix()->Print();
 #endif
                   TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")
-                                       ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID)
+                                       ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_PSCE + LayerID - 1)
                                        ->GetMatrix();                                       // PSCE
-                  TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNER
+                  TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix(); // INNNER
                   TGeoMatrix* g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix(); // MFLD
                   TGeoHMatrix H1(*g1), H2(*g2), H3(*g3);
                   TGeoHMatrix H = H2 * H1;
@@ -726,15 +664,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res), hit.Energy);
-
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
-
-                  LocalHisto.h76->Fill(LayerID, atan2(shift[1], shift[0]));
-
-                  //std::cout << "PSB Det: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
               else if(IsPSBE(TypeDet))
                 {
@@ -788,8 +720,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   measurement =
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
-
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res), hit.Energy);
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
@@ -848,104 +778,333 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res), hit.Energy);
+                  hitCoordsTree(0) = hit.HitPosX;
+                  hitCoordsTree(1) = hit.HitPosY;
+                  hitCoordsTree(2) = hit.HitPosZ;
+                }
+              else if(IsFiberU(TypeDet))
+                {
+                  if(IsFiberU_Vetoed(TypeDet))
+                    continue;
+                  string volumeName;
+                  switch(TypeDet)
+                    {
+                    case G4Sol::FiberD1_x:
+                      volumeName = "FiberD1_log_x";
+                      break;
+                    case G4Sol::FiberD1_u:
+                      volumeName = "FiberD1_log_u";
+                      break;
+                    case G4Sol::FiberD1_v:
+                      volumeName = "FiberD1_log_v";
+                      break;
+                    case G4Sol::FiberD2_x:
+                      volumeName = "FiberD2_log_x";
+                      break;
+                    case G4Sol::FiberD2_u:
+                      volumeName = "FiberD2_log_u";
+                      break;
+                    case G4Sol::FiberD2_v:
+                      volumeName = "FiberD2_log_v";
+                      break;
+                    case G4Sol::FiberD3_x:
+                      volumeName = "FiberD3_log_x";
+                      break;
+                    case G4Sol::FiberD3_u:
+                      volumeName = "FiberD3_log_u";
+                      break;
+                    case G4Sol::FiberD3_v:
+                      volumeName = "FiberD3_log_v";
+                      break;
+                    case G4Sol::FiberD4_x:
+                      volumeName = "FiberD4_log_x";
+                      break;
+                    case G4Sol::FiberD4_u:
+                      volumeName = "FiberD4_log_u";
+                      break;
+                    case G4Sol::FiberD4_v:
+                      volumeName = "FiberD4_log_v";
+                      break;
+                    case G4Sol::FiberD5_x:
+                      volumeName = "FiberD5_log_x";
+                      break;
+                    case G4Sol::FiberD5_u:
+                      volumeName = "FiberD5_log_u";
+                      break;
+                    case G4Sol::FiberD5_v:
+                      volumeName = "FiberD5_log_v";
+                      break;
+                    // case G4Sol::MiniFiberD1_x1 :  volumeName = "MiniFiberD1_log_x1"; break;
+                    // case G4Sol::MiniFiberD1_u1 :  volumeName = "MiniFiberD1_log_u1"; break;
+                    // case G4Sol::MiniFiberD1_v1 :  volumeName = "MiniFiberD1_log_v1"; break;
+                    // case G4Sol::MiniFiberD1_x2 :  volumeName = "MiniFiberD1_log_x2"; break;
+                    // case G4Sol::MiniFiberD1_u2 :  volumeName = "MiniFiberD1_log_u2"; break;
+                    // case G4Sol::MiniFiberD1_v2 :  volumeName = "MiniFiberD1_log_v2"; break;
+                    default:
+                      std::cerr << "something wrong" << std::endl;
+                      break;
+                    }
+                  string motherName;
+                  switch(TypeDet)
+                    {
+                    case G4Sol::FiberD1_x:
+                      motherName = "FiberD1_log_0";
+                      break;
+                    case G4Sol::FiberD1_u:
+                      motherName = "FiberD1_log_0";
+                      break;
+                    case G4Sol::FiberD1_v:
+                      motherName = "FiberD1_log_0";
+                      break;
+                    case G4Sol::FiberD2_x:
+                      motherName = "FiberD2_log_0";
+                      break;
+                    case G4Sol::FiberD2_u:
+                      motherName = "FiberD2_log_0";
+                      break;
+                    case G4Sol::FiberD2_v:
+                      motherName = "FiberD2_log_0";
+                      break;
+                    case G4Sol::FiberD3_x:
+                      motherName = "FiberD3_log_0";
+                      break;
+                    case G4Sol::FiberD3_u:
+                      motherName = "FiberD3_log_0";
+                      break;
+                    case G4Sol::FiberD3_v:
+                      motherName = "FiberD3_log_0";
+                      break;
+                    case G4Sol::FiberD4_x:
+                      motherName = "FiberD4_log_0";
+                      break;
+                    case G4Sol::FiberD4_u:
+                      motherName = "FiberD4_log_0";
+                      break;
+                    case G4Sol::FiberD4_v:
+                      motherName = "FiberD4_log_0";
+                      break;
+                    case G4Sol::FiberD5_x:
+                      motherName = "FiberD5_log_0";
+                      break;
+                    case G4Sol::FiberD5_u:
+                      motherName = "FiberD5_log_0";
+                      break;
+                    case G4Sol::FiberD5_v:
+                      motherName = "FiberD5_log_0";
+                      break;
+                    // case G4Sol::MiniFiberD1_x1 :  motherName = "MiniFiberD1_log_0"; break;
+                    // case G4Sol::MiniFiberD1_u1 :  motherName = "MiniFiberD1_log_0"; break;
+                    // case G4Sol::MiniFiberD1_v1 :  motherName = "MiniFiberD1_log_0"; break;
+                    // case G4Sol::MiniFiberD1_x2 :  motherName = "MiniFiberD1_log_0"; break;
+                    // case G4Sol::MiniFiberD1_u2 :  motherName = "MiniFiberD1_log_0"; break;
+                    // case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
+                    default:
+                      std::cerr << "something wrong" << std::endl;
+                      break;
+                    }
+#ifdef DEBUG_BUILD2
+                  std::cout << "fiber" << std::endl;
+                  std::string tmpName = orderDetName.find(TypeDet)->second;
+                  std::cout << "name : " << tmpName << std::endl;
+                  std::cout << "LayerID : " << LayerID << std::endl;
+                  std::cout << "HitPosX : " << hit.HitPosX << std::endl;
+                  std::cout << "HitPosY : " << hit.HitPosY << std::endl;
+                  std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->Print();
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix()->Print();
+                  gGeoManager->GetVolume("MFLD")
+                      ->GetNode(motherName.c_str())
+                      ->GetVolume()
+                      ->GetNode((volumeName + "_0").c_str())
+                      ->Print();
+                  gGeoManager->GetVolume("MFLD")
+                      ->GetNode(motherName.c_str())
+                      ->GetVolume()
+                      ->GetNode((volumeName + "_0").c_str())
+                      ->GetMatrix()
+                      ->Print();
+                  gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->Print();
+                  gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix()->Print();
+#endif
+                  TGeoMatrix* g1 =
+                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // fiber core
+                  TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
+                                       ->GetNode(motherName.c_str())
+                                       ->GetVolume()
+                                       ->GetNode((volumeName + "_0").c_str())
+                                       ->GetMatrix(); // fiber layer
+                  TGeoMatrix* g3 =
+                      gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // fiber station
+                  TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();     // MFLD
+                  TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
+                  TGeoHMatrix H = H2 * H1;
+                  H             = H3 * H;
+                  H             = H4 * H;
+                  TGeoHMatrix w1("w1");
+                  TGeoHMatrix w2("w2");
+                  w1.SetDz(-10);
+                  w2.SetDz(10);
+                  TGeoHMatrix Hw1 = H * w1;
+                  TGeoHMatrix Hw2 = H * w2;
+#ifdef DEBUG_BUILD2
+                  H.Print();
+                  Hw1.Print();
+                  Hw2.Print();
+#endif
+                  double* edge1 = Hw1.GetTranslation();
+                  double* edge2 = Hw2.GetTranslation();
+                  double* shift = H.GetTranslation();
+                  TVector3 o(0., 0., shift[2]), zdir(0., 0., 1.);
+                  TVector3 fiber_dir(edge2[0] - edge1[0], edge2[1] - edge1[1], edge2[2] - edge1[2]);
+                  fiber_dir  = fiber_dir.Unit();
+                  TVector3 u = fiber_dir.Cross(zdir);
+                  TVector3 v = fiber_dir;
+                  genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
+
+                  TVectorD hitCoords(1);
+                  hitCoords(0) = u.Dot(TVector3(shift[0], shift[1], 0));
+                  TMatrixDSym hitCov(1);
+                  hitCov(0, 0) = resolution_fiber * resolution_fiber;
+                  measurement =
+                      std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+                  dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
                 }
-              else if(IsFiber(TypeDet))
+              else if(IsFiberM(TypeDet))
                 {
-                  //if(IsFiberU_Vetoed(TypeDet))
-                  //  continue;
-
+                  string volumeName;
+                  switch(TypeDet)
+                    {
+                    case G4Sol::MiniFiberD1_x:
+                      volumeName = "MiniFiberD1_log_x";
+                      break;
+                    case G4Sol::MiniFiberD1_u:
+                      volumeName = "MiniFiberD1_log_u";
+                      break;
+                    case G4Sol::MiniFiberD1_v:
+                      volumeName = "MiniFiberD1_log_v";
+                      break;
+                    case G4Sol::MiniFiberD2_x:
+                      volumeName = "MiniFiberD2_log_x";
+                      break;
+                    case G4Sol::MiniFiberD2_u:
+                      volumeName = "MiniFiberD2_log_u";
+                      break;
+                    case G4Sol::MiniFiberD2_v:
+                      volumeName = "MiniFiberD2_log_v";
+                      break;
+                    default:
+                      std::cerr << "something wrong" << std::endl;
+                      break;
+                    }
+                  string motherName;
+                  switch(TypeDet)
+                    {
+                    case G4Sol::MiniFiberD1_x:
+                      motherName = "MiniFiberD1_log_0";
+                      break;
+                    case G4Sol::MiniFiberD1_u:
+                      motherName = "MiniFiberD1_log_0";
+                      break;
+                    case G4Sol::MiniFiberD1_v:
+                      motherName = "MiniFiberD1_log_0";
+                      break;
+                    case G4Sol::MiniFiberD2_x:
+                      motherName = "MiniFiberD2_log_0";
+                      break;
+                    case G4Sol::MiniFiberD2_u:
+                      motherName = "MiniFiberD2_log_0";
+                      break;
+                    case G4Sol::MiniFiberD2_v:
+                      motherName = "MiniFiberD2_log_0";
+                      break;
+                    default:
+                      std::cerr << "something wrong" << std::endl;
+                      break;
+                    }
 #ifdef DEBUG_BUILD2
-                  std::cout << "fiber" << std::endl;
+                  std::cout << "fiberM" << std::endl;
                   std::string tmpName = orderDetName.find(TypeDet)->second;
                   std::cout << "name : " << tmpName << std::endl;
-                  std::cout << "LayerID (hitID in Simu) : " << LayerID << std::endl;
-                  std::cout << "HitID   (hitID in Data) : " << LayerID/2 << std::endl;
+                  std::cout << "LayerID : " << LayerID << std::endl;
                   std::cout << "HitPosX : " << hit.HitPosX << std::endl;
                   std::cout << "HitPosY : " << hit.HitPosY << std::endl;
                   std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
+                  // gGeoManager->GetVolume(volumeName.c_str())->Print();
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->Print();
+                  gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix()->Print();
+                  gGeoManager->GetVolume("MFLD")
+                      ->GetNode(motherName.c_str())
+                      ->GetVolume()
+                      ->GetNode((volumeName + "_0").c_str())
+                      ->Print();
+                  gGeoManager->GetVolume("MFLD")
+                      ->GetNode(motherName.c_str())
+                      ->GetVolume()
+                      ->GetNode((volumeName + "_0").c_str())
+                      ->GetMatrix()
+                      ->Print();
+                  gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->Print();
+                  gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix()->Print();
 #endif
+                  TGeoMatrix* g1 =
+                      gGeoManager->GetVolume(volumeName.c_str())->GetNode(LayerID * 2 + 1)->GetMatrix(); // fiber core
+                  TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
+                                       ->GetNode(motherName.c_str())
+                                       ->GetVolume()
+                                       ->GetNode((volumeName + "_0").c_str())
+                                       ->GetMatrix(); // fiber layer
+                  TGeoMatrix* g3 =
+                      gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // fiber station
+                  TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();     // MFLD
+                  TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
+                  TGeoHMatrix H = H2 * H1;
+                  H             = H3 * H;
+                  H             = H4 * H;
+                  TGeoHMatrix w1("w1");
+                  TGeoHMatrix w2("w2");
+                  w1.SetDz(-10);
+                  w2.SetDz(10);
+                  TGeoHMatrix Hw1 = H * w1;
+                  TGeoHMatrix Hw2 = H * w2;
+#ifdef DEBUG_BUILD2
+                  H.Print();
+                  Hw1.Print();
+                  Hw2.Print();
+#endif
+                  double* edge1 = Hw1.GetTranslation();
+                  double* edge2 = Hw2.GetTranslation();
+                  // std::cout << "edge1[0] : " << edge1[0] << std::endl;
+                  // std::cout << "edge1[1] : " << edge1[1] << std::endl;
+                  // std::cout << "edge1[2] : " << edge1[2] << std::endl;
+                  // std::cout << "edge2[0] : " << edge2[0] << std::endl;
+                  // std::cout << "edge2[1] : " << edge2[1] << std::endl;
+                  // std::cout << "edge2[2] : " << edge2[2] << std::endl;
+                  double* shift = H.GetTranslation();
+                  // std::cout << "shift[0] : " << shift[0] << std::endl;
+                  // std::cout << "shift[1] : " << shift[1] << std::endl;
+                  // std::cout << "shift[2] : " << shift[2] << std::endl;
+                  TVector3 o(0., 0., shift[2]), zdir(0., 0., 1.);
+                  TVector3 fiber_dir(edge2[0] - edge1[0], edge2[1] - edge1[1], edge2[2] - edge1[2]);
+                  fiber_dir  = fiber_dir.Unit();
+                  TVector3 u = fiber_dir.Cross(zdir);
+                  TVector3 v = fiber_dir;
+                  genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
 
-                  int i_fiber = -1;
-                  int i_layer = -1;
-                  switch(TypeDet)
-                    {
-                      case G4Sol::FiberD1_x:     { i_fiber = 0; i_layer = 0; } ; break;
-                      case G4Sol::FiberD1_u:     { i_fiber = 0; i_layer = 1; } ; break;
-                      case G4Sol::FiberD1_v:     { i_fiber = 0; i_layer = 2; } ; break;
-                      case G4Sol::FiberD2_x:     { i_fiber = 1; i_layer = 0; } ; break;
-                      case G4Sol::FiberD2_u:     { i_fiber = 1; i_layer = 1; } ; break;
-                      case G4Sol::FiberD2_v:     { i_fiber = 1; i_layer = 2; } ; break;
-                      case G4Sol::FiberD3_x:     { i_fiber = 2; i_layer = 0; } ; break;
-                      case G4Sol::FiberD3_u:     { i_fiber = 2; i_layer = 1; } ; break;
-                      case G4Sol::FiberD3_v:     { i_fiber = 2; i_layer = 2; } ; break;
-                      case G4Sol::MiniFiberD1_x: { i_fiber = 3; i_layer = 0; } ; break;
-                      case G4Sol::MiniFiberD1_u: { i_fiber = 3; i_layer = 1; } ; break;
-                      case G4Sol::MiniFiberD1_v: { i_fiber = 3; i_layer = 2; } ; break;
-                      case G4Sol::MiniFiberD2_x: { i_fiber = 4; i_layer = 0; } ; break;
-                      case G4Sol::MiniFiberD2_v: { i_fiber = 4; i_layer = 1; } ; break;
-                      case G4Sol::MiniFiberD2_u: { i_fiber = 4; i_layer = 2; } ; break;
-                      case G4Sol::FiberD4_v:     { i_fiber = 5; i_layer = 0; } ; break;
-                      case G4Sol::FiberD4_u:     { i_fiber = 5; i_layer = 1; } ; break;
-                      case G4Sol::FiberD4_x:     { i_fiber = 5; i_layer = 2; } ; break;
-                      case G4Sol::FiberD5_x:     { i_fiber = 6; i_layer = 0; } ; break;
-                      case G4Sol::FiberD5_u:     { i_fiber = 6; i_layer = 1; } ; break;
-                      case G4Sol::FiberD5_v:     { i_fiber = 6; i_layer = 2; } ; break;
-
-                      default:  std::cerr << "something wrong" << std::endl; break;
-                    }
-
-                  FiberHitAna* hit_ana = new FiberHitAna(i_fiber, i_layer, LayerID/2,
-                                  gRandom->Gaus(hit.Time, time_res), hit.Energy, TrackID, par.get());
-                  FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].emplace_back(hit_ana);
-
-                  int pdg_code = pid_fromName(hit.Pname);
-                  if(pdg_code == 0)
-                    att._logger->debug("!> Builder : pdg_code = 0 ! {}", hit.Pname);
-
-                  auto tempTrackSimFibers = RecoEvent.TrackDAFSim.find(TrackID);
-                  SimHit tempHitSim;
-                  tempHitSim.layerID = LayerID;
-                  tempHitSim.hitX    = hit.HitPosX;
-                  tempHitSim.hitY    = hit.HitPosY;
-                  tempHitSim.hitZ    = hit.HitPosZ;
-                  tempHitSim.momX    = hit.MomX;
-                  tempHitSim.momY    = hit.MomY;
-                  tempHitSim.momZ    = hit.MomZ;
-                  tempHitSim.pdg     = pdg_code;
-                  tempHitSim.mass    = hit.Mass;
-                  tempHitSim.Eloss   = hit.Energy;
-                  tempHitSim.time    = hit.Time;
-                  tempHitSim.length  = hit.TrackLength;
-                  tempTrackSimFibers->second[TypeDet].emplace_back(tempHitSim);
-
-                  auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
-                  if(PDG_particle == nullptr)
-                    {
-                      att._logger->error("E> PDG not found !");
-                      continue;
-                    }
-                  const double charge = PDG_particle->Charge() / 3.;
+                  TVectorD hitCoords(1);
+                  hitCoords(0) = u.Dot(TVector3(shift[0], shift[1], 0));
+                  TMatrixDSym hitCov(1);
+                  hitCov(0, 0) = resolution_fiber * resolution_fiber;
+                  measurement =
+                      std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
+                  dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
-                  
-                  fillOutHit(OutTree->Fiber, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-                  
-                  //if(i_fiber == 3 || i_fiber == 4)
-                  //std::cout << "Fiber Det: " << i_fiber << " layer: " << i_layer << " hit: " << LayerID/2 << " TrackID: " << TrackID << "\n";
-
-                  if(i_fiber == 3 || i_fiber == 4)
-                    {
-                      //std::cout << Form("Simu-Hit: (%.3f, %.3f, %.3f)", hit.HitPosX, hit.HitPosY, hit.HitPosZ) << std::endl;
-                      //std::cout << Form("FiberHit: (%.3f, %.3f, %.3f)", 0., 0., hit_ana->GetZ()/10.) << "\n\n";
-                    }
-                  continue;
                 }
               else if(IsWire(TypeDet))
                 {
@@ -957,19 +1116,19 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   std::cout << "HitPosX : " << hit.HitPosX << std::endl;
                   std::cout << "HitPosY : " << hit.HitPosY << std::endl;
                   std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
+                  gGeoManager->GetVolume("INNER")
+		    ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)
+		    ->GetVolume()
+		    ->GetNode(LayerID - 1)
+		    ->Print();
+                  gGeoManager->GetVolume("INNER")
+		    ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)
+                      ->GetVolume()
+                      ->GetNode(LayerID - 1)
+                      ->GetMatrix()
+                      ->Print();
                   gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)->Print();
                   gGeoManager->GetVolume("INNER")->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)->GetMatrix()->Print();
-                  gGeoManager->GetVolume("INNER")
-                                ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)
-                                ->GetVolume()
-                                ->GetNode(LayerID - 1)
-                                ->Print();
-                  gGeoManager->GetVolume("INNER")
-                                ->GetNode(TypeDet - G4Sol::MG01 + offsetGeoNameID_MDC)
-                                ->GetVolume()
-                                ->GetNode(LayerID - 1)
-                                ->GetMatrix()
-                                ->Print();
                   gGeoManager->GetVolume("MFLD")->GetNode(0)->Print();
                   gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix()->Print();
                   gGeoManager->GetVolume("WASA")->GetNode(0)->Print();
@@ -1079,13 +1238,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setLeftRightResolution(0);
                   dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setMaxDistance(dlmax);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res), hit.Energy); //Change check TOT?
-
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
-
-                  //std::cout << "MDC Layer: " << TypeDet-G4Sol::MG01+1 << " hit: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
               else
                 {
@@ -1100,8 +1255,8 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoords(2) = gRandom->Gaus(hit.HitPosZ, resolution_wire_z);
 
                   TMatrixDSym hitCov(3);
-                  hitCov(0, 0) = resolution_wire   * resolution_wire;
-                  hitCov(1, 1) = resolution_wire   * resolution_wire;
+                  hitCov(0, 0) = resolution_wire * resolution_wire;
+                  hitCov(1, 1) = resolution_wire * resolution_wire;
                   hitCov(2, 2) = resolution_wire_z * resolution_wire_z;
 
                   measurement = std::make_unique<genfit::ProlateSpacepointMeasurement>(hitCoords, hitCov, int(TypeDet),
@@ -1116,8 +1271,10 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                 }
 
               RecoEvent.ListHits[TypeDet].emplace_back(measurement.release());
-              RecoEvent.ListHitsInfo[TypeDet].emplace_back(measinfo);
               RecoEvent.ListHitsToTracks[TypeDet].emplace_back(TrackID);
+              int indexHit = RecoEvent.ListHits[TypeDet].size() - 1;
+
+              tempTrack->second[TypeDet] = indexHit;
 
               int pdg_code = pid_fromName(hit.Pname);
               if(pdg_code == 0)
@@ -1139,6 +1296,16 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               tempHitSim.length  = hit.TrackLength;
               tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
+              auto tempTrackInfo                    = RecoEvent.TrackInfo.find(TrackID);
+              tempTrackInfo->second[TypeDet].pdg    = pdg_code;
+              tempTrackInfo->second[TypeDet].momX   = hit.MomX;
+              tempTrackInfo->second[TypeDet].momY   = hit.MomY;
+              tempTrackInfo->second[TypeDet].momZ   = hit.MomZ;
+              tempTrackInfo->second[TypeDet].mass   = hit.Mass;
+              tempTrackInfo->second[TypeDet].Eloss  = hit.Energy;
+              tempTrackInfo->second[TypeDet].time   = hit.Time;
+              tempTrackInfo->second[TypeDet].length = hit.TrackLength;
+
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
               if(PDG_particle == nullptr)
                 {
@@ -1152,6 +1319,9 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
               if(TypeDet >= G4Sol::TR1 && TypeDet <= G4Sol::TR2)
                 fillOutHit(OutTree->TR, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
+
+              if(TypeDet >= G4Sol::MiniFiberD1_x && TypeDet <= G4Sol::FiberD5_v)
+                fillOutHit(OutTree->Fiber, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet >= G4Sol::CDC_layer0 && TypeDet <= G4Sol::CDC_layer14)
                 fillOutHit(OutTree->CDC, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
@@ -1177,274 +1347,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
         }
     }
 
-
-  // Fiber ana //////////////////////////////////
-  FiberAnalyzer* fiberana = new FiberAnalyzer();
-  FiberHitClCont          = fiberana->Clusterize(FiberHitCont, att.WF_perfect);
-
-  RecoEvent.FiberHitClCont = FiberHitClCont;
-
-  int TypeDet[7][3] = {{G4Sol::FiberD1_x, G4Sol::FiberD1_u, G4Sol::FiberD1_v},
-                       {G4Sol::FiberD2_x, G4Sol::FiberD2_u, G4Sol::FiberD2_v},
-                       {G4Sol::FiberD3_x, G4Sol::FiberD3_u, G4Sol::FiberD3_v},
-                       {G4Sol::MiniFiberD1_x, G4Sol::MiniFiberD1_u, G4Sol::MiniFiberD1_v},
-                       {G4Sol::MiniFiberD2_x, G4Sol::MiniFiberD2_v, G4Sol::MiniFiberD2_u},
-                       {G4Sol::FiberD4_v, G4Sol::FiberD4_u, G4Sol::FiberD4_x},
-                       {G4Sol::FiberD5_x, G4Sol::FiberD5_u, G4Sol::FiberD5_v}};
-
-  std::string nameVolDet[7][3] = {{"FiberD1_log_x", "FiberD1_log_u", "FiberD1_log_v"},
-                                  {"FiberD2_log_x", "FiberD2_log_u", "FiberD2_log_v"},
-                                  {"FiberD3_log_x", "FiberD3_log_u", "FiberD3_log_v"},
-                                  {"MiniFiberD1_log_x", "MiniFiberD1_log_u", "MiniFiberD1_log_v"},
-                                  {"MiniFiberD2_log_x", "MiniFiberD2_log_v", "MiniFiberD2_log_u"},
-                                  {"FiberD4_log_v", "FiberD4_log_u", "FiberD4_log_x"},
-                                  {"FiberD5_log_x", "FiberD5_log_u", "FiberD5_log_v"}};
-
-  std::string nameFiber[7][3] = {{"FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v"},
-                                  {"FiberD2_Core_log_x", "FiberD2_Core_log_u", "FiberD2_Core_log_v"},
-                                  {"FiberD3_Core_log_x", "FiberD3_Core_log_u", "FiberD3_Core_log_v"},
-                                  {"MiniFiberD1_Core_log_x", "MiniFiberD1_Core_log_u", "MiniFiberD1_Core_log_v"},
-                                  {"MiniFiberD2_Core_log_x", "MiniFiberD2_Core_log_v", "MiniFiberD2_Core_log_u"},
-                                  {"FiberD4_Core_log_v", "FiberD4_Core_log_u", "FiberD4_Core_log_x"},
-                                  {"FiberD5_Core_log_x", "FiberD5_Core_log_u", "FiberD5_Core_log_v"}};
-
-  std::string nameMotherDet[7] = {"FiberD1_log_0",     "FiberD2_log_0", "FiberD3_log_0",
-                                  "MiniFiberD1_log_0", "MiniFiberD2_log_0",
-                                  "FiberD4_log_0",     "FiberD5_log_0"};
-
-  for(int i = 0; i < 7; ++i)
-    {
-      for(int j = 0; j < 3; ++j)
-        {
-          // std::cout << "\nsize before : " << FiberHitCont[i][j].size() << std::endl;
-          // std::cout << "size after  : " << FiberHitClCont[i][j].size() << std::endl;
-          for(int k = 0; k < (int)FiberHitClCont[i][j].size(); ++k)
-            {
-              // FiberHitClCont[i][j][k]->Print();
-              std::string volumeName = nameVolDet[i][j];
-              std::string motherName = nameMotherDet[i];
-              std::string fiberName = nameFiber[i][j];
-
-              int hitID = FiberHitClCont[i][j][k]->GetClFib();
-
-#ifdef DEBUG_BUILD2
-              std::cout << "Fiber:" << i << "   Layer: " << j << "   HitID: " << hitID << "\n"; 
-#endif
-
-              TGeoMatrix* g1 =
-                  gGeoManager->GetVolume(volumeName.c_str())->GetNode( (fiberName + Form("_%d", hitID*2)).c_str() )->GetMatrix(); // fiber core
-
-              TGeoMatrix* g1_pair =
-                  gGeoManager->GetVolume(volumeName.c_str())->GetNode( (fiberName + Form("_%d", hitID*2 +1)).c_str() )->GetMatrix(); // fiber pair core
-
-              TGeoHMatrix H1(*g1), H1_pair(*g1_pair);
-              Double_t* center_hit = H1.GetTranslation();
-              Double_t* center_pair = H1_pair.GetTranslation();
-              Double_t center_both[3];
-              center_both[0] = (center_hit[0] + center_pair[0]) / 2.;
-              center_both[1] = (center_hit[1] + center_pair[1]) / 2.;
-              center_both[2] = (center_hit[2] + center_pair[2]) / 2.;
-
-              H1.SetTranslation(center_both);
-
-              TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")
-                                   ->GetNode(motherName.c_str())
-                                   ->GetVolume()
-                                   ->GetNode((volumeName + "_0").c_str())
-                                   ->GetMatrix(); // fiber layer
-              TGeoMatrix* g3 =
-                  gGeoManager->GetVolume("MFLD")->GetNode(motherName.c_str())->GetMatrix(); // fiber station
-              TGeoMatrix* g4 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();     // MFLD
-              TGeoHMatrix H2(*g2), H3(*g3), H4(*g4);
-              TGeoHMatrix H = H2 * H1;
-              H             = H3 * H;
-              H             = H4 * H;
-              TGeoHMatrix w1("w1");
-              TGeoHMatrix w2("w2");
-              w1.SetDz(-10);
-              w2.SetDz(10);
-              TGeoHMatrix Hw1 = H * w1;
-              TGeoHMatrix Hw2 = H * w2;
-#ifdef DEBUG_BUILD2
-              H.Print();
-              Hw1.Print();
-              Hw2.Print();
-#endif
-              double* edge1 = Hw1.GetTranslation();
-              double* edge2 = Hw2.GetTranslation();
-              // std::cout << "edge1[0] : " << edge1[0] << std::endl;
-              // std::cout << "edge1[1] : " << edge1[1] << std::endl;
-              // std::cout << "edge1[2] : " << edge1[2] << std::endl;
-              // std::cout << "edge2[0] : " << edge2[0] << std::endl;
-              // std::cout << "edge2[1] : " << edge2[1] << std::endl;
-              // std::cout << "edge2[2] : " << edge2[2] << std::endl;
-              double* shift = H.GetTranslation();
-              // std::cout << "shift[0] : " << shift[0] << std::endl;
-              // std::cout << "shift[1] : " << shift[1] << std::endl;
-              // std::cout << "shift[2] : " << shift[2] << std::endl;
-              //TVector3 o(0., 0., shift[2]), zdir(0., 0., 1.);
-              TVector3 o(0., 0., FiberHitClCont[i][j][k]->GetZ()*0.1), zdir(0., 0., 1.);
-              TVector3 fiber_dir(edge2[0] - edge1[0], edge2[1] - edge1[1], edge2[2] - edge1[2]);
-              fiber_dir  = fiber_dir.Unit();
-              TVector3 u = fiber_dir.Cross(zdir);
-              TVector3 v = fiber_dir;
-              genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
-
-              TVectorD hitCoords(1);
-              hitCoords(0) = FiberHitClCont[i][j][k]->GetPos()*0.1; //u.Dot(TVector3(shift[0], shift[1], 0));
-              TMatrixDSym hitCov(1);
-              //hitCov(0, 0) = TMath::Sq(FiberHitClCont[i][j][k]->GetRes()*0.1); // mm to cm // to be adjusted resolution_fiber * resolution_fiber; // Check with or without Square root?
-              hitCov(0, 0) = std::pow(FiberHitClCont[i][j][k]->GetRes()*0.1, 2.); // mm to cm
-              auto measurement =
-                  std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, TypeDet[i][j], hitID, nullptr);
-              dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
-
-              RecoEvent.ListHits[TypeDet[i][j]].emplace_back(measurement.release());
-
-              MeasurementInfo measinfo(FiberHitClCont[i][j][k]->GetTOT(), FiberHitClCont[i][j][k]->GetTime(), FiberHitClCont[i][j][k]->GetdE());
-              RecoEvent.ListHitsInfo[TypeDet[i][j]].emplace_back(measinfo);
-
-              RecoEvent.ListHitsToTracks[TypeDet[i][j]].emplace_back(FiberHitClCont[i][j][k]->GetSimTrackID());
-
-              //std::cout << "FiberCl Det: " << i << " layer: " << j << " hit: " << hitID << " TrackID: " << FiberHitClCont[i][j][k]->GetSimTrackID() << "\n";
-            }
-        }
-    }
-
-  for(int i = 0; i < 7; ++i)
-    {
-      for(int j = 0; j < 3; ++j)
-        {
-          LocalHisto.h13[i][j]->Fill(FiberHitCont[i][j].size());
-          LocalHisto.h14[i][j]->Fill(FiberHitClCont[i][j].size());
-
-          for(int k = 0; k < (int)FiberHitCont[i][j].size(); ++k)
-            {
-              LocalHisto.h10[i][j]->Fill(FiberHitCont[i][j][k]->GetFib(), FiberHitCont[i][j][k]->GetTL());
-              LocalHisto.h11[i][j]->Fill(FiberHitCont[i][j][k]->GetPos());
-            }
-
-          for(int k = 0; k < (int)FiberHitClCont[i][j].size(); ++k)
-            {
-              LocalHisto.h12[i][j]->Fill(FiberHitClCont[i][j][k]->GetPos());
-              LocalHisto.h15[i][j]->Fill(FiberHitClCont[i][j][k]->GetClsize());
-              LocalHisto.h75[i][j]->Fill(FiberHitClCont[i][j][k]->GetClFib(), FiberHitClCont[i][j][k]->GetPos());
-            }
-        }
-    }
-
-  for(int i=0; i<7; ++i){
-    for(int j=0; j<3; ++j){
-      for(int k=0; k<(int)FiberHitClCont[i][j].size(); ++k){
-        FiberHitAna *hit = FiberHitClCont[i][j][k];
-        LocalHisto.hfiber_13_0[i][j]->Fill(hit->GetTL());
-        LocalHisto.hfiber_13_1[i][j]->Fill(hit->GetTime());
-        LocalHisto.hfiber_13_2[i][j]->Fill(hit->GetTime());
-        LocalHisto.hfiber_13_3[i][j]->Fill(hit->GetFib(), hit->GetTL());
-        LocalHisto.hfiber_13_4[i][j]->Fill(hit->GetFib(), hit->GetTime());
-      }
-    }
-  }
-
-  for(int i=2; i<5; ++i){
-    for(int j=0; j<3; ++j){
-      for(int k=0; k<(int)FiberHitClCont[i][j].size(); ++k){
-        LocalHisto.h51[i-2][j][0]->Fill(FiberHitClCont[i][j][k]->GetFib(), FiberHitClCont[i][j][k]->GetTOT());
-      }
-    }
-  }
-
-
-  // Fiber Track Analysis
-  std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont
-                  = fiberana->FiberTracking(FiberHitClCont, par.get(), RecoEvent.ListHits[G4Sol::PSCE]);
-
-  RecoEvent.FiberTrackCont = FiberTrackCont;
-
-  int num_combi_mft12 = 1;
-  for(int i=3; i<5; ++i)
-    for(int j=0; j<3; ++j)
-      num_combi_mft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
-
-  if(par->flag_mft12_combi && num_combi_mft12<par->cut_mft12_combi){
-    LocalHisto.hfiber_1_1->Fill(num_combi_mft12);
-    LocalHisto.hfiber_1_2->Fill((double)num_combi_mft12*1e-3);
-    LocalHisto.hfiber_1_3->Fill((double)num_combi_mft12*1e-3);
-    LocalHisto.hfiber_1_4->Fill((double)num_combi_mft12*1e-6);
-  }
-
-  LocalHisto.hfiber_1_5->Fill((double)num_combi_mft12*1e-3);
-  LocalHisto.hfiber_1_6->Fill((double)num_combi_mft12*1e-3);
-  LocalHisto.hfiber_1_7->Fill((double)num_combi_mft12*1e-6);
-  if(par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
-
-  for(auto track: FiberTrackCont["mft12"]){
-    double x1 = -9999.;
-    double x2 = -9999.;
-    double u1 = -9999.;
-    double u2 = -9999.;
-    double v1 = -9999.;
-    double v2 = -9999.;
-    for(auto hit: track->GetContHit()){
-      double pos = hit->GetPos();
-      if(hit->GetDid()==30) x1 = pos;
-      if(hit->GetDid()==31) u1 = pos;
-      if(hit->GetDid()==32) v1 = pos;
-      if(hit->GetDid()==40) x2 = pos;
-      if(hit->GetDid()==41) v2 = pos;
-      if(hit->GetDid()==42) u2 = pos;
-    }
-    if(x1!=-9999. && x2!=-9999.) LocalHisto.hfiber_12_1_1->Fill(x1, x2);
-    if(u1!=-9999. && u2!=-9999.) LocalHisto.hfiber_12_2_1->Fill(u1, u2);
-    if(v1!=-9999. && v2!=-9999.) LocalHisto.hfiber_12_3_1->Fill(v1, v2);
-    if(track->IsFlagPair()){
-      if(x1!=-9999. && x2!=-9999.) LocalHisto.hfiber_12_1_2->Fill(x1, x2);
-      if(u1!=-9999. && u2!=-9999.) LocalHisto.hfiber_12_2_2->Fill(u1, u2);
-      if(v1!=-9999. && v2!=-9999.) LocalHisto.hfiber_12_3_2->Fill(v1, v2);
-    }
-  }
-
-  LocalHisto.hfiber_3_0->Fill(FiberTrackCont["mft12"].size());
-
-  int num_combi_dft12 = 1;
-  for(int i=5; i<7; ++i)
-    for(int j=0; j<3; ++j)
-      num_combi_dft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
-
-  if(par->flag_dft12_combi && num_combi_dft12<par->cut_dft12_combi){
-    LocalHisto.hfiber_5_1->Fill(num_combi_dft12);
-    LocalHisto.hfiber_5_2->Fill((double)num_combi_dft12*1e-3);
-    LocalHisto.hfiber_5_3->Fill((double)num_combi_dft12*1e-3);
-    LocalHisto.hfiber_5_4->Fill((double)num_combi_dft12*1e-6);
-  }
-
-  LocalHisto.hfiber_5_5->Fill((double)num_combi_dft12*1e-3);
-  LocalHisto.hfiber_5_6->Fill((double)num_combi_dft12*1e-3);
-  LocalHisto.hfiber_5_7->Fill((double)num_combi_dft12*1e-6);
-  if(par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
-
-  for(int i=0; i<FiberTrackCont["dft12"].size(); ++i){
-    FiberTrackAna *track = FiberTrackCont["dft12"][i];
-    LocalHisto.hfiber_4_2_3->Fill(track->GetXdet(), track->GetYdet());
-    LocalHisto.hfiber_4_3_3->Fill(track->GetXdet(), track->GetA()*1000);
-    LocalHisto.hfiber_4_4_3->Fill(track->GetYdet(), track->GetB()*1000);
-    LocalHisto.hfiber_4_5_3->Fill(track->GetTOT());
-  }
-
-  LocalHisto.h18_3_1->Fill(FiberTrackCont["dft12"].size());
-  if(FiberTrackCont["dft12"].size()>0){
-    LocalHisto.h18_3_2->Fill(FiberTrackCont["dft12"][0]->GetChi2());
-    LocalHisto.h18_3_3->Fill(FiberTrackCont["dft12"][0]->GetXtgt(), FiberTrackCont["dft12"][0]->GetA()*1000);
-    LocalHisto.h18_3_4->Fill(FiberTrackCont["dft12"][0]->GetYtgt(), FiberTrackCont["dft12"][0]->GetB()*1000);
-    LocalHisto.h18_3_5->Fill(FiberTrackCont["dft12"][0]->GetXtgt());
-    LocalHisto.h18_3_6->Fill(FiberTrackCont["dft12"][0]->GetYtgt());
-    LocalHisto.h18_3_7->Fill(FiberTrackCont["dft12"][0]->GetA()*1000);
-    LocalHisto.h18_3_8->Fill(FiberTrackCont["dft12"][0]->GetB()*1000);
-  }
-
-
-
-  OutTree->Field       = att.Field_Strength;
+  OutTree->Field = att.Field_Strength;
 
   OutTree->NInSi       = OutTree->InSi->GetEntries();
   OutTree->NTr         = OutTree->TR->GetEntries();
@@ -1463,7 +1366,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 #endif
 
 #ifdef DEBUG_BUILD
-  /*
   att._logger->debug(" DAF Hit :");
   for(auto track : RecoEvent.TrackDAF)
     {
@@ -1506,12 +1408,15 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
 
       att._logger->debug("] ");
     }
-*/
-  for(size_t i_det = 0; i_det < RecoEvent.ListHits.size(); ++i_det)
-    att._logger->debug("RecoListHits det {} size {}", i_det, RecoEvent.ListHits[i_det].size());
 
+  for(size_t i_det = 0; i_det < RecoEvent.ListHits.size(); ++i_det) // const auto& det : RecoEvent.ListHits)
+    {
+      att._logger->debug("RecoListHits det {} size {}", i_det, RecoEvent.ListHits[i_det].size());
+      //   for(const auto& hit : det)
+      //     if(hit != nullptr)
+      //       hit->Print();
+    }
 #endif
-
   return 0;
 }
 

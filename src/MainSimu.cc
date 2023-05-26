@@ -6,7 +6,6 @@
 //#include "FullRecoTaskMT.hh"
 //#include "FullRecoTaskZMQ.hh"
 #include "KFParticle.h"
-#include "TBuildDetectorLayerPlaneDAF.h"
 
 
 //#include "TApplication.h"

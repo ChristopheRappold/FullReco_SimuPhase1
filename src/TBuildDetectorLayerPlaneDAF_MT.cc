@@ -1038,3 +1038,18 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
 #endif
   return 0;
 }
+
+double TBuildDetectorLayerPlaneDAF_MT::CloseDist(const TVector3& Xin, const TVector3& Xout, const TVector3& Pin, const TVector3& Pout)
+{
+  double ui = Pin.x() / Pin.z(), vi = Pin.y() / Pin.z();
+  double uo = Pout.x() / Pout.z(), vo = Pout.y() / Pout.z();
+  double xi = Xin.x(), yi = Xin.y();
+  double xo = Xout.x() + Pout.x() / Pout.z() * (Xin.z() - Xout.z());
+  double yo = Xout.y() + Pout.y() / Pout.z() * (Xin.z() - Xout.z());
+
+  double z  = ((xi - xo) * (uo - ui) + (yi - yo) * (vo - vi)) / ((uo - ui) * (uo - ui) + (vo - vi) * (vo - vi));
+  double x1 = xi + ui * z, y1 = yi + vi * z;
+  double x2 = xo + uo * z, y2 = yo + vo * z;
+
+  return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+}

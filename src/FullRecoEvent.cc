@@ -85,9 +85,9 @@ void FullRecoEvent::Clear(int toclean)
   //FragmentTracks.clear();
   //PionTracks.clear();
 
-/*
+
   Si_HitsEnergyLayer.clear();
-  
+/*
   Hits_Si1.clear();
   Hits_Si2.clear();
   Hits_Si3.clear();

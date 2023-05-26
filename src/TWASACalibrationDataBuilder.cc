@@ -1,4 +1,4 @@
-#include "TBuildWASACalibrationLayerPlane.h"
+#include "TWASACalibrationDataBuilder.h"
 
 #include <list>
 #include <map>
@@ -10,10 +10,10 @@
 
 using namespace std;
 
-TBuildWASACalibrationLayerPlane::TBuildWASACalibrationLayerPlane(const THyphiAttributes& attribut)
+TWASACalibrationDataBuilder::TWASACalibrationDataBuilder(const THyphiAttributes& attribut)
     : TDataBuilder("build_det"), att(attribut)
 {
-  att._logger->info("TBuildWASACalibrationLayerPlane::TBuildWASACalibrationLayerPlane");
+  att._logger->info("TWASACalibrationDataBuilder::TWASACalibrationDataBuilder");
 
   par = std::make_unique<ParaManager>(att.map_ParamFiles);
 
@@ -36,10 +36,10 @@ TBuildWASACalibrationLayerPlane::TBuildWASACalibrationLayerPlane(const THyphiAtt
   offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC + 17 -1;
 }
 
-TBuildWASACalibrationLayerPlane::~TBuildWASACalibrationLayerPlane() {}
+TWASACalibrationDataBuilder::~TWASACalibrationDataBuilder() {}
 
 #ifdef ROOT6
-ReturnRes::InfoM TBuildWASACalibrationLayerPlane::operator()(const EventWASAUnpack& event, FullRecoEvent& RecoEvent,
+ReturnRes::InfoM TWASACalibrationDataBuilder::operator()(const EventWASAUnpack& event, FullRecoEvent& RecoEvent,
                                                              Ana_WasaEvent* OutTree)
 {
   int result = Exec(event, RecoEvent, OutTree);
@@ -47,7 +47,7 @@ ReturnRes::InfoM TBuildWASACalibrationLayerPlane::operator()(const EventWASAUnpa
   return SoftExit(result);
 }
 #else
-ReturnRes::InfoM TBuildWASACalibrationLayerPlane::operator()(const EventWASAUnpack& event, FullRecoEvent& RecoEvent,
+ReturnRes::InfoM TWASACalibrationDataBuilder::operator()(const EventWASAUnpack& event, FullRecoEvent& RecoEvent,
                                                              Ana_WasaEvent* OutTree)
 {
   int result = Exec(event, RecoEvent, OutTree);
@@ -55,14 +55,14 @@ ReturnRes::InfoM TBuildWASACalibrationLayerPlane::operator()(const EventWASAUnpa
   return SoftExit(result);
 }
 
-ReturnRes::InfoM TBuildWASACalibrationLayerPlane::operator()(const EventWASAUnpack& event,
+ReturnRes::InfoM TWASACalibrationDataBuilder::operator()(const EventWASAUnpack& event,
                                                           FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 {
   return ReturnRes::BuildError;
 }
 
 #endif
-void TBuildWASACalibrationLayerPlane::SelectHists()
+void TWASACalibrationDataBuilder::SelectHists()
 {
   LocalHisto.h_Builderstats = AnaHisto->CloneAndRegister(AnaHisto->h_Builderstats);
 
@@ -231,7 +231,7 @@ void TBuildWASACalibrationLayerPlane::SelectHists()
   LocalHisto.htrig_4 = AnaHisto->CloneAndRegister(AnaHisto->htrig_4);
 }
 
-ReturnRes::InfoM TBuildWASACalibrationLayerPlane::SoftExit(int return_build)
+ReturnRes::InfoM TWASACalibrationDataBuilder::SoftExit(int return_build)
 {
   if(return_build == -1)
     {
@@ -275,10 +275,10 @@ ReturnRes::InfoM TBuildWASACalibrationLayerPlane::SoftExit(int return_build)
 }
 
 #ifdef ROOT6
-int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullRecoEvent& RecoEvent,
+int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEvent& RecoEvent,
                                           Ana_WasaEvent* OutTree)
 #else
-int TBuildWASACalibrationLayerPlane::Exec(const EventWASAUnpack& event, FullRecoEvent& RecoEvent,
+int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEvent& RecoEvent,
                                           Ana_WasaEvent* OutTree)
 #endif
 {

@@ -2,8 +2,8 @@
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "Ana_Event/Ana_WasaEvent.hh"
-#include "TBuildDetectorLayerPlaneDAF.h"
-#include "TBuildWASACalibrationLayerPlane.h"
+#include "TWASACalibrationSimuBuilder.h"
+#include "TWASACalibrationDataBuilder.h"
 #include "TBuildRestarter.h"
 
 #include "TBayesFinder.h"
@@ -52,9 +52,9 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
   else
     {
       if constexpr(recotask::HasMC_Particle<TEOut>::value == true)
-        det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
+        det_build = new TWASACalibrationSimuBuilder(Attributes);
       else
-        det_build = new TBuildWASACalibrationLayerPlane(Attributes);
+        det_build = new TWASACalibrationDataBuilder(Attributes);
     }
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
@@ -220,7 +220,7 @@ int FullRecoTask<TEOut>::EventLoop(const TG4Sol_Event& ev, const std::vector<TCl
 {
 
   REvent.Clear();
-  int return_build = (*dynamic_cast<TBuildDetectorLayerPlaneDAF*>(det_build))(ev,hits,REvent,OutTree);
+  int return_build = (*dynamic_cast<TWASACalibrationSimuBuilder*>(det_build))(ev,hits,REvent,OutTree);
   
   if(return_build !=0)
     return -1;
@@ -260,7 +260,7 @@ int FullRecoTask<TEOut>::EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* Ou
 {
 
   REvent.Clear();
-  int return_build = (*dynamic_cast<TBuildWASACalibrationLayerPlane*>(det_build))(UnpackEvent,REvent,OutTree);
+  int return_build = (*dynamic_cast<TWASACalibrationDataBuilder*>(det_build))(UnpackEvent,REvent,OutTree);
 
   if(return_build !=0)
     return -1;

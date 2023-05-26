@@ -273,6 +273,8 @@ public:
                               FullRecoEvent& RecoEvent);
 #endif
 
+  double CloseDist(const TVector3& Xin, const TVector3& Xout, const TVector3& Pin, const TVector3& Pout);
+
 private:
   // int Exec(THyphiEvent_Phys_new *event,Ana_Event* OutTree);
 #ifdef ROOT6
