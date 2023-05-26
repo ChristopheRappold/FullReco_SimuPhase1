@@ -63,6 +63,14 @@ int TFragmentFinder<Out>::FinderFragment(FullRecoEvent& RecoEvent)
     {
       RealFragmentFinder(RecoEvent.TrackDAFSim, Fragment_pdg, RecoEvent.FragmentTracks);
       LocalHisto.hopt_1_4->Fill(RecoEvent.FragmentTracks.size());
+
+      for(int i=0; i<RecoEvent.FragmentTracks.size(); ++i)
+        {
+          LocalHisto.hopt_1_1->Fill(RecoEvent.FragmentTracks[i].GetMom().X() / RecoEvent.FragmentTracks[i].GetMom().Z());
+          LocalHisto.hopt_1_2->Fill(RecoEvent.FragmentTracks[i].GetMom().Y() / RecoEvent.FragmentTracks[i].GetMom().Z());
+          LocalHisto.hopt_1_3->Fill(RecoEvent.FragmentTracks[i].GetMom().Mag());
+        }
+
       return 0;
     }
 
@@ -106,6 +114,7 @@ int TFragmentFinder<Out>::FinderFragment(FullRecoEvent& RecoEvent)
           tmp_FragmentTrack.SetChi2NDF(RecoEvent.FiberTrackCont["dft12"][i]->GetChi2());
           tmp_FragmentTrack.SetIsBest(optics->IsBest());
           tmp_FragmentTrack.SetPID(optics->GetPID());
+          tmp_FragmentTrack.SetTrackID(i);
 
           RecoEvent.FragmentTracks.emplace_back(tmp_FragmentTrack);
         }
@@ -163,36 +172,30 @@ void TFragmentFinder<Out>::RealFragmentFinder(std::unordered_map<int, std::vecto
   for(itr = TrackDAFSim.begin(); itr != TrackDAFSim.end(); ++itr)
     {
       size_t iDetFirst = -1;
-      size_t iDetLast = -1;
 
-      for(size_t iDet = 0; iDet < itr->second.size(); ++iDet)
+      for(size_t iDet = G4Sol::FiberD4_v; iDet < G4Sol::FiberD5_v; ++iDet)
         {
           if(itr->second[iDet].size() == 0)
             continue;
 
-          if(iDetFirst == -1)
-            iDetFirst = iDet;
-
-          iDetLast = iDet;
+          iDetFirst = iDet;
+          break;
         }
 
       if(iDetFirst == -1)
         continue;
-
-      iDetFirst = iDetLast;
-
 
       if(itr->second[iDetFirst][0].pdg == fragment_pdg)
         {
 
           TVector3 tmp_pos = TVector3(itr->second[iDetFirst][0].hitX, itr->second[iDetFirst][0].hitY, itr->second[iDetFirst][0].hitZ);
           TVector3 tmp_mom = TVector3(itr->second[iDetFirst][0].momX, itr->second[iDetFirst][0].momY, itr->second[iDetFirst][0].momZ);
-          std::vector<double> tmp_covmatrix = {1.e-8,
-                                                  0., 1.e-8,
-                                                  0.,    0., 1.e-8,
-                                                  0.,    0.,    0., 1.e-8,
-                                                  0.,    0.,    0.,    0., 1.e-8,
-                                                  0.,    0.,    0.,    0.,    0., 1.e-8}; //Change!
+          std::vector<double> tmp_covmatrix = {1.e-2,
+                                                  0., 1.e-2,
+                                                  0.,    0., 1.e-2,
+                                                  0.,    0.,    0., 1.e-3,
+                                                  0.,    0.,    0.,    0., 1.e-3,
+                                                  0.,    0.,    0.,    0.,    0., 1.e-3}; //Change!
           
 
           FragmentTrack tmp_FragmentTrack;
@@ -204,6 +207,7 @@ void TFragmentFinder<Out>::RealFragmentFinder(std::unordered_map<int, std::vecto
           tmp_FragmentTrack.SetChi2NDF(1.); //CHECK Change!
           tmp_FragmentTrack.SetIsBest(true);
           tmp_FragmentTrack.SetPID(fragment_pdg);
+          tmp_FragmentTrack.SetTrackID(itr->first);
 
           RealFragmentTracks.emplace_back(tmp_FragmentTrack);
         }

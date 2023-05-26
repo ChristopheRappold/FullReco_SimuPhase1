@@ -621,6 +621,7 @@ class FragmentTrack
     void SetChi2NDF(double _chi2ndf) { chi2ndf = _chi2ndf; };
     void SetIsBest(bool _isbest) { isbest = _isbest; };
     void SetPID(int _pid) { pid = _pid; };
+    void SetTrackID(int _trackid) { trackid = _trackid; };
 
 
     TVector3 GetPos() { return pos; };
@@ -631,6 +632,7 @@ class FragmentTrack
     double GetChi2NDF() { return chi2ndf; };
     bool GetIsBest() { return isbest; };
     int GetPID() { return pid; };
+    int GetTrackID() { return trackid; };
 
   private:
     TVector3 pos = TVector3(-999., -999., -999.);
@@ -641,6 +643,7 @@ class FragmentTrack
     double chi2ndf = -999.;
     bool isbest = false;
     int pid = -999;
+    int trackid = -999;
 };
 
 
@@ -806,9 +809,9 @@ public:
   std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
   std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitClCont;
 
-/*
+
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
-  
+/*
   std::vector<std::vector<double> > Hits_Si1{};
   std::vector<std::vector<double> > Hits_Si2{};
   std::vector<std::vector<double> > Hits_Si3{};

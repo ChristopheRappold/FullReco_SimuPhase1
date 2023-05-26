@@ -232,6 +232,8 @@ private:
 
   int KFPart_fConstructMethod = 2;
 
+  bool ifRemoveNaNMother = true;
+
   bool ifCut_MaxClosedist_DaughterTracks = false; 
   double MaxClosedist_DaughterTracks = 10.; //Change !
 

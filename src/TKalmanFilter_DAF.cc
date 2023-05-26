@@ -1257,7 +1257,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               tempResults.firstHit     = id_firstDet;
               tempResults.lastHit      = id_lastDet;
               tempResults.Ncentral     = n_Central;
-              tempResults.Nmfiber  = n_MiniFiber;
+              tempResults.Nmfiber      = n_MiniFiber;
               tempResults.dE           = dE;
               tempResults.path_time    = Path_time;
               tempResults.path_length  = Path_lengthMean;

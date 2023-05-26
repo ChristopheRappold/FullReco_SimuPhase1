@@ -344,7 +344,8 @@ void FiberHitAna::Add(FiberHitAna *hit){
   i_pos      = ( i_pos      * i_clsize + hit->GetPos()   * hit->GetClsize() ) / ( i_clsize + hit->GetClsize() );
   i_cl_fiber = ( i_cl_fiber * i_clsize + hit->GetClFib() * hit->GetClsize() ) / ( i_clsize + hit->GetClsize() );
   i_z        = ( i_z        * i_clsize + hit->GetZ()     * hit->GetClsize() ) / ( i_clsize + hit->GetClsize() );
-  i_clsize += hit->GetClsize();
+  i_clsize  += hit->GetClsize();
+  //i_res      =
 
 }
 
