@@ -48,7 +48,7 @@ ReturnRes::InfoM TCheckFiberXUV<Out>::operator()(FullRecoEvent& RecoEvent, Out* 
 }
 
 template<class Out>
-int TCheckFiberXUV<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
+int TCheckFiberXUV<Out>::Exec(FullRecoEvent& RecoEvent, Out* )
 {  
   return CheckHitXUV(RecoEvent);
 }
@@ -111,7 +111,7 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 							rand->Uniform(RecoEvent.InteractionPoint[1] - randIPXY, RecoEvent.InteractionPoint[1] + randIPXY));
 
 	//Get 3-fiber correct combination & real hit position
-  for(int i_det = 0; i_det < id_detector.size(); ++i_det)
+  for(size_t i_det = 0; i_det < id_detector.size(); ++i_det)
 	  {
 	  	int i = id_detector[i_det];
 		  std::unordered_map<int,std::tuple<std::vector<size_t>,std::vector<size_t>,std::vector<size_t> > > tmp_realCombIdHit;
@@ -265,7 +265,7 @@ int TCheckFiberXUV<Out>::CheckHitXUV(const FullRecoEvent& RecoEvent)
 
 
   //Get recons hits
-  for(int i_det = 0; i_det < id_detector.size(); ++i_det)
+  for(size_t i_det = 0; i_det < id_detector.size(); ++i_det)
 	  {
 	  	int i = id_detector[i_det];
 	  	if((i == G4Sol::FiberD1_x) || (i == G4Sol::FiberD2_x)) //Skip UFT12
@@ -679,11 +679,13 @@ double TCheckFiberXUV<Out>::FindHitReal_dvalue(double hitx, double hitu, double 
   pos_v = pos_v / std::cos(ang_u);
 
   if(ang_u>0)
-  	hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
+    hit_xv_y =  std::tan((M_PI/2. - ang_u))*pos_x - std::tan((M_PI/2. - ang_u))*pos_v;
   else
-  	hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
+    hit_xv_y = -std::tan((M_PI/2. + ang_u))*pos_x + std::tan((M_PI/2. + ang_u))*pos_v;
 
-	return hit_xu_y-hit_xv_y;
+
+
+  return hit_xu_y-hit_xv_y;
 }
 
 

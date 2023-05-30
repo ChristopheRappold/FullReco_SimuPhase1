@@ -33,6 +33,12 @@ TDecayVertex<Out>::TDecayVertex(const THyphiAttributes& attribut, int pi_type) /
     pion_type = pi_type;
     if(pi_type==0) pi_pdg = piminus_pdg;
     if(pi_type==1) pi_pdg = piplus_pdg;
+
+    StudyCaseSelector_Hyp(att.StudyCase);
+    Hyp_charge = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Charge()/3.;
+    Hyp_mass = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Mass();
+
+
   }
 
 template <class Out>
@@ -335,11 +341,6 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
                                 + std::pow(DecayVertex_real.Y() - att.Target_PositionY, 2.));
   LocalHisto.h_EffPosZPosR_real[pion_type]->Fill(DecayVertex_real.Z() - att.Target_PositionZ, PosR_real, 1.);
   LocalHisto.h_Hyp_RealLifeTime[pion_type]->Fill(RecoEvent.Hyp_LifeTime, 1.);
-
-  StudyCaseSelector_Hyp(att.StudyCase, Hyp_pdg);
-  Hyp_charge = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Charge()/3.;
-  Hyp_mass = TDatabasePDG::Instance()->GetParticle(Hyp_pdg)->Mass();
-
 
   //Primary vertex KFParticle initialization
   KFParticleSIMD KFPart_PrimVtx_real;
@@ -1645,7 +1646,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
 
 template <class Out>
-void TDecayVertex<Out>::StudyCaseSelector_Hyp(std::string StudyCase, int& Hyp_pdg)
+void TDecayVertex<Out>::StudyCaseSelector_Hyp(std::string StudyCase)
 {
   if(StudyCase.compare("H3L") == 0)
     {
@@ -1664,8 +1665,8 @@ void TDecayVertex<Out>::StudyCaseSelector_Hyp(std::string StudyCase, int& Hyp_pd
     }
   else if(StudyCase.compare("lambda") == 0)
     {
-      HypPDG = lambda_pdg;
-      FragmentPDG = proton_pdg;
+      Hyp_pdg = lambda_pdg;
+      //FragmentPDG = proton_pdg;
       recons_from_FRS_MDC = 2;
     }
   else if(StudyCase.compare("background_H3L") == 0)
@@ -1692,7 +1693,7 @@ void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std
   std::unordered_map<int, std::vector<std::vector<SimHit> > >::iterator itr;
   for(itr = TrackDAFSim.begin(); itr != TrackDAFSim.end(); ++itr)
     {
-      size_t iDetFirst = -1;
+      int iDetFirst = -1;
       
       size_t nHits_MDC = 0;
       size_t nHits_MiniFiber = 0;

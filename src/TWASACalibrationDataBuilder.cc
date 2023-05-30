@@ -55,8 +55,8 @@ ReturnRes::InfoM TWASACalibrationDataBuilder::operator()(const EventWASAUnpack& 
   return SoftExit(result);
 }
 
-ReturnRes::InfoM TWASACalibrationDataBuilder::operator()(const EventWASAUnpack& event,
-                                                          FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
+ReturnRes::InfoM TWASACalibrationDataBuilder::operator()(const EventWASAUnpack&,
+                                                          FullRecoEvent&, MCAnaEventG4Sol* )
 {
   return ReturnRes::BuildError;
 }
@@ -639,7 +639,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       TVectorD hitCoords(1);
       hitCoords(0) = 0.;
       TMatrixDSym hitCov(1);
-      hitCov(0, 0) = pow(par->psfe_res_phi * mm2cm, 2); // must be corrected
+      hitCov(0, 0) = pow(par->psfe_res_phi * hitana::mm2cm, 2); // must be corrected
 
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSBE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
@@ -694,7 +694,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         TGeoHMatrix H = H2 * H1;
         H             = H3 * H;
         H             = H4 * H;
-        double* shift = H.GetTranslation();
+        // double* shift = H.GetTranslation();
         TGeoHMatrix w1("w1");
         TGeoHMatrix w2("w2");
         Double_t minZ, maxZ;
@@ -922,7 +922,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
               // std::cout << "edge2[0] : " << edge2[0] << std::endl;
               // std::cout << "edge2[1] : " << edge2[1] << std::endl;
               // std::cout << "edge2[2] : " << edge2[2] << std::endl;
-              double* shift = H.GetTranslation();
+              // double* shift = H.GetTranslation();
               // std::cout << "shift[0] : " << shift[0] << std::endl;
               // std::cout << "shift[1] : " << shift[1] << std::endl;
               // std::cout << "shift[2] : " << shift[2] << std::endl;
@@ -1068,7 +1068,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hfiber_5_7->Fill((double)num_combi_dft12*1e-6);
   if(par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
 
-  for(int i=0; i<FiberTrackCont["dft12"].size(); ++i){
+  for(size_t i=0; i<FiberTrackCont["dft12"].size(); ++i){
     FiberTrackAna *track = FiberTrackCont["dft12"][i];
     LocalHisto.hfiber_4_2_3->Fill(track->GetXdet(), track->GetYdet());
     LocalHisto.hfiber_4_3_3->Fill(track->GetXdet(), track->GetA()*1000);

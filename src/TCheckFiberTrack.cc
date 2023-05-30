@@ -86,7 +86,7 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 #endif
 
       const int id_track = it_trackInfo.first;
-      auto it_ListHits   = RecoEvent.TrackDAF.find(id_track);
+      // auto it_ListHits   = RecoEvent.TrackDAF.find(id_track);
       auto it_ListHitsSim = RecoEvent.TrackDAFSim.find(id_track);
 
 #ifdef DEBUG_FIBERTRACK

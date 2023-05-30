@@ -47,7 +47,7 @@ private:
 
   int FinderFragment(FullRecoEvent& RecoEvent);
 
-  void StudyCaseSelector_Fr(std::string StudyCase, int& Fragment_pdg);
+  void StudyCaseSelector_Fr(const std::string& StudyCase);
 
   void RealFragmentFinder(std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
                          int& fragment_pdg, std::vector<FragmentTrack>& RealFragmentTracks);

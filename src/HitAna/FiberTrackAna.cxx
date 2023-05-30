@@ -429,7 +429,7 @@ void FiberTrackAna::CorrectMFT(ParaManager *par){
         }
         hit_s -= buf_cent_s;
         hit_l -= buf_cent_l;
-        double l_buf =  sqrt( pow(r_ring, 2.) - pow(hit_s, 2.) );
+        // double l_buf =  sqrt( pow(r_ring, 2.) - pow(hit_s, 2.) );
         //double cor_buf =  cor_max - (fabs(hit_s) - 12.6)/(83.0 - 12.6) * (cor_max - cor_min);
         //double r = (pow(l_buf,2) + pow(cor_buf,2)) / (cor_buf * 2);
         //double theta = asin(l_buf/r);
@@ -513,8 +513,8 @@ void FiberTrackAna::CorrectMFTCombi(ParaManager *par){
 void FiberTrackAna::SetPosL(){
 
   for(auto hit: _cont_hit){
-    int lay = hit->GetLay();
-    int fib = hit->GetFib();
+    // int lay = hit->GetLay();
+    // int fib = hit->GetFib();
     double buf_z   = hit->GetZ();
     double buf_ang = hit->GetAng();
     double buf_x = _x + _a * buf_z;

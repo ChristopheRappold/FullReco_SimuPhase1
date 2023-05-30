@@ -317,7 +317,7 @@ int MWDCTracking::Tracking_FitCylindrical(void){
   for(int i=0; i<NumHitCombinationTemp(); i++){
     SetLRCombinationTemp0();
     //for(int j=0; j<NumLRCombinationTemp(); j++){ //}
-    int status_tracking_matrix;
+    // int status_tracking_matrix;
     int status_tracking_fit = TrackingFitCylindrical();
     if(1!=status_tracking_fit){
       cout << "enabled plane choice seems bad..."<< endl;
@@ -380,7 +380,7 @@ int MWDCTracking::Tracking_LRfixed(void){
   for(int i=0; i<NumHitCombinationTemp(); i++){
     SetLRCombinationTemp0();
 #if 1
-    bool WRONGCOMB=false;
+    // bool WRONGCOMB=false;
     int plane_enabled_save[16];
     CopyPlaneEnabled(plane_enabled_temp, plane_enabled_save);
     for(int i_pair=0;i_pair<8;i_pair++){
@@ -525,7 +525,7 @@ int MWDCTracking::ResidualExCalc3(void){
       //printf("b%d\n",NumHitCombinationTemp());
       //------try all combination by inverse matrix method------
       double chi2_excalc3 = 999999.9;
-      double a_excalc3,b_excalc3,x_excalc3,y_excalc3;
+      double a_excalc3 = 99999. , b_excalc3 = 99999., x_excalc3 = 99999., y_excalc3 = 99999.;
       int i_hit_used_excalc3[16];
       int LR_used_excalc3[16];
       SetHitCombinationTemp0();

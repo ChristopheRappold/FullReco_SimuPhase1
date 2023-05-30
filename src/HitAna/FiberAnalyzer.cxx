@@ -844,7 +844,7 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
         double b_fiber = buf_track[i]->GetB();
         double x_fiber = buf_track[i]->GetX();
         double y_fiber = buf_track[i]->GetY();
-        double phi_psb   = GetPSB_Phi(ListHits_PSB[j]->getHitId()) + par->psb_rot_z*Deg2Rad;
+        double phi_psb   = GetPSB_Phi(ListHits_PSB[j]->getHitId()) + par->psb_rot_z*hitana::Deg2Rad;
         double r_psb     = GetPSB_R(ListHits_PSB[j]->getHitId());
         double z_psb     = ListHits_PSB[j]->getRawHitCoords()[1]*10.; //in mm
 
@@ -984,7 +984,7 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
           double b_fiber = buf_track[i]->GetB();
           double x_fiber = buf_track[i]->GetX();
           double y_fiber = buf_track[i]->GetY();
-          double phi_psb   = GetPSB_Phi(ListHits_PSB[j]->getHitId()) + par->psb_rot_z*Deg2Rad;
+          double phi_psb   = GetPSB_Phi(ListHits_PSB[j]->getHitId()) + par->psb_rot_z*hitana::Deg2Rad;
           double r_psb     = GetPSB_R(ListHits_PSB[j]->getHitId());
           double z_psb     = ListHits_PSB[j]->getRawHitCoords()[1]*10.; //in mm
 

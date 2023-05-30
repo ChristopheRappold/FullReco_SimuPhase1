@@ -946,7 +946,7 @@ void TPrimaryVertex<Out>::PrimaryTracksSelector(std::vector<PrimVtxTrack>& Prima
 
 template <class Out>
 void TPrimaryVertex<Out>::InteractionPointFinder(std::vector<PrimVtxTrack>& BeamTracks, std::vector<PrimVtxTrack>& PrimaryTracks,
-                                                  TVector3& InteractionPointRecons, std::vector<double>& f_values_IP, size_t& i_BeamTracks_Vmax)
+                                                  TVector3& InteractionPointRecons, std::vector<double>& f_values_IP, size_t& i_BeamTracks_VmaxTemp)
 {
   double V_total = 0.;
   std::vector<double> temp_f_values_IP(PrimaryTracks.size() + 1, 0.);
@@ -1020,7 +1020,7 @@ void TPrimaryVertex<Out>::InteractionPointFinder(std::vector<PrimVtxTrack>& Beam
           V_total = V_temp;
           f_values_IP = temp_f_values_IP;
           InteractionPointRecons.SetXYZ(temp_InteractionPointRecons.X(), temp_InteractionPointRecons.Y(), temp_InteractionPointRecons.Z());
-          i_BeamTracks_Vmax = l;
+          i_BeamTracks_VmaxTemp = l;
         }
     }
 
@@ -1028,7 +1028,7 @@ void TPrimaryVertex<Out>::InteractionPointFinder(std::vector<PrimVtxTrack>& Beam
     {
       f_values_IP.clear();
       InteractionPointRecons.SetXYZ(-999., -999., -999.);
-      i_BeamTracks_Vmax = 999;
+      i_BeamTracks_VmaxTemp = 999;
 
       return;
     }
@@ -1919,7 +1919,7 @@ PrimVtxTrack TPrimaryVertex<Out>::TrackFitting(int nlayer, double* w, double* z,
   PrimVtxTrack tmp_PrimVtxTrack;
 
   size_t n = nlayer;
-  double ct[n],st[n],wt[n];
+  std::vector<double> ct(n,0.),st(n,0.),wt(n,0);
 
   for( std::size_t i=0; i<n; ++i ){
     double ww = w[i];

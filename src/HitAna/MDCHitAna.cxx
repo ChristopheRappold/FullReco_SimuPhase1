@@ -65,7 +65,7 @@ void MDCHitAna::SetPhys(ParaManager *par){
 
   int num_wire = Physinfo.nb_wire;
   double rmax_wire = Physinfo.rmax;
-  double size_wire = 0.5 * Physinfo.wire_size;//convert to radius
+  // double size_wire = 0.5 * Physinfo.wire_size;//convert to radius
   double theta_begin_gr1 = 0.5*TMath::Pi() + hitana::Deg2Rad*Physinfo.Dpsi1; // or Dphi1??
   double theta_begin_gr2 = theta_begin_gr1 + TMath::Pi();
   double theta_step = hitana::Deg2Rad * Physinfo.dpsi0; // or dphi0??

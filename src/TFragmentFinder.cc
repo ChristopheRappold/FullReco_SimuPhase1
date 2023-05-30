@@ -10,6 +10,8 @@ TFragmentFinder<Out>::TFragmentFinder(const THyphiAttributes& attribut) : TDataP
 {
   att._logger->info("TFragmentFinder::TFragmentFinder");
 
+  StudyCaseSelector_Fr(att.StudyCase);
+
 }
 
 template<class Out>
@@ -50,7 +52,6 @@ void TFragmentFinder<Out>::SelectHists()
 template<class Out>
 int TFragmentFinder<Out>::FinderFragment(FullRecoEvent& RecoEvent)
 {
-  StudyCaseSelector_Fr(att.StudyCase, Fragment_pdg);
 
   if(recons_from_FRS_MDC == 2)
     {
@@ -64,7 +65,7 @@ int TFragmentFinder<Out>::FinderFragment(FullRecoEvent& RecoEvent)
       RealFragmentFinder(RecoEvent.TrackDAFSim, Fragment_pdg, RecoEvent.FragmentTracks);
       LocalHisto.hopt_1_4->Fill(RecoEvent.FragmentTracks.size());
 
-      for(int i=0; i<RecoEvent.FragmentTracks.size(); ++i)
+      for(size_t i=0; i<RecoEvent.FragmentTracks.size(); ++i)
         {
           LocalHisto.hopt_1_1->Fill(RecoEvent.FragmentTracks[i].GetMom().X() / RecoEvent.FragmentTracks[i].GetMom().Z());
           LocalHisto.hopt_1_2->Fill(RecoEvent.FragmentTracks[i].GetMom().Y() / RecoEvent.FragmentTracks[i].GetMom().Z());
@@ -76,7 +77,7 @@ int TFragmentFinder<Out>::FinderFragment(FullRecoEvent& RecoEvent)
 
   if(RecoEvent.MWDCTracks.size() == 1 && RecoEvent.FragmentPID != -999)
     {
-      for(int i=0; i<RecoEvent.FiberTrackCont["dft12"].size(); ++i)
+      for(size_t i=0; i<RecoEvent.FiberTrackCont["dft12"].size(); ++i)
         {
           //std::cout << "s4PID : " << s4hit->GetPID() << std::endl;
           OpticsMom *optics = new OpticsMom( RecoEvent.FiberTrackCont["dft12"][i], RecoEvent.MWDCTracks[0], RecoEvent.FragmentPID, att.optics_par, att.optics_s2z);
@@ -127,7 +128,7 @@ int TFragmentFinder<Out>::FinderFragment(FullRecoEvent& RecoEvent)
 
 
 template <class Out>
-void TFragmentFinder<Out>::StudyCaseSelector_Fr(std::string StudyCase, int& Fragment_pdg)
+void TFragmentFinder<Out>::StudyCaseSelector_Fr(const std::string& StudyCase)
 {
   if(StudyCase.compare("H3L") == 0)
     {
@@ -171,7 +172,7 @@ void TFragmentFinder<Out>::RealFragmentFinder(std::unordered_map<int, std::vecto
   std::unordered_map<int, std::vector<std::vector<SimHit> > >::iterator itr;
   for(itr = TrackDAFSim.begin(); itr != TrackDAFSim.end(); ++itr)
     {
-      size_t iDetFirst = -1;
+      int iDetFirst = -1;
 
       for(size_t iDet = G4Sol::FiberD4_v; iDet < G4Sol::FiberD5_v; ++iDet)
         {

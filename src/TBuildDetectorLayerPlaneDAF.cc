@@ -87,14 +87,14 @@ TBuildDetectorLayerPlaneDAF::TBuildDetectorLayerPlaneDAF(const THyphiAttributes&
   int index_lastMDC = -1, index_firstPSCE = -1;
   for(int i=0;i<listNodes->GetEntries();++i)
     {
-      std::string tempName(listNodes->At(i)->GetName());
-      if(tempName == "MD17_1")
+      std::string tempNameList(listNodes->At(i)->GetName());
+      if(tempNameList == "MD17_1")
 	index_lastMDC = i;
-      if(tempName == "PSCE_1")
+      if(tempNameList == "PSCE_1")
 	index_firstPSCE = i;
-      if(tempName == "MDC_1")
+      if(tempNameList == "MDC_1")
 	++newGeoExp;
-      if(tempName == "PSCEall_1")
+      if(tempNameList == "PSCEall_1")
 	++newGeoExp;
     }
   if(index_lastMDC == -1 && index_firstPSCE == -1)
@@ -181,7 +181,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                                       FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 #endif
 {
-  int NumFilled = 0;
+  // int NumFilled = 0;
   //  std::cout<<"TBuidlDetectorLayerPlaneDAF : Proton = "<<event.n_Proton<<endl;
 
 #ifdef DEBUG_BUILD
@@ -451,7 +451,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               int indexInBranch = std::distance(tempHits->begin(), it_hit);
 #else
               const TG4Sol_Hit& hit = *(dynamic_cast<TG4Sol_Hit*>(tempHits->At(it_hit)));
-              int indexInBranch     = it_hit;
+              // int indexInBranch     = it_hit;
 #endif
               int TrackID = hit.TrackID;
               int LayerID = hit.LayerID;
@@ -546,7 +546,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               int indexInBranch = std::distance(tempHits->begin(), it_hit);
 #else
               const TG4Sol_Hit& hit = *(dynamic_cast<TG4Sol_Hit*>(tempHits->At(it_hit)));
-              int indexInBranch     = it_hit;
+              // int indexInBranch     = it_hit;
 #endif
               int TrackID = hit.TrackID;
               int LayerID = hit.LayerID;
@@ -1212,24 +1212,6 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   string volumeName;
                   switch(TypeDet)
                     {
-                    case G4Sol::MiniFiberD1_x:
-                      volumeName = "MiniFiberD1_log_x";
-                      break;
-                    case G4Sol::MiniFiberD1_u:
-                      volumeName = "MiniFiberD1_log_u";
-                      break;
-                    case G4Sol::MiniFiberD1_v:
-                      volumeName = "MiniFiberD1_log_v";
-                      break;
-                    case G4Sol::MiniFiberD2_x:
-                      volumeName = "MiniFiberD2_log_x";
-                      break;
-                    case G4Sol::MiniFiberD2_u:
-                      volumeName = "MiniFiberD2_log_u";
-                      break;
-                    case G4Sol::MiniFiberD2_v:
-                      volumeName = "MiniFiberD2_log_v";
-                      break;
                     case G4Sol::MiniFiberD1_x:
                       volumeName = "MiniFiberD1_log_x";
                       break;

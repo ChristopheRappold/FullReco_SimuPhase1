@@ -366,7 +366,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
     return ss.str();
   };
 
-  unsigned int Nb_trackSeed = RecoEvent.TrackDAF.size();
+  // unsigned int Nb_trackSeed = RecoEvent.TrackDAF.size();
 
   int ntrack = -1;
   for(auto it_trackInfo : RecoEvent.TrackInfo)
@@ -589,7 +589,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       const InfoPar track_state(it_trackInfo.second[id_firstDet]);
 
       genfit::AbsMeasurement* tempHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
-      TVectorD& tempHitrawRef         = tempHit->getRawHitCoords();
+      // TVectorD& tempHitrawRef         = tempHit->getRawHitCoords();
       // std::cout << "tempHitrawRef 0 : " << tempHitrawRef[0] << std::endl;
       // std::cout << "tempHitrawRef 1 : " << tempHitrawRef[1] << std::endl;
       // const TVector3 firstPos(tempHitrawRef[0], tempHitrawRef[1], getZpos(tempHit));
@@ -1301,7 +1301,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               tempResults.mass         = mass;
               tempResults.mass2        = mass2;
 
-              double m_range[4]  = {0.9383, 3.72738, 0.1396, 2.809};
+              // double m_range[4]  = {0.9383, 3.72738, 0.1396, 2.809};
               double m_charge[4] = {1., 2., -1., 2.};
 
               for(int i = 0; i < 4; i++)
