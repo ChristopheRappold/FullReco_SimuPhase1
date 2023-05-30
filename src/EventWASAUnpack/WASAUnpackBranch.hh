@@ -5,6 +5,36 @@
 #include <TString.h>
 
 
+class UnpackMetadata : public TObject
+{
+  public:
+  UnpackMetadata();
+  ~UnpackMetadata();
+
+  uint RunNumber = 9999;
+  uint FirstFile = 9999;
+  uint LastFile = 9999;
+  uint NumEventTotal = 0;
+  uint NumEventUnpacked = 0;
+
+  std::string SetupFiber = "";
+  std::string ChannelMapT0 = "";
+  std::string ChannelMapPSFE = "";
+  std::string ChannelMapPSBE = "";
+  std::string SetupPSB = "";
+  std::string DtDxTableMWDC = "";
+  std::string CellOffsetS4WFD1 = "";
+  std::string CellOffsetS2WFD1 = "";
+  std::string CellOffsetS2WFD2 = "";
+  std::string CellOffsetS2WFD3 = "";
+  std::string CellOffsetS2WFD4 = "";
+  std::string CellOffsetS2WFD5 = "";
+  std::string ChannelMapMDC = "";
+  std::string PhysicalMapMDC = "";
+  std::string DriftParamMDC = "";
+
+  ClassDef(UnpackMetadata, 1);
+};
 
 class LMDHeader : public TObject
 {

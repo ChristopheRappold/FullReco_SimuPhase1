@@ -6,7 +6,12 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <fstream>
 //#include "TRandom3.h"
+
+#include "TFile.h"
+#include "TCutG.h"
+
 #include "FullRecoConfig.hh"
 
 #include "FairBase/FrsSksHypFieldMapFull.h"
@@ -18,6 +23,7 @@
 #include "FairBase/WasaSolenoidFieldMap.h"
 
 #include "Ana_Event/AnaEvent_Metadata.hh"
+//#include "EventWASAUnpack/TFRSParameter.h"
 
 #include "spdlog/logger.h"
 
@@ -25,10 +31,10 @@
 
 struct DataSimExp
 {
-  std::vector<std::string>* nameDet;
+  std::vector<std::string>* nameDet;  
   std::map<std::string, double>* simParameters;
 
-  AnaEvent_Metadata* previousMeta;
+  AnaEvent_Metadata* simexpMetadata;
 };
 
 
@@ -70,31 +76,34 @@ struct Task
 {
   bool Task_ReStart = false;
   bool Task_CheckField = false;
+  bool Task_FiberHitFinder = true;
   bool Task_PrimaryVtx = true;
+  bool Task_PrimaryVtx_Si = false;
   bool Task_FlatMCOutputML = false;
+  bool Task_CheckFiberXUV = false;
   bool Task_CheckFiberTrack = false;
+  bool Task_FragmentFinder = false;
+  bool Task_WASAFinder = false;
   bool Task_BayesFinder = false;
   bool Task_RiemannFinder = false;
   bool Task_FinderCM = false;
   bool Task_FindingPerf = false;
   bool Task_CheckRZ = true;
   bool Task_KalmanDAF = true;
+  bool Task_KalmanDAFPID = true;
   bool Task_DecayVtx = false;
+  bool Task_DecayVtx_piplus = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKPRIMARYVTX, TASKFLATMCOUTPUTML, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, NBTASKID
+    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ,
+    TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKPRIMARYVTX, TASKCHECKFIBERTRACK, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKDECAYVTX, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
 
-// struct KF
-// {
-
-
-// };
 
 struct RunDoneDef
   {
@@ -134,16 +143,23 @@ struct RunTaskDef
   std::string Hash;
 
   bool Task_CheckField;
+  bool Task_FiberHitFinder;
   bool Task_PrimaryVtx;
+  bool Task_PrimaryVtx_Si;
   bool Task_FlatMCOutputML;
+  bool Task_CheckFiberXUV;
   bool Task_CheckFiberTrack;
+  bool Task_FragmentFinder;
+  bool Task_WASAFinder;
   bool Task_BayesFinder;
   bool Task_RiemannFinder;
   bool Task_FinderCM;
   bool Task_FindingPerf;
   bool Task_CheckRZ;
   bool Task_KalmanDAF;
+  bool Task_KalmanDAFPID;
   bool Task_DecayVtx;
+  bool Task_DecayVtx_piplus;
   bool Task_ReStart;
 };
 struct RunAttrGeneralDef
@@ -179,10 +195,17 @@ struct RunTaskAttrDef
   bool Debug_DAF;
   bool DoNoMaterial;
 
+  bool PV_RealXUVComb;
+  bool PV_RealPrimTrack;
+
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
   bool RZ_MDCWire2;
   bool RZ_MDCBiasCorr;
+
+  bool WF_perfect;
+  bool WF_PSBHits;
+  bool WF_PSFEHits;
 
   bool KF_Kalman;
   bool KF_KalmanSqrt;
@@ -257,15 +280,20 @@ inline auto InitStorage()
 				 "RunTask",
 				 make_column("HashId", &RunTaskDef::Hash),
 				 make_column("Task_CheckField", &RunTaskDef::Task_CheckField),
-				 make_column("Task_PrimaryVtx", &RunTaskDef::Task_PrimaryVtx),
+         make_column("Task_PrimaryVtx", &RunTaskDef::Task_PrimaryVtx),
+         make_column("Task_PrimaryVtx_Si", &RunTaskDef::Task_PrimaryVtx_Si),
 				 make_column("Task_FlatMCOutputML", &RunTaskDef::Task_FlatMCOutputML),
-				 make_column("Task_BayesFinder", &RunTaskDef::Task_BayesFinder),
+         make_column("Task_FragmentFinder", &RunTaskDef::Task_FragmentFinder),
+         make_column("Task_WASAFinder", &RunTaskDef::Task_WASAFinder),
+         make_column("Task_BayesFinder", &RunTaskDef::Task_BayesFinder),
 				 make_column("Task_RiemannFinder", &RunTaskDef::Task_RiemannFinder),
 				 make_column("Task_FinderCM", &RunTaskDef::Task_FinderCM),
 				 make_column("Task_FindingPerf", &RunTaskDef::Task_FindingPerf),
 				 make_column("Task_CheckRZ", &RunTaskDef::Task_CheckRZ),
-				 make_column("Task_KalmanDAF", &RunTaskDef::Task_KalmanDAF),
-				 make_column("Task_DecayVtx", &RunTaskDef::Task_DecayVtx),
+         make_column("Task_KalmanDAF", &RunTaskDef::Task_KalmanDAF),
+         make_column("Task_KalmanDAFPID", &RunTaskDef::Task_KalmanDAFPID),
+         make_column("Task_DecayVtx", &RunTaskDef::Task_DecayVtx),
+         make_column("Task_DecayVtx_pi+", &RunTaskDef::Task_DecayVtx_piplus),
 				 make_column("Task_ReStart", &RunTaskDef::Task_ReStart)
 				 ),
 		      make_table(
@@ -291,10 +319,15 @@ inline auto InitStorage()
 				 make_column("HashId", &RunTaskAttrDef::Hash),
 				 make_column("Debug_DAF", &RunTaskAttrDef::Debug_DAF),
 				 make_column("DoNoMaterial", &RunTaskAttrDef::DoNoMaterial),
+         make_column("PV_RealXUVComb", &RunTaskAttrDef::PV_RealXUVComb),
+         make_column("PV_RealPrimTrack", &RunTaskAttrDef::PV_RealPrimTrack),
 				 make_column("RZ_ChangeMiniFiber", &RunTaskAttrDef::RZ_ChangeMiniFiber),
 				 make_column("RZ_MDCProlate", &RunTaskAttrDef::RZ_MDCProlate),
 				 make_column("RZ_MDCWire2", &RunTaskAttrDef::RZ_MDCWire2),
-				 make_column("RZ_MDCBiasCorr", &RunTaskAttrDef::RZ_MDCBiasCorr),
+         make_column("RZ_MDCBiasCorr", &RunTaskAttrDef::RZ_MDCBiasCorr),
+         make_column("WF_perfect", &RunTaskAttrDef::WF_perfect),
+         make_column("WF_PSBHits", &RunTaskAttrDef::WF_PSBHits),
+         make_column("WF_PSFEHits", &RunTaskAttrDef::WF_PSFEHits),
 				 make_column("KF_Kalman", &RunTaskAttrDef::KF_Kalman),
 				 make_column("KF_KalmanSqrt", &RunTaskAttrDef::KF_KalmanSqrt),
 				 make_column("KF_KalmanRef", &RunTaskAttrDef::KF_KalmanRef),
@@ -329,7 +362,37 @@ class THyphiAttributes
   std::string Hash;
 
   std::unordered_map<std::string,std::string> map_ParamFiles;
+  //std::unordered_map<std::string,std::string> Unpack_map_ParamFiles;
 
+  // Optics parameters
+  std::string optics_name;
+  std::map<std::string, std::vector<float>> optics_par;
+  double optics_s2z;
+
+  // PID Cuts
+  std::string pi_cut_name;
+  TCutG *cut_pi;
+  
+  // MWDC Par load
+  int mwdc_par_fitorhist; // 0 -> fit ; 1 -> Hist
+
+  // MFT
+  double fiber_mft1_pos_z;
+  double fiber_mft2_pos_z;
+
+  // PSB
+  double psb_pos_x;
+  double psb_pos_y;
+  double psb_pos_z;
+  double psb_rot_z;
+  double cut_psb_phi;
+  double cut_psb_z;
+  double cut_phi_fm;
+
+  bool flag_dup_trackhit;
+  bool flag_dup_trackhit_mdc;
+  bool flag_trackhit_inclusive;
+  
   int Nb_CPU;
   int Nb_Fraction;
   int NEvent;
@@ -361,10 +424,17 @@ class THyphiAttributes
   bool Debug_DAF;
   bool DoNoMaterial;
 
+  bool PV_RealXUVComb;
+  bool PV_RealPrimTrack;
+
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
   bool RZ_MDCWire2;
   bool RZ_MDCBiasCorr;
+
+  bool WF_perfect;
+  bool WF_PSBHits;
+  bool WF_PSFEHits;
 
   bool KF_Kalman;
   bool KF_KalmanSqrt;

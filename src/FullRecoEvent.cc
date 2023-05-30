@@ -39,11 +39,14 @@ void FullRecoEvent::Clear(int toclean)
   //     }
   ListHits.clear();
   OldListHits.clear();
+  ListHitsInfo.clear();
+  
   ListHitsToTracks.clear();
 
   TrackDAF.clear();
   TrackDAFSim.clear();
   TrackDAFInit.clear();
+  TrackDAFInitSim.clear();
   TrackInfo.clear();
 
   TracksFound.clear();
@@ -52,12 +55,39 @@ void FullRecoEvent::Clear(int toclean)
   TrackMother.clear();
   DaughtersTrackDAFInit.clear();
 
+  MWDCTracks.clear();
+
+  BeamTracks.clear();
+  PrimaryTracks.clear();
+
+  FragmentTracks.clear();
+  FragmentPID = -999;
+
+  for(auto x : FiberTrackCont)
+    for(int i=0; i<x.second.size(); ++i)
+      delete x.second[i];
+
+  for(int i = 0; i < FiberHitClCont.size(); ++i)
+    {
+      for(int j = 0; j < FiberHitClCont[i].size(); ++j)
+        {
+          int num = (int)FiberHitClCont[i][j].size();
+          for(int k = 0; k < num; ++k)
+            delete FiberHitClCont[i][j][k];
+        }
+    }
+
+  FiberTrackCont.clear();
+  FiberHitClCont.clear();
+
+
   //Added when merging with master
   //FragmentTracks.clear();
   //PionTracks.clear();
 
+
   Si_HitsEnergyLayer.clear();
-  
+/*
   Hits_Si1.clear();
   Hits_Si2.clear();
   Hits_Si3.clear();
@@ -67,6 +97,7 @@ void FullRecoEvent::Clear(int toclean)
   HitsY_Si1.clear();
   HitsX_Si2.clear();
   HitsY_Si2.clear();
+*/
 
   Mother_MomE.SetXYZM(0.,0.,0.,0.);
   InteractionPoint.fill(0.);
@@ -80,4 +111,22 @@ void FullRecoEvent::Clear(int toclean)
   CovMatrix_SV.fill(0.);
 
   Hyp_Vect.clear();
+}
+
+
+
+double PrimaryVtxTrack::GetTheta()
+{
+  if(a > -990. && b > -990.)
+    return TMath::ATan2(std::sqrt( a*a + b*b ), 1.) * 180. / M_PI;
+  else
+    return -999.;
+}
+
+double PrimaryVtxTrack::GetPhi()
+{
+  if(a > -990. && b > -990.)
+    return TMath::ATan2(b, a) * 180. / M_PI;
+  else
+    return -999.;
 }

@@ -57,7 +57,7 @@ ORMFLAGS = -I./sqlite_orm/include
 
 CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GEANTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
 LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 $(GEANTLIBS)
-LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventWASAUnpack -lHitAna -lEventG4Sol -lTreePlayer -lHyphiFairBase -lAna_Event -lMCAnaEventG4Sol -lsqlite3 $(GEANTLIBS)
+LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 $(GEANTLIBS)
 
 GENFIT_LIB = -lgenfit2
 SPDLOG_LIB = -lspdlog
@@ -74,7 +74,7 @@ LIB_PROFILING = #-L/home/christophe/Workspace/gperftools-2.4/lib -ltcmalloc #-lp
 
 DEPEND        = makedepend $(CXXFLAGS)
 
-#--------------------------------------------------------------------
+#---------------------------------------------------------------------
 SourcesSimu = MainSimu.cc
 Objects_Simu = $(patsubst %.cc,%.o,$(SourcesSimu))
 
@@ -85,12 +85,12 @@ Sources_Comm = FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana_Hist.c
 Headers_Comm = $(patsubst %.cc,%.hh,$(Sources_Comm))
 Objects_Comm = $(patsubst %.cc,%.o,$(Sources_Comm))
  
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TBuildWASACalibrationLayerPlane.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc TCheckFiberTrack.cc #TFinderCM.cc
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TWASACalibrationSimuBuilder.cc TWASACalibrationDataBuilder.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc TCheckFiberTrack.cc TCheckFiberXUV.cc TFragmentFinder.cc TWASAFinder.cc #TFinderCM.cc TPrimaryVertex_Si.cc
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
 
-Sources_Proc_genfit_dep = THyphiAttributes.cc FullRecoTask.cc TKalmanFilter_DAF.cc FullRecoTaskMT.cc TKalmanFilter_DAF_MT.cc
+Sources_Proc_genfit_dep = THyphiAttributes.cc FullRecoTask.cc TKalmanFilter_DAF.cc TKalmanFilter_DAF_PID.cc FullRecoTaskMT.cc TKalmanFilter_DAF_MT.cc
 Objects_Proc_genfit_dep = $(patsubst %.cc,%.o,$(Sources_Proc_genfit_dep))
 
 Source_Proc_genfit_ZMQ_dep = FullRecoTaskZMQ.cc TKalmanFilter_DAF_ZMQ.cc

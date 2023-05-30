@@ -65,7 +65,7 @@ DEPEND        = makedepend $(CXXFLAGS)
 #--------------------------------------------------------------------
 Headers = WASAUnpackBranch.hh
 
-Sources = WASAUnpackBranch.cxx 
+Sources = WASAUnpackBranch.cxx
 
 DictObj = DictionaryEventWASAUnpack.$(DictObjSuf)
 

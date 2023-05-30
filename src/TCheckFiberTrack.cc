@@ -195,8 +195,8 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 	      TString nameT(G4Sol::nameLiteralDet.begin()[id_det]);
 	      //att._logger->debug("    -> hitZ: {}, hit xy {},{} : Exp xy {},{}", it_ListHitsSim->second[id_det][0].hitZ, it_ListHitsSim->second[id_det][0].hitX, it_ListHitsSim->second[id_det][0].hitY, hitExp[0], hitExp[1]);
 
-	      const TString nameTemp[] = {"FiberD3_u","FiberD3_v","MiniFiberD1_x1","MiniFiberD1_u1","MiniFiberD1_v1",
-					  "MiniFiberD1_x2","MiniFiberD1_u2","MiniFiberD1_v2","PSCE","PSFE","PSCE","PSBE"};
+	      const TString nameTemp[] = {"FiberD3_u","FiberD3_v","MiniFiberD1_x","MiniFiberD1_u","MiniFiberD1_v",
+					  "MiniFiberD2_x","MiniFiberD2_u","MiniFiberD2_v","PSCE","PSFE","PSCE","PSBE"};
 
 	      int temp_i = 0;
 	      for(int i=0;i<11;++i)

@@ -156,7 +156,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
       RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
       RecoEvent.ListHitsToTracks.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
       RecoEvent.OldListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
-      RecoEvent.Si_HitsEnergyLayer.resize(4);
+      //RecoEvent.Si_HitsEnergyLayer.resize(4);
 
       std::unique_ptr<genfit::AbsMeasurement> measurement = nullptr;
 
@@ -171,8 +171,8 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
       double resolution_psce   = 1.1; // 3.8/sqrt(12.)
       double resolution_psce_z = 1.0;
       double time_res          = 0.150; // ns
-
-      for(int it_Si = 0; it_Si < event->NInSi; ++it_Si)
+/*
+      for(size_t it_Si = 0; it_Si < event->NInSi; ++it_Si)
 	{
 
 	  const TMcHit& SiHit = *(dynamic_cast<TMcHit*>(event->InSi->At(it_Si)));
@@ -200,7 +200,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  else
 	    RecoEvent.Si_HitsEnergyLayer[idSi].insert(std::make_pair(SiHit.HitID, SiHit.Energy));
 	}
-
+*/
       att._logger->debug("NMC   : {} {}",event->Nmc,event->fMC_Particle->GetEntries());
       att._logger->debug("NPSCE : {} {}",event->NPsce,event->PSCE->GetEntries());
       att._logger->debug("NPSBE : {} {}",event->NPsbe,event->PSBE->GetEntries());
@@ -458,12 +458,12 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 		case G4Sol::FiberD5_v:
 		  volumeName = "FiberD5_log_v";
 		  break;
-		  // case G4Sol::MiniFiberD1_x1 :  volumeName = "MiniFiberD1_log_x1"; break;
-		  // case G4Sol::MiniFiberD1_u1 :  volumeName = "MiniFiberD1_log_u1"; break;
-		  // case G4Sol::MiniFiberD1_v1 :  volumeName = "MiniFiberD1_log_v1"; break;
-		  // case G4Sol::MiniFiberD1_x2 :  volumeName = "MiniFiberD1_log_x2"; break;
-		  // case G4Sol::MiniFiberD1_u2 :  volumeName = "MiniFiberD1_log_u2"; break;
-		  // case G4Sol::MiniFiberD1_v2 :  volumeName = "MiniFiberD1_log_v2"; break;
+		  // case G4Sol::MiniFiberD1_x :  volumeName = "MiniFiberD1_log_x"; break;
+		  // case G4Sol::MiniFiberD1_u :  volumeName = "MiniFiberD1_log_u"; break;
+		  // case G4Sol::MiniFiberD1_v :  volumeName = "MiniFiberD1_log_v"; break;
+		  // case G4Sol::MiniFiberD2_x :  volumeName = "MiniFiberD2_log_x"; break;
+		  // case G4Sol::MiniFiberD2_u :  volumeName = "MiniFiberD2_log_u"; break;
+		  // case G4Sol::MiniFiberD2_v :  volumeName = "MiniFiberD2_log_v"; break;
 		default:
 		  std::cerr << "something wrong" << std::endl;
 		  break;
@@ -516,12 +516,12 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 		case G4Sol::FiberD5_v:
 		  motherName = "FiberD5_log_0";
 		  break;
-		  // case G4Sol::MiniFiberD1_x1 :  motherName = "MiniFiberD1_log_0"; break;
-		  // case G4Sol::MiniFiberD1_u1 :  motherName = "MiniFiberD1_log_0"; break;
-		  // case G4Sol::MiniFiberD1_v1 :  motherName = "MiniFiberD1_log_0"; break;
-		  // case G4Sol::MiniFiberD1_x2 :  motherName = "MiniFiberD1_log_0"; break;
-		  // case G4Sol::MiniFiberD1_u2 :  motherName = "MiniFiberD1_log_0"; break;
-		  // case G4Sol::MiniFiberD1_v2 :  motherName = "MiniFiberD1_log_0"; break;
+		  // case G4Sol::MiniFiberD1_x :  motherName = "MiniFiberD1_log_0"; break;
+		  // case G4Sol::MiniFiberD1_u :  motherName = "MiniFiberD1_log_0"; break;
+		  // case G4Sol::MiniFiberD1_v :  motherName = "MiniFiberD1_log_0"; break;
+		  // case G4Sol::MiniFiberD2_x :  motherName = "MiniFiberD2_log_0"; break;
+		  // case G4Sol::MiniFiberD2_u :  motherName = "MiniFiberD2_log_0"; break;
+		  // case G4Sol::MiniFiberD2_v :  motherName = "MiniFiberD2_log_0"; break;
 		default:
 		  std::cerr << "something wrong" << std::endl;
 		  break;
@@ -631,23 +631,23 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	      string volumeName;
 	      switch(TypeDet)
 		{
-		case G4Sol::MiniFiberD1_x1:
-		  volumeName = "MiniFiberD1_log_x1";
+		case G4Sol::MiniFiberD1_x:
+		  volumeName = "MiniFiberD1_log_x";
 		  break;
-		case G4Sol::MiniFiberD1_u1:
-		  volumeName = "MiniFiberD1_log_u1";
+		case G4Sol::MiniFiberD1_u:
+		  volumeName = "MiniFiberD1_log_u";
 		  break;
-		case G4Sol::MiniFiberD1_v1:
-		  volumeName = "MiniFiberD1_log_v1";
+		case G4Sol::MiniFiberD1_v:
+		  volumeName = "MiniFiberD1_log_v";
 		  break;
-		case G4Sol::MiniFiberD1_x2:
-		  volumeName = "MiniFiberD1_log_x2";
+		case G4Sol::MiniFiberD2_x:
+		  volumeName = "MiniFiberD2_log_x";
 		  break;
-		case G4Sol::MiniFiberD1_u2:
-		  volumeName = "MiniFiberD1_log_u2";
+		case G4Sol::MiniFiberD2_u:
+		  volumeName = "MiniFiberD2_log_u";
 		  break;
-		case G4Sol::MiniFiberD1_v2:
-		  volumeName = "MiniFiberD1_log_v2";
+		case G4Sol::MiniFiberD2_v:
+		  volumeName = "MiniFiberD2_log_v";
 		  break;
 		default:
 		  std::cerr << "something wrong" << std::endl;
@@ -656,23 +656,23 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	      string motherName;
 	      switch(TypeDet)
 		{
-		case G4Sol::MiniFiberD1_x1:
+		case G4Sol::MiniFiberD1_x:
 		  motherName = "MiniFiberD1_log_0";
 		  break;
-		case G4Sol::MiniFiberD1_u1:
+		case G4Sol::MiniFiberD1_u:
 		  motherName = "MiniFiberD1_log_0";
 		  break;
-		case G4Sol::MiniFiberD1_v1:
+		case G4Sol::MiniFiberD1_v:
 		  motherName = "MiniFiberD1_log_0";
 		  break;
-		case G4Sol::MiniFiberD1_x2:
-		  motherName = "MiniFiberD1_log_0";
+		case G4Sol::MiniFiberD2_x:
+		  motherName = "MiniFiberD2_log_0";
 		  break;
-		case G4Sol::MiniFiberD1_u2:
-		  motherName = "MiniFiberD1_log_0";
+		case G4Sol::MiniFiberD2_u:
+		  motherName = "MiniFiberD2_log_0";
 		  break;
-		case G4Sol::MiniFiberD1_v2:
-		  motherName = "MiniFiberD1_log_0";
+		case G4Sol::MiniFiberD2_v:
+		  motherName = "MiniFiberD2_log_0";
 		  break;
 		default:
 		  std::cerr << "something wrong" << std::endl;

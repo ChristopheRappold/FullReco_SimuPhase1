@@ -30,6 +30,11 @@
 #include "SpacepointMeasurement.h"
 #include "spdlog/spdlog.h"
 
+#include "HitAna/FiberHitXUV.hh"
+#include "HitAna/MWDCTracking.hh"
+#include "HitAna/FiberTrackAna.hh"
+#include "HitAna/FiberHitAna.hh"
+
 #include <cassert>
 
 class MomRef;
@@ -59,29 +64,30 @@ enum SolDet : int
   Si1y_SD_pad,
   Si2x_SD_pad,
   Si2y_SD_pad, /*17*/
-  MiniFiberD1_x1, /*18*/
-  MiniFiberD1_u1,
-  MiniFiberD1_v1,
-  MiniFiberD1_x2,
-  MiniFiberD1_u2,
-  MiniFiberD1_v2, /*23*/
-  FiberD1_x, /*24*/
+  TO_Counter, /*18*/
+  FiberD1_x, /*19*/
   FiberD1_u,
   FiberD1_v,
-  FiberD2_x, /*27*/
+  FiberD2_x, /*22*/
   FiberD2_u,
   FiberD2_v,
-  FiberD3_x, /*30*/
+  FiberD3_x, /*25*/
   FiberD3_u,
   FiberD3_v,
-  FiberD4_x, /*33*/
+  MiniFiberD1_x, /*28*/
+  MiniFiberD1_u,
+  MiniFiberD1_v,
+  MiniFiberD2_x,
+  MiniFiberD2_v,
+  MiniFiberD2_u,
+  FiberD4_v, /*34*/
   FiberD4_u,
-  FiberD4_v,
-  FiberD5_x, /*36*/
+  FiberD4_x,
+  FiberD5_x, /*37*/
   FiberD5_u,
   FiberD5_v,
-  PSFE, /*39*/
-  MG01, /*40*/
+  PSFE, /*40*/ //PSB_F
+  MG01, /*41*/
   MG02,
   MG03,
   MG04,
@@ -97,9 +103,25 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17, /*56*/
-  PSCE, /*57*/
-  PSBE, /*58*/
+  MG17, /*57*/
+  PSCE, /*58*/   //PSB
+  PSBE, /*59*/   //PSB_B
+  MWDC01, /*60*/
+  MWDC02,
+  MWDC03,
+  MWDC04,
+  MWDC05,
+  MWDC06,
+  MWDC07,
+  MWDC08,
+  MWDC09,
+  MWDC10,
+  MWDC11,
+  MWDC12,
+  MWDC13,
+  MWDC14,
+  MWDC15,
+  MWDC16, /*75*/
   FiberD1_xy,
   FiberD2_xy,
   FiberD3_xy,
@@ -138,15 +160,18 @@ constexpr auto nameLiteralDet = {
     "InSi0"         ,          "InSi1",          "InSi2",          "InSi3",            "TR1",            "TR2",
     "Si1x"          ,           "Si1y",           "Si2x",           "Si2y",
     "Si1x_SD"          ,           "Si1y_SD",           "Si2x_SD",           "Si2y_SD",
-    "Si1x_SD_pad"          ,           "Si1y_SD_pad",           "Si2x_SD_pad",           "Si2y_SD_pad",
-    "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1", "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
+    "Si1x_SD_pad"          ,       "Si1y_SD_pad",       "Si2x_SD_pad",       "Si2y_SD_pad",       "T0_Counter",
     "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
-    "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      "FiberD4_x",      "FiberD4_u",      "FiberD4_v",
-    "FiberD5_x",           "FiberD5_u",      "FiberD5_v",           "PSFE",           "MG01",           "MG02",
+    "FiberD3_x",           "FiberD3_u",      "FiberD3_v",      
+    "MiniFiberD1_x", "MiniFiberD1_u", "MiniFiberD1_v", "MiniFiberD2_x", "MiniFiberD2_v", "MiniFiberD2_u",
+    "FiberD4_v",      "FiberD4_u",      "FiberD4_x",           "FiberD5_x",      "FiberD5_u",      "FiberD5_v",
+    "PSFE",     "MG01",           "MG02",
     "MG03",                     "MG04",           "MG05",           "MG06",           "MG07",           "MG08",
     "MG09",                     "MG10",           "MG11",           "MG12",           "MG13",           "MG14",
     "MG15",                     "MG16",           "MG17",           "PSCE",           "PSBE",
-    "FiberD1_xy", "FiberD2_xy","FiberD3_xy","FiberD4_xy","FiberD5_xy","MiniFiberD1_xy","MiniFiberD2_xy",
+    "MWDC01", "MWDC02", "MWDC03", "MWDC04", "MWDC05", "MWDC06", "MWDC07", "MWDC08", "MWDC09", "MWDC10", "MWDC11",
+    "MWDC12", "MWDC13", "MWDC14", "MWDC15", "MWDC16",
+    "FiberD1_xy", "FiberD2_xy", "FiberD3_xy", "FiberD4_xy",  "FiberD5_xy",  "MiniFiberD1_xy", "MiniFiberD2_xy",
     "CDC0",
     "CDC1",                     "CDC2",           "CDC3",           "CDC4",           "CDC5",           "CDC6",
     "CDC7",                     "CDC8",           "CDC9",          "CDC10",          "CDC11",          "CDC12",
@@ -186,11 +211,10 @@ constexpr T EnumIter<T, args...>::values[];
   using SolDetIter = struct EnumIter<
     SolDet, InSi0, InSi1, InSi2, InSi3 /*3*/, TR1 /*4*/, TR2 /*5*/,
     Si1x, Si1y, Si2x, Si2y,
-    Si1x_SD, Si1y_SD, Si2x_SD, Si2y_SD,
-    MiniFiberD1_x1, MiniFiberD1_x1,MiniFiberD1_v1,
-    MiniFiberD1_x2, MiniFiberD1_x2,MiniFiberD1_v2,
-    FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x,
-    FiberD2_u, FiberD2_v, FiberD3_x, FiberD3_u, FiberD3_v, FiberD4_x, FiberD4_u, FiberD4_v,FiberD5_x, FiberD5_u, FiberD5_v,
+    Si1x_SD, Si1y_SD, Si2x_SD, Si2y_SD, TO_Counter,
+    FiberD1_x, FiberD1_u, FiberD1_v, FiberD2_x, FiberD2_u, FiberD2_v, FiberD3_x, FiberD3_u, FiberD3_v,
+    MiniFiberD1_x, MiniFiberD1_u, MiniFiberD1_v, MiniFiberD2_x, MiniFiberD2_v, MiniFiberD2_u,
+    FiberD4_v, FiberD4_u, FiberD4_x, FiberD5_x, FiberD5_u, FiberD5_v,
     PSFE /*6*/, MG01 /*7*/, MG02, MG03, MG04, MG05, MG06, MG07,
     MG08, MG09, MG10, MG11, MG12, MG13, MG14, MG15, MG16, MG17 /*23*/, PSCE /*24*/, PSBE /*25*/,
     FiberD1_xy,FiberD2_xy,FiberD3_xy,FiberD4_xy,FiberD5_xy,MiniFiberD1_xy,MiniFiberD2_xy,
@@ -406,6 +430,7 @@ struct SimHit
 struct InfoInit
 {
   int charge  = -999 ;
+  double time = -999.;
   double posX = -999.;
   double posY = -999.;
   double posZ = -999.;
@@ -423,6 +448,7 @@ struct InfoPar
   double mass   = -999.;
   double Eloss  = 0.;
   double time   = 0.;
+  double TOT    = 0.;
   double length = 0.;
 };
 
@@ -545,6 +571,82 @@ struct OutHit
   std::array<double, 4> MCparticle;
 };
 
+
+class PrimaryVtxTrack 
+{
+  public:
+    PrimaryVtxTrack() { };
+    ~PrimaryVtxTrack() = default;
+
+    void SetX(double _x) { x = _x; };
+    void SetY(double _y) { y = _y; };
+    void SetA(double _a) { a = _a; };
+    void SetB(double _b) { b = _b; };
+    void SetChi2NDF(double _chi2ndf) { chi2ndf = _chi2ndf; };
+    void SetFTHit(size_t i_ft, double hit_pos) { ft_hits.emplace_back(std::make_tuple(i_ft, hit_pos)); };
+
+    double GetX() { return x; };
+    double GetY() { return y; };
+    double GetA() { return a; };
+    double GetB() { return b; };
+    double GetChi2NDF() { return chi2ndf; };
+    std::vector<std::tuple<size_t,double>> GetFTHits() { return ft_hits; };
+
+    //bool IsFTHit(size_t i_ft);
+    double GetTheta();
+    double GetPhi();
+    size_t GetNHits() { return ft_hits.size(); };
+
+  private:
+    double x = -999.;
+    double y = -999.; //z = mid of target;
+    double a = -999.;
+    double b = -999.;
+    double chi2ndf = -999.;
+    std::vector<std::tuple<size_t,double>> ft_hits = {};
+};
+
+
+class FragmentTrack 
+{
+  public:
+    FragmentTrack() { };
+    ~FragmentTrack() = default;
+
+    void SetPos(TVector3 _pos) { pos = _pos; };
+    void SetMom(TVector3 _mom) { mom = _mom; };
+    void SetCovMatrix(std::vector<double> _cov_matrix) { cov_matrix = _cov_matrix; };
+    void SetTOT(double _tot) { tot = _tot; };
+    void SetTime(double _time) { time = _time; };
+    void SetChi2NDF(double _chi2ndf) { chi2ndf = _chi2ndf; };
+    void SetIsBest(bool _isbest) { isbest = _isbest; };
+    void SetPID(int _pid) { pid = _pid; };
+    void SetTrackID(int _trackid) { trackid = _trackid; };
+
+
+    TVector3 GetPos() { return pos; };
+    TVector3 GetMom() { return mom; };
+    std::vector<double> GetCovMatrix() { return cov_matrix; };
+    double GetTOT() { return tot; };
+    double GetTime() { return time; };
+    double GetChi2NDF() { return chi2ndf; };
+    bool GetIsBest() { return isbest; };
+    int GetPID() { return pid; };
+    int GetTrackID() { return trackid; };
+
+  private:
+    TVector3 pos = TVector3(-999., -999., -999.);
+    TVector3 mom = TVector3(-999., -999., -999.);
+    std::vector<double> cov_matrix = {};
+    double tot = -999.;
+    double time = -999.;
+    double chi2ndf = -999.;
+    bool isbest = false;
+    int pid = -999;
+    int trackid = -999;
+};
+
+
 struct Hyp
 {
   Int_t Pattern; /// 1 = Simulation / 2 = KFParticle_real / 3 = KFParticle_cut / 4 = KFParticle / 5 = KFParticle_Mass / 6 = LorentzVector
@@ -569,6 +671,7 @@ struct Hyp
   Int_t Mother_IsFromHyp;
 
   //Daughters:
+  Int_t PDG_Fragment;
   Int_t Id_Fragment;
   TLorentzVector MomE_Fragment;
   Double32_t Chi2ndf_Fragment;
@@ -577,6 +680,7 @@ struct Hyp
   Double32_t Angle_MotherFragment;
   Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
 
+  Int_t PDG_Pion;
   Int_t Id_Pion;
   TLorentzVector MomE_Pion;
   Double32_t Chi2ndf_Pion;
@@ -648,6 +752,20 @@ struct CandTrack
 //   double Cov[6][6];
 // };
 
+
+struct MeasurementInfo
+{
+  double TOT = -9999.;
+  double time = -9999.;
+  double dE = -9999.;
+  //size_t layer = 100000;
+
+  MeasurementInfo() = default;
+  MeasurementInfo(double TOT_, double time_, double dE_):TOT(TOT_),time(time_),dE(dE_) {};
+  void SetInfo(double TOT_, double time_, double dE_) { TOT = TOT_; time = time_; dE = dE_;};
+};
+
+
 class FullRecoEvent
 {
 public:
@@ -663,6 +781,7 @@ public:
 
   std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > ListHits;
   std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > > OldListHits;
+  std::vector<std::vector<MeasurementInfo> > ListHitsInfo;
 
   std::vector<std::vector<int> > ListHitsToTracks;
   // std::vector< std::vector<std::vector<genfit::AbsMeasurement*> > > ListHitsDAF;
@@ -670,6 +789,7 @@ public:
   std::unordered_map<int, std::vector<int> > TrackDAF;
   std::unordered_map<int, std::vector<std::vector<SimHit> > > TrackDAFSim;
   std::unordered_map<int, InfoInit> TrackDAFInit;
+  std::unordered_map<int, InfoInit> TrackDAFInitSim;
   std::unordered_map<int, std::vector<InfoPar> > TrackInfo;
 
   std::vector<CandTrack> TracksFound;
@@ -678,8 +798,20 @@ public:
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
 
+  std::vector<MWDCTracking> MWDCTracks;
+
+  std::vector<PrimaryVtxTrack> BeamTracks;
+  std::vector<PrimaryVtxTrack> PrimaryTracks;
+
+  std::vector<FragmentTrack> FragmentTracks;
+  int FragmentPID;
+
+  std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
+  std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitClCont;
+
+
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
-  
+/*
   std::vector<std::vector<double> > Hits_Si1{};
   std::vector<std::vector<double> > Hits_Si2{};
   std::vector<std::vector<double> > Hits_Si3{};
@@ -689,7 +821,7 @@ public:
   std::vector<std::tuple<double, size_t> > HitsY_Si1{};
   std::vector<std::tuple<double, size_t> > HitsX_Si2{};
   std::vector<std::tuple<double, size_t> > HitsY_Si2{};
-
+*/
 
   TLorentzVector Mother_MomE;
   std::array<double,3> InteractionPoint;

@@ -2,19 +2,24 @@
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "Ana_Event/Ana_WasaEvent.hh"
-#include "TBuildDetectorLayerPlaneDAF.h"
-#include "TBuildWASACalibrationLayerPlane.h"
+#include "TWASACalibrationSimuBuilder.h"
+#include "TWASACalibrationDataBuilder.h"
 #include "TBuildRestarter.h"
 
 #include "TBayesFinder.h"
 //#include "TFinderCM.h"
 #include "TFindingPerf.h"
 #include "TKalmanFilter_DAF.h"
+#include "TKalmanFilter_DAF_PID.h"
 #include "CheckField.h"
+#include "TCheckFiberXUV.h"
 #include "TCheckFiberTrack.h"
+#include "TFragmentFinder.h"
+#include "TWASAFinder.h"
 #include "TCheckRZ.h"
 #include "TFlatMCOutputML.h"
 #include "TPrimaryVertex.h"
+//#include "TPrimaryVertex_Si.h"
 #include "TDecayVertex.h"
 #include "TRiemannFinder.h"
 #include "TFindingPerf.h"
@@ -35,23 +40,22 @@
 
 
 template<class TEOut>
-FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp& In):Attributes(config,In),REvent()
+FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp& In): Attributes(config,In),REvent()
 {
   Attributes._logger->info(" *** > FullRecoTask instance created | Reconstruction requested are :");
+
   det_build = nullptr;
   AnaHisto = nullptr;
 
-  //det_build = new TBuildDetectorLayerPlane(Attributes,Attributes.beam_only);
   if(Attributes.TaskConfig.Task_ReStart)
     det_build = new TBuildRestarter<TEOut>(Attributes);
   else
     {
       if constexpr(recotask::HasMC_Particle<TEOut>::value == true)
-	det_build = new TBuildDetectorLayerPlaneDAF(Attributes);
+        det_build = new TWASACalibrationSimuBuilder(Attributes);
       else
-	det_build = new TBuildWASACalibrationLayerPlane(Attributes);
+        det_build = new TWASACalibrationDataBuilder(Attributes);
     }
-  //det_build = new TTestUnits(Attributes,"layerDAF");
 
   //list_process.push_back(new TKalmanFilter_DAF(Attributes) );
   // if(Attributes.TaskConfig.Task_CheckField)
@@ -88,13 +92,29 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
 	  if(Attributes.TaskConfig.Task_PrimaryVtx)
 	    list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
 	  break;
+          //  case Task::TASKPRIMARYVTX_SI:
+          //    if(Attributes.TaskConfig.Task_PrimaryVtx_Si)
+          //      list_processMC.emplace_back(new TPrimaryVertex_Si<TEOut>(Attributes));
+          //    break;
 	case Task::TASKFLATMCOUTPUTML:
 	  if(Attributes.TaskConfig.Task_FlatMCOutputML)
 	    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
 	  break;
+	case Task::TASKCHECKFIBERXUV:
+	  if(Attributes.TaskConfig.Task_CheckFiberXUV)
+	    list_processMC.emplace_back(new TCheckFiberXUV<TEOut>(Attributes));
+	  break;
 	case Task::TASKCHECKFIBERTRACK:
 	  if(Attributes.TaskConfig.Task_CheckFiberTrack)
 	    list_processMC.emplace_back(new TCheckFiberTrack<TEOut>(Attributes));
+	  break;
+	case Task::TASKFRAGMENTFINDER:
+	  if(Attributes.TaskConfig.Task_FragmentFinder)
+	    list_processMC.emplace_back(new TFragmentFinder<TEOut>(Attributes));
+	  break;
+	case Task::TASKWASAFINDER:
+	  if(Attributes.TaskConfig.Task_WASAFinder)
+	    list_processMC.emplace_back(new TWASAFinder<TEOut>(Attributes));
 	  break;
 	case Task::TASKBAYESFINDER:
 	  if(Attributes.TaskConfig.Task_BayesFinder)
@@ -120,27 +140,31 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
 	  if(Attributes.TaskConfig.Task_KalmanDAF)
 	    list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
 	  break;
+	case Task::TASKKALMANDAFPID:
+	  if(Attributes.TaskConfig.Task_KalmanDAFPID)
+	    list_processMC.emplace_back(new TKalmanFilter_DAF_PID<TEOut>(Attributes));
+	  break;
 	case Task::TASKDECAYVTX:
 	  if(Attributes.TaskConfig.Task_DecayVtx)
-	    list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes));
+	    list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes, 0)); // 0-> pi- analysis
+	  break;
+	case Task::TASKDECAYVTX_PIPLUS:
+	  if(Attributes.TaskConfig.Task_DecayVtx_piplus)
+	    list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes, 1)); // 1-> pi+ analysis
 	  break;
 	default:
 	  break;
 	}
     }
 
-
   for(auto task : list_processMC)
     Attributes._logger->info(" -> Task : {}",task->signature);
-
 }
 
 
 template<class TEOut>
 FullRecoTask<TEOut>::~FullRecoTask()
 {
-  //delete REvent;
-  //FieldMap.clear();
   AnaHisto=nullptr;
   delete det_build;
   det_build = nullptr;
@@ -151,7 +175,6 @@ FullRecoTask<TEOut>::~FullRecoTask()
     }
 
   Attributes.SaveToDatabase();
-
 }
 
 template<class TEOut>
@@ -171,7 +194,7 @@ void FullRecoTask<TEOut>::SetEventMetadata(AnaEvent_Metadata& metadata)
   metadata.DateOfRun = Attributes.DateOfRun;
   metadata.Hash = Attributes.Hash;
   metadata.FirstStep = det_build->signature;
-  metadata.FinalStep = list_processMC.back()->signature;
+  metadata.FinalStep = list_processMC.size() == 0 ? "None" : list_processMC.back()->signature;
   metadata.G4_simu = Attributes.G4_simu;
   metadata.NEvent = Attributes.NEvent;
   metadata.StartEvent = Attributes.Config.Get<uint>("Start_Event");
@@ -181,6 +204,8 @@ void FullRecoTask<TEOut>::SetEventMetadata(AnaEvent_Metadata& metadata)
   metadata.Wasa_FieldMap = Attributes.Wasa_FieldMap;
   metadata.Field_Strength = Attributes.Field_Strength;
   metadata.Wasa_FieldMapName = Attributes.Wasa_FieldMapName;
+
+  // Change ? -> Include event by event MetaData or full file metadata
 
 }
 
@@ -195,7 +220,7 @@ int FullRecoTask<TEOut>::EventLoop(const TG4Sol_Event& ev, const std::vector<TCl
 {
 
   REvent.Clear();
-  int return_build = (*dynamic_cast<TBuildDetectorLayerPlaneDAF*>(det_build))(ev,hits,REvent,OutTree);
+  int return_build = (*dynamic_cast<TWASACalibrationSimuBuilder*>(det_build))(ev,hits,REvent,OutTree);
   
   if(return_build !=0)
     return -1;
@@ -203,7 +228,6 @@ int FullRecoTask<TEOut>::EventLoop(const TG4Sol_Event& ev, const std::vector<TCl
   int result_process = EventProcess(REvent,OutTree);
 
   return result_process;
-
 }
 
 #ifdef ROOT6
@@ -224,7 +248,6 @@ int FullRecoTask<TEOut>::EventLoop(TEOut* RestartEvent, TEOut* OutTree)
   int result_process = EventProcess(REvent,OutTree);
 
   return result_process;
-
 }
 
 #ifdef ROOT6
@@ -237,7 +260,7 @@ int FullRecoTask<TEOut>::EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* Ou
 {
 
   REvent.Clear();
-  int return_build = (*dynamic_cast<TBuildWASACalibrationLayerPlane*>(det_build))(UnpackEvent,REvent,OutTree);
+  int return_build = (*dynamic_cast<TWASACalibrationDataBuilder*>(det_build))(UnpackEvent,REvent,OutTree);
 
   if(return_build !=0)
     return -1;
@@ -245,26 +268,25 @@ int FullRecoTask<TEOut>::EventLoop(const EventWASAUnpack& UnpackEvent, TEOut* Ou
   int result_process = EventProcess(REvent,OutTree);
 
   return result_process;
-
 }
 
 
 template<class TEOut>
 int FullRecoTask<TEOut>::EventProcess(FullRecoEvent& RecoEvent,TEOut* OutTree)
 {
-
   for(auto process = list_processMC.begin(), process_last = list_processMC.end(); process!=process_last;++process)
     {
       //std::std::cout<<"courrent process:"<<(*process)->signature<<std::endl;
       if( (*(*process))(RecoEvent,OutTree) != 0)
-	{
-	  AnaHisto->h_task_exit.h->Fill((*process)->signature.c_str(),1);
-	  Attributes._logger->warn("current process:{} failed", (*process)->signature);
-	  return -1;
-	}
+        {
+          AnaHisto->h_task_exit.h->Fill((*process)->signature.c_str(),1);
+          Attributes._logger->warn("current process:{} failed", (*process)->signature);
+          return -1;
+        }
     }
   return 0;
 }
+
 
 template class FullRecoTask<MCAnaEventG4Sol>;
 template class FullRecoTask<Ana_WasaEvent>;

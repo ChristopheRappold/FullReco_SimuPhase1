@@ -415,7 +415,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             continue;
           if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
             ++n_Central;
-          if(id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2)
+          if(id_det>=G4Sol::MiniFiberD1_x && id_det<=G4Sol::MiniFiberD2_u)
             ++n_MiniFiber;
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
@@ -1031,14 +1031,14 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                         tempResults.ResFiber[id_det - G4Sol::FiberD1_x]    = res;
                         tempResults.WeightFiber[id_det - G4Sol::FiberD1_x] = weights[0];
                       }
-                    else if(id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2){
+                    else if(id_det>=G4Sol::MiniFiberD1_x && id_det<=G4Sol::MiniFiberD2_u){
                       const genfit::MeasurementOnPlane& residual = kfi->getResidual(0, false, true);
                       const TVectorD& resid(residual.getState());
                       double res = resid(0);
                       //std::cout << "res : " << res << std::endl;
-                      LocalHisto.h_ResMiniFiber[id_det-G4Sol::MiniFiberD1_x1]->Fill(res);
-                      tempResults.ResMiniFiber[id_det-G4Sol::MiniFiberD1_x1] = res;
-                      tempResults.WeightMiniFiber[id_det-G4Sol::MiniFiberD1_x1] = weights[0];
+                      LocalHisto.h_ResMiniFiber[id_det-G4Sol::MiniFiberD1_x]->Fill(res);
+                      tempResults.ResMiniFiber[id_det-G4Sol::MiniFiberD1_x] = res;
+                      tempResults.WeightMiniFiber[id_det-G4Sol::MiniFiberD1_x] = weights[0];
                     }
                     else if(id_det == G4Sol::PSCE)
                       {
@@ -1281,7 +1281,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               tempResults.firstHit     = id_firstDet;
               tempResults.lastHit      = id_lastDet;
               tempResults.Ncentral     = n_Central;
-              tempResults.Nmfiber  = n_MiniFiber;
+              tempResults.Nmfiber      = n_MiniFiber;
               tempResults.dE           = dE;
               tempResults.path_time    = Path_time;
               tempResults.path_length  = Path_lengthMean;

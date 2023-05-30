@@ -35,6 +35,7 @@ public :
   Int_t Mother_IsFromHyp; // 0-> No; 1-> Yes
 
   //Daughters:
+  Int_t PDG_Fragment;
   Int_t Id_Fragment;
   TLorentzVector MomE_Fragment;
   Double32_t Chi2ndf_Fragment;
@@ -43,6 +44,7 @@ public :
   Double32_t Angle_MotherFragment;
   Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
   
+  Int_t PDG_Pion;
   Int_t Id_Pion;
   TLorentzVector MomE_Pion;
   Double32_t Chi2ndf_Pion;

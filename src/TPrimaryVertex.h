@@ -2,11 +2,15 @@
 #define TPRIMARYVERTEX
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
+#include "Ana_Event/Ana_WasaEvent.hh"
+
 #include "Debug.hh"
 #include "FullRecoEvent.hh"
 #include "ReturnRes.hh"
 #include "TDataProcess.h"
 #include "THyphiAttributes.h"
+
+#include "TVector3.h"
 #include "TRandom3.h"
 
 //typedef TDataProcess<FullRecoEvent, MCAnaEventG4Sol> TDataProcessInterface;
@@ -19,463 +23,41 @@
 template<class Out>
 using TDataProcessInterface = TDataProcess<FullRecoEvent, Out>;
 
-/*
-class SiliconHits
+
+class PrimVtxTrack 
 {
-  double Z_plane_Si1    = 27.;  // in cm
-  double widthStrip_Si1 = 0.03; // in cm
-  double lenghtSi_Si1   = 4.;   // in cm
+  public:
+    PrimVtxTrack() { };
+    ~PrimVtxTrack() = default;
 
-  double Z_plane_Si2    = 30.;  // in cm
-  double widthStrip_Si2 = 0.03; // in cm
-  double lenghtSi_Si2   = 6.;   // in cm
+    void SetX(double _x) { x = _x; };
+    void SetY(double _y) { y = _y; };
+    void SetA(double _a) { a = _a; };
+    void SetB(double _b) { b = _b; };
+    void SetChi2NDF(double _chi2ndf) { chi2ndf = _chi2ndf; };
+    void SetFTHit(size_t i_ft, double hit_pos) { ft_hits.emplace_back(std::make_tuple(i_ft, hit_pos)); };
 
-  double MaxEnergyDiffStrips = 0.2;   // in MeV
+    double GetX() { return x; };
+    double GetY() { return y; };
+    double GetA() { return a; };
+    double GetB() { return b; };
+    double GetChi2NDF() { return chi2ndf; };
+    std::vector<std::tuple<size_t,double>> GetFTHits() { return ft_hits; };
 
-  double MaxEnergyMultiplicity = 0.03; // in MeV
+    //bool IsFTHit(size_t i_ft);
+    double GetTheta();
+    double GetPhi();
+    size_t GetNHits() { return ft_hits.size(); };
 
-  double Z_plane;
-  double widthStrip;
-  double lenghtSi;
-  int nStrips;
-
-public:
-  SiliconHits(size_t idSilicon)
-  {
-    if(idSilicon == 1)
-      {
-        Z_plane    = Z_plane_Si1;
-        widthStrip = widthStrip_Si1;
-        lenghtSi   = lenghtSi_Si1;
-      }
-    else if(idSilicon == 2)
-      {
-        Z_plane    = Z_plane_Si2;
-        widthStrip = widthStrip_Si2;
-        lenghtSi   = lenghtSi_Si2;
-      }
-    else
-      std::cout << "Wrong idSilicon: it must be 1 for Silicon1 or 2 for Silicon2\n";
-
-    nStrips = static_cast<int>(lenghtSi / widthStrip);
-  }
-
-  size_t size_type_abs(size_t a, size_t b)
-  {
-    if(a >= b)
-      return a - b;
-    else
-      return b - a;
-  }
-
-  void SignalstoHits(std::vector<std::tuple<double, size_t> >& HitEnergyLayerX,
-                      std::vector<std::tuple<double, size_t> >& HitEnergyLayerY,
-                      std::vector<std::vector<double> >& HitEnergyPosXY);
-};
-*/
-
-
-class SiliconHits_SDpad
-{
-
-/* For 2 layers: 1p2pXiYj
-  double Z_plane_Si1x    = 27.; // in cm
-  double Z_plane_Si1y    = 27.05; // in cm
-  size_t combineStrips_Si1 = 2; // power of 2
-  double widthStrip_Si1 = 0.008 * combineStrips_Si1; // in cm
-  double lenghtSi_Si1   = 2.048; // in cm
-  double thicknessSi_Si1 = 0.0285; // in cm
-  bool restrict_actlenght_Si1 = false;
-  double actlenghtX_Si1 = 50.; // in cm
-  double actlenghtY_Si1 = 50.; // in cm
-  bool restrict_gapcenter_Si1 = false;
-  double gapcenter_Si1 = 0.05; //in cm
-  bool ifveto_Si1 = false;
-  std::vector<int> inactwiresX_Si1 {};
-  std::vector<int> inactwiresY_Si1 {};
-  std::vector<size_t> PadDistribution_Si1 {2, 2}; // {nPads_X, n_Pads_Y}
-  bool ifreflectionX_Si1 = false;
-  bool ifreflectionY_Si1 = false;
-  bool ifphirot_Si1 = false;
-  double phirot_Si1 = 0.; //in degrees
-
-  double Z_plane_Si2x    = 28.; // in cm
-  double Z_plane_Si2y    = 28.05; // in cm
-  size_t combineStrips_Si2 = 2; // power of 2
-  double widthStrip_Si2 = 0.008 * combineStrips_Si2; // in cm
-  double lenghtSi_Si2   = 2.048; // in cm
-  double thicknessSi_Si2 = 0.0285; // in cm
-  bool restrict_actlenght_Si2 = false;
-  double actlenghtX_Si2 = 50.; // in cm
-  double actlenghtY_Si2 = 50.; // in cm
-  bool restrict_gapcenter_Si2 = false;
-  double gapcenter_Si2 = 0.05; //in cm
-  bool ifveto_Si2 = false;
-  std::vector<int> inactwiresX_Si2 {};
-  std::vector<int> inactwiresY_Si2 {};
-  std::vector<size_t> PadDistribution_Si2 {2, 3}; // {nPads_X, n_Pads_Y}
-  bool ifreflectionX_Si2 = false;
-  bool ifreflectionY_Si2 = false;
-  bool ifphirot_Si2 = false;
-  double phirot_Si2 = 0.; //in degrees
-*/
-
-// For 4 layers: pad1234a
-  double Z_plane_Si1x    = 27.4; // in cm
-  double Z_plane_Si1y    = 27.45; // in cm
-  size_t combineStrips_Si1 = 4; // power of 2
-  double widthStrip_Si1 = 0.008 * combineStrips_Si1; // in cm
-  double lenghtSi_Si1   = 2.048; // in cm
-  double thicknessSi_Si1 = 0.0285; // in cm
-  bool restrict_actlenght_Si1 = false;
-  double actlenghtX_Si1 = 50.; // in cm
-  double actlenghtY_Si1 = 50.; // in cm
-  bool restrict_gapcenter_Si1 = false;
-  double gapcenter_Si1 = 0.188*2.; //in cm
-  bool ifveto_Si1 = false;
-  std::vector<int> inactwiresX_Si1 {};
-  std::vector<int> inactwiresY_Si1 {};
-  std::vector<size_t> PadDistribution_Si1 {2, 2}; // {nPads_X, n_Pads_Y}
-  bool ifreflectionX_Si1 = false;
-  bool ifreflectionY_Si1 = false;
-  bool ifphirot_Si1 = true;
-  double phirot_Si1 = -45.; //in degrees
-
-  double Z_plane_Si2x    = 28.2; // in cm
-  double Z_plane_Si2y    = 28.25; // in cm
-  size_t combineStrips_Si2 = 4; // power of 2
-  double widthStrip_Si2 = 0.008 * combineStrips_Si2; // in cm
-  double lenghtSi_Si2   = 2.048; // in cm
-  double thicknessSi_Si2 = 0.0285; // in cm
-  bool restrict_actlenght_Si2 = false;
-  double actlenghtX_Si2 = 50.; // in cm
-  double actlenghtY_Si2 = 50.; // in cm
-  bool restrict_gapcenter_Si2 = false;
-  double gapcenter_Si2 = 0.188*2.; //in cm
-  bool ifveto_Si2 = false;
-  std::vector<int> inactwiresX_Si2 {};
-  std::vector<int> inactwiresY_Si2 {};
-  std::vector<size_t> PadDistribution_Si2 {2, 2}; // {nPads_X, n_Pads_Y}
-  bool ifreflectionX_Si2 = false;
-  bool ifreflectionY_Si2 = false;
-  bool ifphirot_Si2 = true;
-  double phirot_Si2 = -45.; //in degrees
-
-
-  double Z_plane_Si3x    = 26.475; // in cm
-  double Z_plane_Si3y    = 26.525; // in cm
-  size_t combineStrips_Si3 = 1; // power of 2
-  double widthStrip_Si3 = 0.008 * combineStrips_Si3; // in cm
-  double lenghtSi_Si3   = 2.048; // in cm
-  double thicknessSi_Si3 = 0.0285; // in cm
-  bool restrict_actlenght_Si3 = false;
-  double actlenghtX_Si3 = 50.; // in cm
-  double actlenghtY_Si3 = 50.; // in cm
-  bool restrict_gapcenter_Si3 = false;
-  double gapcenter_Si3 = 0.188*2.; //in cm
-  bool ifveto_Si3 = false;
-  std::vector<int> inactwiresX_Si3 {};
-  std::vector<int> inactwiresY_Si3 {};
-  std::vector<size_t> PadDistribution_Si3 {1, 1}; // {nPads_X, n_Pads_Y}
-  bool ifreflectionX_Si3 = false;
-  bool ifreflectionY_Si3 = true;
-  bool ifphirot_Si3 = false;
-  double phirot_Si3 = 0.; //in degrees
-
-  double Z_plane_Si4x    = 27.075; // in cm
-  double Z_plane_Si4y    = 27.125; // in cm
-  size_t combineStrips_Si4 = 1; // power of 2
-  double widthStrip_Si4 = 0.008 * combineStrips_Si4; // in cm
-  double lenghtSi_Si4   = 2.048; // in cm
-  double thicknessSi_Si4 = 0.0285; // in cm
-  bool restrict_actlenght_Si4 = false;
-  double actlenghtX_Si4 = 50.; // in cm
-  double actlenghtY_Si4 = 50.; // in cm
-  bool restrict_gapcenter_Si4 = false;
-  double gapcenter_Si4 = 0.188*2.; //in cm
-  bool ifveto_Si4 = false;
-  std::vector<int> inactwiresX_Si4 {};
-  std::vector<int> inactwiresY_Si4 {};
-  std::vector<size_t> PadDistribution_Si4 {1, 1}; // {nPads_X, n_Pads_Y}
-  bool ifreflectionX_Si4 = false;
-  bool ifreflectionY_Si4 = true;
-  bool ifphirot_Si4 = false;
-  double phirot_Si4 = 0.; //in degrees
-
-  double MaxEnergyDiffStrips = 0.2;   // in MeV
-  double MaxEnergyMultiplicity = 0.06; // in MeV
-
-  size_t Si_station;
-  double Z_plane;
-  double widthStrip;
-  double lenghtSi;
-  double thicknessSi;
-  bool restrict_actlenght;
-  double actlenghtX;
-  double actlenghtY;
-  bool restrict_gapcenter;
-  double gapcenter;
-  size_t combineStrips;
-  bool ifveto;
-  std::vector<int> inactwiresX; 
-  std::vector<int> inactwiresY;
-  std::vector<size_t> PadDistribution;
-  bool ifreflectionX;
-  bool ifreflectionY;
-  bool ifphirot;
-  double phirot;
-  int nStrips;
-  size_t nPads;
-
-  int nRejectPad = 0;
-
-public:
-  SiliconHits_SDpad(size_t idSilicon)
-  {
-    if(idSilicon == 1)
-      {
-        Z_plane    = (Z_plane_Si1x + Z_plane_Si1y)/2.;
-        widthStrip = widthStrip_Si1;
-        lenghtSi   = lenghtSi_Si1;
-        thicknessSi = thicknessSi_Si1;
-        restrict_actlenght = restrict_actlenght_Si1;
-        actlenghtX = actlenghtX_Si1;
-        actlenghtY = actlenghtY_Si1;
-        restrict_gapcenter = restrict_gapcenter_Si1;
-        gapcenter = gapcenter_Si1;
-        combineStrips = combineStrips_Si1;
-        ifveto = ifveto_Si1;
-        inactwiresX = inactwiresX_Si1;
-        inactwiresY = inactwiresY_Si1;
-        PadDistribution = PadDistribution_Si1;
-        ifreflectionX = ifreflectionX_Si1;
-        ifreflectionY = ifreflectionY_Si1;
-        ifphirot = ifphirot_Si1;
-        phirot = phirot_Si1;
-      }
-    else if(idSilicon == 2)
-      {
-        Z_plane    = (Z_plane_Si2x + Z_plane_Si2y)/2.;
-        widthStrip = widthStrip_Si2;
-        lenghtSi   = lenghtSi_Si2;
-        thicknessSi = thicknessSi_Si2;
-        restrict_actlenght = restrict_actlenght_Si2;
-        actlenghtX = actlenghtX_Si2;
-        actlenghtY = actlenghtY_Si2;
-        restrict_gapcenter = restrict_gapcenter_Si2;
-        gapcenter = gapcenter_Si2;
-        combineStrips = combineStrips_Si2;
-        ifveto = ifveto_Si2;
-        inactwiresX = inactwiresX_Si2;
-        inactwiresY = inactwiresY_Si2;
-        PadDistribution = PadDistribution_Si2;
-        ifreflectionX = ifreflectionX_Si2;
-        ifreflectionY = ifreflectionY_Si2;
-        ifphirot = ifphirot_Si2;
-        phirot = phirot_Si2;
-      }
-    else if(idSilicon == 3)
-      {
-        Z_plane    = (Z_plane_Si3x + Z_plane_Si3y)/2.;
-        widthStrip = widthStrip_Si3;
-        lenghtSi   = lenghtSi_Si3;
-        thicknessSi = thicknessSi_Si3;
-        restrict_actlenght = restrict_actlenght_Si3;
-        actlenghtX = actlenghtX_Si3;
-        actlenghtY = actlenghtY_Si3;
-        restrict_gapcenter = restrict_gapcenter_Si3;
-        gapcenter = gapcenter_Si3;
-        combineStrips = combineStrips_Si3;
-        ifveto = ifveto_Si3;
-        inactwiresX = inactwiresX_Si3;
-        inactwiresY = inactwiresY_Si3;
-        PadDistribution = PadDistribution_Si3;
-        ifreflectionX = ifreflectionX_Si3;
-        ifreflectionY = ifreflectionY_Si3;
-        ifphirot = ifphirot_Si3;
-        phirot = phirot_Si3;
-      }
-    else if(idSilicon == 4)
-      {
-        Z_plane    = (Z_plane_Si4x + Z_plane_Si4y)/2.;
-        widthStrip = widthStrip_Si4;
-        lenghtSi   = lenghtSi_Si4;
-        thicknessSi = thicknessSi_Si4;
-        restrict_actlenght = restrict_actlenght_Si4;
-        actlenghtX = actlenghtX_Si4;
-        actlenghtY = actlenghtY_Si4;
-        restrict_gapcenter = restrict_gapcenter_Si4;
-        gapcenter = gapcenter_Si4;
-        combineStrips = combineStrips_Si4;
-        ifveto = ifveto_Si4;
-        inactwiresX = inactwiresX_Si4;
-        inactwiresY = inactwiresY_Si4;
-        PadDistribution = PadDistribution_Si4;
-        ifreflectionX = ifreflectionX_Si4;
-        ifreflectionY = ifreflectionY_Si4;
-        ifphirot = ifphirot_Si4;
-        phirot = phirot_Si4;
-      }
-    else
-      std::cout << "Wrong idSilicon: it must be 1,2,3,4 for Silicon1,2,3,4\n";
-
-    Si_station = idSilicon;
-    nStrips = static_cast<int>(lenghtSi / widthStrip);
-    nPads = PadDistribution[0] * PadDistribution[1];
-  }
-
-  size_t size_type_abs(size_t a, size_t b)
-  {
-    if(a >= b)
-      return a - b;
-    else
-      return b - a;
-  }
-
-  void SignalstoHits_SDpad(std::vector<std::tuple<double, size_t> > HitEnergyLayerX,
-                        std::vector<std::tuple<double, size_t> > HitEnergyLayerY,
-                        std::vector<std::vector<double> >& HitEnergyPosXY);
-
-  bool IsSamePad(size_t& layerX_id, size_t& layerY_id);
-
-  void originPad(size_t& layerX_id, double& originPadX, double& originPadY);
-
-  void CombineStrips(std::vector<std::tuple<double, size_t> >& HitEnergyLayer);
-
-  int CountRejectPad()
-  {
-    return nRejectPad;
-  }
-
-  void Clear()
-  {
-    nRejectPad = 0;
-  }
-
-  void TranslationZ_Si_System(double Target_PosZ);
-
+  private:
+    double x = -999.;
+    double y = -999.; //z = mid of target;
+    double a = -999.;
+    double b = -999.;
+    double chi2ndf = -999.;
+    std::vector<std::tuple<size_t,double>> ft_hits = {};
 };
 
-
-/* For Hamamatsu silicons
-class SiliconHits_SD
-{
-  double Z_plane_Si1x    = 27.; // in cm
-  double Z_plane_Si1y    = 27.05; // in cm
-  size_t combineStrips_Si1 = 1; // power of 2
-  double widthStrip_Si1 = 0.019 * combineStrips_Si1; // in cm
-  double lenghtSi_Si1   = 9.728; // in cm
-  double thicknessSi_Si1 = 0.032; // in cm
-  bool restrict_actlenght_Si1 = true;
-  double actlenghtX_Si1 = 3.648; // in cm
-  double actlenghtY_Si1 = 3.648; // in cm
-  bool restrict_gapcenter_Si1 = true;
-  double gapcenter_Si1 = 0.05; //in cm
-  bool ifveto_Si1 = false;
-  std::vector<int> inactwiresX_Si1 {254, 255, 256, 257, 1278, 1279, 1280, 1281}; 
-  std::vector<int> inactwiresY_Si1 {254, 255, 256, 257, 1278, 1279, 1280, 1281};
-
-  double Z_plane_Si2x    = 30.; // in cm
-  double Z_plane_Si2y    = 30.05; // in cm
-  size_t combineStrips_Si2 = 2; // power of 2
-  double widthStrip_Si2 = 0.019 * combineStrips_Si2; // in cm
-  double lenghtSi_Si2   = 9.728; // in cm
-  double thicknessSi_Si2 = 0.032; // in cm
-  bool restrict_actlenght_Si2 = true;
-  double actlenghtX_Si2 = 7.296; // in cm
-  double actlenghtY_Si2 = 7.296; // in cm
-  bool restrict_gapcenter_Si2 = true;
-  double gapcenter_Si2 = 0.05; //in cm
-  bool ifveto_Si2 = false;
-  std::vector<int> inactwiresX_Si2 {254, 255, 256, 257, 1278, 1279, 1280, 1281};
-  std::vector<int> inactwiresY_Si2 {254, 255, 256, 257, 1278, 1279, 1280, 1281};
-
-  double MaxEnergyDiffStrips = 0.4;   // in MeV
-  double MaxEnergyMultiplicity = 0.06; // in MeV
-
-
-  double Z_plane;
-  double widthStrip;
-  double lenghtSi;
-  bool restrict_actlenght;
-  double actlenghtX;
-  double actlenghtY;
-  bool restrict_gapcenter;
-  double gapcenter;
-  size_t combineStrips;
-  bool ifveto;
-  std::vector<int> inactwiresX; 
-  std::vector<int> inactwiresY;
-  int nStrips;
-
-  int nRejectCuadrant = 0;
-
-public:
-  SiliconHits_SD(size_t idSilicon)
-  {
-    if(idSilicon == 1)
-      {
-        Z_plane    = (Z_plane_Si1x + Z_plane_Si1y)/2.;
-        widthStrip = widthStrip_Si1;
-        lenghtSi   = lenghtSi_Si1;
-        restrict_actlenght = restrict_actlenght_Si1;
-        actlenghtX = actlenghtX_Si1;
-        actlenghtY = actlenghtY_Si1;
-        restrict_gapcenter = restrict_gapcenter_Si1;
-        gapcenter = gapcenter_Si1;
-        combineStrips = combineStrips_Si1;
-        ifveto = ifveto_Si1;
-        inactwiresX = inactwiresX_Si1;
-        inactwiresY = inactwiresY_Si1;
-      }
-    else if(idSilicon == 2)
-      {
-        Z_plane    = (Z_plane_Si2x + Z_plane_Si2y)/2.;
-        widthStrip = widthStrip_Si2;
-        lenghtSi   = lenghtSi_Si2;
-        restrict_actlenght = restrict_actlenght_Si2;
-        actlenghtX = actlenghtX_Si2;
-        actlenghtY = actlenghtY_Si2;
-        restrict_gapcenter = restrict_gapcenter_Si2;
-        gapcenter = gapcenter_Si2;
-        combineStrips = combineStrips_Si2;
-        ifveto = ifveto_Si2;
-        inactwiresX = inactwiresX_Si2;
-        inactwiresY = inactwiresY_Si2;
-      }
-    else
-      std::cout << "Wrong idSilicon: it must be 1 for Silicon1 or 2 for Silicon2\n";
-
-    nStrips = static_cast<int>(lenghtSi / widthStrip);
-  }
-
-  size_t size_type_abs(size_t a, size_t b)
-  {
-    if(a >= b)
-      return a - b;
-    else
-      return b - a;
-  }
-
-  void SignalstoHits_SD(std::vector<std::tuple<double, size_t> > HitEnergyLayerX,
-                        std::vector<std::tuple<double, size_t> > HitEnergyLayerY,
-                        std::vector<std::vector<double> >& HitEnergyPosXY);
-
-  bool IsValidCuadrant(size_t& layerX_id, size_t& layerY_id);
-
-  void CombineStrips(std::vector<std::tuple<double, size_t> >& HitEnergyLayer);
-
-  int CountRejectCuadrant()
-  {
-    return nRejectCuadrant;
-  }
-
-  void Clear()
-  {
-    nRejectCuadrant = 0;
-  }
-};
-*/
 
 template<class Out>
 class TPrimaryVertex final : public TDataProcessInterface<Out> //TDataProcess<FullRecoEvent, Out> //TDataProcessInterface
@@ -497,179 +79,240 @@ private:
   void SelectHists() final;
 
   int FinderPrimaryVertex(FullRecoEvent& RecoEvent);
-  void simulHitstoRealHits(
-      FullRecoEvent& REvent,
-      std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal,
-      int id_det_x, int id_det_y, TH1F* h_Diff, std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos);
 
-  void MFcheck(std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si1,
-               std::vector<std::tuple<size_t,TVector3,TVector3>>& HitIdMomPos_Si2,
-               std::array<double,3> InteractionPoint);
+  void CloseDist_TrackTrack(PrimVtxTrack& Track1, PrimVtxTrack& Track2, double& distance, TVector3& midpoint);
 
-  void nGoodEventsCounter(
-      std::vector<std::vector<double> >& HitEnergyPosXY,
-      std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal,
-      double& widthStrip, size_t& nGoodrecons);
+  double CloseDist_TrackPoint(PrimVtxTrack& Track, TVector3& Point);
 
-  void RealHitstoRealTracks(
-      std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal_Si1,
-      std::vector<std::tuple<double, double, double, size_t, double, double, std::string> >& HitEnergyPosXYreal_Si2,
-      std::vector<std::vector<std::vector<double> > >& RealTracks);
-
-  void nGoodTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
-                          std::vector<std::vector<std::vector<double> > >& RealTracks, size_t& nGoodTracks,
-                          std::vector<size_t>& goodCandidateTracks);
-
-  void nForwardTracksCounter(std::vector<std::vector<std::vector<double> > >& CandidateTracks, size_t& nForwardTracks,
-                             std::vector<size_t>& forwardCandidateTracks);
-
-  void CloseDist(std::vector<double>& BeamHit1, std::vector<double>& BeamHit2, std::vector<double>& TrackHit1,
-                 std::vector<double>& TrackHit2, double& distance, double& z);
-
-  double f_function(std::vector<double>& Hit1, std::vector<double>& Hit2, std::vector<double>& PosXYZ);
+  double f_function(PrimVtxTrack& Track, std::vector<double>& PosXYZ);
 
   double V_function(std::vector<double>& f_vector);
 
-  void SpaceDiscretization(double& Xi, double& Xf, size_t& NstepsX, double& Yi, double& Yf, size_t& NstepsY, double& Zi,
-                           double& Zf, size_t& NstepsZ, size_t& border, std::vector<std::vector<double> >& PosXYZ);
+  void SpaceDiscretization(double& Xi, double& Xf, double& Yi, double& Yf, size_t& NstepsXY, double& Zi, double& Zf, size_t& NstepsZ,
+                              size_t& border, std::vector<std::vector<double> >& PosXYZ);
   
-  void HitstoTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
-                    std::vector<std::vector<double> >& HitEnergyPosXY_Si2, std::vector<double>& BeamHit1,
-                    std::vector<double>& BeamHit2, std::vector<std::vector<std::vector<double> > >& CandidateTracks);
+  void BeamTracksFinder(std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > >& ListHits, std::vector<PrimVtxTrack>& BeamTracks_All);
 
-  void TrackstoVertexPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
-                              std::vector<double>& BeamHit1, std::vector<double>& BeamHit2,
-                              std::vector<double>& InteractionPointRecons, std::vector<double>& f_values_IP);
+  void BeamTracksSelector(std::vector<PrimVtxTrack>& BeamTracks_All, std::vector<PrimVtxTrack>& BeamTracks);
 
-  void CovarianceMatrix(std::vector<std::vector<std::vector<double> > >& CandidateTracks, std::vector<double>& BeamHit1,
-                        std::vector<double>& BeamHit2, std::vector<double>& InteractionPointAverage,
-                        std::vector<double>& f_values_IP, std::vector<std::vector<double> >& CovMatrix);
+  void PrimaryTracksFinder(std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > >& ListHits, std::vector<PrimVtxTrack>& PrimaryTracks_All);
 
-  void HitstoDecayTracks(std::vector<std::vector<double> >& HitEnergyPosXY_Si1,
-                         std::vector<std::vector<double> >& HitEnergyPosXY_Si2, std::vector<double>& BeamHit1,
-                         std::vector<double>& BeamHit2, std::vector<double>& InteractionPointRecons,
-                         std::vector<std::vector<std::vector<double> > >& CandidateDecayTracks);
+  void PrimaryTracksFinder_v2(std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > >& ListHits, PrimVtxTrack& BeamTrack,
+                                  std::vector<PrimVtxTrack>& PrimaryTracks_All);
 
-  void DecayTrackstoDecayPosition(std::vector<std::vector<std::vector<double> > >& CandidateTracks,
-                                  std::vector<double>& InteractionPointRecons,
-                                  std::vector<double>& DecayPositionRecons);
+  void RealPrimaryTracksFinder(std::vector<std::vector<std::unique_ptr<genfit::AbsMeasurement> > >& ListHits,
+                                std::vector<std::vector<int> >& ListHitsToTracks,
+                                std::unordered_map<int, std::vector<std::vector<SimHit> > >& TrackDAFSim,
+                                  std::vector<PrimVtxTrack>& PrimaryTracks_All);
 
-  void TranslationZ_Target_System(double Target_PosZ);
+  void PrimaryTracksSelector(std::vector<PrimVtxTrack>& PrimaryTracks_All, std::vector<PrimVtxTrack>& BeamTracks,
+                                  std::vector<PrimVtxTrack>& PrimaryTracks);
 
-  SiliconHits_SDpad SiliconHitsSD_Si1;
-  SiliconHits_SDpad SiliconHitsSD_Si2;
+  void InteractionPointFinder(std::vector<PrimVtxTrack>& BeamTracks, std::vector<PrimVtxTrack>& PrimaryTracks,
+                                TVector3& IP_recons, std::vector<double>& f_values_IP, size_t& i_BeamTracks_Vmax);
 
-  bool Si_4layers = true;
-  SiliconHits_SDpad SiliconHitsSD_Si3;
-  SiliconHits_SDpad SiliconHitsSD_Si4;
-
-  double Zo_target = 24.; // in cm
-  double Zf_target = 26.; // in cm
-
-  double Z_plane_Si1x   = 27.4; // in cm
-  double Z_plane_Si1y   = 27.45; // in cm
-  double Z_plane_Si1    = (Z_plane_Si1x + Z_plane_Si1y)/2.;
-  size_t combineStrips_Si1 = 4; // power of 2
-  double widthStrip_Si1 = 0.008 * combineStrips_Si1; // in cm
-  double sigma_Si1      = widthStrip_Si1 / std::sqrt(12.);
-  double lenghtSi_Si1   = 2.048; // in cm
-  int nStrips_Si1 = static_cast<int>(lenghtSi_Si1 / widthStrip_Si1);
-
-  double Z_plane_Si2x    = 28.2; // in cm
-  double Z_plane_Si2y    = 28.25; // in cm
-  double Z_plane_Si2     = (Z_plane_Si2x + Z_plane_Si2y)/2.;  // in cm
-  size_t combineStrips_Si2 = 4; // power of 2
-  double widthStrip_Si2 = 0.008 * combineStrips_Si2; // in cm
-  double sigma_Si2       = widthStrip_Si2 / std::sqrt(12.);
-  double lenghtSi_Si2   = 2.048; // in cm
-  int nStrips_Si2 = static_cast<int>(lenghtSi_Si2 / widthStrip_Si2);
+  void CovarianceMatrix(PrimVtxTrack& BeamTrack, std::vector<PrimVtxTrack>& PrimaryTracks,
+                          TVector3& IP_average, std::vector<double>& f_values_IP,
+                              std::vector<std::vector<double> >& CovMatrix);
 
 
-  double ErrorDistTarget    = 0.2;  // in cm
-  double MaxClosestDistance = 0.04; // in cm
+  void FindHitXUV_v3(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                      const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
 
-  size_t NstepsdiscretXY      = 5;
-  size_t NstepsdiscretZ       = 11;
-  size_t Nstepsdiscretbox     = 5;
-  size_t nTimesDiscretization = 6;
-  double boxDistBeamXY        = 0.4;
+  void FindHitXUV_v4(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                      const std::vector<genfit::AbsMeasurement*>& hitv, int id_det);
 
-  double boxDistDecayXY     = 0.75; // in cm
-  size_t NstepsdiscretDecay = 11;
+  void FindCombXUV_d(const std::vector<genfit::AbsMeasurement*>& hitx, const std::vector<genfit::AbsMeasurement*>& hitu,
+                      const std::vector<genfit::AbsMeasurement*>& hitv, int id_det,
+                        std::map<double,std::tuple<double,double,double> >& CombXUV_diffd);
 
-  double k_factor       = 3.; // multiplies the beam track f function value
-  double k_alpha_factor = 5.;
-  double MinDistIPDecay = 0.15;
+  void SelectCombXUV_d(std::map<double,std::tuple<double,double,double> >& CombXUV_diffd);
 
-  double randInteractionPointXY = 0.01; // in cm
+  double d_function1(int id_det, double hitx, double hity);
+  double d_function2(int id_det, double posx);
 
-  double min_f_value = 0.5;
-  std::vector<double> sigma_Si{sigma_Si1, sigma_Si2};
-  double sigma_beam = 2. * randInteractionPointXY / std::sqrt(12.);
+  void Get_dvalueThetaPhi_CombXUV(int id_det, std::tuple<double,double,double> CombXUV);
 
-  double EnergyThreshold     = 0.001; // in MeV
-  double MaxEnergyDiffSilicons = 0.3;   // in MeV
+  std::vector<genfit::AbsMeasurement*> Clusterize(const std::vector<std::unique_ptr<genfit::AbsMeasurement>>& hit);
+  std::vector<genfit::AbsMeasurement*> Clusterize(const std::vector<genfit::AbsMeasurement*>& hit);
+
+  void BeamTracking(const std::vector<std::tuple<double,double,double>>& CombXUV_UFT1,
+                    const std::vector<std::tuple<double,double,double>>& CombXUV_UFT2,
+                      std::vector<PrimVtxTrack>& BeamTracks);
+
+  void PrimaryTracking(const std::vector<std::tuple<double,double,double>>& CombXUV_UFT3,
+                        const std::vector<std::tuple<double,double,double>>& CombXUV_MFT1,
+                        const std::vector<std::tuple<double,double,double>>& CombXUV_MFT2,
+                          std::vector<PrimVtxTrack>& PrimaryTracks);
+
+  bool PrimVtxTracking(PrimVtxTrack& PrimaryVtxTrack);
+
+  bool CloseToBeam(std::tuple<double,double,double,double> BeamEllipsePar, PrimVtxTrack& PrimaryVtxTrack);
+
+  PrimVtxTrack TrackFitting(int nlayer, double* w, double* z, double* angle, double* s);
+
+  bool GaussJordan( double **a, int n, double *b, int *indxr, int *indxc, int *ipiv );
+
+  std::tuple<double,double,double,double> BeamEllipseParam(PrimVtxTrack& BeamTrack);
+
+  std::vector<std::vector<TVector2> >                            vect_HitXY = {{}, {}, {}, {}, {}, {}, {}};
+  std::vector<std::vector<std::tuple<double, double, double> > > vect_CombHit = {{}, {}, {}, {}, {}, {}, {}};
+
+  //std::vector<double> cut_d = {0.4, 0.4, 2., 0.4, 0.4, 0.6, 0.6}; //in cm
+  std::vector<double> cut_d = {0.4, 0.4, 2., 0.4, 0.4, 0.4, 0.4}; //in cm
+  std::vector<double> cut_diff_d = {0.35, 0.35, 1., 0.3, 0.3, 0.35, 0.35}; //in cm
+
+  double fiber_resolution = 0.015; // in cm
+  double fiber_width = 0.11; // in cm
+
+  std::vector<double> Zpos_Fiber = {154.77, 171.17, 199.67, 226.93, 230.93, 396.00, 405.63}; //in cm
+
+  std::vector< std::tuple<double, double, double, double, double> > param_d_funct1 = // p0, p1, p2, p3, phi_offset
+               {std::make_tuple(     0.,     0.,     0.,     0.,   0.),  // UFT1
+                std::make_tuple(     0.,     0.,     0.,     0.,   0.),  // UFT2
+                std::make_tuple(-0.0006, 2.1169, 0.0014, -0.001,  11.),  // UFT3
+                std::make_tuple(-0.0010, -0.785,  0.054,  -0.18, -30.),  // MFT1
+                std::make_tuple(-0.0009, -0.786,  0.029,  -0.25,  30.),  // MFT2
+                std::make_tuple( 0.0002,     2.,     0.,     0., -13.),  // DFT1
+                std::make_tuple(-0.0010,   2.21,     0.,     0.,  13.)}; // DFT2
+
+  std::vector< std::tuple<double, double, double, double> > param_d_funct2 = // p0, p1, p2, p3
+               {std::make_tuple(     0.,       0.,       0.,       0.),  // UFT1
+                std::make_tuple(     0.,       0.,       0.,       0.),  // UFT2
+                std::make_tuple( 0.0035,  0.31200,  -0.0017,   0.0552),  // UFT3
+                std::make_tuple( 0.0010, -0.02370,       0.,       0.),  // MFT1
+                std::make_tuple( 0.0008, -0.02147,       0.,       0.),  // MFT2
+                std::make_tuple( 0.0012,  0.01001,       0.,       0.),  // DFT1
+                std::make_tuple( 0.0001,  0.00985,       0.,       0.)}; // DFT2
+
+  std::vector<int> id_detector = {G4Sol::FiberD1_x, G4Sol::FiberD2_x, G4Sol::FiberD3_x,
+                                            G4Sol::MiniFiberD1_x, G4Sol::MiniFiberD2_x,
+                                                    G4Sol::FiberD4_x, G4Sol::FiberD5_x};
+
+  double ang[7][3] = {
+    {  0.,  30., -30.},  // UFT1
+    {  0.,  30., -30.},  // UFT2 
+    {  0.,  30., -30.},  // UFT3
+    {  0., -60.,  60.},  // MFT1
+    {  0.,  60., -60.},  // MFT2
+    { 30., -30.,   0.},  // DFT1
+    {  0.,  30., -30.}}; // DFT2
+
+  int id_mid[7] = {1, 1, 1, 1, 2, 1, 1};
+
+  bool SelectCombXUV_flag[7] = {true, true, false, false, false, true, true};
+  bool ifcut_MFTtheta_UFT3 = false;
+  double maxMFTtheta = 18.;
+  double minMFTtheta = 8.;
+
+  double randIPXY = fiber_resolution;
 
   TRandom3* rand;
 
+  bool RealPrimTrack = false;
+
+  bool onlyMFT = true;
+
+  //Experimental setup parameters about target
+  TVector3 target_pos;
+  TVector3 target_size;
+
+  //Cut conditions on reconstructed beam tracks
+  bool ifCut_MaxChi2ndf_BeamTracks = false;
+  double MaxChi2ndf_BeamTracks = 10.; //Change !
+
+  bool ifCut_MaxTheta_BeamTracks = false;
+  double MaxTheta_BeamTracks = 2.; //Change !
+
+  bool ifCut_CloseDistToTgtCenter_BeamTracks = false;
+  double MaxCloseDistToTgtCenter_BeamTracks = std::sqrt(2)/2. + 0.1; // in target_size.Mag() units, which is 3 cm
+
+
+  //Cut conditions on reconstructed primary tracks
+  bool ifCut_MaxChi2ndf_PrimaryTracks = true;
+  double MaxChi2ndf_PrimaryTracks = 10.; //Change !
+
+  bool ifCut_MaxCloseDistToBeam_PrimaryTracks = true;
+  double MaxCloseDistToBeam_PrimaryTracks = 0.5;
+
+  bool ifCut_MaxDistZBeamToTarget_PrimaryTracks = true;
+  double MaxDistZBeamToTarget_PrimaryTracks = 0.6; //in target_size.Mag() units, which is 3 cm, from target_pos.Z()
+
+  bool ifCut_MinTheta_PrimaryTracks = true;
+  double MinTheta_PrimaryTracks = 5.;
+
+  bool ifCut_MaxTheta_PrimaryTracks = true;
+  double MaxTheta_PrimaryTracks = 20.;
+
+  bool ifCut_CloseDistToTgtCenter_PrimaryTracks = true;
+  double MaxCloseDistToTgtCenter_PrimaryTracks = 1.1; // in target_size.Mag() units, which is 3 cm
+
+
+/*
+  bool ifCut_FlagPSBhit_PrimaryTracks = false;
+  bool FlagPSBhit_PrimaryTracks = true; //Change !
+
+  bool ifCut_FlagPSBEhit_PrimaryTracks = false;
+  bool FlagPSBEhit_PrimaryTracks = true; //Change !
+
+  bool ifCut_FlagPSFEhit_PrimaryTracks = false;
+  bool FlagPSFEhit_PrimaryTracks = true; //Change !
+
+  bool ifCut_FlagPShit_PrimaryTracks = false;
+  bool FlagPShit_PrimaryTracks = true; //Change !
+*/
+
+  //Parameters for space discretization
+  size_t NstepsdiscretXY      = 5;
+  size_t NstepsdiscretZ       = 16;
+  size_t Nstepsdiscretbox     = 5;
+  size_t nTimesDiscretization = 5;
+  double boxDistBeamXY        = 0.4; //in cm
+
+  //Parameter for v function method
+  double k_factor       = 30.; // multiplies the beam track f function value
+  bool ifCut_min_V_value = false;
+  double min_V_value = 0.9; //change
+
+  size_t i_BeamTracks_Vmax = 99.;
+
+  //Parameters for covariance matrix calculation
+  double min_f_value = 0.5;
+  double sigma_FT = fiber_resolution;
+
+  //Results for primary vertex Finder
+  TVector3 IP_real;
+  TVector3 IP_average;
+  TVector3 IP_recons;
+
+
   struct LocalHists
   {
-    TH1F* h_HitMultiplicity_Si1;
-    TH1F* h_HitMultiplicityRecons_Si1;
-    TH1F* h_HitMultiplicityDiff_Si1;
-    TH2F* h_HitMultiplicityDiffNHits_Si1;
+    TH2F* h_NFiberMult;
+    TH2F* h_NCombsXUV_UFT12;
+    
+    TH2F* h_NCombsXUV[5];
+    TH2F* h_CombsXUV_dvalue_theta[5];
+    TH2F* h_CombsXUV_dvalue_phi[5];
+    TH2F* h_CombsXUV_dvalue_phi_theta5[5];
+    TH2F* h_CombsXUV_dvalue_phi_theta10[5];
 
-    TH1F* h_EnergyDiffStrips_Si1;
-
-    TH1F* h_nEventsGoodrecons_Si1;
-    TH1F* h_nEventsGhost_Si1;
-    TH2F* h_nEventsGoodreconsGhost_Si1;
-    TH2F* h_nEventsRealGoodrecons_Si1;
-    TH2F* h_nEventsRealRejectPad_Si1;
-
-
-    TH1F* h_HitMultiplicity_Si2;
-    TH1F* h_HitMultiplicityRecons_Si2;
-    TH1F* h_HitMultiplicityDiff_Si2;
-    TH2F* h_HitMultiplicityDiffNHits_Si2;
-
-    TH1F* h_EnergyDiffStrips_Si2;
-
-    TH1F* h_nEventsGoodrecons_Si2;
-    TH1F* h_nEventsGhost_Si2;
-    TH2F* h_nEventsGoodreconsGhost_Si2;
-    TH2F* h_nEventsRealGoodrecons_Si2;
-    TH2F* h_nEventsRealRejectPad_Si2;
-
-    TH1F* h_MFCheck_Theta_MomSi1MomSi2;
-    TH1F* h_MFCheck_Dist_MomSi1HitSi2;
-    TH1F* h_MFCheck_Dist_MomSi2HitSi1;
-    TH1F* h_MFCheck_Dist_MomSi1HitIP;
-    TH1F* h_MFCheck_Dist_MomSi2HitIP;
-
-    TH2F* h_EnergyStripEnergyTotalReal;
-    TH2F* h_EnergyStripEnergyTotal;
-    TH2F* h_EnergyDiffSilicons;
-
-    TH2F* h_EnergyDepositionMother;
-    TH2F* h_EnergyDepositionDaughters;
+    TH2F* h_NHits_PrimaryTracks;
 
     TH2F* h_nTrackCandidates;
     TH2F* h_DistanceBeamTracks;
     TH2F* h_PosZBeamTracks;
     TH2F* h_thetaTracks;
-    TH1F* h_thetaResol;
+    TH2F* h_chi2ndfTracks;
 
-    TH1F* h_Acc_ThetaCandidates;
-    TH1F* h_Acc_ThetaAllReal;
-    
-    TH2F* h_nCandidatesRealTracks;
-    TH2F* h_nCandidatesRealTracks_IfRecons;
-
-    TH1F* h_nHypernucleiTrack;
     TH1F* h_fvalues;
 
-    TH1F* h_InteractionPointDistance;
+    TH1F* h_InteractionPointPosX;
+    TH1F* h_InteractionPointPosY;
+    TH1F* h_InteractionPointPosZ;
+
+    TH2F* h_InteractionPointDistance_V_value;
+
     TH1F* h_InteractionPointDistanceX;
     TH1F* h_InteractionPointDistanceY;
     TH1F* h_InteractionPointDistanceZ;
@@ -681,16 +324,6 @@ private:
     TH1F* h_CovarianceSigmaX;
     TH1F* h_CovarianceSigmaY;
     TH1F* h_CovarianceSigmaZ;
-
-    TH1F* h_IP_DecayDistance;
-    TH1F* h_IP_DecayDistanceX;
-    TH1F* h_IP_DecayDistanceY;
-    TH1F* h_IP_DecayDistanceZ;
-
-    TH1F* h_DecayPositionDistance;
-    TH1F* h_DecayPositionDistanceX;
-    TH1F* h_DecayPositionDistanceY;
-    TH1F* h_DecayPositionDistanceZ;
 
     TH1F* h_PrimVtxstats;
     TH2F* h_PrimStatus;

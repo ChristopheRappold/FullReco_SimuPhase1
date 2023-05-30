@@ -5,15 +5,15 @@
 #include <iostream>
 #include <math.h>
 
-PSBHitAna::PSBHitAna(int seg, int t_u, int t_d, int q_u, int q_d, ParaManager *par){
+PSBHitAna::PSBHitAna(int seg, int t_u, int t_d, int q_u, int q_d, ParaManager *par, double t_t0){
   _seg     = seg;
   _t_u     = t_u;
   _t_d     = t_d;
   _q_u     = q_u;
   _q_d     = q_d;
   SetRPhi();
-  _time_u = t_u * par->psb_ch2ns[seg][0] + par->psb_off_time[seg][0];
-  _time_d = t_d * par->psb_ch2ns[seg][1] + par->psb_off_time[seg][1];
+  _time_u = t_u * par->psb_ch2ns[seg][0] + par->psb_off_time[seg][0] - t_t0 + par->wasa_tof_offset;
+  _time_d = t_d * par->psb_ch2ns[seg][1] + par->psb_off_time[seg][1] - t_t0 + par->wasa_tof_offset;
   _time   = (_time_u + _time_d)/2.;
   _z      = (_time_u - _time_d) * par->psb_zpar[seg];
   //_time = (t_u * par->psb_ch2ns + t_d * par->psb_ch2ns)/2. + par->psb_off_time[seg];
@@ -37,19 +37,19 @@ void PSBHitAna::SetRPhi(void){
 
   if(_seg<23){
     if (0 == (_seg % 2)) { // inner PSB
-      _r   = 221.25;
+      _r   = 217.;
       _phi = TMath::Pi() * (9.15 + 14.7 * ((double)(_seg / 2))) / 180.0;
     } else { // outer PSB
-      _r   = 231.75;
+      _r   = 227.75;
       _phi = TMath::Pi() * (16.5 + 14.7 * ((double)((_seg - 1) / 2))) / 180.0;
     }
   }
   else{
     if (0 == ((_seg-23) % 2)) { // inner PSB
-      _r   =  221.25;
+      _r   = 217.;
       _phi = TMath::Pi() * (189.15 + 14.7 * ((float)((_seg-23) / 2))) / 180.0;
-    } else { // uter PSB
-      _r   = 231.75;
+    } else { // outer PSB
+      _r   = 227.75;
       _phi = TMath::Pi() * (196.5 + 14.7 * ((float)(((_seg-23) - 1) / 2))) / 180.0;
     }
   }

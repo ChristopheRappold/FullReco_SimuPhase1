@@ -46,12 +46,12 @@ TBuildDetectorLayerPlaneDAF_MT::TBuildDetectorLayerPlaneDAF_MT(const THyphiAttri
                                        "FiberD5_Core_log_x",
                                        "FiberD5_Core_log_u",
                                        "FiberD5_Core_log_v",
-                                       "MiniFiberD1_Core_log_x1",
-                                       "MiniFiberD1_Core_log_u1",
-                                       "MiniFiberD1_Core_log_v1",
-                                       "MiniFiberD1_Core_log_x2",
-                                       "MiniFiberD1_Core_log_u2",
-                                       "MiniFiberD1_Core_log_v2",
+                                       "MiniFiberD1_Core_log_x",
+                                       "MiniFiberD1_Core_log_u",
+                                       "MiniFiberD1_Core_log_v",
+                                       "MiniFiberD2_Core_log_x",
+                                       "MiniFiberD2_Core_log_u",
+                                       "MiniFiberD2_Core_log_v",
                                        "PSFE",
                                        "MG01",
                                        "MG02",
@@ -633,23 +633,23 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
                     case G4Sol::FiberD5_v:
                       volumeName = "FiberD5_log_v";
                       break;
-                    case G4Sol::MiniFiberD1_x1:
-                      volumeName = "MiniFiberD1_log_x1";
+                    case G4Sol::MiniFiberD1_x:
+                      volumeName = "MiniFiberD1_log_x";
                       break;
-                    case G4Sol::MiniFiberD1_u1:
-                      volumeName = "MiniFiberD1_log_u1";
+                    case G4Sol::MiniFiberD1_u:
+                      volumeName = "MiniFiberD1_log_u";
                       break;
-                    case G4Sol::MiniFiberD1_v1:
-                      volumeName = "MiniFiberD1_log_v1";
+                    case G4Sol::MiniFiberD1_v:
+                      volumeName = "MiniFiberD1_log_v";
                       break;
-                    case G4Sol::MiniFiberD1_x2:
-                      volumeName = "MiniFiberD1_log_x2";
+                    case G4Sol::MiniFiberD2_x:
+                      volumeName = "MiniFiberD2_log_x";
                       break;
-                    case G4Sol::MiniFiberD1_u2:
-                      volumeName = "MiniFiberD1_log_u2";
+                    case G4Sol::MiniFiberD2_u:
+                      volumeName = "MiniFiberD2_log_u";
                       break;
-                    case G4Sol::MiniFiberD1_v2:
-                      volumeName = "MiniFiberD1_log_v2";
+                    case G4Sol::MiniFiberD2_v:
+                      volumeName = "MiniFiberD2_log_v";
                       break;
                     default:
                       std::cerr << "something wrong" << std::endl;
@@ -703,23 +703,23 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
                     case G4Sol::FiberD5_v:
                       motherName = "FiberD5_log_0";
                       break;
-                    case G4Sol::MiniFiberD1_x1:
+                    case G4Sol::MiniFiberD1_x:
                       motherName = "MiniFiberD1_log_0";
                       break;
-                    case G4Sol::MiniFiberD1_u1:
+                    case G4Sol::MiniFiberD1_u:
                       motherName = "MiniFiberD1_log_0";
                       break;
-                    case G4Sol::MiniFiberD1_v1:
+                    case G4Sol::MiniFiberD1_v:
                       motherName = "MiniFiberD1_log_0";
                       break;
-                    case G4Sol::MiniFiberD1_x2:
-                      motherName = "MiniFiberD1_log_0";
+                    case G4Sol::MiniFiberD2_x:
+                      motherName = "MiniFiberD2_log_0";
                       break;
-                    case G4Sol::MiniFiberD1_u2:
-                      motherName = "MiniFiberD1_log_0";
+                    case G4Sol::MiniFiberD2_u:
+                      motherName = "MiniFiberD2_log_0";
                       break;
-                    case G4Sol::MiniFiberD1_v2:
-                      motherName = "MiniFiberD1_log_0";
+                    case G4Sol::MiniFiberD2_v:
+                      motherName = "MiniFiberD2_log_0";
                       break;
                     default:
                       std::cerr << "something wrong" << std::endl;
@@ -1037,4 +1037,19 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
     }
 #endif
   return 0;
+}
+
+double TBuildDetectorLayerPlaneDAF_MT::CloseDist(const TVector3& Xin, const TVector3& Xout, const TVector3& Pin, const TVector3& Pout)
+{
+  double ui = Pin.x() / Pin.z(), vi = Pin.y() / Pin.z();
+  double uo = Pout.x() / Pout.z(), vo = Pout.y() / Pout.z();
+  double xi = Xin.x(), yi = Xin.y();
+  double xo = Xout.x() + Pout.x() / Pout.z() * (Xin.z() - Xout.z());
+  double yo = Xout.y() + Pout.y() / Pout.z() * (Xin.z() - Xout.z());
+
+  double z  = ((xi - xo) * (uo - ui) + (yi - yo) * (vo - vi)) / ((uo - ui) * (uo - ui) + (vo - vi) * (vo - vi));
+  double x1 = xi + ui * z, y1 = yi + vi * z;
+  double x2 = xo + uo * z, y2 = yo + vo * z;
+
+  return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }

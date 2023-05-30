@@ -983,23 +983,23 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
                   string volumeName;
                   switch(TypeDet)
                     {
-                    case G4Sol::MiniFiberD1_x1:
-                      volumeName = "MiniFiberD1_log_x1";
+                    case G4Sol::MiniFiberD1_x:
+                      volumeName = "MiniFiberD1_log_x";
                       break;
-                    case G4Sol::MiniFiberD1_u1:
-                      volumeName = "MiniFiberD1_log_u1";
+                    case G4Sol::MiniFiberD1_u:
+                      volumeName = "MiniFiberD1_log_u";
                       break;
-                    case G4Sol::MiniFiberD1_v1:
-                      volumeName = "MiniFiberD1_log_v1";
+                    case G4Sol::MiniFiberD1_v:
+                      volumeName = "MiniFiberD1_log_v";
                       break;
-                    case G4Sol::MiniFiberD1_x2:
-                      volumeName = "MiniFiberD1_log_x2";
+                    case G4Sol::MiniFiberD2_x:
+                      volumeName = "MiniFiberD2_log_x";
                       break;
-                    case G4Sol::MiniFiberD1_u2:
-                      volumeName = "MiniFiberD1_log_u2";
+                    case G4Sol::MiniFiberD2_u:
+                      volumeName = "MiniFiberD2_log_u";
                       break;
-                    case G4Sol::MiniFiberD1_v2:
-                      volumeName = "MiniFiberD1_log_v2";
+                    case G4Sol::MiniFiberD2_v:
+                      volumeName = "MiniFiberD2_log_v";
                       break;
                     default:
                       std::cerr << "something wrong" << std::endl;
@@ -1326,7 +1326,7 @@ int TBuildDetectorLayerPlaneDAF::Exec(const TG4Sol_Event& event, const std::vect
               if(TypeDet >= G4Sol::TR1 && TypeDet <= G4Sol::TR2)
                 fillOutHit(OutTree->TR, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
-              if(TypeDet >= G4Sol::MiniFiberD1_x1 && TypeDet <= G4Sol::FiberD5_v)
+              if(TypeDet >= G4Sol::MiniFiberD1_x && TypeDet <= G4Sol::FiberD5_v)
                 fillOutHit(OutTree->Fiber, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
 
               if(TypeDet >= G4Sol::CDC_layer0 && TypeDet <= G4Sol::CDC_layer14)

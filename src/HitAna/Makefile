@@ -44,6 +44,9 @@ ROOTGLIBS    := $(shell root-config --glibs)
 CXXFLAGS     += $(ROOTCFLAGS) $(WASAUNPACK)
 LIBS         +=-L$(ROOTLIBSDIR) -lPhysics 
 
+GENFITV2FLAGS = -I../Genfit2_v2/include
+CXXFLAGS     += $(GENFITV2FLAGS)
+
 .SUFFIXES : .$(HeadSuf) .$(DictSuf) .$(ObjSuf) .$(SrcSuf) .$(DictObjSuf)
 .PHONY : all clean clean_all
 
@@ -51,7 +54,7 @@ DEPEND        = makedepend $(CXXFLAGS)
 
 #--------------------------------------------------------------------
 
-Headers = FiberAnalyzer.hh FiberHitAna.hh FiberHitXUV.hh FiberTrackAna.hh MDCHitAna.hh ParaManager.hh PSBEHitAna.hh PSBHitAna.hh PSFEHitAna.hh T0HitAna.hh TrackHit.hh
+Headers = FiberAnalyzer.hh FiberHitAna.hh FiberHitXUV.hh FiberTrackAna.hh MDCHitAna.hh ParaManager.hh PSBEHitAna.hh PSBHitAna.hh PSFEHitAna.hh T0HitAna.hh TrackHit.hh MWDCHitAna.hh MWDCTracking.hh OpticsMom.hh S4SciHitAna.hh
 
 Sources = $(patsubst %.$(HeadSuf),%.$(SrcSuf),$(Headers))
 
