@@ -591,56 +591,52 @@ int THyphiAttributes::Init_Para()
 
 int THyphiAttributes::Reload_Para()
 {
-  <<<<<<< HEAD
-    Hash = InputPar.previousMeta->Hash;
-  =======
-    std::string Hash(InputPar.simexpMetadata->Hash);
-    >>>>>>> maindata
+  Hash = InputPar.simexpMetadata->Hash;
 
-	      auto storage = InitStorage();
-    storage.sync_schema();
+  auto storage = InitStorage();
+  storage.sync_schema();
 
-    auto previousConfSel = storage.get_all<RunAttrGeneralDef>(sqlite_orm::where(sqlite_orm::is_equal(&RunAttrGeneralDef::Hash,Hash)));
+  auto previousConfSel = storage.get_all<RunAttrGeneralDef>(sqlite_orm::where(sqlite_orm::is_equal(&RunAttrGeneralDef::Hash,Hash)));
 
-    if(previousConfSel.size()!=1)
-      {
-	_logger->info("Reload from database : could not found the proper previous configuration : {} : nb Entries {}",Hash,previousConfSel.size());
-	return -1;
-      }
+  if(previousConfSel.size()!=1)
+    {
+      _logger->info("Reload from database : could not found the proper previous configuration : {} : nb Entries {}",Hash,previousConfSel.size());
+      return -1;
+    }
 
-    auto previousConf = previousConfSel.front();
+  auto previousConf = previousConfSel.front();
 
-    Target_PositionX = previousConf.Target_PositionX;
-    Target_PositionY = previousConf.Target_PositionY;
-    Target_PositionZ = previousConf.Target_PositionZ;
-    Target_Size      = previousConf.Target_Size;
-    Field_Strength   = previousConf.Field_Strength;
-    Wasa_Side        = previousConf.Wasa_Side;
+  Target_PositionX = previousConf.Target_PositionX;
+  Target_PositionY = previousConf.Target_PositionY;
+  Target_PositionZ = previousConf.Target_PositionZ;
+  Target_Size      = previousConf.Target_Size;
+  Field_Strength   = previousConf.Field_Strength;
+  Wasa_Side        = previousConf.Wasa_Side;
 
-    Wasa_FieldMap = previousConf.Wasa_FieldMap;
-    Wasa_FieldMapName = previousConf.Wasa_FieldMapName;
+  Wasa_FieldMap = previousConf.Wasa_FieldMap;
+  Wasa_FieldMapName = previousConf.Wasa_FieldMapName;
 
-    std::string tempStr;
-    for(size_t i=0; i<previousConf.name_GeoVolumes.size();++i)
-      {
-	if(previousConf.name_GeoVolumes[i] != ';')
-	  tempStr += previousConf.name_GeoVolumes[i];
-	else
-	  {
-	    name_GeoVolumes.push_back(tempStr);
-	    tempStr.clear();
-	  }
-      }
+  std::string tempStr;
+  for(size_t i=0; i<previousConf.name_GeoVolumes.size();++i)
+    {
+      if(previousConf.name_GeoVolumes[i] != ';')
+	tempStr += previousConf.name_GeoVolumes[i];
+      else
+	{
+	  name_GeoVolumes.push_back(tempStr);
+	  tempStr.clear();
+	}
+    }
 
-    auto previousFullConfSel = storage.get_all<RunFullConfigDef>(sqlite_orm::where(sqlite_orm::is_equal(&RunFullConfigDef::Hash,Hash)));
+  auto previousFullConfSel = storage.get_all<RunFullConfigDef>(sqlite_orm::where(sqlite_orm::is_equal(&RunFullConfigDef::Hash,Hash)));
 
-    auto previousFullConf = previousFullConfSel.front();
+  auto previousFullConf = previousFullConfSel.front();
 
-    int diffConf = Config.Reload(previousFullConf.ConfigJson);
-    if(diffConf !=0)
-      return -2;
+  int diffConf = Config.Reload(previousFullConf.ConfigJson);
+  if(diffConf !=0)
+    return -2;
 
-    return 0;
+  return 0;
 }
 
 
@@ -705,113 +701,96 @@ void Task::Init(const FullRecoConfig& Config)
 
   if(Config.IsAvailable("Task_PrimaryVtx"))
     Task_PrimaryVtx = Config.Get<bool>("Task_PrimaryVtx");
-  <<<<<<< HEAD
-
-	    if(Config.IsAvailable("Task_FlatMCOutputML"))
-	      Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
-
+  if(Config.IsAvailable("Task_PrimaryVtx_Si"))
+    Task_PrimaryVtx_Si = Config.Get<bool>("Task_PrimaryVtx_Si");
+  if(Config.IsAvailable("Task_FlatMCOutputML"))
+    Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
+  if(Config.IsAvailable("Task_CheckFiberXUV"))
+    Task_CheckFiberXUV = Config.Get<bool>("Task_CheckFiberXUV");
   if(Config.IsAvailable("Task_CheckFiberTrack"))
     Task_CheckFiberTrack = Config.Get<bool>("Task_CheckFiberTrack");
+  if(Config.IsAvailable("Task_FragmentFinder"))
+    Task_FragmentFinder = Config.Get<bool>("Task_FragmentFinder");
+  if(Config.IsAvailable("Task_WASAFinder"))
+    Task_WASAFinder = Config.Get<bool>("Task_WASAFinder");
+  if(Config.IsAvailable("Task_BayesFinder"))
+    Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
 
-  =======
-    if(Config.IsAvailable("Task_PrimaryVtx_Si"))
-      Task_PrimaryVtx_Si = Config.Get<bool>("Task_PrimaryVtx_Si");
-    if(Config.IsAvailable("Task_FlatMCOutputML"))
-      Task_FlatMCOutputML = Config.Get<bool>("Task_FlatMCOutputML");
-    if(Config.IsAvailable("Task_CheckFiberXUV"))
-      Task_CheckFiberXUV = Config.Get<bool>("Task_CheckFiberXUV");
-    if(Config.IsAvailable("Task_CheckFiberTrack"))
-      Task_CheckFiberTrack = Config.Get<bool>("Task_CheckFiberTrack");
-    if(Config.IsAvailable("Task_FragmentFinder"))
-      Task_FragmentFinder = Config.Get<bool>("Task_FragmentFinder");
-    if(Config.IsAvailable("Task_WASAFinder"))
-      Task_WASAFinder = Config.Get<bool>("Task_WASAFinder");
-    >>>>>>> maindata
-	      if(Config.IsAvailable("Task_BayesFinder"))
-		Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
+  if(Config.IsAvailable("Task_RiemannFinder"))
+    Task_RiemannFinder = Config.Get<bool>("Task_RiemannFinder");
 
-    if(Config.IsAvailable("Task_RiemannFinder"))
-      Task_RiemannFinder = Config.Get<bool>("Task_RiemannFinder");
+  if(Config.IsAvailable("Task_FindingPerf"))
+    Task_FindingPerf = Config.Get<bool>("Task_FindingPerf");
 
-    if(Config.IsAvailable("Task_FindingPerf"))
-      Task_FindingPerf = Config.Get<bool>("Task_FindingPerf");
+  if(Config.IsAvailable("Task_FinderCM"))
+    Task_FinderCM = Config.Get<bool>("Task_FinderCM");
 
-    if(Config.IsAvailable("Task_FinderCM"))
-      Task_FinderCM = Config.Get<bool>("Task_FinderCM");
+  if(Config.IsAvailable("Task_CheckRZ"))
+    Task_CheckRZ = Config.Get<bool>("Task_CheckRZ");
 
-    if(Config.IsAvailable("Task_CheckRZ"))
-      Task_CheckRZ = Config.Get<bool>("Task_CheckRZ");
-
-    if(Config.IsAvailable("Task_KalmanDAF"))
-      Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
-    <<<<<<< HEAD
-
-	      if(Config.IsAvailable("Task_DecayVtx"))
-		Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
-
-    =======
-	      if(Config.IsAvailable("Task_KalmanDAFPID"))
-		Task_KalmanDAFPID = Config.Get<bool>("Task_KalmanDAFPID");
-	      if(Config.IsAvailable("Task_DecayVtx"))
-		Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
-	      if(Config.IsAvailable("Task_DecayVtx_pi+"))
-		Task_DecayVtx_piplus = Config.Get<bool>("Task_DecayVtx_pi+");
-	      >>>>>>> maindata
-			if(Config.IsAvailable("Task_ReStart"))
-			  Task_ReStart = Config.Get<bool>("Task_ReStart");
+  if(Config.IsAvailable("Task_KalmanDAF"))
+    Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
+  if(Config.IsAvailable("Task_KalmanDAFPID"))
+    Task_KalmanDAFPID = Config.Get<bool>("Task_KalmanDAFPID");
+  if(Config.IsAvailable("Task_DecayVtx"))
+    Task_DecayVtx = Config.Get<bool>("Task_DecayVtx");
+  if(Config.IsAvailable("Task_DecayVtx_pi+"))
+    Task_DecayVtx_piplus = Config.Get<bool>("Task_DecayVtx_pi+");
+  if(Config.IsAvailable("Task_ReStart"))
+    Task_ReStart = Config.Get<bool>("Task_ReStart");
 
 
-	      if(Config.IsAvailable("Task_Pipeline"))
-		{
-		  Task_Order.clear();
+  if(Config.IsAvailable("Task_Pipeline"))
+    {
+      Task_Order.clear();
 
-		  std::string in(Config.Get<std::string>("Task_Pipeline"));
-		  std::vector<std::string> pipeline;
-		  boost::split(pipeline, in, boost::is_any_of("->"), boost::token_compress_on);
+      std::string in(Config.Get<std::string>("Task_Pipeline"));
+      std::vector<std::string> pipeline;
+      boost::split(pipeline, in, boost::is_any_of("->"), boost::token_compress_on);
 
-		  for(auto& s : pipeline)
-		    boost::trim(s);
+      for(auto& s : pipeline)
+	boost::trim(s);
 
-		  for(const auto& s : pipeline)
-		    {
-		      if(s == "Task_CheckField")
-			Task_Order.push_back(TASKCHECKFIELD);
-		      if(s == "Task_PrimaryVtx")
-			Task_Order.push_back(TASKPRIMARYVTX);
-		      if(s == "Task_PrimaryVtx_Si")
-			Task_Order.push_back(TASKPRIMARYVTX_SI);
-		      if(s == "Task_FlatMCOutputML")
-			Task_Order.push_back(TASKFLATMCOUTPUTML);
-		      if(s == "Task_CheckFiberXUV")
-			Task_Order.push_back(TASKCHECKFIBERXUV);
-		      if(s == "Task_CheckFiberTrack")
-			Task_Order.push_back(TASKCHECKFIBERTRACK);
-		      if(s == "Task_FragmentFinder")
-			Task_Order.push_back(TASKFRAGMENTFINDER);
-		      if(s == "Task_WASAFinder")
-			Task_Order.push_back(TASKWASAFINDER);
-		      if(s == "Task_BayesFinder")
-			Task_Order.push_back(TASKBAYESFINDER);
-		      if(s == "Task_RiemannFinder")
-			Task_Order.push_back(TASKRIEMANNFINDER);
-		      if(s == "Task_FindingPerf")
-			Task_Order.push_back(TASKFINDINGPERF);
-		      if(s == "Task_FinderCM")
-			Task_Order.push_back(TASKFINDERCM);
-		      if(s == "Task_CheckRZ")
-			Task_Order.push_back(TASKCHECKRZ);
-		      if(s == "Task_KalmanDAF")
-			Task_Order.push_back(TASKKALMANDAF);
-		      if(s == "Task_KalmanDAFPID")
-			Task_Order.push_back(TASKKALMANDAFPID);
-		      if(s == "Task_DecayVtx")
-			Task_Order.push_back(TASKDECAYVTX);
-		      if(s == "Task_DecayVtx_pi+")
-			Task_Order.push_back(TASKDECAYVTX_PIPLUS);
-		      if(s == "Task_ReStart")
-			Task_Order.push_back(TASKRESTART);
-		    }
-		}
+      for(const auto& s : pipeline)
+	{
+	  if(s == "Task_CheckField")
+	    Task_Order.push_back(TASKCHECKFIELD);
+	  if(s == "Task_PrimaryVtx")
+	    Task_Order.push_back(TASKPRIMARYVTX);
+	  if(s == "Task_PrimaryVtx_Si")
+	    Task_Order.push_back(TASKPRIMARYVTX_SI);
+	  if(s == "Task_FlatMCOutputML")
+	    Task_Order.push_back(TASKFLATMCOUTPUTML);
+	  if(s == "Task_CheckFiberXUV")
+	    Task_Order.push_back(TASKCHECKFIBERXUV);
+	  if(s == "Task_CheckFiberTrack")
+	    Task_Order.push_back(TASKCHECKFIBERTRACK);
+	  if(s == "Task_FragmentFinder")
+	    Task_Order.push_back(TASKFRAGMENTFINDER);
+	  if(s == "Task_WASAFinder")
+	    Task_Order.push_back(TASKWASAFINDER);
+	  if(s == "Task_BayesFinder")
+	    Task_Order.push_back(TASKBAYESFINDER);
+	  if(s == "Task_RiemannFinder")
+	    Task_Order.push_back(TASKRIEMANNFINDER);
+	  if(s == "Task_FindingPerf")
+	    Task_Order.push_back(TASKFINDINGPERF);
+	  if(s == "Task_FinderCM")
+	    Task_Order.push_back(TASKFINDERCM);
+	  if(s == "Task_CheckRZ")
+	    Task_Order.push_back(TASKCHECKRZ);
+	  if(s == "Task_KalmanDAF")
+	    Task_Order.push_back(TASKKALMANDAF);
+	  if(s == "Task_KalmanDAFPID")
+	    Task_Order.push_back(TASKKALMANDAFPID);
+	  if(s == "Task_DecayVtx")
+	    Task_Order.push_back(TASKDECAYVTX);
+	  if(s == "Task_DecayVtx_pi+")
+	    Task_Order.push_back(TASKDECAYVTX_PIPLUS);
+	  if(s == "Task_ReStart")
+	    Task_Order.push_back(TASKRESTART);
+	}
+    }
 }
 
 void THyphiAttributes::SetOut(AttrOut& out) const
