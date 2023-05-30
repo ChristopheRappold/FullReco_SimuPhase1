@@ -176,6 +176,12 @@ constexpr bool IsFiberU(G4Sol::SolDet idDet) {
 
 constexpr bool IsFiberM(G4Sol::SolDet idDet) {
   switch (idDet) {
+  case G4Sol::MiniFiberD1_x1 : ;
+  case G4Sol::MiniFiberD1_u1 : ;
+  case G4Sol::MiniFiberD1_v1 : ;
+  case G4Sol::MiniFiberD1_x2 : ;
+  case G4Sol::MiniFiberD1_u2 : ;
+  case G4Sol::MiniFiberD1_v2 : ;
   case G4Sol::MiniFiberD1_x : ;
   case G4Sol::MiniFiberD1_u : ;
   case G4Sol::MiniFiberD1_v : ;
@@ -216,6 +222,9 @@ constexpr bool IsWire(G4Sol::SolDet idDet) {
 double CloseDist( const TVector3 & Xin, const TVector3 & Xout,
 		  const TVector3 & Pin, const TVector3 & Pout );
 
+double closestDistanceApproach( const TVector3 & Xin, const TVector3 & Xout,
+				const TVector3 & Pin, const TVector3 & Pout,
+				TVector3 & P1, TVector3& P2);
 
 
 
@@ -257,6 +266,7 @@ private:
   int offsetGeoNameID_MDC = 0;
   int offsetGeoNameID_PSCE = 0;
   int MiniFiberMother = 1;
+  int newGeoExp = 0;
   struct LocalHists
   {
     TH1I* h_stats;

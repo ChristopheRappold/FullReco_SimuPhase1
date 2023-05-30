@@ -3,6 +3,7 @@
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "Ana_Event/Ana_WasaEvent.hh"
 #include "FullRecoEvent.hh"
+#include "FullRecoEventZMQ.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
 #include "PlanarMeasurement.h"
@@ -28,9 +29,7 @@ TCheckFiberTrack<Out>::TCheckFiberTrack(const THyphiAttributes& attribut) : TDat
 
 template<class Out>
 TCheckFiberTrack<Out>::~TCheckFiberTrack()
-{
-
-}
+{ }
 
 template<class Out>
 void TCheckFiberTrack<Out>::InitMT() { att._logger->error("E> Not supposed to be multithreaded !"); }
@@ -92,30 +91,30 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 
 #ifdef DEBUG_FIBERTRACK
 
-	  auto printW = [](const auto a, const int width) -> std::string {
-	    std::stringstream ss;
-	    ss << std::fixed << std::right;
-	    ss.fill(' ');    // fill space around displayed #
-	    ss.width(width); // set  width around displayed #
-	    ss << a;
-	    return ss.str();
-	  };
+      auto printW = [](const auto a, const int width) -> std::string {
+	std::stringstream ss;
+	ss << std::fixed << std::right;
+	ss.fill(' ');    // fill space around displayed #
+	ss.width(width); // set  width around displayed #
+	ss << a;
+	return ss.str();
+      };
 
-	  std::vector<std::stringstream> s1(it_trackInfo.second.size() / 10 + 1);
-          std::vector<std::stringstream> s2(it_trackInfo.second.size() / 10 + 1);
-          std::vector<std::stringstream> s3(it_trackInfo.second.size() / 10 + 1);
-          for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
-            {
-              s1[i / 10] << printW(G4Sol::nameLiteralDet.begin()[i], 10) << ", ";
-              s2[i / 10] << printW(i, 10) << ", ";
-              s3[i / 10] << printW(it_trackInfo.second[i].pdg, 10) << ", ";
-            }
-          for(size_t i = 0; i < s1.size(); ++i)
-            {
-              att._logger->debug("Det  :{}", s1[i].str());
-              att._logger->debug("idDet:{}", s2[i].str());
-              att._logger->debug("stat :{}", s3[i].str());
-            }
+      std::vector<std::stringstream> s1(it_trackInfo.second.size() / 10 + 1);
+      std::vector<std::stringstream> s2(it_trackInfo.second.size() / 10 + 1);
+      std::vector<std::stringstream> s3(it_trackInfo.second.size() / 10 + 1);
+      for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
+	{
+	  s1[i / 10] << printW(G4Sol::nameLiteralDet.begin()[i], 10) << ", ";
+	  s2[i / 10] << printW(i, 10) << ", ";
+	  s3[i / 10] << printW(it_trackInfo.second[i].pdg, 10) << ", ";
+	}
+      for(size_t i = 0; i < s1.size(); ++i)
+	{
+	  att._logger->debug("Det  :{}", s1[i].str());
+	  att._logger->debug("idDet:{}", s2[i].str());
+	  att._logger->debug("stat :{}", s3[i].str());
+	}
 #endif
 	  
       bool id_FirstFiberX = it_ListHitsSim->second[G4Sol::FiberD3_x].size() > 0 ;
@@ -221,11 +220,12 @@ int TCheckFiberTrack<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 	      LocalHisto.h_ResidualFiberDzDtheta->Fill(it_ListHitsSim->second[id_det][0].hitZ-LineParams[2], Dtheta);
 
 	    }
-
 	}
     }
+
   return 0;
 }
 
 template class TCheckFiberTrack<MCAnaEventG4Sol>;
 template class TCheckFiberTrack<Ana_WasaEvent>;
+

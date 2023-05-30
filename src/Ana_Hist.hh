@@ -628,6 +628,17 @@ class Ana_Hist
   Hist<TH2F> h_ResidualFiberDzDphi;
   Hist<TH2F> h_ResidualFiberDzDtheta;
 
+  Hist<TH2F> h_ResidualMDC_dZ1;
+  Hist<TH2F> h_ResidualMDC_dZ2;
+
+  Hist<TH2F> h_RPhiZMDC_Sigma;
+
+
+  Hist<TH2F> h_ResidualMDC_dZ_PSB;
+  Hist<TH2F> h_ResidualMDC_dZ_PSBE;
+  Hist<TH2F> h_ResidualMDC_dZ_PSFE;
+  Hist<TH2F> h_ResidualMDC_dZ_More6;
+
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
   Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false,

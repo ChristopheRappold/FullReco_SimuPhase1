@@ -496,6 +496,27 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       h_ResidualFiberDzDtheta.emplace_back(new TH2F("h_ResidualDzDtheta","h_ResidualDzDtheta",300,0,300,500,-10,10));
       HistReg.emplace_back(&h_ResidualFiberDzDtheta.store);
 
+      h_ResidualMDC_dZ1.emplace_back(new TH2F("h_ResidualMDC_SimdZ","h_ResidualMDC_SimdZ",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_ResidualMDC_dZ1.store);
+
+      h_ResidualMDC_dZ2.emplace_back(new TH2F("h_ResidualMDC_RealdZ","h_ResidualMDC_RealdZ",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_ResidualMDC_dZ2.store);
+
+      h_RPhiZMDC_Sigma.emplace_back(new TH2F("h_RPhiZMDC_Sigma","h_RPhiZMDC_Sigma",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_RPhiZMDC_Sigma.store);
+
+      h_ResidualMDC_dZ_PSB.emplace_back(new TH2F("h_ResidualMDC_SimdZ_PSB","h_ResidualMDC_SimdZ_PSB",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_ResidualMDC_dZ_PSB.store);
+
+      h_ResidualMDC_dZ_PSBE.emplace_back(new TH2F("h_ResidualMDC_SimdZ_PSBE","h_ResidualMDC_SimdZ_PSBE",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_ResidualMDC_dZ_PSBE.store);
+
+      h_ResidualMDC_dZ_PSFE.emplace_back(new TH2F("h_ResidualMDC_SimdZ_PSFE","h_ResidualMDC_SimdZ_PSFE",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_ResidualMDC_dZ_PSFE.store);
+
+      h_ResidualMDC_dZ_More6.emplace_back(new TH2F("h_ResidualMDC_SimdZ_More6","h_ResidualMDC_SimdZ_More6",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_ResidualMDC_dZ_More6.store);
+
       HistRegisteredByDir.insert(std::make_pair("Simu", std::make_tuple(HistReg,0)));
       HistRegisteredByDir.insert(std::make_pair("Simu_Eff", std::make_tuple(HistRegEff,2)));
     }
