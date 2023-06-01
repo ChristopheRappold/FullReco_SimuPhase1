@@ -64,11 +64,11 @@ TWASACalibrationSimuBuilder::TWASACalibrationSimuBuilder(const THyphiAttributes&
   int index_lastMDC = -1, index_firstPSCE = -1;
   for(int i=0;i<listNodes->GetEntries();++i)
     {
-      std::string tempName(listNodes->At(i)->GetName());
-      if(tempName == "MD17_1") index_lastMDC = i;
-      else if(tempName == "PSCE_1") index_firstPSCE = i;
-      else if(tempName == "MDC_1") ++newGeoExp;
-      else if(tempName == "PSCEall_1") ++newGeoExp;
+      std::string tempNameList(listNodes->At(i)->GetName());
+      if(tempNameList == "MD17_1") index_lastMDC = i;
+      else if(tempNameList == "PSCE_1") index_firstPSCE = i;
+      else if(tempNameList == "MDC_1") ++newGeoExp;
+      else if(tempNameList == "PSCEall_1") ++newGeoExp;
     }
 
   if(index_lastMDC == -1 && index_firstPSCE == -1) offsetGeoNameID_PSCE = 0;
@@ -244,7 +244,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                                       FullRecoEvent& RecoEvent, MCAnaEventG4Sol* OutTree)
 #endif
 {
-  int NumFilled = 0;
+  // int NumFilled = 0;
   //  std::cout<<"TBuidlDetectorLayerPlaneDAF : Proton = "<<event.n_Proton<<endl;
 
 #ifdef DEBUG_BUILD
@@ -525,7 +525,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 #ifdef ROOT6
           for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
 #else
-          for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
+          for(int it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
 #endif
             {
 #ifdef ROOT6
@@ -586,7 +586,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 #ifdef ROOT6
           for(auto it_hit = tempHits->begin(), it_hit_end = tempHits->end(); it_hit != it_hit_end; ++it_hit)
 #else
-          for(size_t it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
+          for(int it_hit = 0; it_hit < tempHits->GetEntries(); ++it_hit)
 #endif
             {
 #ifdef ROOT6
@@ -594,7 +594,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
               int indexInBranch = std::distance(tempHits->begin(), it_hit);
 #else
               const TG4Sol_Hit& hit = *(dynamic_cast<TG4Sol_Hit*>(tempHits->At(it_hit)));
-              int indexInBranch     = it_hit;
+              // int indexInBranch     = it_hit;
 #endif
               int TrackID = hit.TrackID;
               int LayerID = hit.LayerID;
@@ -1428,7 +1428,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
               // std::cout << "edge2[0] : " << edge2[0] << std::endl;
               // std::cout << "edge2[1] : " << edge2[1] << std::endl;
               // std::cout << "edge2[2] : " << edge2[2] << std::endl;
-              double* shift = H.GetTranslation();
+              // double* shift = H.GetTranslation();
               // std::cout << "shift[0] : " << shift[0] << std::endl;
               // std::cout << "shift[1] : " << shift[1] << std::endl;
               // std::cout << "shift[2] : " << shift[2] << std::endl;
@@ -1573,7 +1573,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
   LocalHisto.hfiber_5_7->Fill((double)num_combi_dft12*1e-6);
   if(par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
 
-  for(int i=0; i<FiberTrackCont["dft12"].size(); ++i){
+  for(size_t i=0; i<FiberTrackCont["dft12"].size(); ++i){
     FiberTrackAna *track = FiberTrackCont["dft12"][i];
     LocalHisto.hfiber_4_2_3->Fill(track->GetXdet(), track->GetYdet());
     LocalHisto.hfiber_4_3_3->Fill(track->GetXdet(), track->GetA()*1000);

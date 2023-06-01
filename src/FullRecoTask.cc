@@ -17,6 +17,7 @@
 #include "TFragmentFinder.h"
 #include "TWASAFinder.h"
 #include "TCheckRZ.h"
+#include "TRPhiZTrackMDC.h"
 #include "TFlatMCOutputML.h"
 #include "TPrimaryVertex.h"
 //#include "TPrimaryVertex_Si.h"
@@ -83,78 +84,82 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
   for(const auto& Tid : Attributes.TaskConfig.Task_Order)
     {
       switch(Tid)
-        {
-          case Task::TASKCHECKFIELD:
-            if(Attributes.TaskConfig.Task_CheckField)
-              list_processMC.emplace_back(new CheckField<TEOut>(Attributes));
-            break;
-          case Task::TASKPRIMARYVTX:
-            if(Attributes.TaskConfig.Task_PrimaryVtx)
-              list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
-            break;
+	{
+	case Task::TASKCHECKFIELD:
+	  if(Attributes.TaskConfig.Task_CheckField)
+	    list_processMC.emplace_back(new CheckField<TEOut>(Attributes));
+	  break;
+	case Task::TASKPRIMARYVTX:
+	  if(Attributes.TaskConfig.Task_PrimaryVtx)
+	    list_processMC.emplace_back(new TPrimaryVertex<TEOut>(Attributes));
+	  break;
           //  case Task::TASKPRIMARYVTX_SI:
           //    if(Attributes.TaskConfig.Task_PrimaryVtx_Si)
           //      list_processMC.emplace_back(new TPrimaryVertex_Si<TEOut>(Attributes));
           //    break;
-          case Task::TASKFLATMCOUTPUTML:
-            if(Attributes.TaskConfig.Task_FlatMCOutputML)
-              list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
-            break;
-          case Task::TASKCHECKFIBERXUV:
-            if(Attributes.TaskConfig.Task_CheckFiberXUV)
-              list_processMC.emplace_back(new TCheckFiberXUV<TEOut>(Attributes));
-            break;
-          case Task::TASKCHECKFIBERTRACK:
-            if(Attributes.TaskConfig.Task_CheckFiberTrack)
-              list_processMC.emplace_back(new TCheckFiberTrack<TEOut>(Attributes));
-            break;
-          case Task::TASKFRAGMENTFINDER:
-            if(Attributes.TaskConfig.Task_FragmentFinder)
-              list_processMC.emplace_back(new TFragmentFinder<TEOut>(Attributes));
-            break;
-          case Task::TASKWASAFINDER:
-            if(Attributes.TaskConfig.Task_WASAFinder)
-              list_processMC.emplace_back(new TWASAFinder<TEOut>(Attributes));
-            break;
-          case Task::TASKBAYESFINDER:
-            if(Attributes.TaskConfig.Task_BayesFinder)
-              list_processMC.emplace_back(new TBayesFinder<TEOut>(Attributes));
-            break;
-          case Task::TASKRIEMANNFINDER:
-            if(Attributes.TaskConfig.Task_RiemannFinder)
-              list_processMC.emplace_back(new TRiemannFinder<TEOut>(Attributes));
-            break;
-          case Task::TASKFINDERCM:
-            //if(Attributes.TaskConfig.Task_FinderCM)
-            //  list_processMC.emplace_back(new TFinderCM(Attributes));
-            break;
-          case Task::TASKFINDINGPERF:
-            if(Attributes.TaskConfig.Task_FindingPerf)
-              list_processMC.emplace_back(new TFindingPerf<TEOut>(Attributes));
-            break;
-          case Task::TASKCHECKRZ:
-            if(Attributes.TaskConfig.Task_CheckRZ)
-              list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
-            break;
-          case Task::TASKKALMANDAF:
-            if(Attributes.TaskConfig.Task_KalmanDAF)
-              list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
-            break;
-          case Task::TASKKALMANDAFPID:
-            if(Attributes.TaskConfig.Task_KalmanDAFPID)
-              list_processMC.emplace_back(new TKalmanFilter_DAF_PID<TEOut>(Attributes));
-            break;
-          case Task::TASKDECAYVTX:
-            if(Attributes.TaskConfig.Task_DecayVtx)
-              list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes, 0)); // 0-> pi- analysis
-            break;
-          case Task::TASKDECAYVTX_PIPLUS:
-            if(Attributes.TaskConfig.Task_DecayVtx_piplus)
-              list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes, 1)); // 1-> pi+ analysis
-            break;
-          default:
-            break;
-        }
+	case Task::TASKFLATMCOUTPUTML:
+	  if(Attributes.TaskConfig.Task_FlatMCOutputML)
+	    list_processMC.emplace_back(new TFlatMCOutputML<TEOut>(Attributes));
+	  break;
+	case Task::TASKCHECKFIBERXUV:
+	  if(Attributes.TaskConfig.Task_CheckFiberXUV)
+	    list_processMC.emplace_back(new TCheckFiberXUV<TEOut>(Attributes));
+	  break;
+	case Task::TASKCHECKFIBERTRACK:
+	  if(Attributes.TaskConfig.Task_CheckFiberTrack)
+	    list_processMC.emplace_back(new TCheckFiberTrack<TEOut>(Attributes));
+	  break;
+	case Task::TASKFRAGMENTFINDER:
+	  if(Attributes.TaskConfig.Task_FragmentFinder)
+	    list_processMC.emplace_back(new TFragmentFinder<TEOut>(Attributes));
+	  break;
+	case Task::TASKWASAFINDER:
+	  if(Attributes.TaskConfig.Task_WASAFinder)
+	    list_processMC.emplace_back(new TWASAFinder<TEOut>(Attributes));
+	  break;
+	case Task::TASKBAYESFINDER:
+	  if(Attributes.TaskConfig.Task_BayesFinder)
+	    list_processMC.emplace_back(new TBayesFinder<TEOut>(Attributes));
+	  break;
+	case Task::TASKRIEMANNFINDER:
+	  if(Attributes.TaskConfig.Task_RiemannFinder)
+	    list_processMC.emplace_back(new TRiemannFinder<TEOut>(Attributes));
+	  break;
+	case Task::TASKFINDERCM:
+	  //if(Attributes.TaskConfig.Task_FinderCM)
+	  //  list_processMC.emplace_back(new TFinderCM(Attributes));
+	  break;
+	case Task::TASKFINDINGPERF:
+	  if(Attributes.TaskConfig.Task_FindingPerf)
+	    list_processMC.emplace_back(new TFindingPerf<TEOut>(Attributes));
+	  break;
+	case Task::TASKCHECKRZ:
+	  if(Attributes.TaskConfig.Task_CheckRZ)
+	    list_processMC.emplace_back(new TCheckRZ<TEOut>(Attributes));
+	  break;
+	case Task::TASKRPHIZTRACKMDC:
+	  if(Attributes.TaskConfig.Task_RPhiZTrackMDC)
+	    list_processMC.emplace_back(new TRPhiZTrackMDC<TEOut>(Attributes));
+	  break;
+	case Task::TASKKALMANDAF:
+	  if(Attributes.TaskConfig.Task_KalmanDAF)
+	    list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
+	  break;
+	case Task::TASKKALMANDAFPID:
+	  if(Attributes.TaskConfig.Task_KalmanDAFPID)
+	    list_processMC.emplace_back(new TKalmanFilter_DAF_PID<TEOut>(Attributes));
+	  break;
+	case Task::TASKDECAYVTX:
+	  if(Attributes.TaskConfig.Task_DecayVtx)
+	    list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes, 0)); // 0-> pi- analysis
+	  break;
+	case Task::TASKDECAYVTX_PIPLUS:
+	  if(Attributes.TaskConfig.Task_DecayVtx_piplus)
+	    list_processMC.emplace_back(new TDecayVertex<TEOut>(Attributes, 1)); // 1-> pi+ analysis
+	  break;
+	default:
+	  break;
+	}
     }
 
   for(auto task : list_processMC)
@@ -194,7 +199,7 @@ void FullRecoTask<TEOut>::SetEventMetadata(AnaEvent_Metadata& metadata)
   metadata.DateOfRun = Attributes.DateOfRun;
   metadata.Hash = Attributes.Hash;
   metadata.FirstStep = det_build->signature;
-  metadata.FinalStep = list_processMC.size() == 0 ? "None" : list_processMC.back()->signature;
+  metadata.FinalStep = list_processMC.size() != 0 ? list_processMC.back()->signature : det_build->signature;
   metadata.G4_simu = Attributes.G4_simu;
   metadata.NEvent = Attributes.NEvent;
   metadata.StartEvent = Attributes.Config.Get<uint>("Start_Event");

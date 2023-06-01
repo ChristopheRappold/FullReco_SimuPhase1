@@ -276,7 +276,7 @@ double FiberHitAna::GetAngFiber(ParaManager *par){
     }
   }
 
-  return (ang[i_detector][i_layer] + ang_offset) * Deg2Rad;
+  return (ang[i_detector][i_layer] + ang_offset) * hitana::Deg2Rad;
 
 }
 

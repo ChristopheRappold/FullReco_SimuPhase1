@@ -187,7 +187,7 @@ int TKalmanFilter_DAF_MT::Exec(FullRecoEvent& RecoEvent, int*)
   return result_kalman;
 }
 
-ReturnRes::InfoM TKalmanFilter_DAF_MT::SoftExit(int result_full) { return ReturnRes::Fine; }
+ReturnRes::InfoM TKalmanFilter_DAF_MT::SoftExit(int ) { return ReturnRes::Fine; }
 
 int TKalmanFilter_DAF_MT::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 {

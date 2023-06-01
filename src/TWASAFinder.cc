@@ -28,7 +28,7 @@ ReturnRes::InfoM TWASAFinder<Out>::operator()(FullRecoEvent& RecoEvent, Out* Out
 }
 
 template<class Out>
-int TWASAFinder<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree) { return FinderWASA(RecoEvent); }
+int TWASAFinder<Out>::Exec(FullRecoEvent& RecoEvent, Out* ) { return FinderWASA(RecoEvent); }
 
 template<class Out>
 ReturnRes::InfoM TWASAFinder<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
@@ -204,9 +204,9 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
   std::string track_type = "mft12";
 
   // Fiber PSB ////
-  for(int i=0; i<RecoEvent.FiberTrackCont[track_type].size(); ++i)
+  for(size_t i=0; i<RecoEvent.FiberTrackCont[track_type].size(); ++i)
     {
-      for(int j=0; j<(int)RecoEvent.ListHits[G4Sol::PSCE].size(); ++j)
+      for(size_t j=0; j< RecoEvent.ListHits[G4Sol::PSCE].size(); ++j)
         {
           if(RecoEvent.FiberTrackCont[track_type][i]->GetNlayer()>4 && RecoEvent.FiberTrackCont[track_type][i]->GetChi2()>30) continue;
           double a_fiber = RecoEvent.FiberTrackCont[track_type][i]->GetA();
@@ -214,7 +214,7 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
           double x_fiber = RecoEvent.FiberTrackCont[track_type][i]->GetX();
           double y_fiber = RecoEvent.FiberTrackCont[track_type][i]->GetY();
           //double phi_fiber = atan2(b_fiber, a_fiber);
-          double phi_psb   = GetPSB_Phi(RecoEvent.ListHits[G4Sol::PSCE][j]->getHitId())    + att.psb_rot_z*Deg2Rad;
+          double phi_psb   = GetPSB_Phi(RecoEvent.ListHits[G4Sol::PSCE][j]->getHitId())    + att.psb_rot_z*hitana::Deg2Rad;
           double r_psb     = GetPSB_R(RecoEvent.ListHits[G4Sol::PSCE][j]->getHitId());
           double z_psb     = RecoEvent.ListHits[G4Sol::PSCE][j]->getRawHitCoords()[1]*10.; //in mm
 
@@ -261,7 +261,7 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
   // Fiber MDC ////
   std::vector<TrackHit*> TrackHitCont;
 
-  for(int i=0; i<RecoEvent.FiberTrackCont[track_type].size(); ++i)
+  for(size_t i=0; i<RecoEvent.FiberTrackCont[track_type].size(); ++i)
     {
       TrackHit *track_hit = new TrackHit();
       for(int j=0; j<17; ++j)
@@ -345,7 +345,7 @@ if(att.flag_dup_trackhit_mdc) TrackHitCont = fiberana->DeleteDupTrackHitMDC(Trac
 if(att.flag_trackhit_inclusive) TrackHitCont = fiberana->DeleteInclusiveTrackHit(TrackHitCont);
 
 
-for(int i = 0; i < TrackHitCont.size(); ++i)
+for(size_t i = 0; i < TrackHitCont.size(); ++i)
   {
     std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
     std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);

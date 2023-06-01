@@ -23,6 +23,8 @@
 #include "KalmanFitter.h"
 #include "KalmanFitterRefTrack.h"
 #include "RKTrackRep.h"
+#include "G4eTrackRep.h"
+#include "G4eManager.h"
 #include "Track.h"
 
 //#include "GFRaveVertexFactory.h"
@@ -81,6 +83,7 @@ private:
   genfit::Track* Vtracks;
   genfit::RKTrackRep* rep;
   genfit::EventDisplay* display;
+  std::unique_ptr<G4eManager> G4eMag = nullptr;
   // genfit::GFRaveVertexFactory* vertexFactory;
 
   std::vector<genfit::DetPlane*> list_Plane;

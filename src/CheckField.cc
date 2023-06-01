@@ -37,7 +37,7 @@ ReturnRes::InfoM CheckField<Out>::operator() (FullRecoEvent& RecoEvent,Out* OutT
 }
 
 template<class Out>
-int CheckField<Out>::Exec(FullRecoEvent& RecoEvent,Out* OutTree)
+int CheckField<Out>::Exec(FullRecoEvent& ,Out* )
 {
   return Check();
 }

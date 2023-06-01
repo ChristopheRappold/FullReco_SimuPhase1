@@ -121,7 +121,7 @@ int FullRecoTaskMT::Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, 
   nextingEvent nextEvent(startEvent, stopEvent, startEvent);
   auto& logging = Attributes._logger;
  
-  auto f_nextEvent = [&](nextingEvent& nEvent, std::vector<FullRecoEvent>& REvent) {
+  auto f_nextEvent = [&](nextingEvent& nEvent, std::vector<FullRecoEvent>& R_Event) {
 
     logging->debug("MT0> start thread nextEvent / queueInit: {}",queueInit.empty());
 
@@ -133,8 +133,8 @@ int FullRecoTaskMT::Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, 
 	logging->debug("MT0> Current Event:{}",currentEvent);
 	if(currentEvent < nEvent.Stop)
 	  {
-	    assert(std::get<0>(Status) == REvent[std::get<0>(Status)].idThread);
-	    REvent[std::get<0>(Status)].idEvent = currentEvent;
+	    assert(std::get<0>(Status) == R_Event[std::get<0>(Status)].idThread);
+	    R_Event[std::get<0>(Status)].idEvent = currentEvent;
 	    queueStep1.push(Status);
 	  }
 	else
@@ -151,7 +151,7 @@ int FullRecoTaskMT::Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, 
   auto& list_builder = list_det_build;
 
   auto f_det_build = [&](int idTh, TTree* InTree, const TG4Sol_Event& ev,
-                         const std::vector<TClonesArray*>& hits, std::vector<FullRecoEvent>& REvent) {
+                         const std::vector<TClonesArray*>& hits, std::vector<FullRecoEvent>& R_Event) {
 
     logging->debug("MT1> start thread det_build ");
 
@@ -177,13 +177,13 @@ int FullRecoTaskMT::Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, 
 	    return;
 	  }
 	
-        assert(std::get<0>(Status) == REvent[std::get<0>(Status)].idThread);
+        assert(std::get<0>(Status) == R_Event[std::get<0>(Status)].idThread);
 
-        auto idEvent = REvent[std::get<0>(Status)].idEvent;
+        auto idEvent = R_Event[std::get<0>(Status)].idEvent;
 
 	InTree->GetEntry(idEvent);
         ReturnRes::InfoM return_build =
-	  (*dynamic_cast<TBuildDetectorLayerPlaneDAF_MT*>(list_builder[idTh]))(ev, hits, std::ref(REvent[std::get<0>(Status)]));
+	  (*dynamic_cast<TBuildDetectorLayerPlaneDAF_MT*>(list_builder[idTh]))(ev, hits, std::ref(R_Event[std::get<0>(Status)]));
 
 	std::get<1>(Status) = return_build;
         queueStep2.push(Status);
@@ -223,7 +223,7 @@ int FullRecoTaskMT::Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, 
 	else if(std::get<1>(Status) != ReturnRes::Fine)
           queueStep3.push(Status);
 
-        assert(std::get<0>(Status) == REvent[std::get<0>(Status)].idThread);
+        assert(std::get<0>(Status) == RecoEvent[std::get<0>(Status)].idThread);
 
         ReturnRes::InfoM return_process = (*list_processMC_RK[htId])(std::ref(RecoEvent[std::get<0>(Status)]),nullptr);
 
@@ -252,7 +252,7 @@ int FullRecoTaskMT::Run(Long64_t startEvent, Long64_t stopEvent, TTree* InTree, 
 	      queueStep3.push(Status);
 	    return;
 	  }
-        assert(std::get<0>(Status) == REvent[std::get<0>(Status)].idThread);
+        assert(std::get<0>(Status) == RecoEvent[std::get<0>(Status)].idThread);
 
         (*dynamic_cast<TMergerOutput_MT*>(list_merger[idTh]))(std::ref(RecoEvent[std::get<0>(Status)]), std::get<1>(Status), OutEvent);
 	

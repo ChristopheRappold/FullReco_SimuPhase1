@@ -360,7 +360,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
     return ss.str();
   };
 
-  unsigned int Nb_trackSeed = RecoEvent.TrackDAF.size();
+  // unsigned int Nb_trackSeed = RecoEvent.TrackDAF.size();
 
   int ntrack = -1;
   for(auto it_trackInfo : RecoEvent.TrackInfo)
@@ -378,24 +378,24 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
       const int id_track = it_trackInfo.first;
       auto it_ListHits   = RecoEvent.TrackDAF.find(id_track);
 
-      auto getZpos = [](genfit::AbsMeasurement* m) {
-        TVectorD& HitrawRef = m->getRawHitCoords();
-        if(HitrawRef.GetNrows() == 2)
-          {
-            genfit::StateOnPlane dummy;
-            genfit::SharedPlanePtr plane = dynamic_cast<genfit::PlanarMeasurement*>(m)->constructPlane(dummy);
-            TVector3 tempO(plane->getO());
-            return tempO.Z();
-          }
-        else if(HitrawRef.GetNrows() == 3)
-          return HitrawRef[2];
-        else
-          {
-            fmt::print("E> rawref not proper ! {}", HitrawRef.GetNrows());
-            HitrawRef.Print();
-            return -999.;
-          }
-      };
+      // auto getZpos = [](genfit::AbsMeasurement* m) {
+      //   TVectorD& HitrawRef = m->getRawHitCoords();
+      //   if(HitrawRef.GetNrows() == 2)
+      //     {
+      //       genfit::StateOnPlane dummy;
+      //       genfit::SharedPlanePtr plane = dynamic_cast<genfit::PlanarMeasurement*>(m)->constructPlane(dummy);
+      //       TVector3 tempO(plane->getO());
+      //       return tempO.Z();
+      //     }
+      //   else if(HitrawRef.GetNrows() == 3)
+      //     return HitrawRef[2];
+      //   else
+      //     {
+      //       fmt::print("E> rawref not proper ! {}", HitrawRef.GetNrows());
+      //       HitrawRef.Print();
+      //       return -999.;
+      //     }
+      // };
       std::set<std::tuple<double, int, int> > id_dets;
       double total_dE = 0.;
       int n_Central   = 0;
@@ -416,7 +416,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
             ++n_Central;
           if(id_det>=G4Sol::MiniFiberD1_x && id_det<=G4Sol::MiniFiberD2_u)
             ++n_MiniFiber;
-          genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
+          // genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
           total_dE += it_trackInfo.second[id_det].Eloss;   //CHECK Change!!
 
@@ -1124,7 +1124,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
 
               {
                 unsigned int np_pid = fitTrack_pid->getNumPointsWithMeasurement();
-                for(int i = 0; i < np_pid; ++i)
+                for(size_t i = 0; i < np_pid; ++i)
                   {
                     genfit::TrackPoint* tp_tmp    = fitTrack_pid->getPointWithMeasurementAndFitterInfo(i);
                       if(tp_tmp==nullptr)
@@ -1139,7 +1139,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
                     if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
                       {
                         double res_min = 9999999;
-                        for(int j = 0; j < weights.size() ; ++j)
+                        for(size_t j = 0; j < weights.size() ; ++j)
                           {
                             const genfit::MeasurementOnPlane& residual = kfi->getResidual(j, false, true);
                             const TVectorD& resid(residual.getState());
@@ -1326,7 +1326,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
               tempResults.mass2        = mass2_pid;
               tempResults.pdg_guess    = PDG_guess_pid;
 
-              double m_range[4]  = {0.9383, 3.72738, 0.1396, 2.809};
+              // double m_range[4]  = {0.9383, 3.72738, 0.1396, 2.809};
               double m_charge[4] = {1., 2., -1., 2.};
 
               for(int i = 0; i < 4; i++)

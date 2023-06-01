@@ -74,7 +74,7 @@ TBayesFinder<Out>::TBayesFinder(const THyphiAttributes& attribut):TDataProcessIn
 
       TGeoNodeMatrix* MD[17]; 
       unsigned int Nsize[17];
-      std::vector<TGeoHMatrix> MatMD;
+      //std::vector<TGeoHMatrix> MatMD;
       for(int i=0;i<17;++i)
 	{
 	  MD[i] = nullptr;
@@ -93,13 +93,13 @@ TBayesFinder<Out>::TBayesFinder(const THyphiAttributes& attribut):TDataProcessIn
       //ME.resize( 17, std::vector<TGeoNodeMatrix*>());
       //LayerGeo.resize(17, std::vector<DataLayer>());
   
-      for( auto i = 0 ; i < ME.size(); ++i)
+      for( size_t i = 0 ; i < ME.size(); ++i)
 	{
 	  att._logger->debug("layer:{} nb channels: {}", i, Nsize[i]);
 	  ME[i] = std::vector<TGeoNodeMatrix*>(Nsize[i],nullptr);
 	  LayerGeo[i].resize(Nsize[i]);
 	  auto N04 = MD[i]->GetNodes();
-	  for( auto j = 0; j<Nsize[i]; ++j)
+	  for( unsigned int j = 0; j<Nsize[i]; ++j)
 	    {
 	      //att._logger->debug("ch#{} / {}",j, Nsize[i]);
 	      ME[i][j] = (TGeoNodeMatrix*)N04->At(j);
@@ -163,14 +163,14 @@ ReturnRes::InfoM TBayesFinder<Out>::operator() (FullRecoEvent& RecoEvent,Out* Ou
 }
 
 template<class Out>
-int TBayesFinder<Out>::Exec(FullRecoEvent& RecoEvent,Out* OutTree)
+int TBayesFinder<Out>::Exec(FullRecoEvent& RecoEvent,Out* )
 {
   return FinderTrack(RecoEvent);
   
 }
 
 template<class Out>
-ReturnRes::InfoM TBayesFinder<Out>::SoftExit(int result_full)
+ReturnRes::InfoM TBayesFinder<Out>::SoftExit(int )
 {
   return ReturnRes::Fine;
 }
@@ -266,7 +266,7 @@ int TBayesFinder<Out>::FinderTrack(FullRecoEvent& RecoEvent)
 	}
     }
 
-  auto DrawMG = [](const auto& ListHits, const auto& LayerG, TH2F* h, TRandom3& rand) {
+  auto DrawMG = [](const auto& ListHits, const auto& LayerG, TH2F* h, TRandom3& random) {
     
     for(SolDetIter i = G4Sol::MG01 ; i != G4Sol::MG17;++i)
       {
@@ -281,7 +281,7 @@ int TBayesFinder<Out>::FinderTrack(FullRecoEvent& RecoEvent)
 	    for(int ran = 0;ran<1000;++ran)
 	      {
 		double temp_x,temp_y;
-		rand.Circle(temp_x,temp_y,LayerG[LayID][WireID].radius);
+		random.Circle(temp_x,temp_y,LayerG[LayID][WireID].radius);
 		h->Fill(xH+temp_x,yH+temp_y);
 	      }
 	  }

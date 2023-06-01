@@ -41,6 +41,8 @@ void FullRecoEvent::Clear(int toclean)
   OldListHits.clear();
   ListHitsInfo.clear();
   
+  SegmentHit1Ds.clear();
+
   ListHitsToTracks.clear();
 
   TrackDAF.clear();
@@ -64,15 +66,15 @@ void FullRecoEvent::Clear(int toclean)
   FragmentPID = -999;
 
   for(auto x : FiberTrackCont)
-    for(int i=0; i<x.second.size(); ++i)
+    for(size_t i=0; i<x.second.size(); ++i)
       delete x.second[i];
 
-  for(int i = 0; i < FiberHitClCont.size(); ++i)
+  for(size_t i = 0; i < FiberHitClCont.size(); ++i)
     {
-      for(int j = 0; j < FiberHitClCont[i].size(); ++j)
+      for(size_t j = 0; j < FiberHitClCont[i].size(); ++j)
         {
-          int num = (int)FiberHitClCont[i][j].size();
-          for(int k = 0; k < num; ++k)
+          size_t num = FiberHitClCont[i][j].size();
+          for(size_t k = 0; k < num; ++k)
             delete FiberHitClCont[i][j][k];
         }
     }

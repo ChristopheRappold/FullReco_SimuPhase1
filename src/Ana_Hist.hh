@@ -625,6 +625,19 @@ class Ana_Hist
   Hist<TH2F> h_ResidualFiberX_Angle[11][2];
   Hist<TH2F> h_ResidualFiberY_Angle[11][2];
 
+  Hist<TH2F> h_ResidualFiberDzDphi;
+  Hist<TH2F> h_ResidualFiberDzDtheta;
+
+  Hist<TH2F> h_ResidualMDC_dZ1;
+  Hist<TH2F> h_ResidualMDC_dZ2;
+
+  Hist<TH2F> h_RPhiZMDC_Sigma;
+
+
+  Hist<TH2F> h_ResidualMDC_dZ_PSB;
+  Hist<TH2F> h_ResidualMDC_dZ_PSBE;
+  Hist<TH2F> h_ResidualMDC_dZ_PSFE;
+  Hist<TH2F> h_ResidualMDC_dZ_More6;
 
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 

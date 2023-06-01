@@ -38,7 +38,7 @@
 // }
 
 THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimExp& In)
-    : Field(nullptr), Config(config), InputPar(In)
+  : Field(nullptr), Config(config), InputPar(In)
 {
   _logger = spdlog::get("Console");
   _logger->info("THyphiAttributes()");
@@ -85,11 +85,19 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   KF_KalmanRef  = false;
   KF_DAFRef     = false;
   KF_DAF        = false;
+  KF_G4e        = false;
+
+  G4e_FullProp = "0";
+  G4e_Basf2List = "1";
+  G4e_ExactJac = "1";
+  G4e_MaxEnergyLoss = "0.0005";
+  G4e_Verbose = "0";
 
   KF_NbCentralCut   = 1;
   KF_NbMiniFiberCut = 4;
 
   RF_OutputEvents = false;
+  CFT_OutputEvents = false;
 
 
   //Optics parameters
@@ -121,10 +129,10 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     printf("Optics done : %s\n", optics_name.c_str());
   }
   else
-  {
-    printf(" ! fail to open  : %s\n", optics_name.c_str());
-    exit(-1);
-  }
+    {
+      printf(" ! fail to open  : %s\n", optics_name.c_str());
+      exit(-1);
+    }
 
   optics_s2z = 4187.5; //Ti: 4150 mm, take this value just for easy expression
   
@@ -182,6 +190,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("PV_RealPrimTrack"))
     PV_RealPrimTrack = Config.Get<bool>("PV_RealPrimTrack");
 
+  if(Config.IsAvailable("CFT_RZfit"))
+    CFT_RZfit = Config.Get<bool>("CFT_RZfit");
   if(Config.IsAvailable("RZ_ChangeMiniFiber"))
     RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
   if(Config.IsAvailable("RZ_MDCProlate"))
@@ -211,10 +221,25 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     KF_DAF = Config.Get<bool>("KF_DAF");
   if(Config.IsAvailable("KF_DAFRef"))
     KF_DAFRef = Config.Get<bool>("KF_DAFRef");
+  if(Config.IsAvailable("KF_G4e"))
+    KF_G4e = Config.Get<bool>("KF_G4e");
 
-  _logger->info("KF Setting: Kalman? {} / KalmanRef? {} / KalmanSqrt? {} / DAF? {} / DAFRef? {}", KF_Kalman,
-                KF_KalmanRef, KF_KalmanSqrt, KF_DAF, KF_DAFRef);
+  _logger->info("KF Setting: Kalman? {} / KalmanRef? {} / KalmanSqrt? {} / DAF? {} / DAFRef? {} / G4e? {}", KF_Kalman,
+                KF_KalmanRef, KF_KalmanSqrt, KF_DAF, KF_DAFRef, KF_G4e);
 
+  if(Config.IsAvailable("G4e_FullProp"))
+    G4e_FullProp = Config.Get<std::string>("G4e_FullProp");
+  if(Config.IsAvailable("G4e_Basf2List"))
+    G4e_Basf2List = Config.Get<std::string>("G4e_Basf2List");
+  if(Config.IsAvailable("G4e_ExactJac"))
+    G4e_ExactJac = Config.Get<std::string>("G4e_ExactJac");
+  if(Config.IsAvailable("G4e_MaxEnergyLoss"))
+    G4e_MaxEnergyLoss = Config.Get<std::string>("G4e_MaxEnergyLoss");
+  if(Config.IsAvailable("G4e_Verbose"))
+    G4e_Verbose = Config.Get<std::string>("G4e_Verbose");
+
+  _logger->info("G4e Setting: FullProp? {} / Basf2List? {} / ExactJac? {} / MaxEnergyLoss? {} / Verbose? {}", G4e_FullProp, G4e_Basf2List, G4e_ExactJac, G4e_MaxEnergyLoss, G4e_Verbose);
+  
   if(Config.IsAvailable("KF_NbCentralCut"))
     KF_NbCentralCut = Config.Get<int>("KF_NbCentralCut");
   if(Config.IsAvailable("KF_NbMiniFiberCut"))
@@ -233,6 +258,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   if(Config.IsAvailable("RF_OutputEvents"))
     RF_OutputEvents = Config.Get<bool>("RF_OutputEvents");
+
+  if(Config.IsAvailable("CFT_OutputEvents"))
+    CFT_OutputEvents = Config.Get<bool>("CFT_OutputEvents");
 
   DataML_Out = Config.IsAvailable("DataML_Out") ? Config.Get<std::string>("DataML_Out") : "NoneInConfig";
 
@@ -255,118 +283,123 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   _logger->info(" *** > Loading Fieldmap ");
 
-if(Config.IsAvailable("CalibFile_MDCmap"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_MDCmap");
-    map_ParamFiles.insert({"mdc_map_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_MDCmap"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_MDCmap");
+      map_ParamFiles.insert({"mdc_map_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"mdc_map_file","./calib/mdc_mapping/MDC_channelmap.csv"});
 
-if(Config.IsAvailable("CalibFile_MDCphys"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_MDCphys");
-    map_ParamFiles.insert({"mdc_phys_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_MDCphys"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_MDCphys");
+      map_ParamFiles.insert({"mdc_phys_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"mdc_phys_file","./calib/mdc_mapping/MDC_PhysicalMap.csv"});
 
-if(Config.IsAvailable("CalibFile_MDCdrift"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_MDCdrift");
-    map_ParamFiles.insert({"mdc_drift_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_MDCdrift"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_MDCdrift");
+      map_ParamFiles.insert({"mdc_drift_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"mdc_drift_file","./calib/mdc_driftparam/MDC_DriftParam.txt"});
 
-if(Config.IsAvailable("CalibFile_MDCparT0"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_MDCparT0");
-    map_ParamFiles.insert({"mdc_parT0_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_MDCparT0"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_MDCparT0");
+      map_ParamFiles.insert({"mdc_parT0_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"mdc_parT0_file","./calib/mdc_driftparam/MDC_T0Param.csv"});
 
-if(Config.IsAvailable("CalibFile_MDCparT0_Wir"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_MDCparT0_Wir");
-    map_ParamFiles.insert({"mdc_parT0wir_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_MDCparT0_Wir"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_MDCparT0_Wir");
+      map_ParamFiles.insert({"mdc_parT0wir_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"mdc_parT0wir_file","./calib/mdc_driftparam/MDC_T0Param_Wir.csv"});
 
-if(Config.IsAvailable("CalibFile_Fiberoffset"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_Fiberoffset");
-    map_ParamFiles.insert({"fiber_offset_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_Fiberoffset"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_Fiberoffset");
+      map_ParamFiles.insert({"fiber_offset_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"fiber_offset_file","./calib/fiber_offset/fiber_offset.csv"});
 
-if(Config.IsAvailable("CalibFile_FiberTimeoffset"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_FiberTimeoffset");
-    map_ParamFiles.insert({"fiber_timeoffset_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_FiberTimeoffset"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_FiberTimeoffset");
+      map_ParamFiles.insert({"fiber_timeoffset_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"fiber_timeoffset_file","./calib/fiber_offset/fiber_timeoffset.csv"});
 
-if(Config.IsAvailable("CalibFile_FiberAngleoffset"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_FiberAngleoffset");
-    map_ParamFiles.insert({"fiber_angleoffset_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_FiberAngleoffset"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_FiberAngleoffset");
+      map_ParamFiles.insert({"fiber_angleoffset_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"fiber_angleoffset_file","./calib/fiber_offset/fiber_angleoffset.csv"});
 
-if(Config.IsAvailable("Fiber_MFTCor_name"))
-  {
-    auto tmpStr = Config.Get<std::string>("Fiber_MFTCor_name");
-    map_ParamFiles.insert({"fiber_mftcor_file",tmpStr});
-  }
+  if(Config.IsAvailable("Fiber_MFTCor_name"))
+    {
+      auto tmpStr = Config.Get<std::string>("Fiber_MFTCor_name");
+      map_ParamFiles.insert({"fiber_mftcor_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"fiber_mftcor_file","./calib/fiber_mftcor/fiber_mftcor.csv"});
 
-if(Config.IsAvailable("CalibFile_PSBtime"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_PSBtime");
-    map_ParamFiles.insert({"psb_time_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_PSBtime"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_PSBtime");
+      map_ParamFiles.insert({"psb_time_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"psb_time_file","calib/psb_param/psb_time.csv"});
 
-if(Config.IsAvailable("CalibFile_T0time"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_T0time");
-    map_ParamFiles.insert({"t0_time_file",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_T0time"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_T0time");
+      map_ParamFiles.insert({"t0_time_file",tmpStr});
+    }
   else
     map_ParamFiles.insert({"t0_time_file","./calib/t0_param/t0_time.csv"});
 
-if(Config.IsAvailable("CalibFile_MWDCDtDx"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_MWDCDtDx");
-    map_ParamFiles.insert({"mwdc_name_dtdx",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_MWDCDtDx"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_MWDCDtDx");
+      map_ParamFiles.insert({"mwdc_name_dtdx",tmpStr});
+    }
   else
     map_ParamFiles.insert({"mwdc_name_dtdx","./calib/mwdc_dtdx/mwdc_dtdx_param.txt"});
 
-if(Config.IsAvailable("CalibFile_MWDCDtDxtable"))
-  {
-    auto tmpStr = Config.Get<std::string>("CalibFile_MWDCDtDxtable");
-    map_ParamFiles.insert({"mwdc_name_dtdxtable",tmpStr});
-  }
+  if(Config.IsAvailable("CalibFile_MWDCDtDxtable"))
+    {
+      auto tmpStr = Config.Get<std::string>("CalibFile_MWDCDtDxtable");
+      map_ParamFiles.insert({"mwdc_name_dtdxtable",tmpStr});
+    }
   else
     map_ParamFiles.insert({"mwdc_name_dtdxtable","./calib/mwdc_dtdx/mwdc_dtdxtable.root"});
-/*
-if(Config.IsAvailable("CalibFile_Optics"))
-  {
+  /*
+    if(Config.IsAvailable("CalibFile_Optics"))
+    {
     auto tmpStr = Config.Get<std::string>("CalibFile_Optics");
     map_ParamFiles.insert({"optics_name",tmpStr});
-  }
-  else
+    }
+    else
     map_ParamFiles.insert({"optics_name","./calib/optics/optics_par.csv"});
-*/
+  */
+  if(Config.IsAvailable("Wasa_FieldMap"))
+    Wasa_FieldMap = Config.Get<int>("Wasa_FieldMap");
+
+  if(Config.IsAvailable("Wasa_FieldMapName"))
+    Wasa_FieldMapName = Config.Get<std::string>("Wasa_FieldMapName");
 
   if(Wasa_FieldMap)
     {
@@ -512,59 +545,59 @@ int THyphiAttributes::Init_Para()
     }
   name_GeoVolumes.push_back("Total");
 
-/*
-  std::string upk_setupfiber = InputPar.simexpMetadata->Unpack_SetupFiber;
-  Unpack_map_ParamFiles["upk_setupfiber"] = upk_setupfiber;
+  /*
+    std::string upk_setupfiber = InputPar.simexpMetadata->Unpack_SetupFiber;
+    Unpack_map_ParamFiles["upk_setupfiber"] = upk_setupfiber;
 
-  std::string upk_channelmapt0 = InputPar.simexpMetadata->Unpack_ChannelMapT0;
-  Unpack_map_ParamFiles["upk_channelmapt0"] = upk_channelmapt0;
+    std::string upk_channelmapt0 = InputPar.simexpMetadata->Unpack_ChannelMapT0;
+    Unpack_map_ParamFiles["upk_channelmapt0"] = upk_channelmapt0;
 
-  std::string upk_channelmappsfe = InputPar.simexpMetadata->Unpack_ChannelMapPSFE;
-  Unpack_map_ParamFiles["upk_channelmappsfe"] = upk_channelmappsfe;
+    std::string upk_channelmappsfe = InputPar.simexpMetadata->Unpack_ChannelMapPSFE;
+    Unpack_map_ParamFiles["upk_channelmappsfe"] = upk_channelmappsfe;
 
-  std::string upk_channelmappsbe = InputPar.simexpMetadata->Unpack_ChannelMapPSBE;
-  Unpack_map_ParamFiles["upk_channelmappsbe"] = upk_channelmappsbe;
+    std::string upk_channelmappsbe = InputPar.simexpMetadata->Unpack_ChannelMapPSBE;
+    Unpack_map_ParamFiles["upk_channelmappsbe"] = upk_channelmappsbe;
 
-  std::string upk_setuppsb = InputPar.simexpMetadata->Unpack_SetupPSB;
-  Unpack_map_ParamFiles["upk_setuppsb"] = upk_setuppsb;
+    std::string upk_setuppsb = InputPar.simexpMetadata->Unpack_SetupPSB;
+    Unpack_map_ParamFiles["upk_setuppsb"] = upk_setuppsb;
 
-  std::string upk_dtdxtablemwdc = InputPar.simexpMetadata->Unpack_DtDxTableMWDC;
-  Unpack_map_ParamFiles["upk_dtdxtablemwdc"] = upk_dtdxtablemwdc;
+    std::string upk_dtdxtablemwdc = InputPar.simexpMetadata->Unpack_DtDxTableMWDC;
+    Unpack_map_ParamFiles["upk_dtdxtablemwdc"] = upk_dtdxtablemwdc;
 
-  std::string upk_celloffsets4wfd1 = InputPar.simexpMetadata->Unpack_CellOffsetS4WFD1;
-  Unpack_map_ParamFiles["upk_celloffsets4wfd1"] = upk_celloffsets4wfd1;
+    std::string upk_celloffsets4wfd1 = InputPar.simexpMetadata->Unpack_CellOffsetS4WFD1;
+    Unpack_map_ParamFiles["upk_celloffsets4wfd1"] = upk_celloffsets4wfd1;
 
-  std::string upk_celloffsets2wfd1 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD1;
-  Unpack_map_ParamFiles["upk_celloffsets2wfd1"] = upk_celloffsets2wfd1;
+    std::string upk_celloffsets2wfd1 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD1;
+    Unpack_map_ParamFiles["upk_celloffsets2wfd1"] = upk_celloffsets2wfd1;
 
-  std::string upk_celloffsets2wfd2 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD2;
-  Unpack_map_ParamFiles["upk_celloffsets2wfd2"] = upk_celloffsets2wfd2;
+    std::string upk_celloffsets2wfd2 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD2;
+    Unpack_map_ParamFiles["upk_celloffsets2wfd2"] = upk_celloffsets2wfd2;
 
-  std::string upk_celloffsets2wfd3 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD3;
-  Unpack_map_ParamFiles["upk_celloffsets2wfd3"] = upk_celloffsets2wfd3;
+    std::string upk_celloffsets2wfd3 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD3;
+    Unpack_map_ParamFiles["upk_celloffsets2wfd3"] = upk_celloffsets2wfd3;
 
-  std::string upk_celloffsets2wfd4 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD4;
-  Unpack_map_ParamFiles["upk_celloffsets2wfd4"] = upk_celloffsets2wfd4;
+    std::string upk_celloffsets2wfd4 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD4;
+    Unpack_map_ParamFiles["upk_celloffsets2wfd4"] = upk_celloffsets2wfd4;
 
-  std::string upk_celloffsets2wfd5 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD5;
-  Unpack_map_ParamFiles["upk_celloffsets2wfd5"] = upk_celloffsets2wfd5;
+    std::string upk_celloffsets2wfd5 = InputPar.simexpMetadata->Unpack_CellOffsetS2WFD5;
+    Unpack_map_ParamFiles["upk_celloffsets2wfd5"] = upk_celloffsets2wfd5;
 
-  std::string upk_channelmapmdc = InputPar.simexpMetadata->Unpack_ChannelMapMDC;
-  Unpack_map_ParamFiles["upk_channelmapmdc"] = upk_channelmapmdc;
+    std::string upk_channelmapmdc = InputPar.simexpMetadata->Unpack_ChannelMapMDC;
+    Unpack_map_ParamFiles["upk_channelmapmdc"] = upk_channelmapmdc;
 
-  std::string upk_physicalmapmdc = InputPar.simexpMetadata->Unpack_PhysicalMapMDC;
-  Unpack_map_ParamFiles["upk_physicalmapmdc"] = upk_physicalmapmdc;
+    std::string upk_physicalmapmdc = InputPar.simexpMetadata->Unpack_PhysicalMapMDC;
+    Unpack_map_ParamFiles["upk_physicalmapmdc"] = upk_physicalmapmdc;
 
-  std::string upk_driftparammdc = InputPar.simexpMetadata->Unpack_PhysicalMapMDC;
-  Unpack_map_ParamFiles["upk_driftparammdc"] = upk_driftparammdc;
-*/
+    std::string upk_driftparammdc = InputPar.simexpMetadata->Unpack_PhysicalMapMDC;
+    Unpack_map_ParamFiles["upk_driftparammdc"] = upk_driftparammdc;
+  */
 
   return 0;
 }
 
 int THyphiAttributes::Reload_Para()
 {
-  std::string Hash(InputPar.simexpMetadata->Hash);
+  Hash = InputPar.simexpMetadata->Hash;
 
   auto storage = InitStorage();
   storage.sync_schema();
@@ -634,28 +667,28 @@ void MT::Init(const FullRecoConfig& Config)
       NMerger  = Config.IsAvailable("Nb_DataMerger") ? Config.Get<int>("Nb_DataMerger") : 1;
 
       addr_initEvent =
-          Config.IsAvailable("Addr_InitEvent") ? Config.Get<std::string>("Addr_InitEvent") : "inproc://Nevent";
+	Config.IsAvailable("Addr_InitEvent") ? Config.Get<std::string>("Addr_InitEvent") : "inproc://Nevent";
 
       addr_frontBuilder =
-          Config.IsAvailable("Addr_InputBuilder") ? Config.Get<std::string>("Addr_InputBuilder") : "inproc://Q0";
+	Config.IsAvailable("Addr_InputBuilder") ? Config.Get<std::string>("Addr_InputBuilder") : "inproc://Q0";
       addr_backFitter =
-          Config.IsAvailable("Addr_OutputBuilder") ? Config.Get<std::string>("Addr_OutputBuilder") : "inproc://Q0out";
+	Config.IsAvailable("Addr_OutputBuilder") ? Config.Get<std::string>("Addr_OutputBuilder") : "inproc://Q0out";
 
       addr_frontFitter =
-          Config.IsAvailable("Addr_InputFitter") ? Config.Get<std::string>("Addr_InputFitter") : "inproc://Q1";
+	Config.IsAvailable("Addr_InputFitter") ? Config.Get<std::string>("Addr_InputFitter") : "inproc://Q1";
       addr_backMerger =
-          Config.IsAvailable("Addr_OutputFitter") ? Config.Get<std::string>("Addr_OutputFitter") : "inproc://Q1out";
+	Config.IsAvailable("Addr_OutputFitter") ? Config.Get<std::string>("Addr_OutputFitter") : "inproc://Q1out";
 
       addr_frontMerger =
-          Config.IsAvailable("Addr_InputMerger") ? Config.Get<std::string>("Addr_InputMerger") : "inproc://Q2";
+	Config.IsAvailable("Addr_InputMerger") ? Config.Get<std::string>("Addr_InputMerger") : "inproc://Q2";
       addr_backEnd =
-          Config.IsAvailable("Addr_OutputMerger") ? Config.Get<std::string>("Addr_OutputMerger") : "inproc://Q2out";
+	Config.IsAvailable("Addr_OutputMerger") ? Config.Get<std::string>("Addr_OutputMerger") : "inproc://Q2out";
 
       addr_control =
-          Config.IsAvailable("Addr_EndControl") ? Config.Get<std::string>("Addr_EndControl") : "inproc://controlQ";
+	Config.IsAvailable("Addr_EndControl") ? Config.Get<std::string>("Addr_EndControl") : "inproc://controlQ";
 
       addr_monitor =
-          Config.IsAvailable("Addr_Monitor") ? Config.Get<std::string>("Addr_Monitor") : "tcp://127.0.0.1:9876";
+	Config.IsAvailable("Addr_Monitor") ? Config.Get<std::string>("Addr_Monitor") : "tcp://127.0.0.1:9876";
     }
   else
     {
@@ -671,6 +704,7 @@ void Task::Init(const FullRecoConfig& Config)
 {
   if(Config.IsAvailable("Task_CheckField"))
     Task_CheckField = Config.Get<bool>("Task_CheckField");
+
   if(Config.IsAvailable("Task_PrimaryVtx"))
     Task_PrimaryVtx = Config.Get<bool>("Task_PrimaryVtx");
   if(Config.IsAvailable("Task_PrimaryVtx_Si"))
@@ -687,14 +721,22 @@ void Task::Init(const FullRecoConfig& Config)
     Task_WASAFinder = Config.Get<bool>("Task_WASAFinder");
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
+
   if(Config.IsAvailable("Task_RiemannFinder"))
     Task_RiemannFinder = Config.Get<bool>("Task_RiemannFinder");
+
   if(Config.IsAvailable("Task_FindingPerf"))
     Task_FindingPerf = Config.Get<bool>("Task_FindingPerf");
+
   if(Config.IsAvailable("Task_FinderCM"))
     Task_FinderCM = Config.Get<bool>("Task_FinderCM");
+
   if(Config.IsAvailable("Task_CheckRZ"))
     Task_CheckRZ = Config.Get<bool>("Task_CheckRZ");
+
+  if(Config.IsAvailable("Task_RPhiZTrackMDC"))
+    Task_CheckRZ = Config.Get<bool>("Task_RPhiZTrackMDC");
+
   if(Config.IsAvailable("Task_KalmanDAF"))
     Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
   if(Config.IsAvailable("Task_KalmanDAFPID"))
@@ -724,19 +766,19 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKCHECKFIELD);
 	  if(s == "Task_PrimaryVtx")
 	    Task_Order.push_back(TASKPRIMARYVTX);
-    if(s == "Task_PrimaryVtx_Si")
-      Task_Order.push_back(TASKPRIMARYVTX_SI);
+	  if(s == "Task_PrimaryVtx_Si")
+	    Task_Order.push_back(TASKPRIMARYVTX_SI);
 	  if(s == "Task_FlatMCOutputML")
 	    Task_Order.push_back(TASKFLATMCOUTPUTML);
-    if(s == "Task_CheckFiberXUV")
-      Task_Order.push_back(TASKCHECKFIBERXUV);
+	  if(s == "Task_CheckFiberXUV")
+	    Task_Order.push_back(TASKCHECKFIBERXUV);
 	  if(s == "Task_CheckFiberTrack")
 	    Task_Order.push_back(TASKCHECKFIBERTRACK);
-    if(s == "Task_FragmentFinder")
-      Task_Order.push_back(TASKFRAGMENTFINDER);
-    if(s == "Task_WASAFinder")
-      Task_Order.push_back(TASKWASAFINDER);
-  	if(s == "Task_BayesFinder")
+	  if(s == "Task_FragmentFinder")
+	    Task_Order.push_back(TASKFRAGMENTFINDER);
+	  if(s == "Task_WASAFinder")
+	    Task_Order.push_back(TASKWASAFINDER);
+	  if(s == "Task_BayesFinder")
 	    Task_Order.push_back(TASKBAYESFINDER);
 	  if(s == "Task_RiemannFinder")
 	    Task_Order.push_back(TASKRIEMANNFINDER);
@@ -746,14 +788,16 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKFINDERCM);
 	  if(s == "Task_CheckRZ")
 	    Task_Order.push_back(TASKCHECKRZ);
+	  if(s == "Task_RPhiZTrackMDC")
+	    Task_Order.push_back(TASKRPHIZTRACKMDC);
 	  if(s == "Task_KalmanDAF")
 	    Task_Order.push_back(TASKKALMANDAF);
-    if(s == "Task_KalmanDAFPID")
-      Task_Order.push_back(TASKKALMANDAFPID);
+	  if(s == "Task_KalmanDAFPID")
+	    Task_Order.push_back(TASKKALMANDAFPID);
 	  if(s == "Task_DecayVtx")
 	    Task_Order.push_back(TASKDECAYVTX);
-    if(s == "Task_DecayVtx_pi+")
-      Task_Order.push_back(TASKDECAYVTX_PIPLUS);
+	  if(s == "Task_DecayVtx_pi+")
+	    Task_Order.push_back(TASKDECAYVTX_PIPLUS);
 	  if(s == "Task_ReStart")
 	    Task_Order.push_back(TASKRESTART);
 	}
@@ -833,6 +877,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.DoNoMaterial       = DoNoMaterial;
   out.RunTaskAttr.PV_RealXUVComb     = PV_RealXUVComb;
   out.RunTaskAttr.PV_RealPrimTrack   = PV_RealPrimTrack;
+  out.RunTaskAttr.CFT_RZfit          = CFT_RZfit;
   out.RunTaskAttr.RZ_ChangeMiniFiber = RZ_ChangeMiniFiber;
   out.RunTaskAttr.RZ_MDCProlate      = RZ_MDCProlate;
   out.RunTaskAttr.RZ_MDCWire2        = RZ_MDCWire2;
@@ -850,6 +895,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.FlatML_namefile    = FlatML_namefile;
   out.RunTaskAttr.DataML_Out         = DataML_Out;
   out.RunTaskAttr.RF_OutputEvents    = RF_OutputEvents;
+  out.RunTaskAttr.CFT_OutputEvents    = CFT_OutputEvents;
 
   out.RunFullConfig.Hash = Hash;
   std::string tempCj;

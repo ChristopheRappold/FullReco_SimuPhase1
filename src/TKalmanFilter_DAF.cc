@@ -2,6 +2,7 @@
 
 #include "Ana_Event/MCAnaEventG4Sol.hh"
 #include "Ana_Event/Ana_WasaEvent.hh"
+#include "FullRecoEvent.hh"
 #include "KalmanFittedStateOnPlane.h"
 #include "KalmanFitterInfo.h"
 #include "StateOnPlane.h"
@@ -72,6 +73,33 @@ TKalmanFilter_DAF<Out>::TKalmanFilter_DAF(const THyphiAttributes& attribut)
   else
     att._logger->error("E> Kalman Filter fitter not set correctly !");
 
+  if(att.KF_G4e)
+    {
+      att._logger->error("!> Start KF_G4e !");
+      std::string nameField = att.Wasa_FieldMapName;
+      double signDir = att.Wasa_Side ? 1.0 : -1.0;
+      std::array<double,3> fieldValues = {att.Field_Strength*signDir*0.1, 0., 0.}; 
+      // std::unordered_map<std::string, std::string> G4eConfig = {{"FullProp","0"},{"G4eBasf2PhysicsList","1"},{"ExactJac","1"},
+      // 								//,{"TrackingVerbose","10"},{"ControlVerbose","2"},{"G4eVerbose","4"}};
+      // 								//{"StepLength","25 mm"},
+      // 								//{"MagFieldDiff","0.01",},
+      // 								{"MaxEnergyLoss","0.0005"}
+
+      std::unordered_map<std::string, std::string> G4eConfig = {{"FullProp",att.G4e_FullProp},
+								{"G4eBasf2PhysicsList",att.G4e_Basf2List},
+								{"ExactJac",att.G4e_ExactJac},
+								//,{"TrackingVerbose","10"},{"ControlVerbose","2"},
+								{"G4eVerbose",att.G4e_Verbose},
+								//{"StepLength","25 mm"},
+								//{"MagFieldDiff","0.01",},
+								{"MaxEnergyLoss", att.G4e_MaxEnergyLoss}};
+
+      G4eMag = std::make_unique<G4eManager>(G4eConfig,fieldValues, true, nameField);
+      G4eMag->InitG4e();
+    }
+
+
+  
   Fitter->setMinIterations(3);
   Fitter->setMaxIterations(nIter);
 
@@ -315,7 +343,7 @@ int TKalmanFilter_DAF<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
 }
 
 template<class Out>
-ReturnRes::InfoM TKalmanFilter_DAF<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
+ReturnRes::InfoM TKalmanFilter_DAF<Out>::SoftExit(int ) { return ReturnRes::Fine; }
 
 template<class Out>
 int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
@@ -338,7 +366,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
     return ss.str();
   };
 
-  unsigned int Nb_trackSeed = RecoEvent.TrackDAF.size();
+  // unsigned int Nb_trackSeed = RecoEvent.TrackDAF.size();
 
   int ntrack = -1;
   for(auto it_trackInfo : RecoEvent.TrackInfo)
@@ -359,7 +387,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
       auto getZpos = [](genfit::AbsMeasurement* m) {
         TVectorD& HitrawRef = m->getRawHitCoords();
-        if(HitrawRef.GetNrows() == 2)
+        if(HitrawRef.GetNrows() == 2 || HitrawRef.GetNrows() == 1)
           {
             genfit::StateOnPlane dummy;
             genfit::SharedPlanePtr plane = dynamic_cast<genfit::PlanarMeasurement*>(m)->constructPlane(dummy);
@@ -368,6 +396,10 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
           }
         else if(HitrawRef.GetNrows() == 3)
           return HitrawRef[2];
+	else if(HitrawRef.GetNrows() == 7)
+	  {
+	    return 0.5*(HitrawRef[2]+HitrawRef[5]);
+	  }
         else
           {
             fmt::print("E> rawref not proper ! {}", HitrawRef.GetNrows());
@@ -375,7 +407,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             return -999.;
           }
       };
-      std::set<std::tuple<double, int, int> > id_dets;
+      std::set<std::tuple<double, int, int, double> > id_dets;
       double total_dE = 0.;
       int n_Central   = 0;
       int n_MiniFiber = 0;
@@ -391,15 +423,15 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
             continue;
           if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
             ++n_Central;
-          if(id_det>=G4Sol::MiniFiberD1_x && id_det<=G4Sol::MiniFiberD2_u)
+          if( (id_det>=G4Sol::MiniFiberD1_x1 && id_det<=G4Sol::MiniFiberD1_v2) || (id_det>=G4Sol::MiniFiberD1_x && id_det<= G4Sol::MiniFiberD2_u))
             ++n_MiniFiber;
           genfit::AbsMeasurement* currentHit = RecoEvent.ListHits[id_det][id_hit].get();
 
           total_dE += it_trackInfo.second[id_det].Eloss;
-          // std::cout << "id_det : " << id_det << std::endl;
-          // std::cout << "id_hit : " << id_hit << std::endl;
-          // id_dets.insert(std::make_tuple(getZpos(currentHit), id_det, id_hit));
-          id_dets.insert(std::make_tuple(id_det, id_det, id_hit));
+	  //std::cout << "id_det : " << id_det << std::endl;
+	  //std::cout << "id_hit : " << id_hit << std::endl;
+	  //id_dets.insert(std::make_tuple(getZpos(currentHit), id_det, id_hit));
+          id_dets.insert(std::make_tuple(id_det, id_det, id_hit, getZpos(currentHit)));
           // std::cout << " id_det : " << id_det << std::endl;
         }
       // std::cout << "n_Central : " << n_Central << std::endl;
@@ -557,7 +589,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       const InfoPar track_state(it_trackInfo.second[id_firstDet]);
 
       genfit::AbsMeasurement* tempHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
-      TVectorD& tempHitrawRef         = tempHit->getRawHitCoords();
+      // TVectorD& tempHitrawRef         = tempHit->getRawHitCoords();
       // std::cout << "tempHitrawRef 0 : " << tempHitrawRef[0] << std::endl;
       // std::cout << "tempHitrawRef 1 : " << tempHitrawRef[1] << std::endl;
       // const TVector3 firstPos(tempHitrawRef[0], tempHitrawRef[1], getZpos(tempHit));
@@ -585,7 +617,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       // std::cout<<"id_dets:"<<id_dets.size()<<" ";
       if(charge <= 1)
         {
-          std::set<std::tuple<double, int, int> > temp_id_dets;
+          std::set<std::tuple<double, int, int, double> > temp_id_dets;
           for(auto id_det : id_dets)
             {
               if(std::get<1>(id_det) <= G4Sol::RPC_h)
@@ -604,7 +636,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 
 #ifdef DEBUG_KALMAN
       for(auto idet : id_dets)
-        att._logger->debug("det:{} [{}] at Z:{}", std::get<1>(idet), std::get<2>(idet), std::get<0>(idet));
+        att._logger->debug("det:{} / {} / [{}] at Z:{}", std::get<1>(idet),G4Sol::nameLiteralDet.begin()[std::get<1>(idet)],  std::get<2>(idet), std::get<3>(idet));
 
       const int PID = charge * charge;
       att._logger->debug(" PID:{} {} {}", PID, charge, PDG);
@@ -723,7 +755,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
       seed_p.SetMag(new_P);
 
       // Forward
-      genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG, 1);
+      genfit::AbsTrackRep* REP = att.KF_G4e ? new genfit::G4eTrackRep(*G4eMag,PDG) : new genfit::RKTrackRep(PDG, 1);
       // REP->setDebugLvl(2);
       // genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG,-1);
 
@@ -966,7 +998,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               {
                 unsigned int np = fitTrack->getNumPointsWithMeasurement();
                 //std::cout << "np : " << np << std::endl;
-                for(int i = 0; i < np; ++i)
+                for(unsigned int i = 0; i < np; ++i)
 		  {
                     genfit::TrackPoint* tp_tmp    = fitTrack->getPointWithMeasurementAndFitterInfo(i);//, REP);
 		    if(tp_tmp==nullptr)
@@ -981,7 +1013,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                     if(id_det >= G4Sol::MG01 && id_det <= G4Sol::MG17)
                       {
                         double res_min = 9999999;
-                        for(int j = 0; j < weights.size() ; ++j)
+                        for(size_t j = 0; j < weights.size() ; ++j)
                           {
                             const genfit::MeasurementOnPlane& residual = kfi->getResidual(j, false, true);
                             const TVectorD& resid(residual.getState());
@@ -1269,7 +1301,7 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
               tempResults.mass         = mass;
               tempResults.mass2        = mass2;
 
-              double m_range[4]  = {0.9383, 3.72738, 0.1396, 2.809};
+              // double m_range[4]  = {0.9383, 3.72738, 0.1396, 2.809};
               double m_charge[4] = {1., 2., -1., 2.};
 
               for(int i = 0; i < 4; i++)

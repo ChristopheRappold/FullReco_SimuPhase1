@@ -121,7 +121,7 @@ struct c_nextEvent
           case finishing:
             {
               logging->info("MTinit> finishing !");
-              EventStatus Status;
+              //EventStatus Status;
               Status.status     = ReturnRes::EndRun;
               Status.BeginEvent = 0;
               Status.EndEvent   = 1;

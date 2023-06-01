@@ -3,6 +3,8 @@
 
 #include <math.h>
 
+namespace hitana {
+
 const double mm2cm = 0.1;
 const double cm2mm = 10.;
 
@@ -14,5 +16,6 @@ const double MassProton = 0.938272; // GeV
 const double MassKaon   = 0.493677; // GeV
 const double MassPion   = 0.139570; // GeV
 
+}
 
 #endif

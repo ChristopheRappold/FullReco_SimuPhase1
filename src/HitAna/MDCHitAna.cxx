@@ -65,10 +65,10 @@ void MDCHitAna::SetPhys(ParaManager *par){
 
   int num_wire = Physinfo.nb_wire;
   double rmax_wire = Physinfo.rmax;
-  double size_wire = 0.5 * Physinfo.wire_size;//convert to radius
-  double theta_begin_gr1 = 0.5*TMath::Pi() + Deg2Rad*Physinfo.Dpsi1; // or Dphi1??
+  // double size_wire = 0.5 * Physinfo.wire_size;//convert to radius
+  double theta_begin_gr1 = 0.5*TMath::Pi() + hitana::Deg2Rad*Physinfo.Dpsi1; // or Dphi1??
   double theta_begin_gr2 = theta_begin_gr1 + TMath::Pi();
-  double theta_step = Deg2Rad * Physinfo.dpsi0; // or dphi0??
+  double theta_step = hitana::Deg2Rad * Physinfo.dpsi0; // or dphi0??
 
   i_r = rmax_wire;
 
@@ -85,8 +85,8 @@ void MDCHitAna::SetPhys(ParaManager *par){
 
   i_phi = theta_tmp;
 
-  i_dpf   = -Physinfo.Dpsi0f * Deg2Rad;
-  i_dpb   = -Physinfo.Dpsi0b * Deg2Rad;
+  i_dpf   = -Physinfo.Dpsi0f * hitana::Deg2Rad;
+  i_dpb   = -Physinfo.Dpsi0b * hitana::Deg2Rad;
   i_lf    = -Physinfo.l_front;
   i_lb    = -Physinfo.l_back;
   i_zf    = -Physinfo.z_front;
@@ -105,7 +105,7 @@ void MDCHitAna::SetDriftTime(ParaManager *par, double t_t0){
 
 void MDCHitAna::SetDriftLength(ParaManager *par){
 
-  double par_dl[6];
+  double par_dl[7];
   par_dl[0] = par->mdc_PhysMDC[i_layer].drift_par0;
   par_dl[1] = par->mdc_PhysMDC[i_layer].drift_par1;
   par_dl[2] = par->mdc_PhysMDC[i_layer].drift_par2;
