@@ -301,7 +301,7 @@ inline auto InitStorage()
 				 make_column("Task_KalmanDAF", &RunTaskDef::Task_KalmanDAF),
 				 make_column("Task_KalmanDAFPID", &RunTaskDef::Task_KalmanDAFPID),
 				 make_column("Task_DecayVtx", &RunTaskDef::Task_DecayVtx),
-				 make_column("Task_DecayVtx_pi+", &RunTaskDef::Task_DecayVtx_piplus),
+				 make_column("Task_DecayVtx_piPlus", &RunTaskDef::Task_DecayVtx_piplus),
 				 make_column("Task_ReStart", &RunTaskDef::Task_ReStart)
 				 ),
 		      make_table(
