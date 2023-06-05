@@ -19,14 +19,18 @@ TWASACalibrationSimuBuilder::TWASACalibrationSimuBuilder(const THyphiAttributes&
 
   par = std::make_unique<ParaManager>(att.map_ParamFiles);
 
-  std::vector<std::string> tempName = {"HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
-    "TR1_log","TR2_log","Si1_Strip_log_x", "Si1_Strip_log_y", "Si2_Strip_log_x", "Si2_Strip_log_y",
+  std::vector<std::string> tempName = {
+    "HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
+    "TR1_log","TR2_log",
+    "Si1_Strip_log_x", "Si1_Strip_log_y", "Si2_Strip_log_x", "Si2_Strip_log_y",
     "SD1_Strip_log_u", "SD1_Strip_log_v", "SD2_Strip_log_u", "SD2_Strip_log_v",
     "SD1pad_Strip_log_u", "SD1pad_Strip_log_v", "SD2pad_Strip_log_u", "SD2pad_Strip_log_v",
     "TO_Counter",
     "FiberD1_Core_log_x", "FiberD1_Core_log_u", "FiberD1_Core_log_v",
     "FiberD2_Core_log_x", "FiberD2_Core_log_u", "FiberD2_Core_log_v",
     "FiberD3_Core_log_x", "FiberD3_Core_log_u", "FiberD3_Core_log_v",
+    "MiniFiberD1_Core_log_x1", "MiniFiberD1_Core_log_u1", "MiniFiberD1_Core_log_v1",
+    "MiniFiberD1_Core_log_x2", "MiniFiberD1_Core_log_u2", "MiniFiberD1_Core_log_v2",
     "MiniFiberD1_Core_log_x", "MiniFiberD1_Core_log_u", "MiniFiberD1_Core_log_v",
     "MiniFiberD2_Core_log_x", "MiniFiberD2_Core_log_v", "MiniFiberD2_Core_log_u",
     "FiberD4_Core_log_v", "FiberD4_Core_log_u", "FiberD4_Core_log_x",
@@ -1143,8 +1147,8 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   TVector3 ClosestPointWire, ClosestPointTrack;
                   double dl  = closestDistanceApproach(x1, x2, p1, p2,ClosestPointWire,ClosestPointTrack);
 #ifdef DEBUG_BUILD2
-                  att._logger->debug("Wire Closest distance : dl {} | dl_2 {}",dl, dl2);
-                  //att._logger->debug("Wire Closest distance : dl {}",dl);
+                  //att._logger->debug("Wire Closest distance : dl {} | dl_2 {}",dl, dl2);
+                  att._logger->debug("Wire Closest distance : dl {}",dl);
 
                   att._logger->debug("geometry wire : o {} {} {}, wire_dir {} {} {}",x1.X(),x1.Y(),x1.Z(), p1.X(),p1.Y(),p1.Z());
                   att._logger->debug("sim hit : {} {} {}, mom {} {} {}",x2.X(),x2.Y(),x2.Z(), p2.X(),p2.Y(),p2.Z());

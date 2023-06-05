@@ -74,26 +74,26 @@ enum SolDet : int
   FiberD3_x, /*25*/
   FiberD3_u,
   FiberD3_v,
-  MiniFiberD1_x1, /*18*/
+  MiniFiberD1_x1, /*28*/
   MiniFiberD1_u1,
   MiniFiberD1_v1,
   MiniFiberD1_x2,
   MiniFiberD1_u2,
-  MiniFiberD1_v2, /*23*/
-  MiniFiberD1_x, /*18*/
+  MiniFiberD1_v2, /*33*/
+  MiniFiberD1_x, /*34*/
   MiniFiberD1_u,
   MiniFiberD1_v,
   MiniFiberD2_x,
   MiniFiberD2_v,
-  MiniFiberD2_u,
-  FiberD4_v, /*34*/
+  MiniFiberD2_u, /*39*/
+  FiberD4_v, /*40*/
   FiberD4_u,
   FiberD4_x,
-  FiberD5_x, /*37*/
+  FiberD5_x, /*43*/
   FiberD5_u,
   FiberD5_v,
-  PSFE, /*40*/ //PSB_F
-  MG01, /*41*/
+  PSFE, /*46*/ //PSB_F
+  MG01, /*47*/
   MG02,
   MG03,
   MG04,
@@ -109,10 +109,10 @@ enum SolDet : int
   MG14,
   MG15,
   MG16,
-  MG17, /*57*/
-  PSCE, /*58*/   //PSB
-  PSBE, /*59*/   //PSB_B
-  MWDC01, /*60*/
+  MG17, /*63*/
+  PSCE, /*64*/   //PSB
+  PSBE, /*65*/   //PSB_B
+  MWDC01, /*66*/
   MWDC02,
   MWDC03,
   MWDC04,
@@ -127,7 +127,7 @@ enum SolDet : int
   MWDC13,
   MWDC14,
   MWDC15,
-  MWDC16, /*75*/
+  MWDC16, /*81*/
   FiberD1_xy,
   FiberD2_xy,
   FiberD3_xy,
@@ -163,20 +163,26 @@ enum SolDet : int
 };
 
 constexpr auto nameLiteralDet = {
-    "InSi0"         ,          "InSi1",          "InSi2",          "InSi3",            "TR1",            "TR2",
-    "Si1x"          ,           "Si1y",           "Si2x",           "Si2y",
-    "Si1x_SD"          ,           "Si1y_SD",           "Si2x_SD",           "Si2y_SD",
-    "Si1x_SD_pad"          ,           "Si1y_SD_pad",           "Si2x_SD_pad",           "Si2y_SD_pad",       "T0_Counter",
-    "FiberD1_x",           "FiberD1_u",      "FiberD1_v",      "FiberD2_x",      "FiberD2_u",      "FiberD2_v",
+    "InSi0",             "InSi1",       "InSi2",       "InSi3",
+    "TR1",                 "TR2",
+    "Si1x",               "Si1y",        "Si2x",        "Si2y",
+    "Si1x_SD",         "Si1y_SD",     "Si2x_SD",     "Si2y_SD",
+    "Si1x_SD_pad", "Si1y_SD_pad", "Si2x_SD_pad", "Si2y_SD_pad",
+    "T0_Counter",
+    "FiberD1_x",           "FiberD1_u",      "FiberD1_v",
+    "FiberD2_x",           "FiberD2_u",      "FiberD2_v",
     "FiberD3_x",           "FiberD3_u",      "FiberD3_v",
-    "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1", "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
-    "MiniFiberD1_x", "MiniFiberD1_u", "MiniFiberD1_v", "MiniFiberD2_x", "MiniFiberD2_v", "MiniFiberD2_u",
-    "FiberD4_v",      "FiberD4_u",      "FiberD4_x",
-    "FiberD5_x",           "FiberD5_u",      "FiberD5_v",           "PSFE",           "MG01",           "MG02",
-    "MG03",                     "MG04",           "MG05",           "MG06",           "MG07",           "MG08",
-    "MG09",                     "MG10",           "MG11",           "MG12",           "MG13",           "MG14",
-    "MG15",                     "MG16",           "MG17",           "PSCE",           "PSBE",
-    "MWDC01", "MWDC02", "MWDC03", "MWDC04", "MWDC05", "MWDC06", "MWDC07", "MWDC08", "MWDC09", "MWDC10", "MWDC11",
+    "MiniFiberD1_x1", "MiniFiberD1_u1", "MiniFiberD1_v1",
+    "MiniFiberD1_x2", "MiniFiberD1_u2", "MiniFiberD1_v2",
+    "MiniFiberD1_x",   "MiniFiberD1_u",  "MiniFiberD1_v",
+    "MiniFiberD2_x",   "MiniFiberD2_v",  "MiniFiberD2_u",
+    "FiberD4_v",           "FiberD4_u",      "FiberD4_x",
+    "FiberD5_x",           "FiberD5_u",      "FiberD5_v",
+    "PSFE",
+    "MG01", "MG02", "MG03", "MG04", "MG05", "MG06", "MG07", "MG08", "MG09", "MG10", "MG11", "MG12",
+    "MG13", "MG14", "MG15", "MG16", "MG17",
+    "PSCE", "PSBE",
+    "MWDC01", "MWDC02", "MWDC03", "MWDC04", "MWDC05", "MWDC06", "MWDC07", "MWDC08", "MWDC09","MWDC10","MWDC11",
     "MWDC12", "MWDC13", "MWDC14", "MWDC15", "MWDC16",
     "FiberD1_xy", "FiberD2_xy", "FiberD3_xy", "FiberD4_xy",  "FiberD5_xy",  "MiniFiberD1_xy", "MiniFiberD2_xy",
     "CDC0",
