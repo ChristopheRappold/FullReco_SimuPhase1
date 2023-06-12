@@ -347,8 +347,6 @@ private:
 
 public:
 
-  std::unique_ptr<ParaManager> par;
-
 };
 
 #endif

@@ -25,6 +25,8 @@
 #include "Ana_Event/AnaEvent_Metadata.hh"
 //#include "EventWASAUnpack/TFRSParameter.h"
 
+#include "HitAna/ParaManager.hh"
+
 #include "spdlog/logger.h"
 
 #include "sqlite_orm/sqlite_orm.h"
@@ -475,6 +477,8 @@ class THyphiAttributes
 
   const FullRecoConfig& Config;
   const DataSimExp& InputPar;
+
+  std::unique_ptr<ParaManager> par;
 
   std::shared_ptr<spdlog::logger> _logger;
   

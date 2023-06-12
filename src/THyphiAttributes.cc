@@ -395,6 +395,11 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     else
     map_ParamFiles.insert({"optics_name","./calib/optics/optics_par.csv"});
   */
+
+
+
+  par = std::make_unique<ParaManager>(map_ParamFiles);
+  
   if(Config.IsAvailable("Wasa_FieldMap"))
     Wasa_FieldMap = Config.Get<int>("Wasa_FieldMap");
 
