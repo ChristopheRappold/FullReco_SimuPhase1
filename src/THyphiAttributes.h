@@ -343,7 +343,7 @@ inline auto InitStorage()
 				 make_column("KF_DAFRef", &RunTaskAttrDef::KF_DAFRef),
 				 make_column("KF_DAF", &RunTaskAttrDef::KF_DAF),
 				 make_column("KF_NbCentralCut", &RunTaskAttrDef::KF_NbCentralCut),
-				 make_column("KF_MbMiniFiberCut", &RunTaskAttrDef::KF_NbMiniFiberCut),
+         make_column("KF_MbMiniFiberCut", &RunTaskAttrDef::KF_NbMiniFiberCut),
 				 make_column("FlatML_namefile", &RunTaskAttrDef::FlatML_namefile),
 				 make_column("DataML_Out", &RunTaskAttrDef::DataML_Out),
 				 make_column("RF_OutputEvents", &RunTaskAttrDef::RF_OutputEvents),
@@ -398,6 +398,10 @@ class THyphiAttributes
   double cut_psb_phi;
   double cut_psb_z;
   double cut_phi_fm;
+  double psb_timeres;
+
+  // T0 Counter
+  double t0_timeres;
 
   bool flag_dup_trackhit;
   bool flag_dup_trackhit_mdc;
@@ -462,6 +466,9 @@ class THyphiAttributes
 
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
+  double KF_RandInitMomX;
+  double KF_RandInitMomY;
+  double KF_RandInitMomZ;
 
   std::string StudyCase;
 

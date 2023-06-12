@@ -189,6 +189,14 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
           RecoEvent.TrackInfo.insert(std::make_pair(it_trackDAFSim.first, tempSetInfo));
 
           auto it_TrackDAFInitSim = RecoEvent.TrackDAFInitSim.find(it_trackDAFSim.first);
+
+          it_TrackDAFInitSim->second.momX = gRandom->Gaus(it_TrackDAFInitSim->second.momX,
+                                                            it_TrackDAFInitSim->second.momX * att.KF_RandInitMomX);
+          it_TrackDAFInitSim->second.momY = gRandom->Gaus(it_TrackDAFInitSim->second.momY,
+                                                            it_TrackDAFInitSim->second.momY * att.KF_RandInitMomY);
+          it_TrackDAFInitSim->second.momZ = gRandom->Gaus(it_TrackDAFInitSim->second.momZ,
+                                                            it_TrackDAFInitSim->second.momZ * att.KF_RandInitMomZ);
+
           RecoEvent.TrackDAFInit.insert(std::make_pair(it_trackDAFSim.first, it_TrackDAFInitSim->second));
         }
 
@@ -490,6 +498,7 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
     tempInit.momX = tmp_momZ*TrackHitCont[i]->GetTrackA();
     tempInit.momY = tmp_momZ*TrackHitCont[i]->GetTrackB();
     tempInit.momZ = tmp_momZ;
+    tempInit.time = 0.;
 
     RecoEvent.TrackDAFInit.insert(std::make_pair(i, tempInit));
   }

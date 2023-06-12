@@ -603,104 +603,16 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
       // Forward
 
       auto it_init   = RecoEvent.TrackDAFInit.find(id_track);
-      double init_px = gRandom->Gaus(it_init->second.momX, it_init->second.momX * 0.005);
-      double init_py = gRandom->Gaus(it_init->second.momY, it_init->second.momY * 0.005);
-      double init_pz = gRandom->Gaus(it_init->second.momZ, it_init->second.momZ * 0.005);
+      double init_px = it_init->second.momX;
+      double init_py = it_init->second.momY;
+      double init_pz = it_init->second.momZ;
+
       TVector3 init_p(init_px, init_py, init_pz);
 
-      double seed_Mom_Mag = init_p.Mag();
-      if(TMath::Abs(seed_Mom_Mag) < 1e-9)
-        {
-          att._logger->debug("!> Seed Momemtum with TVector3 is zero ! correcting ");
-
-          auto tempLastHit = id_dets.crbegin();
-          ++tempLastHit;
-          auto lastHit2 = tempLastHit;
-          const InfoPar track_stateBeforeLast(it_trackInfo.second[std::get<1>(*lastHit2)]);
-          const TVector3 init_p2(track_stateBeforeLast.momX, track_stateBeforeLast.momY, track_stateBeforeLast.momZ);
-
-          if(TMath::Abs(init_p2.Mag()) < 1e-7)
-            {
-              att._logger->error("E> Seed Momemtum with TVector3 is zero ! {} Mom:{}", PDG_particle->GetName(),
-                                 seed_Mom_Mag);
-              att._logger->error("TrackID #{} hit_id :", it_ListHits->first);
-              std::vector<std::stringstream> s1(it_ListHits->second.size() / 20 + 1);
-              std::vector<std::stringstream> s2(it_ListHits->second.size() / 20 + 1);
-              for(size_t i = 0; i < it_ListHits->second.size(); ++i)
-                {
-                  s1[i / 20] << printW(i, 3) << ", ";
-                  s2[i / 20] << printW(it_ListHits->second[i], 3) << ", ";
-                }
-              for(size_t i = 0; i < s1.size(); ++i)
-                {
-                  att._logger->error("idDet:{}", s1[i].str());
-                  att._logger->error("stat :{}", s2[i].str());
-                }
-
-              att._logger->error("Track Info :");
-              std::vector<std::stringstream> s11(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s22(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s33(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s44(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s55(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s66(it_ListHits->second.size() / 10 + 1);
-              for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
-                {
-                  s11[i / 10] << printW(i, 9) << ", ";
-                  s22[i / 10] << printFixed(it_trackInfo.second[i].pdg, 3, 9) << ", ";
-                  s33[i / 10] << printFixed(it_trackInfo.second[i].momX, 3, 9) << ", ";
-                  s44[i / 10] << printFixed(it_trackInfo.second[i].momY, 3, 9) << ", ";
-                  s55[i / 10] << printFixed(it_trackInfo.second[i].momZ, 3, 9) << ", ";
-                  s66[i / 10] << printFixed(it_trackInfo.second[i].time, 3, 9) << ", ";
-                }
-              for(size_t i = 0; i < s1.size(); ++i)
-                {
-                  att._logger->error("idDet:{}", s11[i].str());
-                  att._logger->error("pdg  :{}", s22[i].str());
-                  att._logger->error("momX :{}", s33[i].str());
-                  att._logger->error("momY :{}", s44[i].str());
-                  att._logger->error("momZ :{}", s55[i].str());
-                  att._logger->error("time :{}", s66[i].str());
-                }
-
-              continue;
-            }
-          else
-            {
-              init_p.SetXYZ(init_p2.X(), init_p2.Y(), init_p2.Z());
-              seed_Mom_Mag = init_p.Mag();
-#ifdef DEBUG_KALMAN
-              att._logger->debug("!> Reset init_p N#{}", Nb_event);
-
-              std::vector<std::stringstream> s1(it_trackInfo.second.size() / 20 + 1);
-              std::vector<std::stringstream> s2(it_trackInfo.second.size() / 20 + 1);
-              std::vector<std::stringstream> s3(it_trackInfo.second.size() / 20 + 1);
-              for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
-                {
-                  s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
-                  s2[i / 20] << printW(i, 6) << ", ";
-                  s3[i / 20] << printW(it_trackInfo.second[i].pdg, 6) << ", ";
-                }
-              for(size_t i = 0; i < s1.size(); ++i)
-                {
-                  att._logger->debug("Det  :{}", s1[i].str());
-                  att._logger->debug("idDet:{}", s2[i].str());
-                  att._logger->debug("stat :{}", s3[i].str());
-                }
-              for(auto idet : id_dets)
-                  att._logger->debug("det:{} [{}] at Z:{}", std::get<1>(idet), std::get<2>(idet), std::get<0>(idet));
-#endif
-            }
-        }
 #ifdef DEBUG_KALMAN
       att._logger->debug("init mom : ");
       init_p.Print();
 #endif
-
-      const double mom_res = .0500;
-      double new_P         = gRandom->Gaus(seed_Mom_Mag, mom_res * seed_Mom_Mag);
-      TVector3 seed_p(init_p);
-      seed_p.SetMag(new_P);
 
       // Forward
       genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG, 1);
@@ -717,7 +629,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
         CovM(i, i) = 1000.;
 
       genfit::MeasuredStateOnPlane stateRef(REP);
-      REP->setPosMomCov(stateRef, init_point, seed_p, CovM);
+      REP->setPosMomCov(stateRef, init_point, init_p, CovM);
       // remember original initial state
       const genfit::StateOnPlane stateRefOrig(stateRef.getState(), stateRef.getPlane(), REP, stateRef.getAuxInfo());
 

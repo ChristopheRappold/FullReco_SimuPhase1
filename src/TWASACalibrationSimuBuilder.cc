@@ -378,7 +378,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       FiberHitClCont.emplace_back(buf_vv);
     }
 
-  double time_res_t0counter = 0.050; // ns
+  double time_res_t0counter = att.t0_timeres; // ns
 
   for(size_t index = 0; index < event.BeamTrackID.size(); ++index)
     {
@@ -523,7 +523,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       double resolution_fiber  = 0.015;
       double resolution_psce   = 1.1; // 3.8/sqrt(12.)
       double resolution_psce_z = 1.0;
-      double time_res_psb      = 0.080; // ns
+      double time_res_psb      = att.psb_timeres; // ns
       double time_res_psbe     = 0.150; // ns
       double time_res_psfe     = 0.150; // ns
       double time_res_fiber    = 0.150; // ns

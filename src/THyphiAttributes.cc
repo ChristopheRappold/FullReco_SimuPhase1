@@ -95,6 +95,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   KF_NbCentralCut   = 1;
   KF_NbMiniFiberCut = 4;
+  KF_RandInitMomX = 0.005;
+  KF_RandInitMomY = 0.005;
+  KF_RandInitMomZ = 0.005;
 
   RF_OutputEvents = false;
   CFT_OutputEvents = false;
@@ -144,6 +147,15 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   cut_psb_phi = 0.4;
   cut_psb_z   = 150;
   cut_phi_fm  = 0.3;
+  psb_timeres = 0.080; //ns
+
+  t0_timeres = 0.050; //ns
+
+  if(Config.IsAvailable("psb_timeres"))
+    psb_timeres = Config.Get<double>("psb_timeres");
+  if(Config.IsAvailable("t0_timeres"))
+    t0_timeres = Config.Get<double>("t0_timeres");
+
 
   flag_dup_trackhit = true;
   flag_dup_trackhit_mdc = false;
@@ -244,8 +256,15 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     KF_NbCentralCut = Config.Get<int>("KF_NbCentralCut");
   if(Config.IsAvailable("KF_NbMiniFiberCut"))
     KF_NbMiniFiberCut = Config.Get<int>("KF_NbMiniFiberCut");
+  if(Config.IsAvailable("KF_RandInitMomX"))
+    KF_RandInitMomX = Config.Get<double>("KF_RandInitMomX");
+  if(Config.IsAvailable("KF_RandInitMomY"))
+    KF_RandInitMomY = Config.Get<double>("KF_RandInitMomY");
+  if(Config.IsAvailable("KF_RandInitMomZ"))
+    KF_RandInitMomZ = Config.Get<double>("KF_RandInitMomZ");
 
-  _logger->info("KF_RejectionCut : Central < : {} MiniFiber < : {}", KF_NbCentralCut, KF_NbMiniFiberCut);
+  _logger->info("KF_RejectionCut: Central < : {} MiniFiber < : {}", KF_NbCentralCut, KF_NbMiniFiberCut);
+  _logger->info("KF_RandInitMom: X: {}   Y: {}   Z: {}", KF_RandInitMomX, KF_RandInitMomY, KF_RandInitMomZ);
 
   StudyCase = Config.IsAvailable("StudyCase") ? Config.Get<std::string>("StudyCase") : "None";
   // std::string temp_name_out = config.Get<std::string>("Output_Namefile");
