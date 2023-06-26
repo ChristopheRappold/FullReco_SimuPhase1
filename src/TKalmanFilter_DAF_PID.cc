@@ -551,7 +551,10 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
       genfit::AbsMeasurement* tempHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
       TVectorD& tempHitrawRef         = tempHit->getRawHitCoords();
 
-      const int PDG     = static_cast<int>(track_state.pdg);
+      int PDG     = -211; //pi minus
+      if(att.G4_simu && att.WF_perfect)
+        PDG     = static_cast<int>(track_state.pdg);
+
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(PDG);
       
       LocalHisto.h_stats->Fill("Beginning Kalman", 1.);

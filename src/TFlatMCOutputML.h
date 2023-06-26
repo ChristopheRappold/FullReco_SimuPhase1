@@ -93,6 +93,7 @@ public:
   Double32_t Pvalue_Fragment;
   Double32_t Angle_MotherFragment;
   Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
+  Int_t RealPDG_Fragment;
   
   Int_t Id_Pion;
   Double32_t MomX_Pion;
@@ -107,6 +108,7 @@ public:
   Int_t NHitsMinifiber_Pion;
   Int_t N_Pion;
   Int_t Pion_IsFromHyp; // 0-> No; 1-> Yes
+  Int_t RealPDG_Pion;
 
   Double32_t Dist_Daughters;
   Double32_t ArmPod_Qt;

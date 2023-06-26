@@ -815,6 +815,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
                   measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psb), hit.Energy);
+                  measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
@@ -878,6 +879,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
                   measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psbe), hit.Energy);
+                  measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
@@ -937,6 +939,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
                   measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psfe), hit.Energy);
+                  measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
@@ -987,13 +990,13 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                       default:  std::cerr << "something wrong" << std::endl; break;
                     }
 
-                  FiberHitAna* hit_ana = new FiberHitAna(i_fiber, i_layer, LayerID/2,
-                                  gRandom->Gaus(hit.Time, time_res_fiber), hit.Energy, TrackID, par.get());
-                  FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].emplace_back(hit_ana);
-
                   int pdg_code = pid_fromName(hit.Pname);
                   if(pdg_code == 0)
                     att._logger->debug("!> Builder : pdg_code = 0 ! {}", hit.Pname);
+
+                  FiberHitAna* hit_ana = new FiberHitAna(i_fiber, i_layer, LayerID/2,
+                                  gRandom->Gaus(hit.Time, time_res_fiber), hit.Energy, pdg_code, TrackID, par.get());
+                  FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].emplace_back(hit_ana);
 
                   auto tempTrackSimFibers = RecoEvent.TrackDAFSim.find(TrackID);
                   SimHit tempHitSim;
@@ -1024,15 +1027,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(2) = hit.HitPosZ;
                   
                   fillOutHit(OutTree->Fiber, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-                  
-                  //if(i_fiber == 3 || i_fiber == 4)
-                  //std::cout << "Fiber Det: " << i_fiber << " layer: " << i_layer << " hit: " << LayerID/2 << " TrackID: " << TrackID << "\n";
 
-                  if(i_fiber == 3 || i_fiber == 4)
-                    {
-                      //std::cout << Form("Simu-Hit: (%.3f, %.3f, %.3f)", hit.HitPosX, hit.HitPosY, hit.HitPosZ) << std::endl;
-                      //std::cout << Form("FiberHit: (%.3f, %.3f, %.3f)", 0., 0., hit_ana->GetZ()/10.) << "\n\n";
-                    }
                   continue;
                 }
               else if(IsWire(TypeDet))
@@ -1229,6 +1224,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setMaxDistance(dlmax);
 
                   measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_mdc), hit.Energy); //Change check TOT?
+                  measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = ClosestPointTrack.X();
                   hitCoordsTree(1) = ClosestPointTrack.Y();
@@ -1462,6 +1458,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
               RecoEvent.ListHits[TypeDet[i][j]].emplace_back(measurement.release());
 
               MeasurementInfo measinfo(FiberHitClCont[i][j][k]->GetTOT(), FiberHitClCont[i][j][k]->GetTime(), FiberHitClCont[i][j][k]->GetdE());
+              measinfo.SetPDG(FiberHitClCont[i][j][k]->GetPDG());
               RecoEvent.ListHitsInfo[TypeDet[i][j]].emplace_back(measinfo);
 
               RecoEvent.ListHitsToTracks[TypeDet[i][j]].emplace_back(FiberHitClCont[i][j][k]->GetSimTrackID());

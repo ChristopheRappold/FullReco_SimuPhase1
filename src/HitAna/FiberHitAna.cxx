@@ -54,10 +54,11 @@ FiberHitAna::FiberHitAna(FiberHitAna *a){
   i_ud        = a->GetUD();
   i_valid     = a->IsValid();
   i_used      = a->IsUsed();
+  i_pdg       = a->GetPDG();
   i_simtrackid= a->GetSimTrackID();
 }
 
-FiberHitAna::FiberHitAna(int detector, int layer, int fiber, double time, double energy, int simtrackid, ParaManager *par)
+FiberHitAna::FiberHitAna(int detector, int layer, int fiber, double time, double energy, int pdg, int simtrackid, ParaManager *par)
 {
   if(detector == 3 || detector == 4) i_sfp = 0; // MFT12
   if(detector == 2)                  i_sfp = 1; // UFT3
@@ -83,6 +84,7 @@ FiberHitAna::FiberHitAna(int detector, int layer, int fiber, double time, double
   i_dE       = energy;
   i_did      = i_detector * 10 + i_layer;
   i_valid    = true;
+  i_pdg      = pdg;
   i_simtrackid = simtrackid;
 }
 

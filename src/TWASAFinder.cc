@@ -358,6 +358,8 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
     std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
     std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
 
+    int temp_realtrackid = -10-i;
+
     //FiberHits
     for(int j = 0; j < 6; ++j)
       {
@@ -371,7 +373,7 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
               {
                 tempSetHit[G4Sol::MiniFiberD1_x + j] = k;
                 InfoPar tmp_infopar;
-                tmp_infopar.pdg    = -211;
+                tmp_infopar.pdg    = RecoEvent.ListHitsInfo[G4Sol::MiniFiberD1_x + j][k].PDG;
                 //tmp_infopar.momX   = hit.MomX;
                 //tmp_infopar.momY   = hit.MomY;
                 //tmp_infopar.momZ   = hit.MomZ;
@@ -382,6 +384,8 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
                 //tmp_infopar.length = hit.TrackLength;
                 tempSetInfo[G4Sol::MiniFiberD1_x + j] = tmp_infopar;
                 flag_found = true;
+
+                //if(att.G4_simu) temp_realtrackid = RecoEvent.ListHitsToTracks[G4Sol::MiniFiberD1_x + j][k];
               }
           }
 
@@ -400,7 +404,7 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
               {
                 tempSetHit[G4Sol::MG01 + j] = k;
                 InfoPar tmp_infopar;
-                tmp_infopar.pdg    = -211;
+                tmp_infopar.pdg    = RecoEvent.ListHitsInfo[G4Sol::MG01 + j][k].PDG;
                 //tmp_infopar.momX;
                 //tmp_infopar.momY;
                 //tmp_infopar.momZ;
@@ -429,7 +433,7 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
               {
                 tempSetHit[G4Sol::PSCE] = j;
                 InfoPar tmp_infopar;
-                tmp_infopar.pdg    = -211;
+                tmp_infopar.pdg    = RecoEvent.ListHitsInfo[G4Sol::PSCE][j].PDG;
                 //tmp_infopar.momX   = hit.MomX;
                 //tmp_infopar.momY   = hit.MomY;
                 //tmp_infopar.momZ   = hit.MomZ;
@@ -440,6 +444,8 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
                 //tmp_infopar.length = hit.TrackLength;
                 tempSetInfo[G4Sol::PSCE] = tmp_infopar;
                 flag_found = true;
+
+                if(att.G4_simu) temp_realtrackid = RecoEvent.ListHitsToTracks[G4Sol::PSCE][j];
               }
           }
 
@@ -458,7 +464,7 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
               {
                 tempSetHit[G4Sol::PSFE] = j;
                 InfoPar tmp_infopar;
-                tmp_infopar.pdg    = -211;
+                tmp_infopar.pdg    = RecoEvent.ListHitsInfo[G4Sol::PSFE][j].PDG;
                 //tmp_infopar.momX   = hit.MomX;
                 //tmp_infopar.momY   = hit.MomY;
                 //tmp_infopar.momZ   = hit.MomZ;
@@ -469,15 +475,14 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
                 //tmp_infopar.length = hit.TrackLength;
                 tempSetInfo[G4Sol::PSFE] = tmp_infopar;
                 flag_found = true;
+
+                if(att.G4_simu) temp_realtrackid = RecoEvent.ListHitsToTracks[G4Sol::PSFE][j];
               }
           }
 
         if(!flag_found)
           std::cout << "Error: PSFE Hit not found in WasaFinder\n";
       }
-
-    RecoEvent.TrackDAF.insert(std::make_pair(i, tempSetHit));
-    RecoEvent.TrackInfo.insert(std::make_pair(i, tempSetInfo));
 
     TVector3 tmp_closepoint_Pos;
     double tmp_closepoint_Dist;
@@ -500,7 +505,12 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
     tempInit.momZ = tmp_momZ;
     tempInit.time = 0.;
 
-    RecoEvent.TrackDAFInit.insert(std::make_pair(i, tempInit));
+    int temp_trackid = i;
+    if(att.G4_simu) temp_trackid = temp_realtrackid;
+
+    RecoEvent.TrackDAF.insert(std::make_pair(temp_trackid, tempSetHit));
+    RecoEvent.TrackInfo.insert(std::make_pair(temp_trackid, tempSetInfo));
+    RecoEvent.TrackDAFInit.insert(std::make_pair(temp_trackid, tempInit));
   }
 
   return 0;
