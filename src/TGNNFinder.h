@@ -17,6 +17,7 @@
 #include "ReturnRes.hh"
 #include "TDataProcess.h"
 #include "THyphiAttributes.h"
+#include "HitGnnStruct.hh"
 
 #include "TVector3.h"
 #include "TRandom3.h"
@@ -45,6 +46,24 @@ private:
   void SelectHists() final;
 
   int FinderGNN(FullRecoEvent& RecoEvent);
+
+  static bool did_order(HitGnn a, HitGnn b){
+    if(a.did != b.did) return a.did < b.did;
+    else if(a.did>6){
+      if (a.lid != b.lid ) return a.lid < b.lid;
+      else                 return a.de  > b.de;
+    }
+    else{
+      if (a.s != b.s ) return a.s  < b.s;
+      else             return a.de > b.de;
+    }
+  }
+
+
+  HitGnn make_cluster(HitGnn hit_a, HitGnn hit_b, double lid, double s, double dl, double phi, double wang1, double wang2);
+
+
+  //torch::jit::script::Module model;
 
 
 };

@@ -18,6 +18,7 @@ class PSBHitAna
     double GetTimeD(){  return _time_d;};
     double GetTime(){   return _time;};
     double GetDT(){     return _time_u - _time_d;};
+    std::array<double, 6> GetEdge(){ return _edge;};
     void Print();
 
   private:
@@ -32,7 +33,9 @@ class PSBHitAna
     double _time_u = -99999.;
     double _time_d = -99999.;
     double _time   = -99999.;
+    std::array<double, 6> _edge;
     void SetRPhi();
+    void SetEdge(ParaManager *par);
 };
 
 

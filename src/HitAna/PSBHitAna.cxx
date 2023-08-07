@@ -16,6 +16,7 @@ PSBHitAna::PSBHitAna(int seg, int t_u, int t_d, int q_u, int q_d, ParaManager *p
   _time_d = t_d * par->psb_ch2ns[seg][1] + par->psb_off_time[seg][1] - t_t0 + par->wasa_tof_offset;
   _time   = (_time_u + _time_d)/2.;
   _z      = (_time_u - _time_d) * par->psb_zpar[seg];
+  SetEdge(par);
   //_time = (t_u * par->psb_ch2ns + t_d * par->psb_ch2ns)/2. + par->psb_off_time[seg];
 }
 
@@ -57,4 +58,14 @@ void PSBHitAna::SetRPhi(void){
   _phi += TMath::Pi()/2.;
   if( _phi > TMath::Pi() ) _phi -= 2*TMath::Pi();
 
+}
+
+void PSBHitAna::SetEdge(ParaManager *par){
+  double length = 550.;
+  _edge[0] = _r * cos(_phi + par->psb_rot_z*hitana::Deg2Rad) + par->psb_pos_x;
+  _edge[1] = _r * sin(_phi + par->psb_rot_z*hitana::Deg2Rad) + par->psb_pos_y;
+  _edge[2] = _z + par->psb_pos_z - length/2.;
+  _edge[3] = _r * cos(_phi + par->psb_rot_z*hitana::Deg2Rad) + par->psb_pos_x;
+  _edge[4] = _r * sin(_phi + par->psb_rot_z*hitana::Deg2Rad) + par->psb_pos_y;
+  _edge[5] = _z + par->psb_pos_z + length/2.;
 }

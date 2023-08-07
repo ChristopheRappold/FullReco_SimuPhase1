@@ -455,6 +455,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         }
     }
 
+  RecoEvent.PSBHitCont = PSBHitCont;
+
   for(const auto& hit_PSB : PSBHitCont)
     {
       int hitID      = hit_PSB->GetSeg();
@@ -528,6 +530,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
             PSFEHitCont.emplace_back(hit_ana);
           }
       }
+
+  RecoEvent.PSFEHitCont = PSFEHitCont;
 
   for(const auto& hit_PSFE : PSFEHitCont)
     {
@@ -684,6 +688,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       MDCHitCont[hit_ana->GetLay()].emplace_back(hit_ana);
       // hit_ana->Print();
     }
+
+  RecoEvent.MDCHitCont = MDCHitCont;
 
   for(int MDCLayerID = 0; MDCLayerID < 17; ++MDCLayerID)
     for(const auto& hit_MDC : MDCHitCont[MDCLayerID])
