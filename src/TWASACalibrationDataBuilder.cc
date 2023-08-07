@@ -310,7 +310,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
 
   RecoEvent.PrimVtxRecons.SetXYZ(0., 0., att.Target_PositionZ);
 
-  att._logger->debug("TWASACalibrationDataBuilder trigger");
+  att._logger->debug("TWASACalibrationDataBuilder: trigger");
   // Trigger //////////////////
   bool trig[16];
   for(int i=0; i<32; ++i)
@@ -352,7 +352,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     }
 
 
-  att._logger->debug("TWASACalibrationDataBuilder T0");
+  att._logger->debug("TWASACalibrationDataBuilder: T0");
   // T0 ana //////////////////////////////////
   std::vector<T0HitAna*> T0HitCont;
   for(int i = 0; i < 28; ++i)
@@ -414,7 +414,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
 
 
 
-  att._logger->debug("TWASACalibrationDataBuilder PSB");
+  att._logger->debug("TWASACalibrationDataBuilder: PSB");
   // PSB ana //////////////////////////////////
   std::vector<PSBHitAna*> PSBHitCont;
   for(int i = 0; i < 46; ++i)
@@ -511,7 +511,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     }
   LocalHisto.hpsb_0_2->Fill(PSBHitCont.size());
 
-  att._logger->debug("TWASACalibrationDataBuilder PSFE");
+  att._logger->debug("TWASACalibrationDataBuilder: PSFE");
   // PSFE ana //////////////////////////////////
   std::vector<PSFEHitAna*> PSFEHitCont;
   for(int i = 0; i < 44; ++i)
@@ -588,7 +588,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     }
   LocalHisto.hpsfe_0_2->Fill(PSFEHitCont.size());
 
-  att._logger->debug("TWASACalibrationDataBuilder PSBE");
+  att._logger->debug("TWASACalibrationDataBuilder: PSBE");
   // PSBE ana //////////////////////////////////
   std::vector<PSBEHitAna*> PSBEHitCont;
   for(int i = 0; i < 38; ++i)
@@ -662,7 +662,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hpsbe_0_2->Fill(PSBEHitCont.size());
 
 
-  att._logger->debug("TWASACalibrationDataBuilder MDC");
+  att._logger->debug("TWASACalibrationDataBuilder: MDC");
   // MDC ana //////////////////////////////////
   std::vector<std::vector<MDCHitAna*> > MDCHitCont;
   for(int i = 0; i < 17; ++i)
@@ -811,7 +811,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         }
     }
 
-  att._logger->debug("TWASACalibrationDataBuilder Fiber");
+  att._logger->debug("TWASACalibrationDataBuilder: Fiber");
   // Fiber ana //////////////////////////////////
   std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitCont;
   std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitClCont;
@@ -1652,7 +1652,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hs4sci_2_4->Fill(s4hit->GetTOF_sc3141() , s4hit->GetdE_sc42_low());
   //s4hit->Print();
 
-  att._logger->debug("TWASACalibrationDataBuilder MWDC");
+  att._logger->debug("TWASACalibrationDataBuilder: MWDC");
   /// --- MWDC HIT ---- ///////////////////////////////////////////////
   int nt_mwdc = 0;
 

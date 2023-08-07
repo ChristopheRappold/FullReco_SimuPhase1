@@ -724,6 +724,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_FragmentFinder = Config.Get<bool>("Task_FragmentFinder");
   if(Config.IsAvailable("Task_WASAFinder"))
     Task_WASAFinder = Config.Get<bool>("Task_WASAFinder");
+  if(Config.IsAvailable("Task_GNNFinder"))
+    Task_GNNFinder = Config.Get<bool>("Task_GNNFinder");
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
 
@@ -783,6 +785,8 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKFRAGMENTFINDER);
 	  if(s == "Task_WASAFinder")
 	    Task_Order.push_back(TASKWASAFINDER);
+    if(s == "Task_GNNFinder")
+      Task_Order.push_back(TASKGNNFINDER);
 	  if(s == "Task_BayesFinder")
 	    Task_Order.push_back(TASKBAYESFINDER);
 	  if(s == "Task_RiemannFinder")
@@ -843,6 +847,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
   out.RunTask.Task_FragmentFinder  = TaskConfig.Task_FragmentFinder;
   out.RunTask.Task_WASAFinder      = TaskConfig.Task_WASAFinder;
+  out.RunTask.Task_GNNFinder       = TaskConfig.Task_GNNFinder;
   out.RunTask.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
   out.RunTask.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;
   out.RunTask.Task_FinderCM        = TaskConfig.Task_FinderCM;
