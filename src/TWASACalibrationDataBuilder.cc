@@ -1767,24 +1767,24 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         }
     }
 
-  {
-    int num = (int)PSBHitCont.size();
-    for(int i = 0; i < num; ++i)
-      {
-        delete PSBHitCont.back();
-        PSBHitCont.pop_back();
-      }
-  }
+  //{
+  //  int num = (int)PSBHitCont.size();
+  //  for(int i = 0; i < num; ++i)
+  //    {
+  //      delete PSBHitCont.back();
+  //      PSBHitCont.pop_back();
+  //    }
+  //}
 
-  for(int i = 0; i < 17; ++i)
-    {
-      int num = (int)MDCHitCont[i].size();
-      for(int j = 0; j < num; ++j)
-        {
-          delete MDCHitCont[i].back();
-          MDCHitCont[i].pop_back();
-        }
-    }
+  //for(int i = 0; i < 17; ++i)
+  //  {
+  //    int num = (int)MDCHitCont[i].size();
+  //    for(int j = 0; j < num; ++j)
+  //      {
+  //        delete MDCHitCont[i].back();
+  //        MDCHitCont[i].pop_back();
+  //      }
+  //  }
 
   // #ifdef DEBUG_BUILD2
   //                   std::cout << "fiber" << std::endl;

@@ -22,6 +22,10 @@
 #include "TVector3.h"
 #include "TRandom3.h"
 
+#include <torch/torch.h>
+#include <torch/script.h>
+
+
 template<class Out>
 using TDataProcessInterface = TDataProcess<FullRecoEvent, Out>;
 
@@ -62,6 +66,12 @@ private:
 
   HitGnn make_cluster(HitGnn hit_a, HitGnn hit_b, double lid, double s, double dl, double phi, double wang1, double wang2);
 
+  bool not_dup(torch::Tensor input_node, std::set<int> label_g1, std::set<int> label_g2);
+  std::set<int> get_edge_id_g(torch::Tensor edge_index, std::set<int> label_g);
+  std::tuple< std::map<int, std::set<int> >, torch::Tensor, torch::Tensor, bool > get_label_g(
+      torch::Tensor input_node, torch::Tensor edge_index, torch::Tensor gnn_label_n, torch::Tensor gnn_label_e,
+      std::map<int, std::set<int> > gnn_label_g, torch::Tensor gnn_label_g_bce, torch::Tensor gnn_pred_e,
+      int id=-1, int id_s=-1, int id_d=-1, int g_s=0);
 
   //torch::jit::script::Module model;
 

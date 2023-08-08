@@ -82,6 +82,19 @@ void FullRecoEvent::Clear(int toclean)
   FiberTrackCont.clear();
   FiberHitClCont.clear();
 
+  for(size_t i = 0; i < MDCHitCont.size(); ++i)
+    for(size_t j = 0; j < MDCHitCont[i].size(); ++j)
+      delete MDCHitCont[i][j];
+  MDCHitCont.clear();
+
+  for(size_t i = 0; i <PSBHitCont.size(); ++i)
+    delete PSBHitCont[i];
+  PSBHitCont.clear();
+
+  for(size_t i = 0; i <PSFEHitCont.size(); ++i)
+    delete PSFEHitCont[i];
+  PSFEHitCont.clear();
+
 
   //Added when merging with master
   //FragmentTracks.clear();

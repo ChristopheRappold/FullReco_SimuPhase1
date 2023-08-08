@@ -30,7 +30,7 @@ CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUI
 #CXXFLAGS     += -fsanitize=memory -fno-omit-frame-pointer
 #CXXFLAGS     += -fsanitize=undefined -fno-omit-frame-pointer
 #CXXFLAGS      += -fsanitize=leak -fsanitize-blacklist=$(shell root-config --etcdir)/lsan-root.supp
-LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./EventWASAUnpack -L./HitAna -L./KFParticle/install/lib -L./FairBase -L.
+LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./EventWASAUnpack -L./HitAna -L./KFParticle/install/lib -L./FairBase -L./libtorch/lib -L.
 
 LDFLAGS       = '-Wl,-rpath,$$ORIGIN/lib'
 SOFLAGS       = -shared
@@ -56,9 +56,9 @@ TRICKTRACKFLAGS = -I./TrickTrack/include
 KFPARTICLEFLAGS = -I./KFParticle/install/include
 ORMFLAGS = -I./sqlite_orm/include
 
-CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GEANTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
-LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 $(GEANTLIBS)
-LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 $(GEANTLIBS)
+CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GEANTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3  -I./libtorch/include -I./libtorch/include/torch/csrc/api/include #-I./boost
+LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 -ltorch -ltorch_cpu -lc10 $(GEANTLIBS)
+LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 -ltorch -ltorch_cpu -lc10 $(GEANTLIBS)
 
 GENFIT_LIB = -lgenfit2
 SPDLOG_LIB = -lspdlog
@@ -106,12 +106,12 @@ CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 # MathObj = MathematicalTools.o
 # MathSo = libHyphiMathTools.$(DllSuf)
 
-all: print $(MathSo) libEventG4Sol.so libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainData $(Bindir)/MainMonitor 
+all: print $(MathSo) libEventG4Sol.so libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so libtorch.so $(Bindir)/MainSimu $(Bindir)/MainData $(Bindir)/MainMonitor 
 
-$(Bindir)/MainSimu: $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
+$(Bindir)/MainSimu: $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so libtorch.so
 	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_SIM) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
 
-$(Bindir)/MainData: $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
+$(Bindir)/MainData: $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so libtorch.so
 	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainData $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_DATA) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS) 
 
 $(Bindir)/MainMonitor: MainMonitor.o FullRecoConfig.o
@@ -236,6 +236,13 @@ libmsgpack.so :
 	ln -sf $(FromLibdir)/msgpack-c/libmsgpackc.so.2 $(Bindir)/lib/
 	@echo "---> $@ done"
 
+
+libtorch.so :
+	ln -sf $(FromLibdir)/libtorch/lib/libtorch.so           $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libtorch_cpu.so       $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libc10.so             $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libgomp-52f2fd74.so.1 $(Bindir)/lib/
+	@echo "---> $@ done"
 
 # $(MathSo) : $(MathObj)
 # ifeq ($(PLATFORM),macosx)

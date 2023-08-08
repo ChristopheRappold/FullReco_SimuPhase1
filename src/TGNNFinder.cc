@@ -69,6 +69,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
     return -1;
   }
   model.eval();
+  auto bce_loss = torch::nn::BCELoss();
 
   std::vector<HitGnn> hitgnn_cont;
 
@@ -400,6 +401,8 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   }
 
   if(edge_index_buf.size(1)==0) return -1;
+  //std::cout << "input_node : " << input_node << std::endl;
+  //std::cout << "edge_index : " << edge_index_buf << std::endl;
 
   std::vector<torch::jit::IValue> inputs;
   inputs.push_back(input_node);
@@ -409,7 +412,12 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   auto gnn_output_n = gnn_output->elements()[0].toTensor();
   auto gnn_output_e = gnn_output->elements()[1].toTensor();
 
+  //std::cout << "gnn_output_n : " << gnn_output_n << std::endl;
+  //std::cout << "gnn_output_e : " << gnn_output_e << std::endl;
+
   auto gnn_pred_e_buf = at::softmax(gnn_output_e, 1).index({torch::indexing::Slice(), 1});
+
+  //std::cout << "gnn_pred_e_buf : " << gnn_pred_e_buf << std::endl;
 
   // bidir
   torch::Tensor edge_index = torch::full({2, (int)gnn_src.size()/2}, -999, torch::TensorOptions().dtype(torch::kInt));
@@ -426,7 +434,174 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
 
   auto gnn_pred_n = at::softmax(gnn_output_n, 1).index({torch::indexing::Slice(), 1});
 
+  //std::cout << "gnn_pred_n : " << gnn_pred_n << std::endl;
 
+
+  // clustering
+  double threshold_n = 0.5;
+  double threshold_e = 0.5;
+
+  torch::Tensor gnn_label_e = gnn_pred_e > 100;
+  torch::Tensor gnn_label_n = gnn_pred_n > threshold_n;
+
+  torch::Tensor gnn_label_g_bce = torch::full({(int)gnn_src.size()/2, 1}, 0, torch::TensorOptions().dtype(torch::kFloat));
+
+  std::tuple< std::map<int, std::set<int> >, torch::Tensor, torch::Tensor, bool > ret = get_label_g(
+      input_node, edge_index, gnn_label_n, gnn_label_e, gnn_label_g, gnn_label_g_bce, gnn_pred_e);
+
+  gnn_label_g     = std::get<0>(ret);
+  gnn_label_e     = std::get<1>(ret);
+  gnn_label_g_bce = std::get<2>(ret);
+
+  double gloss_last = bce_loss(gnn_pred_e, gnn_label_g_bce).item<double>();
+  double gloss_first = gloss_last;
+
+  auto gnn_pred_order = gnn_pred_e.argsort(0, true);
+
+  std::vector<int> gnn_list_ov2;
+
+
+  for(int i=0; i<(int)gnn_pred_order.size(0); ++i ){
+    int id   = gnn_pred_order[i].item<int>();
+    int id_s = edge_index[0][id].item<int>();
+    int id_d = edge_index[1][id].item<int>();
+    if(gnn_pred_e[id].item<double>() < threshold_e) break;
+    //if(par->flag_debug_gnn) std::cout << Form("- %3d <-> %3d : pred %12.5e",
+    //    edge_index[0][id].item<int>(), edge_index[1][id].item<int>(), gnn_pred_e[id].item<double>()) << std::endl;
+
+    if(gnn_label_n[id_s].item<int>() && gnn_label_n[id_d].item<int>()){
+      gnn_list_ov2.emplace_back(id);
+      //if(par->flag_debug_gnn) std::cout << "- ov2" << std::endl;
+      continue;
+    }
+
+    ret = get_label_g(input_node, edge_index, gnn_label_n, gnn_label_e, gnn_label_g, gnn_label_g_bce, gnn_pred_e, id, id_s, id_d);
+    std::map<int, std::set<int> > gnn_label_g_buf     = std::get<0>(ret);
+    torch::Tensor                 gnn_label_e_buf     = std::get<1>(ret);
+    torch::Tensor                 gnn_label_g_bce_buf = std::get<2>(ret);
+    bool                          gnn_flag_in         = std::get<3>(ret);
+
+    if(gnn_flag_in){
+      //if(par->flag_debug_gnn) std::cout << "- included" << std::endl;
+      gnn_label_g     = gnn_label_g_buf;
+      gnn_label_e     = gnn_label_e_buf;
+      gnn_label_g_bce = gnn_label_g_bce_buf;
+      continue;
+    }
+
+    double gloss = bce_loss(gnn_pred_e, gnn_label_g_bce_buf).item<double>();
+
+    if(gloss < gloss_last){
+      //if(par->flag_debug_gnn) std::cout << Form("- update : %12.5e -> %12.5e", gloss_last, gloss) << std::endl;
+      gloss_last = gloss;
+      gnn_label_g     = gnn_label_g_buf;
+      gnn_label_e     = gnn_label_e_buf;
+      gnn_label_g_bce = gnn_label_g_bce_buf;
+    }
+
+  }
+
+  //if(par->flag_debug_gnn) std::cout << "- gnn_label_g 1st\n" << gnn_label_g << std::endl;
+
+  for(auto id: gnn_list_ov2){
+    int id_s = edge_index[0][id].item<int>();
+    int id_d = edge_index[1][id].item<int>();
+    if(gnn_pred_e[id].item<double>() < threshold_e) break;
+    //if(par->flag_debug_gnn) std::cout << Form("- [ov2] %3d <-> %3d : pred %12.5e",
+    //    edge_index[0][id].item<int>(), edge_index[1][id].item<int>(), gnn_pred_e[id].item<double>()) << std::endl;
+
+    std::set<int> list_s;
+    std::set<int> list_d;
+    for(auto l: gnn_label_g){
+      if(l.second.size()>0 && l.second.find(id_s)!=l.second.end()) list_s.insert(l.first);
+      if(l.second.size()>0 && l.second.find(id_d)!=l.second.end()) list_d.insert(l.first);
+    }
+
+    for(auto i: list_s){
+      ret = get_label_g(input_node, edge_index, gnn_label_n, gnn_label_e, gnn_label_g, gnn_label_g_bce, gnn_pred_e, id, id_s, id_d, i);
+      std::map<int, std::set<int> > gnn_label_g_buf     = std::get<0>(ret);
+      torch::Tensor                 gnn_label_e_buf     = std::get<1>(ret);
+      torch::Tensor                 gnn_label_g_bce_buf = std::get<2>(ret);
+      bool                          gnn_flag_in         = std::get<3>(ret);
+
+      if(gnn_flag_in){
+        //if(par->flag_debug_gnn) std::cout << "- included" << std::endl;
+        gnn_label_g     = gnn_label_g_buf;
+        gnn_label_e     = gnn_label_e_buf;
+        gnn_label_g_bce = gnn_label_g_bce_buf;
+        continue;
+      }
+
+      double gloss = bce_loss(gnn_pred_e, gnn_label_g_bce_buf).item<double>();
+
+      if(gloss < gloss_last){
+        //if(par->flag_debug_gnn) std::cout << Form("- update : %12.5e -> %12.5e", gloss_last, gloss) << std::endl;
+        gloss_last = gloss;
+        gnn_label_g     = gnn_label_g_buf;
+        gnn_label_e     = gnn_label_e_buf;
+        gnn_label_g_bce = gnn_label_g_bce_buf;
+      }
+    }
+
+    for(auto i: list_d){
+      ret = get_label_g(input_node, edge_index, gnn_label_n, gnn_label_e, gnn_label_g, gnn_label_g_bce, gnn_pred_e, id, id_d, id_s, i);
+      std::map<int, std::set<int> > gnn_label_g_buf     = std::get<0>(ret);
+      torch::Tensor                 gnn_label_e_buf     = std::get<1>(ret);
+      torch::Tensor                 gnn_label_g_bce_buf = std::get<2>(ret);
+      bool                          gnn_flag_in         = std::get<3>(ret);
+
+      if(gnn_flag_in){
+        //if(par->flag_debug_gnn) std::cout << "- included" << std::endl;
+        gnn_label_g     = gnn_label_g_buf;
+        gnn_label_e     = gnn_label_e_buf;
+        gnn_label_g_bce = gnn_label_g_bce_buf;
+        continue;
+      }
+
+      double gloss = bce_loss(gnn_pred_e, gnn_label_g_bce_buf).item<double>();
+
+      if(gloss < gloss_last){
+        //if(par->flag_debug_gnn) std::cout << Form("- update : %12.5e -> %12.5e", gloss_last, gloss) << std::endl;
+        gloss_last = gloss;
+        gnn_label_g     = gnn_label_g_buf;
+        gnn_label_e     = gnn_label_e_buf;
+        gnn_label_g_bce = gnn_label_g_bce_buf;
+      }
+    }
+
+  }
+
+
+  //if(par->flag_debug_gnn) std::cout << "- gnn_label_g 2nd\n" << gnn_label_g << std::endl;
+
+  // delete inclusion
+  std::map<int, std::set<int> > gnn_label_g_buf = gnn_label_g;
+  for(auto g1: gnn_label_g){
+    for(auto g2: gnn_label_g){
+      if(g1.first!=g2.first && gnn_label_g_buf.find(g1.first)!=gnn_label_g_buf.end() && gnn_label_g_buf.find(g2.first)!=gnn_label_g_buf.end() ){
+        bool flag = true;
+        for(auto i: g1.second){
+          if(g2.second.find(i)==g2.second.end()) flag = false;
+        }
+        if(flag){
+          //if(par->flag_debug_gnn) std::cout << Form("- delete inclusion : %d", g1.first) << std::endl;
+          gnn_label_g_buf.erase(g1.first);
+        }
+      }
+    }
+  }
+  gnn_label_g = gnn_label_g_buf;
+
+
+  //if(par->flag_debug){
+  //  std::cout << Form("- gloss : %.5e -> %.5e", gloss_first, gloss_last) << std::endl;
+  //  std::cout << "- GNN clustering" << std::endl;
+  //  for(auto g: gnn_label_g){
+  //    std::cout << Form("%3d : ",g.first) << g.second << std::endl;
+  //  }
+  //}
+
+  //if(par->flag_debug) std::cout << "-- GNN end" << std::endl;
 
   att._logger->debug("TGNNFinder: FinderGNN end");
   return 0;
@@ -457,6 +632,158 @@ HitGnn TGNNFinder<Out>::make_cluster(HitGnn hit_a, HitGnn hit_b, double lid, dou
   return hit_buf;
 
 }
+
+template<class Out>
+bool  TGNNFinder<Out>::not_dup(torch::Tensor input_node, std::set<int> label_g1, std::set<int> label_g2){
+  bool flag_dup = true;
+  bool flag_psb = false;
+  bool flag_psfe = false;
+  for(auto l1: label_g1){
+    for(auto l2: label_g2){
+      if( (l1 != l2) && (input_node[l1][0].item<int>() == input_node[l2][0]).item<int>()  ) flag_dup = false;
+      if( (input_node[l1][0].item<int>()==24) || (input_node[l2][0].item<int>()==24) ) flag_psb  = true;
+      if( (input_node[l1][0].item<int>()==25) || (input_node[l2][0].item<int>()==25) ) flag_psfe = true;
+    }
+  }
+  if(flag_psb && flag_psfe) flag_dup = false;
+  //if(par->flag_debug_gnn && !flag_dup){
+  //  std::cout << "- dup" << std::endl;
+  //  std::cout << "label_g1 : " << label_g1 << std::endl;
+  //  std::cout << "label_g2 : " << label_g2 << std::endl;
+  //}
+  return flag_dup;
+}
+
+template<class Out>
+std::set<int> TGNNFinder<Out>::get_edge_id_g(torch::Tensor edge_index, std::set<int> label_g){
+  std::set<int> id_g;
+  for(int i=0; i<(int)edge_index.size(1); ++i){
+    int id_s = edge_index[0][i].item<int>();
+    int id_d = edge_index[1][i].item<int>();
+    if(label_g.size()>0 && label_g.find(id_s)!=label_g.end() && label_g.find(id_d)!=label_g.end()) id_g.insert(i);
+  }
+  return id_g;
+}
+
+
+template<class Out>
+std::tuple< std::map<int, std::set<int> >, torch::Tensor, torch::Tensor, bool > TGNNFinder<Out>::get_label_g(
+    torch::Tensor input_node, torch::Tensor edge_index, torch::Tensor gnn_label_n, torch::Tensor gnn_label_e,
+    std::map<int, std::set<int> > gnn_label_g, torch::Tensor gnn_label_g_bce, torch::Tensor gnn_pred_e, int id, int id_s, int id_d, int g_s){
+
+  std::tuple< std::map<int, std::set<int> >, torch::Tensor, torch::Tensor, bool > ret;
+
+  torch::Tensor src = edge_index.index({0, torch::indexing::Slice()});
+  torch::Tensor dst = edge_index.index({1, torch::indexing::Slice()});
+
+  // initialize
+  if(id == -1){
+    std::map<int, std::set<int> > gnn_label_g_buf;
+    for(int i=0; i<input_node.size(0); ++i){
+      std::set<int> s{i};
+      gnn_label_g_buf[i] = s;
+    }
+    torch::Tensor gnn_label_g_bce_buf = torch::zeros( {gnn_label_g_bce.size(0), 1}, torch::TensorOptions().dtype(torch::kFloat) );
+    ret = std::make_tuple( gnn_label_g_buf, gnn_label_e, gnn_label_g_bce_buf, false);
+    return ret;
+  }
+
+  torch::Tensor gnn_label_e_buf;
+  torch::Tensor gnn_label_g_bce_buf;
+  std::map<int, std::set<int> > gnn_label_g_buf = gnn_label_g;
+  bool flag_in = false;
+
+  gnn_label_e_buf = gnn_label_e.clone();
+  gnn_label_g_bce_buf = gnn_label_g_bce.clone();
+
+  gnn_label_e_buf[id] = 1;
+
+  if(gnn_label_n[id_s].item<int>()!=1 && gnn_label_n[id_d].item<int>()!=1){
+    //if(par->flag_debug_gnn) std::cout<< Form("- 0-0 edge : %3d and %3d", id_s, id_d) << std::endl;
+    int id_s_l = -1;
+    int id_d_l = -2;
+    for(auto l: gnn_label_g){
+      if( (l.second).size()>0 && (l.second).find(id_s)!=(l.second).end() ) id_s_l = l.first;
+      if( (l.second).size()>0 && (l.second).find(id_d)!=(l.second).end() ) id_d_l = l.first;
+    }
+    if(id_s_l == id_d_l) flag_in = true;
+    else if(id_s_l != id_d_l && not_dup(input_node, gnn_label_g[id_s_l], gnn_label_g[id_d_l]) ){
+      int id_small = id_s_l < id_d_l ? id_s_l : id_d_l;
+      int id_large = id_s_l < id_d_l ? id_d_l : id_s_l;
+      std::set_union(gnn_label_g[id_small].begin(), gnn_label_g[id_small].end(),
+          gnn_label_g[id_large].begin(), gnn_label_g[id_large].end(),
+          std::inserter(gnn_label_g_buf[id_small], gnn_label_g_buf[id_small].begin()));
+      gnn_label_g_buf.erase(id_large);
+      std::set<int> id_g = get_edge_id_g(edge_index, gnn_label_g_buf[id_small]);
+      for(auto id: id_g){
+        gnn_label_g_bce_buf[id] = 1;
+      }
+    }
+  }
+
+  if(gnn_label_n[id_s].item<int>()==1 && gnn_label_n[id_d].item<int>()!=1){
+    //if(par->flag_debug_gnn) std::cout<< Form("- 1-0 edge : %3d into %3d", id_s, id_d) << std::endl;
+    int id_l = -1;
+    for(auto l: gnn_label_g){
+      if( (l.second).size()>0 && (l.second).find(id_d)!=(l.second).end() ){
+        id_l = l.first;
+        break;
+      }
+    }
+    if( gnn_label_g[id_l].size()>0 && gnn_label_g[id_l].find(id_s)!=gnn_label_g[id_l].end() ) flag_in = true;
+    if( not_dup(input_node, gnn_label_g[id_s], gnn_label_g[id_l]) ){ // ##### check is_connect
+      std::set_union(gnn_label_g[id_l].begin(), gnn_label_g[id_l].end(),
+          gnn_label_g[id_s].begin(), gnn_label_g[id_s].end(),
+          std::inserter(gnn_label_g_buf[id_l], gnn_label_g_buf[id_l].begin()));
+      std::set<int> id_g = get_edge_id_g(edge_index, gnn_label_g_buf[id_l]);
+      for(auto id: id_g){
+        gnn_label_g_bce_buf[id] = 1;
+      }
+    }
+  }
+
+
+  if(gnn_label_n[id_d].item<int>()==1 && gnn_label_n[id_s].item<int>()!=1){
+    //if(par->flag_debug_gnn) std::cout<< Form("- 1-0 edge : %3d into %3d", id_d, id_s) << std::endl;
+    int id_l = -1;
+    for(auto l: gnn_label_g){
+      if( (l.second).size()>0 && (l.second).find(id_s)!=(l.second).end() ){
+        id_l = l.first;
+        break;
+      }
+    }
+    if( gnn_label_g[id_l].size()>0 && gnn_label_g[id_l].find(id_d)!=gnn_label_g[id_l].end() ) flag_in = true;
+    if( not_dup(input_node, gnn_label_g[id_d], gnn_label_g[id_l]) ){ // ##### check is_connect
+      std::set_union(gnn_label_g[id_l].begin(), gnn_label_g[id_l].end(),
+          gnn_label_g[id_d].begin(), gnn_label_g[id_d].end(),
+          std::inserter(gnn_label_g_buf[id_l], gnn_label_g_buf[id_l].begin()));
+      std::set<int> id_g = get_edge_id_g(edge_index, gnn_label_g_buf[id_l]);
+      for(auto id: id_g){
+        gnn_label_g_bce_buf[id] = 1;
+      }
+    }
+  }
+
+  if(gnn_label_n[id_s].item<int>()==1 && gnn_label_n[id_d].item<int>()==1 && gnn_label_n[g_s].item<int>()!=1){
+    //if(par->flag_debug_gnn) std::cout<< Form("- 1-1 edge : %3d into %3d", id_d, g_s) << std::endl;
+    if( gnn_label_g[g_s].size()>0 && gnn_label_g[g_s].find(id_d)!=gnn_label_g[g_s].end() ) flag_in = true;
+    if( not_dup(input_node, gnn_label_g[g_s], gnn_label_g[id_d]) ){ // ##### check is_connect
+      std::set_union(gnn_label_g[g_s].begin(), gnn_label_g[g_s].end(),
+          gnn_label_g[id_d].begin(), gnn_label_g[id_d].end(),
+          std::inserter(gnn_label_g_buf[g_s], gnn_label_g_buf[g_s].begin()));
+      std::set<int> id_g = get_edge_id_g(edge_index, gnn_label_g_buf[g_s]);
+      for(auto id: id_g){
+        gnn_label_g_bce_buf[id] = 1;
+      }
+    }
+  }
+
+  ret = std::make_tuple( gnn_label_g_buf, gnn_label_e, gnn_label_g_bce_buf, flag_in);
+
+  return ret;
+}
+
+
 
 
 
