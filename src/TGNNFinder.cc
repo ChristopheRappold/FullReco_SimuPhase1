@@ -98,7 +98,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
       }
     }
   }
-  att._logger->debug(Form("TGNNFinder: Fiber hit end %d",hitgnn_cont.size()));
+  att._logger->debug("TGNNFinder: Fiber hit end {}",hitgnn_cont.size());
 
   for(auto mdc_hit_lay: RecoEvent.MDCHitCont){
     for(auto mdc_hit: mdc_hit_lay){
@@ -130,7 +130,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
       hitgnn_cont.push_back(buf);
     }
   }
-  att._logger->debug(Form("TGNNFinder: MDC   hit end %d",hitgnn_cont.size()));
+  att._logger->debug("TGNNFinder: MDC   hit end {}",hitgnn_cont.size());
 
 
   for(auto psb_hit: RecoEvent.PSBHitCont){
@@ -162,7 +162,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
     buf.de    = 1.0;
     hitgnn_cont.push_back(buf);
   }
-  att._logger->debug(Form("TGNNFinder: PSB   hit end %d",hitgnn_cont.size()));
+  att._logger->debug("TGNNFinder: PSB   hit end {}",hitgnn_cont.size());
 
 
   for(auto psfe_hit: RecoEvent.PSFEHitCont){
@@ -185,7 +185,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
     buf.de = 1.0;
     hitgnn_cont.push_back(buf);
   }
-  att._logger->debug(Form("TGNNFinder: PSFE  hit end %d",hitgnn_cont.size()));
+  att._logger->debug("TGNNFinder: PSFE  hit end {}",hitgnn_cont.size());
 
 
   // delete overlap
@@ -209,7 +209,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   }
   hitgnn_cont = hitgnn_cont_ov;
 
-  att._logger->debug(Form("TGNNFinder: delete overlap %d",hitgnn_cont.size()));
+  att._logger->debug("TGNNFinder: delete overlap {}",hitgnn_cont.size());
 
   //  clustering
   std::sort(hitgnn_cont.begin(), hitgnn_cont.end(), did_order);
@@ -323,7 +323,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   }
   hitgnn_cont = hitgnn_cont_cl;
 
-  att._logger->debug(Form("TGNNFinder: clustering     %d",hitgnn_cont.size()));
+  att._logger->debug("TGNNFinder: clustering     {}",hitgnn_cont.size());
 
 
   torch::Tensor input_node = torch::full({(int)hitgnn_cont.size(), 13}, -999, torch::TensorOptions().dtype(torch::kFloat));
