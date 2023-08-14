@@ -1,4 +1,4 @@
-#include <torch/torch.h>
+//#include <torch/torch.h>
 #include <torch/script.h>
 #include "TGNNFinder.h"
 #include "HitGnnStruct.hh"

@@ -22,8 +22,8 @@
 #include "TVector3.h"
 #include "TRandom3.h"
 
-#include <torch/torch.h>
-#include <torch/script.h>
+#include "torch/torch.h"
+//#include "torch/script.h"
 
 
 template<class Out>
