@@ -202,7 +202,9 @@ struct RunTaskAttrDef
 
   bool PV_RealXUVComb;
   bool PV_RealPrimTrack;
-  bool CFT_RZfit;
+
+  bool RPZ_RZfit;
+  int  RPZ_MDCWireType;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
@@ -232,7 +234,7 @@ struct RunTaskAttrDef
   std::string DataML_Out;
 
   bool RF_OutputEvents;
-  bool CFT_OutputEvents;
+  bool RPZ_OutputEvents;
 };
 
 struct RunFullConfigDef
@@ -331,7 +333,8 @@ inline auto InitStorage()
 				 make_column("DoNoMaterial", &RunTaskAttrDef::DoNoMaterial),
 				 make_column("PV_RealXUVComb", &RunTaskAttrDef::PV_RealXUVComb),
 				 make_column("PV_RealPrimTrack", &RunTaskAttrDef::PV_RealPrimTrack),
-				 make_column("CFT_RZfit", &RunTaskAttrDef::CFT_RZfit),
+				 make_column("RPZ_RZfit", &RunTaskAttrDef::RPZ_RZfit),
+				 make_column("RPZ_MDCWireType", &RunTaskAttrDef::RPZ_MDCWireType),
 				 make_column("RZ_ChangeMiniFiber", &RunTaskAttrDef::RZ_ChangeMiniFiber),
 				 make_column("RZ_MDCProlate", &RunTaskAttrDef::RZ_MDCProlate),
 				 make_column("RZ_MDCWire2", &RunTaskAttrDef::RZ_MDCWire2),
@@ -349,7 +352,7 @@ inline auto InitStorage()
 				 make_column("FlatML_namefile", &RunTaskAttrDef::FlatML_namefile),
 				 make_column("DataML_Out", &RunTaskAttrDef::DataML_Out),
 				 make_column("RF_OutputEvents", &RunTaskAttrDef::RF_OutputEvents),
-				 make_column("CFT_OutputEvents", &RunTaskAttrDef::CFT_OutputEvents)
+				 make_column("RPZ_OutputEvents", &RunTaskAttrDef::RPZ_OutputEvents)
 				 ),
 		      make_table(
 				 "RunFullConfig",
@@ -438,7 +441,8 @@ class THyphiAttributes
 
   bool PV_RealXUVComb;
   bool PV_RealPrimTrack;
-  bool CFT_RZfit;
+  bool RPZ_RZfit;
+  int  RPZ_MDCWireType;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
@@ -471,7 +475,7 @@ class THyphiAttributes
   std::string DataML_Out;
 
   bool RF_OutputEvents;
-  bool CFT_OutputEvents;
+  bool RPZ_OutputEvents;
 
   FairField* Field;
 

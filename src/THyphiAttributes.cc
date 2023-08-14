@@ -97,7 +97,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   KF_NbMiniFiberCut = 4;
 
   RF_OutputEvents = false;
-  CFT_OutputEvents = false;
+  RPZ_OutputEvents = false;
 
 
   //Optics parameters
@@ -190,8 +190,10 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("PV_RealPrimTrack"))
     PV_RealPrimTrack = Config.Get<bool>("PV_RealPrimTrack");
 
-  if(Config.IsAvailable("CFT_RZfit"))
-    CFT_RZfit = Config.Get<bool>("CFT_RZfit");
+  if(Config.IsAvailable("RPZ_RZfit"))
+    RPZ_RZfit = Config.Get<bool>("RPZ_RZfit");
+  if(Config.IsAvailable("RPZ_MDCWireType"))
+    RPZ_MDCWireType = Config.Get<int>("RPZ_MDCWireType");
   if(Config.IsAvailable("RZ_ChangeMiniFiber"))
     RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
   if(Config.IsAvailable("RZ_MDCProlate"))
@@ -259,8 +261,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("RF_OutputEvents"))
     RF_OutputEvents = Config.Get<bool>("RF_OutputEvents");
 
-  if(Config.IsAvailable("CFT_OutputEvents"))
-    CFT_OutputEvents = Config.Get<bool>("CFT_OutputEvents");
+  if(Config.IsAvailable("RPZ_OutputEvents"))
+    RPZ_OutputEvents = Config.Get<bool>("RPZ_OutputEvents");
 
   DataML_Out = Config.IsAvailable("DataML_Out") ? Config.Get<std::string>("DataML_Out") : "NoneInConfig";
 
@@ -882,7 +884,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.DoNoMaterial       = DoNoMaterial;
   out.RunTaskAttr.PV_RealXUVComb     = PV_RealXUVComb;
   out.RunTaskAttr.PV_RealPrimTrack   = PV_RealPrimTrack;
-  out.RunTaskAttr.CFT_RZfit          = CFT_RZfit;
+  out.RunTaskAttr.RPZ_RZfit          = RPZ_RZfit;
   out.RunTaskAttr.RZ_ChangeMiniFiber = RZ_ChangeMiniFiber;
   out.RunTaskAttr.RZ_MDCProlate      = RZ_MDCProlate;
   out.RunTaskAttr.RZ_MDCWire2        = RZ_MDCWire2;
@@ -900,7 +902,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.FlatML_namefile    = FlatML_namefile;
   out.RunTaskAttr.DataML_Out         = DataML_Out;
   out.RunTaskAttr.RF_OutputEvents    = RF_OutputEvents;
-  out.RunTaskAttr.CFT_OutputEvents    = CFT_OutputEvents;
+  out.RunTaskAttr.RPZ_OutputEvents    = RPZ_OutputEvents;
 
   out.RunFullConfig.Hash = Hash;
   std::string tempCj;
