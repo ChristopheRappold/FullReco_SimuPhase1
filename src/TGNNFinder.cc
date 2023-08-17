@@ -11,16 +11,16 @@ TGNNFinder<Out>::TGNNFinder(const THyphiAttributes& attribut) : TDataProcessInte
 {
   att._logger->info("TGNNFinder::TGNNFinder");
   //torch::jit::script::Module model;
-  //try{
-  //  model = torch::jit::load("scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt");
-  //                           //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt"
-  //  std::cout << "model is loaded" << std::endl;
-  //}
-  //catch(const c10::Error& e){
-  //  std::cerr << "error loading the model\n";
-  //  return;
-  //}
-  //model.eval();
+  try{
+    model = torch::jit::load("scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt");
+                             //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt"
+    std::cout << "model is loaded" << std::endl;
+  }
+  catch(const c10::Error& e){
+    std::cerr << "error loading the model\n";
+    return;
+  }
+  model.eval();
 }
 
 template<class Out>
@@ -55,20 +55,17 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
 
   double mm2cm = 0.1;
 
-  torch::Tensor x = torch::full({3, 3}, 1.5, torch::TensorOptions().dtype(torch::kFloat));
-  std::cout << x << std::endl;
-
-  torch::jit::script::Module model;
-  try{
-    model = torch::jit::load("scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt");
-                             //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt"
-    std::cout << "model is loaded" << std::endl;
-  }
-  catch(const c10::Error& e){
-    std::cerr << "error loading the model\n";
-    return -1;
-  }
-  model.eval();
+  //torch::jit::script::Module model;
+  //try{
+  //  model = torch::jit::load("scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt");
+  //                           //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt"
+  //  std::cout << "model is loaded" << std::endl;
+  //}
+  //catch(const c10::Error& e){
+  //  std::cerr << "error loading the model\n";
+  //  return -1;
+  //}
+  //model.eval();
   auto bce_loss = torch::nn::BCELoss();
 
   std::vector<HitGnn> hitgnn_cont;
@@ -98,7 +95,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
       }
     }
   }
-  att._logger->debug("TGNNFinder: Fiber hit end {}",hitgnn_cont.size());
+  att._logger->debug("TGNNFinder: Fiber  hit end {}",hitgnn_cont.size());
 
   for(auto mdc_hit_lay: RecoEvent.MDCHitCont){
     for(auto mdc_hit: mdc_hit_lay){
@@ -130,7 +127,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
       hitgnn_cont.push_back(buf);
     }
   }
-  att._logger->debug("TGNNFinder: MDC   hit end {}",hitgnn_cont.size());
+  att._logger->debug("TGNNFinder: MDC    hit end {}",hitgnn_cont.size());
 
 
   for(auto psb_hit: RecoEvent.PSBHitCont){
@@ -162,7 +159,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
     buf.de    = 1.0;
     hitgnn_cont.push_back(buf);
   }
-  att._logger->debug("TGNNFinder: PSB   hit end {}",hitgnn_cont.size());
+  att._logger->debug("TGNNFinder: PSB    hit end {}",hitgnn_cont.size());
 
 
   for(auto psfe_hit: RecoEvent.PSFEHitCont){
@@ -185,7 +182,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
     buf.de = 1.0;
     hitgnn_cont.push_back(buf);
   }
-  att._logger->debug("TGNNFinder: PSFE  hit end {}",hitgnn_cont.size());
+  att._logger->debug("TGNNFinder: PSFE   hit end {}",hitgnn_cont.size());
 
 
   // delete overlap
@@ -571,7 +568,6 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
 
   }
 
-
   //if(par->flag_debug_gnn) std::cout << "- gnn_label_g 2nd\n" << gnn_label_g << std::endl;
 
   // delete inclusion
@@ -592,7 +588,15 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   }
   gnn_label_g = gnn_label_g_buf;
 
-
+  att._logger->debug("TGNNFinder: gloss {:.5e} -> {:.5e}",gloss_first, gloss_last);
+  for(auto g: gnn_label_g){
+    std::string group_buf;
+    std::for_each(g.second.begin(), g.second.end(), [&group_buf](int num) {
+        if (!group_buf.empty()){ group_buf += ", ";}
+        group_buf += std::to_string(num);
+        });
+    att._logger->debug("TGNNFinder: {:3d} : {}",g.first, group_buf);
+  }
   //if(par->flag_debug){
   //  std::cout << Form("- gloss : %.5e -> %.5e", gloss_first, gloss_last) << std::endl;
   //  std::cout << "- GNN clustering" << std::endl;

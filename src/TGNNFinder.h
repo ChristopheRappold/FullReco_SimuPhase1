@@ -73,7 +73,7 @@ private:
       std::map<int, std::set<int> > gnn_label_g, torch::Tensor gnn_label_g_bce, torch::Tensor gnn_pred_e,
       int id=-1, int id_s=-1, int id_d=-1, int g_s=0);
 
-  //torch::jit::script::Module model;
+  torch::jit::script::Module model;
 
 
 };
