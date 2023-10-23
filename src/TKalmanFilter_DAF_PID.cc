@@ -91,6 +91,19 @@ TKalmanFilter_DAF_PID<Out>::TKalmanFilter_DAF_PID(const THyphiAttributes& attrib
   Nb_CentralCut = att.KF_NbCentralCut;
   Nb_MiniFiberCut = att.KF_NbMiniFiberCut;
 
+  if(att.PID_CutorProb == true)
+    {
+      CutPID.insert(std::pair<int,CutMomBeta*>(-211,new CutMomBeta(0.13957,0.03,true,true)));
+      CutPID.insert(std::pair<int,CutMomBeta*>(211,new CutMomBeta(0.13957,0.5,true,false)));
+      //CutPID.insert(std::pair<int,CutMomBeta*>(211,new CutMomBeta(0.13957,0.009,true,false)));
+      CutPID.insert(std::pair<int,CutMomBeta*>(321,new CutMomBeta(0.4936,0.12,true,false)));
+      CutPID.insert(std::pair<int,CutMomBeta*>(2212,new CutMomBeta(0.938272013,0.2,true,false)));
+      CutPID.insert(std::pair<int,CutMomBeta*>(-991,new CutMomBeta(0.4936,0.02,true,true)));
+      CutPID[-991]->SetMargingLimit(.4);
+      CutPID.insert(std::pair<int,CutMomBeta*>(991,new CutMomBeta(1.90925,0.02,true,false)));
+      CutPID[991]->SetMargingLimit(.4);
+    }
+
   // Fitter->setDebugLvl(10);
 
   rep = new genfit::RKTrackRep();
@@ -817,8 +830,18 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
           double mass  = p * sqrt(1. / (beta * beta) - 1.);
 
           int PDG_guess = 2212;
-          if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()>0) PDG_guess =  211;
-          if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()<0) PDG_guess = -211;
+          if(att.PID_CutorProb == false)
+            {
+              if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()>0) PDG_guess =  211;
+              if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()<0) PDG_guess = -211;
+            }
+          else
+            {
+              if(kfsop->getCharge()>0) PDG_guess =  ProbPIDAssign_Pos(p, beta);
+              if(kfsop->getCharge()<0) PDG_guess =  ProbPIDAssign_Neg(p, beta);
+            }
+
+          if(std::abs(PDG_guess) == 991) PDG_guess = 2212;
 
 
           // GENFIT PID
@@ -993,11 +1016,17 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
               double mass_pid  = p_pid * sqrt(1. / (beta_pid * beta_pid) - 1.);
 
               int PDG_guess_pid = 2212;
-              if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()>0) PDG_guess_pid =  211;
-              if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()<0) PDG_guess_pid = -211;
+              if(att.PID_CutorProb == false)
+                {
+                  if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()>0) PDG_guess_pid =  211;
+                  if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()<0) PDG_guess_pid = -211;
+                }
+              else
+                {
+                  if(kfsop_pid->getCharge()>0) PDG_guess_pid =  ProbPIDAssign_Pos(p, beta);
+                  if(kfsop_pid->getCharge()<0) PDG_guess_pid =  ProbPIDAssign_Neg(p, beta);
+                }
 
-              if(PDG_guess != PDG_guess_pid)
-                PDG_guess_pid = 0;
 
               ResSolDAF tempResults;
               tempResults.charge    = kfsop_pid->getCharge();
@@ -1266,6 +1295,92 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
     } //loop over tracks
   
   return 0;
+}
+
+
+template<class Out>
+int TKalmanFilter_DAF_PID<Out>::ProbPIDAssign_Pos(double momenta, double beta)
+{
+  double prob_beta_Pi = (*(CutPID[211]))(momenta,beta);
+  double diff_beta_Pi = (*(CutPID[211])).GetDiff(momenta,beta);
+  double chi2_beta_Pi = (*(CutPID[211])).GetChi2(momenta,beta);
+
+  double prob_beta_K = (*(CutPID[321]))(momenta,beta);
+  double diff_beta_K = (*(CutPID[321])).GetDiff(momenta,beta);
+  double chi2_beta_K = (*(CutPID[321])).GetChi2(momenta,beta);
+
+  double prob_beta_Pr = (*(CutPID[2212]))(momenta,beta);
+  double diff_beta_Pr = (*(CutPID[2212])).GetDiff(momenta,beta);
+  double chi2_beta_Pr = (*(CutPID[2212])).GetChi2(momenta,beta);
+
+  double prob_beta_Limit = (*(CutPID[991]))(momenta,beta);
+  double diff_beta_Limit = (*(CutPID[991])).GetDiff(momenta,beta);
+  double chi2_beta_Limit = (*(CutPID[991])).GetChi2(momenta,beta);
+
+  std::vector<int> indexToPdg = {211,321,2212,991};
+
+  double chi2_beta_array[4] = {chi2_beta_Pi, chi2_beta_K, chi2_beta_Pr, chi2_beta_Limit};
+  double diff_beta_array[4] = {diff_beta_Pi, diff_beta_K, diff_beta_Pr, diff_beta_Limit};
+  double prob_beta_array[4] = {prob_beta_Pi, prob_beta_K, prob_beta_Pr, prob_beta_Limit};
+  //std::cout<<" Pi:"<<prob_beta_Pi<<" K+:"<<prob_beta_K<<" p:"<<prob_beta_Pr;
+
+  double Tot_prob = prob_beta_Pi + prob_beta_K + prob_beta_Pr + prob_beta_Limit;
+  //std::cout<<" / tot :"<<Tot_prob<<std::endl;
+  double prob_pid_array[4];
+  prob_pid_array[0] = prob_beta_Pi / Tot_prob;
+  prob_pid_array[1]= prob_beta_K / Tot_prob;
+  prob_pid_array[2] = prob_beta_Pr / Tot_prob;
+  prob_pid_array[3] = prob_beta_Limit / Tot_prob;
+
+  int id_max_pid = TMath::LocMax(4,prob_pid_array);
+
+  int pid_new = indexToPdg[id_max_pid];
+  //double prob_pid = prob_pid_array[id_max_pid];
+  double prob_beta = prob_beta_array[id_max_pid];
+  //double chi2_beta = chi2_beta_array[id_max_pid];
+  //double diff_beta = diff_beta_array[id_max_pid];
+
+  if(prob_beta < att.PID_minProb) pid_new = 0;
+
+  return pid_new;
+}
+
+
+template<class Out>
+int TKalmanFilter_DAF_PID<Out>::ProbPIDAssign_Neg(double momenta, double beta)
+{
+  double prob_beta_Pi = (*(CutPID[-211]))(momenta,beta);
+  double diff_beta_Pi = (*(CutPID[-211])).GetDiff(momenta,beta);
+  double chi2_beta_Pi = (*(CutPID[-211])).GetChi2(momenta,beta);
+
+  double prob_beta_Limit = (*(CutPID[-991]))(momenta,beta);
+  double diff_beta_Limit = (*(CutPID[-991])).GetDiff(momenta,beta);
+  double chi2_beta_Limit = (*(CutPID[-991])).GetChi2(momenta,beta);
+
+  std::vector<int> indexToPdg = {-211,-991};
+
+  double chi2_beta_array[2] = {chi2_beta_Pi, chi2_beta_Limit};
+  double diff_beta_array[2] = {diff_beta_Pi, diff_beta_Limit};
+  double prob_beta_array[2] = {prob_beta_Pi, prob_beta_Limit};
+  //std::cout<<" Pi:"<<prob_beta_Pi<;
+
+  double Tot_prob = prob_beta_Pi + prob_beta_Limit ;
+  //std::cout<<" / tot :"<<Tot_prob<<std::endl;
+  double prob_pid_array[2];
+  prob_pid_array[0] = prob_beta_Pi / Tot_prob;
+  prob_pid_array[1]= prob_beta_Limit / Tot_prob;
+
+  int id_max_pid = TMath::LocMax(2,prob_pid_array);
+
+  int pid_new = indexToPdg[id_max_pid];
+  //double prob_pid = prob_pid_array[id_max_pid];
+  double prob_beta = prob_beta_array[id_max_pid];
+  //double chi2_beta = chi2_beta_array[id_max_pid];
+  //double diff_beta = diff_beta_array[id_max_pid];
+
+  if(prob_beta < att.PID_minProb) pid_new = 0;
+
+  return pid_new;
 }
 
 

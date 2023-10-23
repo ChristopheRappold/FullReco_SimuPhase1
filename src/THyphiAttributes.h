@@ -470,6 +470,9 @@ class THyphiAttributes
   double KF_RandInitMomY;
   double KF_RandInitMomZ;
 
+  bool PID_CutorProb;
+  double PID_minProb;
+
   std::string StudyCase;
 
   std::string FlatML_namefile;

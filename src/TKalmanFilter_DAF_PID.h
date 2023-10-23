@@ -25,6 +25,8 @@
 #include "RKTrackRep.h"
 #include "Track.h"
 
+#include "TMath.h"
+#include "TString.h"
 #include "TCutG.h"
 
 //#include "GFRaveVertexFactory.h"
@@ -54,6 +56,118 @@ using TDataProcessInterface = TDataProcess<FullRecoEvent, Out>;
 
 //}
 
+
+class CutMomBeta 
+{
+
+private :
+  // mom-beta curve : beta = 1/sqrt(mass*mass/mom/mom + 1)
+  const double mass; 
+  double marging;
+  double marging_limit;
+  double mass_up2;
+  double mass_down2;
+  const bool norm;
+  const bool transl_beta;
+  inline double CalBetaDown(double mom_test) const
+  {return transl_beta == false ? 1./TMath::Sqrt(mass_up2/mom_test/mom_test+1.) : 1./TMath::Sqrt(mass*mass/mom_test/mom_test+1.) - marging_limit;}
+  inline double CalBetaUp(double mom_test) const
+  {return transl_beta == false ? 1./TMath::Sqrt(mass_down2/mom_test/mom_test+1.) : 1./TMath::Sqrt(mass*mass/mom_test/mom_test+1.) + marging;}
+
+  
+public :
+  double operator () (double mom_test,double beta_test) const 
+  {
+    
+    double beta_down_marge = CalBetaDown(mom_test);//1./TMath::Sqrt(mass_up2/mom_test/mom_test+1.);
+    double beta_up_marge = CalBetaUp(mom_test);//1./TMath::Sqrt(mass_down2/mom_test/mom_test+1.);
+
+    double beta_th = 1./TMath::Sqrt(mass*mass/mom_test/mom_test+1.);
+
+    double diff = beta_test-beta_th;
+    double sigma = 0.;
+
+    //std::cout<<"CutMomBeta("<<mass<<","<<marging<<"): mom="<<mom_test<<" beta="<<beta_test<<" Bup="<<beta_up_marge<<" Bdown:"<<beta_down_marge<<" Bth:"<<beta_th<<" diff:"<<diff<<" ";
+
+    if(diff>0.)
+      {
+        sigma = beta_up_marge-beta_th;
+        //double arg = -0.5*diff*diff ;///beta_up_marge/beta_up_marge;
+        //std::cout<<" sigma:"<<sigma<<" prob:"<<TMath::Gaus(beta_test,beta_th,sigma,norm)<<std::endl;
+        return TMath::Gaus(beta_test,beta_th,sigma,norm);//diff*diff/beta_up_marge;
+      }
+    else
+      {
+        sigma = beta_th-beta_down_marge;
+        //double arg = -0.5*diff*diff; //beta_down_marge/beta_down_marge;
+        //std::cout<<" sigma:"<<sigma<<" prob:"<<TMath::Gaus(beta_test,beta_th,sigma,norm)<<std::endl;
+        return TMath::Gaus(beta_test,beta_th,sigma,norm);
+      }
+    // if(beta_down_marge < beta_test && beta_test < beta_up_marge)
+    //   return true;
+    // else
+    //   return false;
+  }
+  double GetDiff( double mom_test, double beta_test) const
+  {
+    double beta_th = 1./TMath::Sqrt(mass*mass/mom_test/mom_test+1.);
+    return beta_test-beta_th;    
+  }
+  double GetChi2( double mom_test, double beta_test) const
+  {
+    double beta_down_marge = CalBetaDown(mom_test);//1./TMath::Sqrt(mass*mass*(1.+marging)*(1.+marging)/mom_test/mom_test+1.);
+    double beta_up_marge = CalBetaUp(mom_test);//1./TMath::Sqrt(mass*mass*(1.-marging)*(1.-marging)/mom_test/mom_test+1.);
+
+    double beta_th = 1./TMath::Sqrt(mass*mass/mom_test/mom_test+1.);
+
+    double diff = beta_test-beta_th;
+    if(diff>0.)
+      return diff*diff/beta_up_marge/beta_up_marge;
+    else
+      return diff*diff/beta_down_marge/beta_down_marge;
+  }
+  double GetProb(double mom_test, double beta_test) const
+  {
+    double beta_th = 1./TMath::Sqrt(mass*mass/mom_test/mom_test+1.);
+
+    double beta_down_marge = CalBetaDown(mom_test);//1./TMath::Sqrt(mass*mass*(1.+marging)*(1.+marging)/mom_test/mom_test+1.);
+    double beta_up_marge = CalBetaUp(mom_test);//1./TMath::Sqrt(mass*mass*(1.-marging)*(1.-marging)/mom_test/mom_test+1.);
+    
+    double diff = beta_test-beta_th;
+    double sigma = 0.;
+    if(diff>0)
+      sigma = beta_up_marge-beta_th;
+    else
+      sigma = beta_th-beta_down_marge;
+
+    return TMath::Gaus(beta_test,beta_th,sigma,true);//TMath::Exp(-0.5*diff*diff/sigma/sigma);
+  }
+
+
+  CutMomBeta():mass(1.),marging(0.),norm(true),transl_beta(false) {}
+  CutMomBeta(double M,double marge,bool nn=true,bool translbeta =false):mass(M),marging(marge),marging_limit(marge),norm(nn),transl_beta(translbeta)
+  {
+    mass_up2=TMath::Sq(mass*(1.+marging));
+    mass_down2=TMath::Sq(mass*(1.-marging));
+  }
+  ~CutMomBeta() {}
+  
+  void SetMarging(double marge) 
+  {
+    marging=marge;     
+    mass_up2=TMath::Sq(mass*(1.+marging));
+    mass_down2=TMath::Sq(mass*(1.-marging));
+  }
+  void SetMargingLimit(double margeL)
+  {
+    marging_limit=margeL;
+    mass_up2=TMath::Sq(mass*(1.+marging_limit));
+  }
+  double GetMass() const { return mass;  }
+};
+
+
+
 template<class Out>
 class TKalmanFilter_DAF_PID final : public TDataProcessInterface<Out>
 {
@@ -76,6 +190,11 @@ private:
 
   int Nb_CentralCut;
   int Nb_MiniFiberCut;
+
+  std::map<int,CutMomBeta*> CutPID;
+
+  int ProbPIDAssign_Pos(double momenta, double beta);
+  int ProbPIDAssign_Neg(double momenta, double beta);
 
   // genfit::DAF* Fitter;
   genfit::AbsKalmanFitter* Fitter;

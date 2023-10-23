@@ -99,6 +99,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   KF_RandInitMomY = 0.005;
   KF_RandInitMomZ = 0.005;
 
+  PID_CutorProb = false;
+  PID_minProb = 0.;
+
   RF_OutputEvents = false;
   CFT_OutputEvents = false;
 
@@ -265,6 +268,15 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   _logger->info("KF_RejectionCut: Central < : {} MiniFiber < : {}", KF_NbCentralCut, KF_NbMiniFiberCut);
   _logger->info("KF_RandInitMom: X: {}   Y: {}   Z: {}", KF_RandInitMomX, KF_RandInitMomY, KF_RandInitMomZ);
+
+
+  if(Config.IsAvailable("PID_CutorProb"))
+    PID_CutorProb = Config.Get<bool>("PID_CutorProb");
+  if(Config.IsAvailable("PID_minProb"))
+    PID_minProb = Config.Get<double>("PID_minProb");
+
+  _logger->info("PID_CutorProb: {}", PID_CutorProb);
+  _logger->info("PID_minProb: {}", PID_minProb);
 
   StudyCase = Config.IsAvailable("StudyCase") ? Config.Get<std::string>("StudyCase") : "None";
   // std::string temp_name_out = config.Get<std::string>("Output_Namefile");
