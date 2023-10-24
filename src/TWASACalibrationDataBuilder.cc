@@ -15,8 +15,6 @@ TWASACalibrationDataBuilder::TWASACalibrationDataBuilder(const THyphiAttributes&
 {
   att._logger->info("TWASACalibrationDataBuilder::TWASACalibrationDataBuilder");
 
-  par = std::make_unique<ParaManager>(att.map_ParamFiles);
-
   std::string volMDCfirst = gGeoManager->GetVolume("INNER")->GetNode(0)->GetVolume()->GetName();
   if(volMDCfirst == "MD01")
     offsetGeoNameID_MDC = 0;
@@ -334,10 +332,10 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       }
   }
 
-  if( par->trig_main  && !trig[3] ) return -4;
-  if( par->trig_clock && !trig[5] ) return -4;
-  if( par->trig_t0    && !(trig[7] && trig[9]) ) return -4;
-  if( par->trig_sc41  && !trig[1] ) return -4;
+  if( att.par->trig_main  && !trig[3] ) return -4;
+  if( att.par->trig_clock && !trig[5] ) return -4;
+  if( att.par->trig_t0    && !(trig[7] && trig[9]) ) return -4;
+  if( att.par->trig_sc41  && !trig[1] ) return -4;
 
   for(int i=0; i<16; ++i)
     {
@@ -363,7 +361,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       int i_d     = -1;
       for(int k = 0; k < event.s2tq2->nhit_t0[i][0]; ++k)
         {
-          if(par->t0_tcut_min < event.s2tq2->tdc_t0[i][0][k] && event.s2tq2->tdc_t0[i][0][k] < par->t0_tcut_max)
+          if(att.par->t0_tcut_min < event.s2tq2->tdc_t0[i][0][k] && event.s2tq2->tdc_t0[i][0][k] < att.par->t0_tcut_max)
             {
               flag_u = true;
               i_u    = k;
@@ -372,7 +370,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         }
       for(int k = 0; k < event.s2tq2->nhit_t0[i][1]; ++k)
         {
-          if(par->t0_tcut_min < event.s2tq2->tdc_t0[i][1][k] && event.s2tq2->tdc_t0[i][1][k] < par->t0_tcut_max)
+          if(att.par->t0_tcut_min < event.s2tq2->tdc_t0[i][1][k] && event.s2tq2->tdc_t0[i][1][k] < att.par->t0_tcut_max)
             {
               flag_d = true;
               i_d    = k;
@@ -385,7 +383,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
           int t_d           = event.s2tq2->tdc_t0[i][1][i_d];
           int q_u           = event.s2tq2->qdc_t0[i][0];
           int q_d           = event.s2tq2->qdc_t0[i][1];
-          T0HitAna* hit_ana = new T0HitAna(i, t_u, t_d, q_u, q_d, par.get());
+          T0HitAna* hit_ana = new T0HitAna(i, t_u, t_d, q_u, q_d, att.par.get());
           T0HitCont.emplace_back(hit_ana);
         }
     }
@@ -401,7 +399,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       LocalHisto.ht0_1[T0HitCont[i]->GetSeg()]->Fill(T0HitCont[i]->GetTime());
 
       double time_buf = std::fabs(T0HitCont[i]->GetTime());
-      if(time_buf < time_ref && time_buf < par->cut_t0_time)
+      if(time_buf < time_ref && time_buf < att.par->cut_t0_time)
       {
         hit_t0_main = T0HitCont[i];
         time_ref = time_buf;
@@ -424,7 +422,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       int i_d     = -1;
       for(int k = 0; k < event.s2tq1->nhit_psb[i][0]; ++k)
         {
-          if(par->psb_tcut_min < event.s2tq1->tdc_psb[i][0][k] && event.s2tq1->tdc_psb[i][0][k] < par->psb_tcut_max)
+          if(att.par->psb_tcut_min < event.s2tq1->tdc_psb[i][0][k] && event.s2tq1->tdc_psb[i][0][k] < att.par->psb_tcut_max)
             {
               flag_u = true;
               i_u    = k;
@@ -433,7 +431,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         }
       for(int k = 0; k < event.s2tq1->nhit_psb[i][1]; ++k)
         {
-          if(par->psb_tcut_min < event.s2tq1->tdc_psb[i][1][k] && event.s2tq1->tdc_psb[i][1][k] < par->psb_tcut_max)
+          if(att.par->psb_tcut_min < event.s2tq1->tdc_psb[i][1][k] && event.s2tq1->tdc_psb[i][1][k] < att.par->psb_tcut_max)
             {
               flag_d = true;
               i_d    = k;
@@ -449,7 +447,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
           int t_d            = event.s2tq1->tdc_psb[i][1][i_d];
           int q_u            = event.s2tq1->qdc_psb[i][0];
           int q_d            = event.s2tq1->qdc_psb[i][1];
-          PSBHitAna* hit_ana = new PSBHitAna(i, t_u, t_d, q_u, q_d, par.get(), t_t0);
+          PSBHitAna* hit_ana = new PSBHitAna(i, t_u, t_d, q_u, q_d, att.par.get(), t_t0);
           PSBHitCont.emplace_back(hit_ana);
         }
     }
@@ -481,10 +479,10 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       hitCoords(0) = 0.;
       hitCoords(1) = hit_PSB->GetZ() * 0.1; // mm to cm
       TMatrixDSym hitCov(2);
-      //hitCov(0, 0)     = TMath::Sq(par->psb_res_phi * 0.1);//0.1; // to be adjusted resolution_psce * resolution_psce;
-      //hitCov(1, 1)     = TMath::Sq(par->psb_res_z   * 0.1);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
-      hitCov(0, 0)     = std::pow(par->psb_res_phi * 0.1, 2.);//0.1; // to be adjusted resolution_psce * resolution_psce;
-      hitCov(1, 1)     = std::pow(par->psb_res_z   * 0.1, 2.);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
+      //hitCov(0, 0)     = TMath::Sq(att.par->psb_res_phi * 0.1);//0.1; // to be adjusted resolution_psce * resolution_psce;
+      //hitCov(1, 1)     = TMath::Sq(att.par->psb_res_z   * 0.1);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
+      hitCov(0, 0)     = std::pow(att.par->psb_res_phi * 0.1, 2.);//0.1; // to be adjusted resolution_psce * resolution_psce;
+      hitCov(1, 1)     = std::pow(att.par->psb_res_z   * 0.1, 2.);//0.1; // to be adjusted resolution_psce_z * resolution_psce_z;
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSCE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
@@ -512,14 +510,14 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   for(int i = 0; i < 44; ++i)
     for(int j = 0; j < event.s2tq2->nhit_psfe[i]; ++j)
       {
-        if(par->psfe_tcut_min < event.s2tq2->tdc_psfe[i][j] && event.s2tq2->tdc_psfe[i][j] < par->psfe_tcut_max)
+        if(att.par->psfe_tcut_min < event.s2tq2->tdc_psfe[i][j] && event.s2tq2->tdc_psfe[i][j] < att.par->psfe_tcut_max)
           {
             double t_t0 = 0.;
             if(hit_t0_main) t_t0 = hit_t0_main->GetTime();
 
             int t_buf           = event.s2tq2->tdc_psfe[i][j];
             int q_buf           = event.s2tq2->qdc_psfe[i];
-            PSFEHitAna* hit_ana = new PSFEHitAna(i, t_buf, q_buf, par.get(), t_t0);
+            PSFEHitAna* hit_ana = new PSFEHitAna(i, t_buf, q_buf, att.par.get(), t_t0);
             PSFEHitCont.emplace_back(hit_ana);
           }
       }
@@ -563,8 +561,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       TVectorD hitCoords(1);
       hitCoords(0) = 0.;
       TMatrixDSym hitCov(1);
-      //hitCov(0, 0) = TMath::Sq(par->psfe_res_phi * 0.1); // mm to cm
-      hitCov(0, 0) = std::pow(par->psfe_res_phi * 0.1, 2.); // mm to cm
+      //hitCov(0, 0) = TMath::Sq(att.par->psfe_res_phi * 0.1); // mm to cm
+      hitCov(0, 0) = std::pow(att.par->psfe_res_phi * 0.1, 2.); // mm to cm
 
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSFE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
@@ -590,11 +588,11 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       for(int j = 0; j < event.s2tq2->nhit_psbe[i]; ++j)
         {
           LocalHisto.hpsbe_1_0->Fill(i, event.s2tq2->tdc_psbe[i][j]);
-          if(par->psbe_tcut_min < event.s2tq2->tdc_psbe[i][j] && event.s2tq2->tdc_psbe[i][j] < par->psbe_tcut_max)
+          if(att.par->psbe_tcut_min < event.s2tq2->tdc_psbe[i][j] && event.s2tq2->tdc_psbe[i][j] < att.par->psbe_tcut_max)
             {
               int t_buf           = event.s2tq2->tdc_psbe[i][j];
               int q_buf           = event.s2tq2->qdc_psbe[i];
-              PSBEHitAna* hit_ana = new PSBEHitAna(i, t_buf, q_buf, par.get());
+              PSBEHitAna* hit_ana = new PSBEHitAna(i, t_buf, q_buf, att.par.get());
               PSBEHitCont.emplace_back(hit_ana);
             }
         }
@@ -639,7 +637,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       TVectorD hitCoords(1);
       hitCoords(0) = 0.;
       TMatrixDSym hitCov(1);
-      hitCov(0, 0) = pow(par->psfe_res_phi * hitana::mm2cm, 2); // must be corrected
+      hitCov(0, 0) = pow(att.par->psfe_res_phi * hitana::mm2cm, 2); // must be corrected
 
       auto measurement = std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, G4Sol::PSBE, hitID, nullptr);
       dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
@@ -668,7 +666,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       double t_t0 = 0.;
       if(hit_t0_main) t_t0 = hit_t0_main->GetTime();
 
-      MDCHitAna* hit_ana = new MDCHitAna(event.s2mdc->mdchit[i], par.get(), event.s2mdc->tref[0], t_t0);
+      MDCHitAna* hit_ana = new MDCHitAna(event.s2mdc->mdchit[i], att.par.get(), event.s2mdc->tref[0], t_t0);
       if(!hit_ana->IsValid())
         {
           delete hit_ana;
@@ -819,7 +817,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     {
       double t_t0 = 0.;
       if(hit_t0_main) t_t0 = hit_t0_main->GetTime();
-      FiberHitAna* hit_ana = new FiberHitAna(event.s2fiber->fiberhit[i], par.get(), t_r, t_t0);
+      FiberHitAna* hit_ana = new FiberHitAna(event.s2fiber->fiberhit[i], att.par.get(), t_r, t_t0);
 
       if(!hit_ana->IsValid())
         {
@@ -1002,7 +1000,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   // Fiber Track Analysis
 
   std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont
-                = fiberana->FiberTracking(FiberHitClCont, par.get(), RecoEvent.ListHits[G4Sol::PSCE]);
+                = fiberana->FiberTracking(FiberHitClCont, att.par.get(), RecoEvent.ListHits[G4Sol::PSCE]);
 
   RecoEvent.FiberTrackCont = FiberTrackCont;
 
@@ -1011,7 +1009,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     for(int j=0; j<3; ++j)
       num_combi_mft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
 
-  if(par->flag_mft12_combi && num_combi_mft12<par->cut_mft12_combi){
+  if(att.par->flag_mft12_combi && num_combi_mft12<att.par->cut_mft12_combi){
     LocalHisto.hfiber_1_1->Fill(num_combi_mft12);
     LocalHisto.hfiber_1_2->Fill((double)num_combi_mft12*1e-3);
     LocalHisto.hfiber_1_3->Fill((double)num_combi_mft12*1e-3);
@@ -1021,7 +1019,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hfiber_1_5->Fill((double)num_combi_mft12*1e-3);
   LocalHisto.hfiber_1_6->Fill((double)num_combi_mft12*1e-3);
   LocalHisto.hfiber_1_7->Fill((double)num_combi_mft12*1e-6);
-  if(par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
+  if(att.par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
 
   for(auto track: FiberTrackCont["mft12"]){
     double x1 = -9999.;
@@ -1056,7 +1054,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     for(int j=0; j<3; ++j)
       num_combi_dft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
 
-  if(par->flag_dft12_combi && num_combi_dft12<par->cut_dft12_combi){
+  if(att.par->flag_dft12_combi && num_combi_dft12<att.par->cut_dft12_combi){
     LocalHisto.hfiber_5_1->Fill(num_combi_dft12);
     LocalHisto.hfiber_5_2->Fill((double)num_combi_dft12*1e-3);
     LocalHisto.hfiber_5_3->Fill((double)num_combi_dft12*1e-3);
@@ -1066,7 +1064,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hfiber_5_5->Fill((double)num_combi_dft12*1e-3);
   LocalHisto.hfiber_5_6->Fill((double)num_combi_dft12*1e-3);
   LocalHisto.hfiber_5_7->Fill((double)num_combi_dft12*1e-6);
-  if(par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
+  if(att.par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
 
   for(size_t i=0; i<FiberTrackCont["dft12"].size(); ++i){
     FiberTrackAna *track = FiberTrackCont["dft12"][i];
@@ -1088,7 +1086,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   }
 
 /*
-  std::vector< std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, par.get());
+  std::vector< std::vector<FiberHitXUV*> > FiberXUVCont = fiberana->FindHit(FiberHitClCont, att.par.get());
 
   for(int i=0; i<7; ++i)
     {
@@ -1105,37 +1103,37 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   // MFT12
   int nt_mft12 = 0;
   int nt_mft12_xuv = 0;
-  if(FiberXUVCont[3].size()>0 && FiberXUVCont[4].size()>0 && !par->flag_mft12_allcombi){
+  if(FiberXUVCont[3].size()>0 && FiberXUVCont[4].size()>0 && !att.par->flag_mft12_allcombi){
     std::vector<FiberTrackAna*> buf_track;
     for(int i=0; i<(int)FiberXUVCont[3].size(); ++i){
       for(int j=0; j<(int)FiberXUVCont[4].size(); ++j){
         std::vector<FiberHitXUV*>   buf_xuv;
         buf_xuv.emplace_back(FiberXUVCont[3][i]);
         buf_xuv.emplace_back(FiberXUVCont[4][j]);
-        FiberTrackAna *track = new FiberTrackAna(buf_xuv, par.get());
-        if(par->flag_mft12_posang){
-          track->CorrectMFT(par.get());
+        FiberTrackAna *track = new FiberTrackAna(buf_xuv, att.par.get());
+        if(att.par->flag_mft12_posang){
+          track->CorrectMFT(att.par.get());
           double buf_x = track->GetXmft();
           double buf_y = track->GetYmft();
           double buf_a = track->GetA();
           double buf_b = track->GetB();
           if( fabs(buf_x * 0.003 - buf_a)>0.3 || fabs(buf_y * 0.003 - buf_b)>0.3 ){ delete track; continue;}
         }
-        if(!par->flag_mft12_combi)                      buf_track.emplace_back(track);
-        else if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track);
+        if(!att.par->flag_mft12_combi)                      buf_track.emplace_back(track);
+        else if(track->GetChi2() < att.par->cut_chi2_mft12) buf_track.emplace_back(track);
       }
     }
 
-    if(par->flag_dup_mft12_xuv && (int)buf_track.size()>0) buf_track = fiberana->DeleteDup(buf_track);
+    if(att.par->flag_dup_mft12_xuv && (int)buf_track.size()>0) buf_track = fiberana->DeleteDup(buf_track);
     FiberTrackCont["mft12"] = buf_track;
 
     nt_mft12     = FiberTrackCont["mft12"].size();
     nt_mft12_xuv = FiberTrackCont["mft12"].size();
     for(auto v: FiberTrackCont["mft12"]){
       for(int i=0; i<6; ++i){
-        if(par->flag_dup_mft12_xuv) v->GetContHit().at(i)->SetUsed();
+        if(att.par->flag_dup_mft12_xuv) v->GetContHit().at(i)->SetUsed();
       }
-      v->CorrectMFT(par.get());
+      v->CorrectMFT(att.par.get());
       v->SetPosL();
     }
   }
@@ -1149,9 +1147,9 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hfiber_1_5->Fill((double)num_combi_mft12*1e-3);
   LocalHisto.hfiber_1_6->Fill((double)num_combi_mft12*1e-3);
   LocalHisto.hfiber_1_7->Fill((double)num_combi_mft12*1e-6);
-  if(par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
+  if(att.par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
 
-  if(par->flag_mft12_combi && num_combi_mft12<par->cut_mft12_combi){
+  if(att.par->flag_mft12_combi && num_combi_mft12<att.par->cut_mft12_combi){
     LocalHisto.hfiber_1_1->Fill(num_combi_mft12);
     LocalHisto.hfiber_1_2->Fill((double)num_combi_mft12*1e-3);
     LocalHisto.hfiber_1_3->Fill((double)num_combi_mft12*1e-3);
@@ -1172,10 +1170,10 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
                 if(e>-1 && !FiberHitClCont[4][1][e]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][1][e]); count++;}
                 if(f>-1 && !FiberHitClCont[4][2][f]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][2][f]); count++;}
                 if(count<4) continue;
-                FiberTrackAna *track = new FiberTrackAna(buf_hit, par.get());
+                FiberTrackAna *track = new FiberTrackAna(buf_hit, att.par.get());
                 track->SetFlagCombi();
-                if(par->flag_mft12_posang){
-                  track->CorrectMFTCombi(par.get());
+                if(att.par->flag_mft12_posang){
+                  track->CorrectMFTCombi(att.par.get());
                   double buf_x = track->GetXmft();
                   double buf_y = track->GetYmft();
                   double buf_a = track->GetA();
@@ -1184,8 +1182,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
                 }
                 switch(track->GetNlayer()){
                   case 4: buf_track.emplace_back(track); break;
-                  case 5: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
-                  case 6: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+                  case 5: if(track->GetChi2() < att.par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+                  case 6: if(track->GetChi2() < att.par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
                   default: break;
                 }
               }
@@ -1250,14 +1248,14 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
 
     LocalHisto.hfiber_2_3->Fill(buf_track.size());
 
-    if(par->flag_dup_mft12_combi){
+    if(att.par->flag_dup_mft12_combi){
       std::vector<FiberTrackAna*> buf_track_tmp = fiberana->DeleteDupCombi(buf_track);
       buf_track = buf_track_tmp;
     }
 
     for(auto v: buf_track){
       for(auto v2: v->GetContHit()){ v2->SetUsed(); }
-      v->CorrectMFTCombi(par.get());
+      v->CorrectMFTCombi(att.par.get());
       v->SetPosL();
       v->DelFlagPSB();
     }
@@ -1270,14 +1268,14 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     }
 
     FiberTrackCont["mft12"] = fiberana->DeleteSame(FiberTrackCont["mft12"]);
-    if(par->flag_debug) std::cout << "- before Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
-    if(par->flag_mft12_inclusive) FiberTrackCont["mft12"] = fiberana->DeleteInclusive(FiberTrackCont["mft12"]);
-    if(par->flag_debug) std::cout << "- after  Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
+    if(att.par->flag_debug) std::cout << "- before Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
+    if(att.par->flag_mft12_inclusive) FiberTrackCont["mft12"] = fiberana->DeleteInclusive(FiberTrackCont["mft12"]);
+    if(att.par->flag_debug) std::cout << "- after  Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
     nt_mft12 = FiberTrackCont["mft12"].size();
 
   }
 
-  if(par->flag_mft12_pair){
+  if(att.par->flag_mft12_pair){
     std::vector<std::pair<FiberHitAna*, FiberHitAna*> > pair_x;
     std::vector<std::pair<FiberHitAna*, FiberHitAna*> > pair_u;
     std::vector<std::pair<FiberHitAna*, FiberHitAna*> > pair_v;
@@ -1307,10 +1305,10 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     int num_up = pair_u.size();
     int num_vp = pair_v.size();
     int num_combi_pair = (num_xp+1) * (num_up+1) * (num_vp+1);
-    if(par->flag_debug) std::cout << "- num_combi_pair_mft12 : " << num_combi_pair << std::endl;
+    if(att.par->flag_debug) std::cout << "- num_combi_pair_mft12 : " << num_combi_pair << std::endl;
     LocalHisto.hfiber_1_9->Fill((double)num_combi_pair*1e-3);
 
-    if(num_combi_pair < par->cut_mft12_combi){
+    if(num_combi_pair < att.par->cut_mft12_combi){
 
       std::vector<FiberTrackAna*> buf_track;
       for(int a=-1; a<num_xp; ++a){
@@ -1325,10 +1323,10 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
             if( c>-1 && !pair_v[c].first->IsUsed() && !pair_v[c].second->IsUsed() ){
               buf_hit.emplace_back(pair_v[c].first); buf_hit.emplace_back(pair_v[c].second); count+=2; }
             if(count<4) continue;
-            FiberTrackAna *track = new FiberTrackAna(buf_hit, par.get());
+            FiberTrackAna *track = new FiberTrackAna(buf_hit, att.par.get());
             track->SetFlagPair();
-            if(par->flag_mft12_posang){
-              track->CorrectMFTCombi(par.get());
+            if(att.par->flag_mft12_posang){
+              track->CorrectMFTCombi(att.par.get());
               double buf_x = track->GetXmft();
               double buf_y = track->GetYmft();
               double buf_a = track->GetA();
@@ -1337,8 +1335,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
             }
             switch(track->GetNlayer()){
               case 4: buf_track.emplace_back(track); break;
-              case 5: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
-              case 6: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+              case 5: if(track->GetChi2() < att.par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+              case 6: if(track->GetChi2() < att.par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
               default: break;
             }
 
@@ -1398,7 +1396,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
 
       for(auto v: buf_track){
         for(auto v2: v->GetContHit()){ v2->SetUsed(); }
-        v->CorrectMFTCombi(par.get());
+        v->CorrectMFTCombi(att.par.get());
         v->SetPosL();
         v->DelFlagPSB();
       }
@@ -1408,9 +1406,9 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       }
 
       FiberTrackCont["mft12"] = fiberana->DeleteSame(FiberTrackCont["mft12"]);
-      if(par->flag_debug) std::cout << "- before Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
-      if(par->flag_mft12_inclusive) FiberTrackCont["mft12"] = fiberana->DeleteInclusive(FiberTrackCont["mft12"]);
-      if(par->flag_debug) std::cout << "- after  Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
+      if(att.par->flag_debug) std::cout << "- before Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
+      if(att.par->flag_mft12_inclusive) FiberTrackCont["mft12"] = fiberana->DeleteInclusive(FiberTrackCont["mft12"]);
+      if(att.par->flag_debug) std::cout << "- after  Inclusive : " << FiberTrackCont["mft12"].size() << std::endl;
       nt_mft12 = FiberTrackCont["mft12"].size();
 
     }
@@ -1450,7 +1448,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hfiber_3_0->Fill(nt_mft12);
   LocalHisto.hfiber_3_0_2->Fill(nt_mft12_xuv);
 
-  if(par->flag_debug) std::cout << "- mft12 end" << std::endl;
+  if(att.par->flag_debug) std::cout << "- mft12 end" << std::endl;
 
 
   // DFT12
@@ -1463,8 +1461,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         std::vector<FiberHitXUV*>   buf_xuv;
         buf_xuv.emplace_back(FiberXUVCont[5][i]);
         buf_xuv.emplace_back(FiberXUVCont[6][j]);
-        FiberTrackAna *track = new FiberTrackAna(buf_xuv, par.get());
-        if(par->flag_dft12_cut){
+        FiberTrackAna *track = new FiberTrackAna(buf_xuv, att.par.get());
+        if(att.par->flag_dft12_cut){
           double tot_mean = track->GetTOT();
           double x_buf = track->GetXdet();
           double y_buf = track->GetYdet();
@@ -1474,11 +1472,11 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
           if( pow(x_buf/60., 2.) + pow(y_buf/40., 2) > 1. ) flag_cut = true;
           if( fabs( x_buf * 23./50. - a_buf) > 20. ) flag_cut = true;
           if( fabs( y_buf * 35./60. - b_buf) > 30. ) flag_cut = true;
-          if( tot_mean < par->cut_dft12_tot_max ) flag_cut = true;
+          if( tot_mean < att.par->cut_dft12_tot_max ) flag_cut = true;
           if(flag_cut){ delete track; continue; }
         }
-        if(!par->flag_dft12_combi)                      buf_track.emplace_back(track);
-        else if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track);
+        if(!att.par->flag_dft12_combi)                      buf_track.emplace_back(track);
+        else if(track->GetChi2() < att.par->cut_chi2_dft12) buf_track.emplace_back(track);
       }
     }
     if((int)buf_track.size()>0) FiberTrackCont["dft12"] = fiberana->DeleteDup(buf_track);
@@ -1518,9 +1516,9 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hfiber_5_5->Fill((double)num_combi_dft12*1e-3);
   LocalHisto.hfiber_5_6->Fill((double)num_combi_dft12*1e-3);
   LocalHisto.hfiber_5_7->Fill((double)num_combi_dft12*1e-6);
-  if(par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
+  if(att.par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
 
-  if(par->flag_dft12_combi && num_combi_dft12<par->cut_dft12_combi){
+  if(att.par->flag_dft12_combi && num_combi_dft12<att.par->cut_dft12_combi){
     LocalHisto.hfiber_5_1->Fill(num_combi_dft12);
     LocalHisto.hfiber_5_2->Fill((double)num_combi_dft12*1e-3);
     LocalHisto.hfiber_5_3->Fill((double)num_combi_dft12*1e-3);
@@ -1541,9 +1539,9 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
                 if(e>-1 && !FiberHitClCont[6][1][e]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][1][e]); count++;}
                 if(f>-1 && !FiberHitClCont[6][2][f]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][2][f]); count++;}
                 if(count<4) continue;
-                FiberTrackAna *track = new FiberTrackAna(buf_hit, par.get());
+                FiberTrackAna *track = new FiberTrackAna(buf_hit, att.par.get());
 
-                if(par->flag_dft12_cut){
+                if(att.par->flag_dft12_cut){
                   double tot_mean = track->GetTOT();
                   double x_buf = track->GetXdet();
                   double y_buf = track->GetYdet();
@@ -1559,8 +1557,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
 
                 switch(track->GetNlayer()){
                   case 4: buf_track.emplace_back(track); break;
-                  case 5: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
-                  case 6: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
+                  case 5: if(track->GetChi2() < att.par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
+                  case 6: if(track->GetChi2() < att.par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
                   default: break;
                 }
               }
@@ -1569,10 +1567,10 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         }
       }
     }
-    if(par->flag_debug) std::cout << "- dft12 combi" << std::endl;
+    if(att.par->flag_debug) std::cout << "- dft12 combi" << std::endl;
 
     std::vector<FiberTrackAna*> buf_track_tmp = fiberana->DeleteDupCombi(buf_track);
-    if(par->flag_debug) std::cout << "- dft12 dup" << std::endl;
+    if(att.par->flag_debug) std::cout << "- dft12 dup" << std::endl;
     buf_track = buf_track_tmp;
 
     for(auto v: buf_track){
@@ -1598,8 +1596,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     LocalHisto.hfiber_4_4_3->Fill(track->GetYdet(), track->GetB()*1000);
     LocalHisto.hfiber_4_5_3->Fill(tot_mean);
     double dist_dft12 =
-      pow( (tot_mean  - par->cut_dft12_tot_mean)  / par->cut_dft12_tot_sig , 2.) +
-      pow( (time_mean - par->cut_dft12_time_mean) / par->cut_dft12_time_sig, 2.);
+      pow( (tot_mean  - att.par->cut_dft12_tot_mean)  / att.par->cut_dft12_tot_sig , 2.) +
+      pow( (time_mean - att.par->cut_dft12_time_mean) / att.par->cut_dft12_time_sig, 2.);
     if(buf_diff_dft12<0 || dist_dft12 < buf_diff_dft12){
       buf_i_dft12 = i;
       buf_diff_dft12 = dist_dft12;
@@ -1619,11 +1617,11 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     LocalHisto.h18_3_8->Fill(FiberTrackCont["dft12"][0]->GetB()*1000);
   }
 
-  if(par->flag_debug) std::cout << "- dft12 end" << std::endl;
+  if(att.par->flag_debug) std::cout << "- dft12 end" << std::endl;
 */
 
   //  S4 Scintillators  //
-  S4SciHitAna *s4hit = new S4SciHitAna(event.s4tq, par.get(), att.StudyCase);
+  S4SciHitAna *s4hit = new S4SciHitAna(event.s4tq, att.par.get(), att.StudyCase);
 
   RecoEvent.FragmentPID = s4hit->GetPID();
 
@@ -1645,52 +1643,52 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   float mwdc_y = -999.;
   float mwdc_b = -999.;
   float mwdc_chi2 = -999.;
-  MWDCTracking mwdc_track(par.get());
+  MWDCTracking mwdc_track(att.par.get());
 
   if(att.mwdc_par_fitorhist == 0) //Load drift length from fit parameter file
     {
       std::vector<MWDCHitAna *> MWDCHitCont;
       MWDCHitCont.clear();
       for(auto mwdc_hit : event.s4mwdc->mwdchit){
-        MWDCHitAna *hit_ana = new MWDCHitAna(mwdc_hit, par.get(), event.s4mwdc->tref[0]);
+        MWDCHitAna *hit_ana = new MWDCHitAna(mwdc_hit, att.par.get(), event.s4mwdc->tref[0]);
         MWDCHitCont.emplace_back(hit_ana);
       }
 
      for(auto hit_mwdc : MWDCHitCont)
-       mwdc_track.StoreHit(hit_mwdc, par.get()); /// only leading time cut 
+       mwdc_track.StoreHit(hit_mwdc, att.par.get()); /// only leading time cut
     }
   else if(att.mwdc_par_fitorhist == 1) //Load drift length from hist root file
     for(auto mwdc_hit : event.s4mwdc->mwdchit)
       {
         float lt_tmp = mwdc_hit.t_leading - event.s4mwdc->tref[0];
         float tot_tmp = mwdc_hit.t_trailing - mwdc_hit.t_leading;
-        if(lt_tmp < par->mwdc_lt_valid_min || lt_tmp > par->mwdc_lt_valid_max) continue;
-        float mwdc_length = par->mwdc_dtdxconversion(mwdc_hit.i_plane, lt_tmp);
-        float wirepos_tmp = (par->mwdc_plane_sign[mwdc_hit.i_plane])*(5.0)*((float)(mwdc_hit.i_wire)-(par->mwdc_center_id[mwdc_hit.i_plane]));
+        if(lt_tmp < att.par->mwdc_lt_valid_min || lt_tmp > att.par->mwdc_lt_valid_max) continue;
+        float mwdc_length = att.par->mwdc_dtdxconversion(mwdc_hit.i_plane, lt_tmp);
+        float wirepos_tmp = (att.par->mwdc_plane_sign[mwdc_hit.i_plane])*(5.0)*((float)(mwdc_hit.i_wire)-(att.par->mwdc_center_id[mwdc_hit.i_plane]));
         mwdc_track.StoreHit(mwdc_hit.i_plane,
           -wirepos_tmp,
           fabs(mwdc_length),
           tot_tmp,
           lt_tmp,
-          -par->mwdc_plane_angle[mwdc_hit.i_plane],
-          par->mwdc_zpos[mwdc_hit.i_plane]);
+          -att.par->mwdc_plane_angle[mwdc_hit.i_plane],
+          att.par->mwdc_zpos[mwdc_hit.i_plane]);
       }
 
 
-  mwdc_track.SetAssumedResolution(par->mwdc_assumed_plane_resolution);
-  mwdc_track.SetMinPlaneEnebaled(par->mwdc_min_plane_with_hit_for_tracking);   // 12,13,14,15,16 or something like that
-  mwdc_track.SetMaxHitCombination(par->mwdc_max_hit_combination_for_tracking); // around 10. small number for online analysis!
+  mwdc_track.SetAssumedResolution(att.par->mwdc_assumed_plane_resolution);
+  mwdc_track.SetMinPlaneEnebaled(att.par->mwdc_min_plane_with_hit_for_tracking);   // 12,13,14,15,16 or something like that
+  mwdc_track.SetMaxHitCombination(att.par->mwdc_max_hit_combination_for_tracking); // around 10. small number for online analysis!
 
   int tracking_status = mwdc_track.Tracking_PairLR();  /// which is better? seems this is faster
   if(tracking_status==1){
     mwdc_chi2 = mwdc_track.GetChi2();
-    if(mwdc_chi2 >= 0.0 && mwdc_chi2 < par->mwdc_tracking_chi2cut_max){
-      mwdc_x = mwdc_track.GetX() + mwdc_track.GetA() * (par->dist_focS4 - par->dist_MWDC_zref)
-        + par->mwdc_shift_x_alignment;
-      mwdc_a = mwdc_track.GetA() * 1000. + par->mwdc_shift_a_alignment;
-      mwdc_y = mwdc_track.GetY() + mwdc_track.GetB() * (par->dist_focS4 - par->dist_MWDC_zref)
-        + par->mwdc_shift_y_alignment;
-      mwdc_b = mwdc_track.GetB() * 1000. + par->mwdc_shift_b_alignment;
+    if(mwdc_chi2 >= 0.0 && mwdc_chi2 < att.par->mwdc_tracking_chi2cut_max){
+      mwdc_x = mwdc_track.GetX() + mwdc_track.GetA() * (att.par->dist_focS4 - att.par->dist_MWDC_zref)
+        + att.par->mwdc_shift_x_alignment;
+      mwdc_a = mwdc_track.GetA() * 1000. + att.par->mwdc_shift_a_alignment;
+      mwdc_y = mwdc_track.GetY() + mwdc_track.GetB() * (att.par->dist_focS4 - att.par->dist_MWDC_zref)
+        + att.par->mwdc_shift_y_alignment;
+      mwdc_b = mwdc_track.GetB() * 1000. + att.par->mwdc_shift_b_alignment;
       nt_mwdc++;
       //for(int i=0; i<16; ++i){ //CHECK LATER
       //  res_mwdc[i] = mwdc_track.GetResidual(i);

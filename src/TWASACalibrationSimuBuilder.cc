@@ -17,8 +17,6 @@ TWASACalibrationSimuBuilder::TWASACalibrationSimuBuilder(const THyphiAttributes&
 {
   att._logger->info("TWASACalibrationSimuBuilder::TWASACalibrationSimuBuilder");
 
-  par = std::make_unique<ParaManager>(att.map_ParamFiles);
-
   std::vector<std::string> tempName = {
     "HypHI_InSi_log0", "HypHI_InSi_log1", "HypHI_InSi_log2", "HypHI_InSi_log3",
     "TR1_log","TR2_log",
@@ -990,6 +988,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                       default:  std::cerr << "something wrong" << std::endl; break;
                     }
 
+
                   int pdg_code = pid_fromName(hit.Pname);
                   if(pdg_code == 0)
                     att._logger->debug("!> Builder : pdg_code = 0 ! {}", hit.Pname);
@@ -1514,7 +1513,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
   // Fiber Track Analysis
   std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont
-                  = fiberana->FiberTracking(FiberHitClCont, par.get(), RecoEvent.ListHits[G4Sol::PSCE]);
+                  = fiberana->FiberTracking(FiberHitClCont, att.par.get(), RecoEvent.ListHits[G4Sol::PSCE]);
 
   RecoEvent.FiberTrackCont = FiberTrackCont;
 
@@ -1523,7 +1522,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
     for(int j=0; j<3; ++j)
       num_combi_mft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
 
-  if(par->flag_mft12_combi && num_combi_mft12<par->cut_mft12_combi){
+  if(att.par->flag_mft12_combi && num_combi_mft12<att.par->cut_mft12_combi){
     LocalHisto.hfiber_1_1->Fill(num_combi_mft12);
     LocalHisto.hfiber_1_2->Fill((double)num_combi_mft12*1e-3);
     LocalHisto.hfiber_1_3->Fill((double)num_combi_mft12*1e-3);
@@ -1533,7 +1532,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
   LocalHisto.hfiber_1_5->Fill((double)num_combi_mft12*1e-3);
   LocalHisto.hfiber_1_6->Fill((double)num_combi_mft12*1e-3);
   LocalHisto.hfiber_1_7->Fill((double)num_combi_mft12*1e-6);
-  if(par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
+  if(att.par->flag_debug) std::cout << "- num_combi_mft12 : " << num_combi_mft12 << std::endl;
 
   for(auto track: FiberTrackCont["mft12"]){
     double x1 = -9999.;
@@ -1568,7 +1567,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
     for(int j=0; j<3; ++j)
       num_combi_dft12 *= ( (int)FiberHitClCont[i][j].size() + 1 );
 
-  if(par->flag_dft12_combi && num_combi_dft12<par->cut_dft12_combi){
+  if(att.par->flag_dft12_combi && num_combi_dft12<att.par->cut_dft12_combi){
     LocalHisto.hfiber_5_1->Fill(num_combi_dft12);
     LocalHisto.hfiber_5_2->Fill((double)num_combi_dft12*1e-3);
     LocalHisto.hfiber_5_3->Fill((double)num_combi_dft12*1e-3);
@@ -1578,7 +1577,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
   LocalHisto.hfiber_5_5->Fill((double)num_combi_dft12*1e-3);
   LocalHisto.hfiber_5_6->Fill((double)num_combi_dft12*1e-3);
   LocalHisto.hfiber_5_7->Fill((double)num_combi_dft12*1e-6);
-  if(par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
+  if(att.par->flag_debug) std::cout << "- num_combi_dft12 : " << num_combi_dft12 << std::endl;
 
   for(size_t i=0; i<FiberTrackCont["dft12"].size(); ++i){
     FiberTrackAna *track = FiberTrackCont["dft12"][i];

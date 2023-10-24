@@ -25,6 +25,8 @@
 #include "Ana_Event/AnaEvent_Metadata.hh"
 //#include "EventWASAUnpack/TFRSParameter.h"
 
+#include "HitAna/ParaManager.hh"
+
 #include "spdlog/logger.h"
 
 #include "sqlite_orm/sqlite_orm.h"
@@ -197,10 +199,14 @@ struct RunTaskAttrDef
 
   bool Debug_DAF;
   bool DoNoMaterial;
+  bool DoNoBeth;
+  bool DoNoMultiScat;
 
   bool PV_RealXUVComb;
   bool PV_RealPrimTrack;
-  bool CFT_RZfit;
+
+  bool RPZ_RZfit;
+  int  RPZ_MDCWireType;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
@@ -230,7 +236,7 @@ struct RunTaskAttrDef
   std::string DataML_Out;
 
   bool RF_OutputEvents;
-  bool CFT_OutputEvents;
+  bool RPZ_OutputEvents;
 };
 
 struct RunFullConfigDef
@@ -301,7 +307,7 @@ inline auto InitStorage()
 				 make_column("Task_KalmanDAF", &RunTaskDef::Task_KalmanDAF),
 				 make_column("Task_KalmanDAFPID", &RunTaskDef::Task_KalmanDAFPID),
 				 make_column("Task_DecayVtx", &RunTaskDef::Task_DecayVtx),
-				 make_column("Task_DecayVtx_piPlus", &RunTaskDef::Task_DecayVtx_piplus),
+         make_column("Task_DecayVtx_piPlus", &RunTaskDef::Task_DecayVtx_piplus),
 				 make_column("Task_ReStart", &RunTaskDef::Task_ReStart)
 				 ),
 		      make_table(
@@ -327,9 +333,12 @@ inline auto InitStorage()
 				 make_column("HashId", &RunTaskAttrDef::Hash),
 				 make_column("Debug_DAF", &RunTaskAttrDef::Debug_DAF),
 				 make_column("DoNoMaterial", &RunTaskAttrDef::DoNoMaterial),
+				 make_column("DoNoBeth", &RunTaskAttrDef::DoNoBeth),
+				 make_column("DoNoMultiScat", &RunTaskAttrDef::DoNoMultiScat),
 				 make_column("PV_RealXUVComb", &RunTaskAttrDef::PV_RealXUVComb),
 				 make_column("PV_RealPrimTrack", &RunTaskAttrDef::PV_RealPrimTrack),
-				 make_column("CFT_RZfit", &RunTaskAttrDef::CFT_RZfit),
+				 make_column("RPZ_RZfit", &RunTaskAttrDef::RPZ_RZfit),
+				 make_column("RPZ_MDCWireType", &RunTaskAttrDef::RPZ_MDCWireType),
 				 make_column("RZ_ChangeMiniFiber", &RunTaskAttrDef::RZ_ChangeMiniFiber),
 				 make_column("RZ_MDCProlate", &RunTaskAttrDef::RZ_MDCProlate),
 				 make_column("RZ_MDCWire2", &RunTaskAttrDef::RZ_MDCWire2),
@@ -347,7 +356,7 @@ inline auto InitStorage()
 				 make_column("FlatML_namefile", &RunTaskAttrDef::FlatML_namefile),
 				 make_column("DataML_Out", &RunTaskAttrDef::DataML_Out),
 				 make_column("RF_OutputEvents", &RunTaskAttrDef::RF_OutputEvents),
-				 make_column("CFT_OutputEvents", &RunTaskAttrDef::CFT_OutputEvents)
+				 make_column("RPZ_OutputEvents", &RunTaskAttrDef::RPZ_OutputEvents)
 				 ),
 		      make_table(
 				 "RunFullConfig",
@@ -437,10 +446,13 @@ class THyphiAttributes
   bool beam_only;
   bool Debug_DAF;
   bool DoNoMaterial;
+  bool DoNoBeth;
+  bool DoNoMultiScat;
 
   bool PV_RealXUVComb;
   bool PV_RealPrimTrack;
-  bool CFT_RZfit;
+  bool RPZ_RZfit;
+  int  RPZ_MDCWireType;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
@@ -479,12 +491,14 @@ class THyphiAttributes
   std::string DataML_Out;
 
   bool RF_OutputEvents;
-  bool CFT_OutputEvents;
+  bool RPZ_OutputEvents;
 
   FairField* Field;
 
   const FullRecoConfig& Config;
   const DataSimExp& InputPar;
+
+  std::unique_ptr<ParaManager> par;
 
   std::shared_ptr<spdlog::logger> _logger;
   

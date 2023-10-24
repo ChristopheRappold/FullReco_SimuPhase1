@@ -67,6 +67,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   G4_GeoResolution  = false;
   Debug_DAF         = false;
   DoNoMaterial      = false;
+  DoNoBeth          = false;
+  DoNoMultiScat     = false;
 
   PV_RealXUVComb   = false;
   PV_RealPrimTrack = false;
@@ -103,7 +105,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   PID_minProb = 0.;
 
   RF_OutputEvents = false;
-  CFT_OutputEvents = false;
+  RPZ_OutputEvents = false;
 
 
   //Optics parameters
@@ -198,15 +200,21 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("Debug_DAF"))
     Debug_DAF = true;
   if(Config.IsAvailable("NoMaterial"))
-    DoNoMaterial = true;
+    DoNoMaterial = config.Get<bool>("NoMaterial");
+  if(Config.IsAvailable("NoBeth"))
+    DoNoBeth = config.Get<bool>("NoBeth");
+  if(Config.IsAvailable("NoMultiScat"))
+    DoNoMultiScat = config.Get<bool>("NoMultiScat");
 
   if(Config.IsAvailable("PV_RealXUVComb"))
     PV_RealXUVComb = Config.Get<bool>("PV_RealXUVComb");
   if(Config.IsAvailable("PV_RealPrimTrack"))
     PV_RealPrimTrack = Config.Get<bool>("PV_RealPrimTrack");
 
-  if(Config.IsAvailable("CFT_RZfit"))
-    CFT_RZfit = Config.Get<bool>("CFT_RZfit");
+  if(Config.IsAvailable("RPZ_RZfit"))
+    RPZ_RZfit = Config.Get<bool>("RPZ_RZfit");
+  if(Config.IsAvailable("RPZ_MDCWireType"))
+    RPZ_MDCWireType = Config.Get<int>("RPZ_MDCWireType");
   if(Config.IsAvailable("RZ_ChangeMiniFiber"))
     RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
   if(Config.IsAvailable("RZ_MDCProlate"))
@@ -290,8 +298,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("RF_OutputEvents"))
     RF_OutputEvents = Config.Get<bool>("RF_OutputEvents");
 
-  if(Config.IsAvailable("CFT_OutputEvents"))
-    CFT_OutputEvents = Config.Get<bool>("CFT_OutputEvents");
+  if(Config.IsAvailable("RPZ_OutputEvents"))
+    RPZ_OutputEvents = Config.Get<bool>("RPZ_OutputEvents");
 
   DataML_Out = Config.IsAvailable("DataML_Out") ? Config.Get<std::string>("DataML_Out") : "NoneInConfig";
 
@@ -426,6 +434,11 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     else
     map_ParamFiles.insert({"optics_name","./calib/optics/optics_par.csv"});
   */
+
+
+
+  par = std::make_unique<ParaManager>(map_ParamFiles);
+  
   if(Config.IsAvailable("Wasa_FieldMap"))
     Wasa_FieldMap = Config.Get<int>("Wasa_FieldMap");
 
@@ -505,10 +518,20 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   genfit::FieldManager::getInstance()->useCache(true, 8);
   genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
-  if(DoNoMaterial)
+  if(DoNoMaterial == true)
     {
       genfit::MaterialEffects::getInstance()->setNoEffects();
       _logger->warn(" ** > Use No material !");
+    }
+  if(DoNoBeth == true)
+    {
+      genfit::MaterialEffects::getInstance()->setEnergyLossBetheBloch(false);
+      _logger->warn(" ** > Use No Beth-Block : noEnergyLoss !");
+    }
+  if(DoNoMultiScat == true)
+    {
+      genfit::MaterialEffects::getInstance()->setNoiseCoulomb(false);
+      _logger->warn(" ** > Use No Multiscatering noise !");
     }
 
   // genfit::MaterialEffects::getInstance()->drawdEdx(-211);
@@ -906,9 +929,11 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.Hash = Hash;
   out.RunTaskAttr.Debug_DAF          = Debug_DAF;
   out.RunTaskAttr.DoNoMaterial       = DoNoMaterial;
+  out.RunTaskAttr.DoNoBeth           = DoNoBeth;
+  out.RunTaskAttr.DoNoMultiScat      = DoNoMultiScat;
   out.RunTaskAttr.PV_RealXUVComb     = PV_RealXUVComb;
   out.RunTaskAttr.PV_RealPrimTrack   = PV_RealPrimTrack;
-  out.RunTaskAttr.CFT_RZfit          = CFT_RZfit;
+  out.RunTaskAttr.RPZ_RZfit          = RPZ_RZfit;
   out.RunTaskAttr.RZ_ChangeMiniFiber = RZ_ChangeMiniFiber;
   out.RunTaskAttr.RZ_MDCProlate      = RZ_MDCProlate;
   out.RunTaskAttr.RZ_MDCWire2        = RZ_MDCWire2;
@@ -926,7 +951,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.FlatML_namefile    = FlatML_namefile;
   out.RunTaskAttr.DataML_Out         = DataML_Out;
   out.RunTaskAttr.RF_OutputEvents    = RF_OutputEvents;
-  out.RunTaskAttr.CFT_OutputEvents    = CFT_OutputEvents;
+  out.RunTaskAttr.RPZ_OutputEvents    = RPZ_OutputEvents;
 
   out.RunFullConfig.Hash = Hash;
   std::string tempCj;
