@@ -994,7 +994,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                     att._logger->debug("!> Builder : pdg_code = 0 ! {}", hit.Pname);
 
                   FiberHitAna* hit_ana = new FiberHitAna(i_fiber, i_layer, LayerID/2,
-                                  gRandom->Gaus(hit.Time, time_res_fiber), hit.Energy, pdg_code, TrackID, par.get());
+                                  gRandom->Gaus(hit.Time, time_res_fiber), hit.Energy, pdg_code, TrackID, att.par.get());
                   FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].emplace_back(hit_ana);
 
                   auto tempTrackSimFibers = RecoEvent.TrackDAFSim.find(TrackID);
