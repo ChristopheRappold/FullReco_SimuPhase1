@@ -67,6 +67,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   G4_GeoResolution  = false;
   Debug_DAF         = false;
   DoNoMaterial      = false;
+  DoNoBeth          = false;
+  DoNoMultiScat     = false;
 
   PV_RealXUVComb   = false;
   PV_RealPrimTrack = false;
@@ -183,7 +185,11 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(Config.IsAvailable("Debug_DAF"))
     Debug_DAF = true;
   if(Config.IsAvailable("NoMaterial"))
-    DoNoMaterial = true;
+    DoNoMaterial = config.Get<bool>("NoMaterial");
+  if(Config.IsAvailable("NoBeth"))
+    DoNoBeth = config.Get<bool>("NoBeth");
+  if(Config.IsAvailable("NoMultiScat"))
+    DoNoMultiScat = config.Get<bool>("NoMultiScat");
 
   if(Config.IsAvailable("PV_RealXUVComb"))
     PV_RealXUVComb = Config.Get<bool>("PV_RealXUVComb");
@@ -481,10 +487,20 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   genfit::FieldManager::getInstance()->useCache(true, 8);
   genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
-  if(DoNoMaterial)
+  if(DoNoMaterial == true)
     {
       genfit::MaterialEffects::getInstance()->setNoEffects();
       _logger->warn(" ** > Use No material !");
+    }
+  if(DoNoBeth == true)
+    {
+      genfit::MaterialEffects::getInstance()->setEnergyLossBetheBloch(false);
+      _logger->warn(" ** > Use No Beth-Block : noEnergyLoss !");
+    }
+  if(DoNoMultiScat == true)
+    {
+      genfit::MaterialEffects::getInstance()->setNoiseCoulomb(false);
+      _logger->warn(" ** > Use No Multiscatering noise !");
     }
 
   // genfit::MaterialEffects::getInstance()->drawdEdx(-211);
@@ -882,6 +898,8 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.Hash = Hash;
   out.RunTaskAttr.Debug_DAF          = Debug_DAF;
   out.RunTaskAttr.DoNoMaterial       = DoNoMaterial;
+  out.RunTaskAttr.DoNoBeth           = DoNoBeth;
+  out.RunTaskAttr.DoNoMultiScat      = DoNoMultiScat;
   out.RunTaskAttr.PV_RealXUVComb     = PV_RealXUVComb;
   out.RunTaskAttr.PV_RealPrimTrack   = PV_RealPrimTrack;
   out.RunTaskAttr.RPZ_RZfit          = RPZ_RZfit;

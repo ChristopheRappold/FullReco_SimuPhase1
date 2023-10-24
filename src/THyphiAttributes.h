@@ -199,6 +199,8 @@ struct RunTaskAttrDef
 
   bool Debug_DAF;
   bool DoNoMaterial;
+  bool DoNoBeth;
+  bool DoNoMultiScat;
 
   bool PV_RealXUVComb;
   bool PV_RealPrimTrack;
@@ -331,6 +333,8 @@ inline auto InitStorage()
 				 make_column("HashId", &RunTaskAttrDef::Hash),
 				 make_column("Debug_DAF", &RunTaskAttrDef::Debug_DAF),
 				 make_column("DoNoMaterial", &RunTaskAttrDef::DoNoMaterial),
+				 make_column("DoNoBeth", &RunTaskAttrDef::DoNoBeth),
+				 make_column("DoNoMultiScat", &RunTaskAttrDef::DoNoMultiScat),
 				 make_column("PV_RealXUVComb", &RunTaskAttrDef::PV_RealXUVComb),
 				 make_column("PV_RealPrimTrack", &RunTaskAttrDef::PV_RealPrimTrack),
 				 make_column("RPZ_RZfit", &RunTaskAttrDef::RPZ_RZfit),
@@ -438,6 +442,8 @@ class THyphiAttributes
   bool beam_only;
   bool Debug_DAF;
   bool DoNoMaterial;
+  bool DoNoBeth;
+  bool DoNoMultiScat;
 
   bool PV_RealXUVComb;
   bool PV_RealPrimTrack;
