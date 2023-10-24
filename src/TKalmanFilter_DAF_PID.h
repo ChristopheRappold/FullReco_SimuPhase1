@@ -192,6 +192,9 @@ private:
   int Nb_MiniFiberCut;
 
   std::map<int,CutMomBeta*> CutPID;
+  double PID_maxMom_piPlus = 10000.;//1.5;
+  double PID_maxMom_kaonPlus = 10000.;// 2.5;
+  double PID_maxMom_proton = 10000.;//3.5;
 
   int ProbPIDAssign_Pos(double momenta, double beta);
   int ProbPIDAssign_Neg(double momenta, double beta);

@@ -1301,26 +1301,29 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
 template<class Out>
 int TKalmanFilter_DAF_PID<Out>::ProbPIDAssign_Pos(double momenta, double beta)
 {
-  double prob_beta_Pi = (*(CutPID[211]))(momenta,beta);
-  double diff_beta_Pi = (*(CutPID[211])).GetDiff(momenta,beta);
-  double chi2_beta_Pi = (*(CutPID[211])).GetChi2(momenta,beta);
+  double prob_beta_Pi = 0.;
+  if(momenta < PID_maxMom_piPlus) prob_beta_Pi = (*(CutPID[211]))(momenta,beta);
+  //double diff_beta_Pi = (*(CutPID[211])).GetDiff(momenta,beta);
+  //double chi2_beta_Pi = (*(CutPID[211])).GetChi2(momenta,beta);
 
-  double prob_beta_K = (*(CutPID[321]))(momenta,beta);
-  double diff_beta_K = (*(CutPID[321])).GetDiff(momenta,beta);
-  double chi2_beta_K = (*(CutPID[321])).GetChi2(momenta,beta);
+  double prob_beta_K = 0.;
+  if(momenta < PID_maxMom_kaonPlus) prob_beta_K = (*(CutPID[321]))(momenta,beta);
+  //double diff_beta_K = (*(CutPID[321])).GetDiff(momenta,beta);
+  //double chi2_beta_K = (*(CutPID[321])).GetChi2(momenta,beta);
 
-  double prob_beta_Pr = (*(CutPID[2212]))(momenta,beta);
-  double diff_beta_Pr = (*(CutPID[2212])).GetDiff(momenta,beta);
-  double chi2_beta_Pr = (*(CutPID[2212])).GetChi2(momenta,beta);
+  double prob_beta_Pr = 0.;
+  if(momenta < PID_maxMom_proton) prob_beta_Pr = (*(CutPID[2212]))(momenta,beta);
+  //double diff_beta_Pr = (*(CutPID[2212])).GetDiff(momenta,beta);
+  //double chi2_beta_Pr = (*(CutPID[2212])).GetChi2(momenta,beta);
 
   double prob_beta_Limit = (*(CutPID[991]))(momenta,beta);
-  double diff_beta_Limit = (*(CutPID[991])).GetDiff(momenta,beta);
-  double chi2_beta_Limit = (*(CutPID[991])).GetChi2(momenta,beta);
+  //double diff_beta_Limit = (*(CutPID[991])).GetDiff(momenta,beta);
+  //double chi2_beta_Limit = (*(CutPID[991])).GetChi2(momenta,beta);
 
   std::vector<int> indexToPdg = {211,321,2212,991};
 
-  double chi2_beta_array[4] = {chi2_beta_Pi, chi2_beta_K, chi2_beta_Pr, chi2_beta_Limit};
-  double diff_beta_array[4] = {diff_beta_Pi, diff_beta_K, diff_beta_Pr, diff_beta_Limit};
+  //double chi2_beta_array[4] = {chi2_beta_Pi, chi2_beta_K, chi2_beta_Pr, chi2_beta_Limit};
+  //double diff_beta_array[4] = {diff_beta_Pi, diff_beta_K, diff_beta_Pr, diff_beta_Limit};
   double prob_beta_array[4] = {prob_beta_Pi, prob_beta_K, prob_beta_Pr, prob_beta_Limit};
   //std::cout<<" Pi:"<<prob_beta_Pi<<" K+:"<<prob_beta_K<<" p:"<<prob_beta_Pr;
 
