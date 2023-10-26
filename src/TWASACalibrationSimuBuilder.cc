@@ -522,8 +522,10 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       double resolution_psce   = 1.1; // 3.8/sqrt(12.)
       double resolution_psce_z = 1.0;
       double time_res_psb      = att.psb_timeres; // ns
+      double dE_res_psb        = 0.1;   // in % of dE
       double time_res_psbe     = 0.150; // ns
       double time_res_psfe     = 0.150; // ns
+      double dE_res_psfe       = 0.1;   // in % of dE
       double time_res_fiber    = 0.150; // ns
       double time_res_mdc      = 0.150; // ns
       double time_res          = 0.150; // ns
@@ -812,7 +814,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psb), hit.Energy);
+                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psb), gRandom->Gaus(hit.Energy, hit.Energy * dE_res_psb));
                   measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
@@ -936,7 +938,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psfe), hit.Energy);
+                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psfe), gRandom->Gaus(hit.Energy, hit.Energy * dE_res_psfe));
                   measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
