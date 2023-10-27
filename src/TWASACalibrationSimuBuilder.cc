@@ -524,6 +524,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       double time_res_psb      = att.psb_timeres; // ns
       double dE_res_psb        = 0.1;   // in % of dE
       double time_res_psbe     = 0.150; // ns
+      double dE_res_psbe       = 0.1;   // in % of dE
       double time_res_psfe     = 0.150; // ns
       double dE_res_psfe       = 0.1;   // in % of dE
       double time_res_fiber    = 0.150; // ns
@@ -823,6 +824,8 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
                   LocalHisto.h76->Fill(LayerID, atan2(shift[1], shift[0]));
 
+                  //std::cout << "PSBHit of track: " << TrackID << "\n";
+
                   //std::cout << "PSB Det: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
               else if(IsPSBE(TypeDet))
@@ -878,7 +881,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psbe), hit.Energy);
+                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psbe), gRandom->Gaus(hit.Energy, hit.Energy * dE_res_psfe));
                   measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
@@ -1231,6 +1234,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(1) = ClosestPointTrack.Y();
                   hitCoordsTree(2) = ClosestPointTrack.Z();
 
+                  //std::cout << "MDCHit of track: " << TrackID << "\n";
                   //std::cout << "MDC Layer: " << TypeDet-G4Sol::MG01+1 << " hit: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
               else
@@ -1463,6 +1467,9 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
               RecoEvent.ListHitsInfo[TypeDet[i][j]].emplace_back(measinfo);
 
               RecoEvent.ListHitsToTracks[TypeDet[i][j]].emplace_back(FiberHitClCont[i][j][k]->GetSimTrackID());
+
+              //if(i == 3 || i == 4)
+                //std::cout << "FiberHit of track: " << FiberHitClCont[i][j][k]->GetSimTrackID() << "\n";
 
               //std::cout << "FiberCl Det: " << i << " layer: " << j << " hit: " << hitID << " TrackID: " << FiberHitClCont[i][j][k]->GetSimTrackID() << "\n";
             }

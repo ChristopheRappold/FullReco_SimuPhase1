@@ -80,7 +80,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   WF_perfect  = false;
   WF_PSBHits  = true;
-  WF_PSFEHits = false;
+  WF_PSBEHits = false;
 
   KF_Kalman     = false;
   KF_KalmanSqrt = true;
@@ -228,8 +228,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     WF_perfect = Config.Get<bool>("WF_perfect");
   if(Config.IsAvailable("WF_PSBHits"))
     WF_PSBHits = Config.Get<bool>("WF_PSBHits");
-  if(Config.IsAvailable("WF_PSFEHits"))
-    WF_PSFEHits = Config.Get<bool>("WF_PSFEHits");
+  if(Config.IsAvailable("WF_PSBEHits"))
+    WF_PSBEHits = Config.Get<bool>("WF_PSBEHits");
   
   _logger->info("RZ Setting: Prolate? {} / Wire2? {} / BiasCorr? {} / ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
                 RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
@@ -940,7 +940,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.RZ_MDCBiasCorr     = RZ_MDCBiasCorr;
   out.RunTaskAttr.WF_perfect         = WF_perfect;
   out.RunTaskAttr.WF_PSBHits         = WF_PSBHits;
-  out.RunTaskAttr.WF_PSFEHits        = WF_PSFEHits;
+  out.RunTaskAttr.WF_PSBEHits        = WF_PSBEHits;
   out.RunTaskAttr.KF_Kalman          = KF_Kalman;
   out.RunTaskAttr.KF_KalmanSqrt      = KF_KalmanSqrt;
   out.RunTaskAttr.KF_KalmanRef       = KF_KalmanRef;
