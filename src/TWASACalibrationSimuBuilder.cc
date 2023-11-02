@@ -865,23 +865,31 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   // v is at the left border of the bar -> rotate 3.75 degree to be at the center of the bar
                   v.RotateZ(-3.75 * TMath::DegToRad());
                   v = v.Unit();
-
                   TVector3 u(v.Y(), -v.X(), 0.);
                   TVector3 o(shift[0], shift[1], shift[2]);
+
+                  u.SetXYZ(1,0,0);
+                  v.SetXYZ(0,1,0);
+                  o.SetXYZ(hit.HitPosX,hit.HitPosY,hit.HitPosZ);
+
                   genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
 
                   TVectorD hitCoords(2);
-                  hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // phi ! be aware ! not u-dim
-                  hitCoords(1) = gRandom->Uniform(6., 22.);     // r -> v dir
+                  //hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // phi ! be aware ! not u-dim
+                  //hitCoords(1) = gRandom->Uniform(6., 22.);     // r -> v dir
+                  hitCoords(0) = 0.; // phi ! be aware ! not u-dim
+                  hitCoords(1) = 0.;     // r -> v dir
 
                   TMatrixDSym hitCov(2);
-                  hitCov(0, 0) = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
-                  hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
+                  //hitCov(0, 0) = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
+                  //hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
+                  hitCov(0, 0) = 0.1;
+                  hitCov(1, 1) = 0.1;
                   measurement =
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psbe), gRandom->Gaus(hit.Energy, hit.Energy * dE_res_psfe));
+                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psbe), gRandom->Gaus(hit.Energy, hit.Energy * dE_res_psbe));
                   measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
