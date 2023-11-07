@@ -403,6 +403,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       int TrackID = event.BeamTrackID[index];
 
       InfoInit tempInit;
+      tempInit.pdg = pid_fromName(event.BeamNames[index]);
       tempInit.charge = event.BeamCharges[index];
       tempInit.time = gRandom->Gaus(0., time_res_t0counter);
       tempInit.posX = event.InteractionPoint_X;
@@ -411,6 +412,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       tempInit.momX = event.BeamMomentums_X[index];
       tempInit.momY = event.BeamMomentums_Y[index];
       tempInit.momZ = event.BeamMomentums_Z[index];
+      tempInit.mass = event.BeamMasses[index];
       RecoEvent.TrackDAFInitSim.insert(std::make_pair(TrackID, tempInit));
 
       std::vector<std::vector<SimHit> > tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
@@ -437,6 +439,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       int TrackID = event.DaughterTrackID[index];
 
       InfoInit tempInit;
+      tempInit.pdg = pid_fromName(event.DaughterNames[index]);
       tempInit.charge = event.DaughterCharges[index];
       tempInit.time = gRandom->Gaus(event.DecayTime, time_res_t0counter);
       tempInit.posX = event.DecayVertex_X;
@@ -445,6 +448,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       tempInit.momX = event.DaughterMomentums_X[index];
       tempInit.momY = event.DaughterMomentums_Y[index];
       tempInit.momZ = event.DaughterMomentums_Z[index];
+      tempInit.mass = event.DaughterMasses[index];
       RecoEvent.TrackDAFInitSim.insert(std::make_pair(TrackID, tempInit));
 
       RecoEvent.DaughtersTrackDAFInit.insert(std::make_pair(TrackID, tempInit));
@@ -483,6 +487,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
     OutHit->Time              = hit.Time;
     OutHit->Energy            = hit.Energy;
     OutHit->TrackLength       = hit.TrackLength;
+    OutHit->HitLength         = TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ));
 
     // std::cout<<" Out> LayerID:"<<LayerID<<" "<<HitID<<std::endl;
   };
@@ -564,18 +569,19 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
               auto tempTrackSimLayers = RecoEvent.TrackDAFSim.find(TrackID);
               SimHit tempHitSim;
-              tempHitSim.layerID = LayerID;
-              tempHitSim.hitX    = hit.HitPosX;
-              tempHitSim.hitY    = hit.HitPosY;
-              tempHitSim.hitZ    = hit.HitPosZ;
-              tempHitSim.momX    = hit.MomX;
-              tempHitSim.momY    = hit.MomY;
-              tempHitSim.momZ    = hit.MomZ;
-              tempHitSim.pdg     = pdg_code;
-              tempHitSim.mass    = hit.Mass;
-              tempHitSim.Eloss   = hit.Energy;
-              tempHitSim.time    = gRandom->Gaus(hit.Time, time_res);
-              tempHitSim.length  = hit.TrackLength;
+              tempHitSim.layerID     = LayerID;
+              tempHitSim.hitX        = hit.HitPosX;
+              tempHitSim.hitY        = hit.HitPosY;
+              tempHitSim.hitZ        = hit.HitPosZ;
+              tempHitSim.momX        = hit.MomX;
+              tempHitSim.momY        = hit.MomY;
+              tempHitSim.momZ        = hit.MomZ;
+              tempHitSim.pdg         = pdg_code;
+              tempHitSim.mass        = hit.Mass;
+              tempHitSim.Eloss       = hit.Energy;
+              tempHitSim.time        = gRandom->Gaus(hit.Time, time_res);
+              tempHitSim.tracklength = hit.TrackLength;
+              tempHitSim.hitlength   = TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ));
               tempTrackSimLayers->second[TypeDet + LayerID].emplace_back(tempHitSim);
 
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
@@ -862,8 +868,8 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   double* local_rot = H.GetRotationMatrix();
 
                   TVector3 v(local_rot[0], local_rot[3], local_rot[6]);
-                  // v is at the left border of the bar -> rotate 3.75 degree to be at the center of the bar
-                  v.RotateZ(-3.75 * TMath::DegToRad());
+                  // v is at the left border of the bar -> rotate 4.09 degree to be at the center of the bar
+                  v.RotateZ(-4.09 * TMath::DegToRad());
                   v = v.Unit();
                   TVector3 u(v.Y(), -v.X(), 0.);
                   TVector3 o(shift[0], shift[1], shift[2]);
@@ -885,6 +891,11 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   //hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
                   hitCov(0, 0) = 0.1;
                   hitCov(1, 1) = 0.1;
+                  //hitCov(0, 0) = 0.5744*0.5744;
+                  //hitCov(1, 1) = 2.956*2.956;
+                  //hitCov(0, 1) = 0.00075487717;
+                  //hitCov(1, 0) = 0.00075487717;
+
                   measurement =
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
@@ -895,6 +906,16 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
+
+                  //std::cout << "dx en PSBE: " << TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ)) << "\n";
+/*
+                  std::cout << "HitPosX : " << hit.HitPosX << std::endl;
+                  std::cout << "HitPosY : " << hit.HitPosY << std::endl;
+                  std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
+
+                  std::cout << "ExitPosX : " << hit.ExitPosX << std::endl;
+                  std::cout << "ExitPosY : " << hit.ExitPosY << std::endl;
+                  std::cout << "ExitPosZ : " << hit.ExitPosZ << std::endl;*/
                 }
               else if(IsPSFE(TypeDet))
                 {
@@ -1012,18 +1033,19 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
                   auto tempTrackSimFibers = RecoEvent.TrackDAFSim.find(TrackID);
                   SimHit tempHitSim;
-                  tempHitSim.layerID = LayerID;
-                  tempHitSim.hitX    = hit.HitPosX;
-                  tempHitSim.hitY    = hit.HitPosY;
-                  tempHitSim.hitZ    = hit.HitPosZ;
-                  tempHitSim.momX    = hit.MomX;
-                  tempHitSim.momY    = hit.MomY;
-                  tempHitSim.momZ    = hit.MomZ;
-                  tempHitSim.pdg     = pdg_code;
-                  tempHitSim.mass    = hit.Mass;
-                  tempHitSim.Eloss   = hit.Energy;
-                  tempHitSim.time    = hit.Time;
-                  tempHitSim.length  = hit.TrackLength;
+                  tempHitSim.layerID      = LayerID;
+                  tempHitSim.hitX         = hit.HitPosX;
+                  tempHitSim.hitY         = hit.HitPosY;
+                  tempHitSim.hitZ         = hit.HitPosZ;
+                  tempHitSim.momX         = hit.MomX;
+                  tempHitSim.momY         = hit.MomY;
+                  tempHitSim.momZ         = hit.MomZ;
+                  tempHitSim.pdg          = pdg_code;
+                  tempHitSim.mass         = hit.Mass;
+                  tempHitSim.Eloss        = hit.Energy;
+                  tempHitSim.time         = hit.Time;
+                  tempHitSim.tracklength  = hit.TrackLength;
+                  tempHitSim.hitlength    = TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ));
                   tempTrackSimFibers->second[TypeDet].emplace_back(tempHitSim);
 
                   auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
@@ -1283,18 +1305,19 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
               auto tempTrackSim = RecoEvent.TrackDAFSim.find(TrackID);
               SimHit tempHitSim;
-              tempHitSim.layerID = LayerID;
-              tempHitSim.hitX    = hit.HitPosX;
-              tempHitSim.hitY    = hit.HitPosY;
-              tempHitSim.hitZ    = hit.HitPosZ;
-              tempHitSim.momX    = hit.MomX;
-              tempHitSim.momY    = hit.MomY;
-              tempHitSim.momZ    = hit.MomZ;
-              tempHitSim.pdg     = pdg_code;
-              tempHitSim.mass    = hit.Mass;
-              tempHitSim.Eloss   = hit.Energy;
-              tempHitSim.time    = hit.Time;
-              tempHitSim.length  = hit.TrackLength;
+              tempHitSim.layerID     = LayerID;
+              tempHitSim.hitX        = hit.HitPosX;
+              tempHitSim.hitY        = hit.HitPosY;
+              tempHitSim.hitZ        = hit.HitPosZ;
+              tempHitSim.momX        = hit.MomX;
+              tempHitSim.momY        = hit.MomY;
+              tempHitSim.momZ        = hit.MomZ;
+              tempHitSim.pdg         = pdg_code;
+              tempHitSim.mass        = hit.Mass;
+              tempHitSim.Eloss       = hit.Energy;
+              tempHitSim.time        = hit.Time;
+              tempHitSim.tracklength = hit.TrackLength;
+              tempHitSim.hitlength    = TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ));
               tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);

@@ -5,7 +5,7 @@ using namespace std;
 
 ClassImp(THyphiTrack)
   
-THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1.),Mass(-1.),pdgcode(0),MomMass(0.,0.,0.,0.),Mom(0.,0.,0.),Charge(0),BarId(0),Beta(0),RefPoint(-999.,-999.,-999.),Pval2(-1),TofsBar(-1),PathLength(-999),TOF(-999),MomIni(-999,-999,-999),RChiIni(-1),PathLengthIni(-999.),TOFIni(-999.),BetaIni(-999),MassIni(-999.),Sim2Vtx(-999.,-999.,-999.,-999.),NCent(0),iterNum(-1),Nmfib(0)//,state(5,1),cov(5,5)
+THyphiTrack::THyphiTrack():type(""),MC_status(0),Chi2(-1.),Chi2_X(-1.),Chi2_Y(-1.),Mass(-1.),pdgcode(0),MomMass(0.,0.,0.,0.),Mom(0.,0.,0.),Pos_PS(0.,0.,0.),Mom_PS(0.,0.,0.),Charge(0),BarId(0),dE(0.),dx(0.),Beta(0),RefPoint(-999.,-999.,-999.),Pval2(-1),TofsBar(-1),PathLength(-999),TOF(-999),MomIni(-999,-999,-999),RChiIni(-1),PathLengthIni(-999.),TOFIni(-999.),BetaIni(-999),MassIni(-999.),Sim2Vtx(-999.,-999.,-999.,-999.),NCent(0),iterNum(-1),Nmfib(0)//,state(5,1),cov(5,5)
 {
   
   //   std::cout<<"THyphiTrack Constructor"<<std::endl;
@@ -52,10 +52,14 @@ THyphiTrack::THyphiTrack(const THyphiTrack& H)
   pdgcode=H.pdgcode;
   MomMass=H.MomMass;
   Mom=H.Mom;
-  
+
+  Pos_PS=H.Pos_PS;
+  Mom_PS=H.Mom_PS;
+
   Charge=H.Charge;
   BarId =H.BarId;
   dE = H.dE;
+  dx = H.dx;
   Beta = H.Beta;
   RefPoint = H.RefPoint;
   Pval2  = H.Pval2;
@@ -75,9 +79,7 @@ THyphiTrack::THyphiTrack(const THyphiTrack& H)
     {
       State[i] = H.State[i];
       for(int j=0;j<6;j++)
-	{
-	  Cov[i][j]=H.Cov[i][j];
-	}
+        Cov[i][j]=H.Cov[i][j];
     }
 
   NCent  = H.NCent;
@@ -102,7 +104,6 @@ THyphiTrack::THyphiTrack(const THyphiTrack& H)
     ResPSCE[i] = H.ResPSCE[i];
     WeightPSCE[i] = H.WeightPSCE[i];
   }
-
 }
 
 //THyphiTrack& THyphiTrack::operator=(const THyphiTrack& H)
@@ -120,6 +121,8 @@ void THyphiTrack::Clear(Option_t *option)
   MomMass.SetXYZT(0.,0.,0.,0.);
   Mom.SetXYZ(0.,0.,0.);
 
+  Pos_PS.SetXYZ(0.,0.,0.);
+  Mom_PS.SetXYZ(0.,0.,0.);
 
   type="";
   MC_status=-999;
@@ -131,7 +134,8 @@ void THyphiTrack::Clear(Option_t *option)
 
   Charge=-999;
   BarId=-999;
-  dE = -999;
+  dE = 0.;
+  dx = 0.;
   Beta=-999.;
   RefPoint.SetXYZ(-999.,-999.,-999.);
   Pval2 = -999;

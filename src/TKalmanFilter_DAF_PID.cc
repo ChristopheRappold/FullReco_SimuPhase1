@@ -271,9 +271,13 @@ int TKalmanFilter_DAF_PID<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
       OutTrack->MomMass.SetXYZM(FitRes.momX, FitRes.momY, FitRes.momZ, FitRes.mass);
       OutTrack->Mom.SetXYZ(FitRes.momX, FitRes.momY, FitRes.momZ);
 
+      OutTrack->Pos_PS.SetXYZ(FitRes.posX_PS, FitRes.posY_PS, FitRes.posY_PS);
+      OutTrack->Mom_PS.SetXYZ(FitRes.momX_PS, FitRes.momY_PS, FitRes.momZ_PS);
+
       OutTrack->BarId  = FitRes.lastHit;
       OutTrack->Charge = FitRes.charge;
       OutTrack->dE     = TInfo->second[FitRes.lastHit].Eloss;
+      OutTrack->dx     = TInfo->second[FitRes.lastHit].hitlength;
       OutTrack->Beta   = FitRes.beta;
       OutTrack->RefPoint.SetXYZ(FitRes.posX, FitRes.posY, FitRes.posZ);
       OutTrack->Pval2      = FitRes.pvalue;
@@ -284,7 +288,7 @@ int TKalmanFilter_DAF_PID<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
       OutTrack->BetaIni       = FitRes.beta2;
       OutTrack->MassIni       = FitRes.mass2;
       OutTrack->TOFIni        = FitRes.tof2;
-      OutTrack->PathLengthIni = TInfo->second[FitRes.lastHit].length; // FitRes.path_length2;
+      OutTrack->PathLengthIni = TInfo->second[FitRes.lastHit].tracklength; // FitRes.path_length2;
       OutTrack->RChiIni       = FitRes.fitter;
       if(Decay == 1)
         OutTrack->Sim2Vtx.SetXYZT(std::get<1>(IsDecay->second), std::get<2>(IsDecay->second),
@@ -790,10 +794,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
             genfit::TrackPoint* tp_tmp = fitTrack->getPointWithMeasurementAndFitterInfo(0, REP);
             genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(REP));
             const genfit::MeasuredStateOnPlane& buf_state = kfi->getFittedState();
-            TVector3 v_pos;
-            TVector3 v_mom;
-            TMatrixDSym v_cov;
-            buf_state.getPosMomCov(v_pos, v_mom, v_cov);
+            TVector3 v_pos= buf_state.getPos();
             posBegin = v_pos;
           }
           catch(genfit::Exception& e){
@@ -980,10 +981,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
                 genfit::TrackPoint* tp_tmp = fitTrack_pid->getPointWithMeasurementAndFitterInfo(0, rep_pid);
                 genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(rep_pid));
                 const genfit::MeasuredStateOnPlane& buf_state = kfi->getFittedState();
-                TVector3 v_pos;
-                TVector3 v_mom;
-                TMatrixDSym v_cov;
-                buf_state.getPosMomCov(v_pos, v_mom, v_cov);
+                TVector3 v_pos = buf_state.getPos();
                 posBegin_pid = v_pos;
               }
               catch(genfit::Exception& e){
@@ -1045,6 +1043,34 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
               tempResults.posX = posRef_pid.X();
               tempResults.posY = posRef_pid.Y();
               tempResults.posZ = posRef_pid.Z();
+
+              TVector3 posEnd_pid;
+              TVector3 momEnd_pid;
+              try{
+                genfit::TrackPoint* tp_tmp = fitTrack_pid->getPointWithMeasurementAndFitterInfo(-1, rep_pid);
+                genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(rep_pid));
+                const genfit::MeasuredStateOnPlane& buf_state = kfi->getFittedState();
+                TVector3 v_pos;
+                TVector3 v_mom;
+                buf_state.getPosMom(v_pos, v_mom);
+                posEnd_pid = v_pos;
+                momEnd_pid = v_mom;
+              }
+              catch(genfit::Exception& e){
+                std::cerr<<"Exception posEnd_pid, next track"<<std::endl;
+                std::cerr << e.what();
+                continue;
+              }
+
+              //std::cout << Form("- posEndPID: (%.3f, %.3f, %.3f)",   posEnd_pid.x(),   posEnd_pid.y(),   posEnd_pid.z()) << std::endl;
+
+              tempResults.momX_PS = momEnd_pid.X();
+              tempResults.momY_PS = momEnd_pid.Y();
+              tempResults.momZ_PS = momEnd_pid.Z();
+
+              tempResults.posX_PS = posEnd_pid.X();
+              tempResults.posY_PS = posEnd_pid.Y();
+              tempResults.posZ_PS = posEnd_pid.Z();
 
               for(int row = 0; row < 6; ++row)
                 for(int col = 0; col < 6; ++col)

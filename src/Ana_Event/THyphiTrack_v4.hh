@@ -22,9 +22,13 @@ class THyphiTrack : public TObject
   TLorentzVector MomMass;
   TVector3 Mom;
 
+  TVector3 Pos_PS;
+  TVector3 Mom_PS;
+
   Int_t Charge;
   Int_t BarId;
   Float_t dE;
+  Float_t dx;
   Float_t Beta;
   TVector3 RefPoint;
   // TVector3 HitTR1;
@@ -54,9 +58,9 @@ class THyphiTrack : public TObject
   Double_t State[6];
   Double_t Cov[6][6];
 
-  Int_t      NCent;
-  Int_t      iterNum;
-  Int_t       Nmfib;
+  Int_t NCent;
+  Int_t iterNum;
+  Int_t Nmfib;
 
   Double32_t ResMDC[17][3];
   Double32_t ResFiber[9];

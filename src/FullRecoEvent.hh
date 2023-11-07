@@ -449,11 +449,13 @@ struct SimHit
 
   double Eloss  = 0.;
   double time   = 0.;
-  double length = 0.;
+  double tracklength = 0.;
+  double hitlength = 0.;
 };
 
 struct InfoInit
 {
+  int pdg     = -999 ;
   int charge  = -999 ;
   double time = -999.;
   double posX = -999.;
@@ -462,11 +464,15 @@ struct InfoInit
   double momX = -999.;
   double momY = -999.;
   double momZ = -999.;
+  double mass = -999.;
 };
 
 struct InfoPar
 {
   int pdg       = 0;
+  double posX   = -999.;
+  double posY   = -999.;
+  double posZ   = -999.;
   double momX   = -999.;
   double momY   = -999.;
   double momZ   = -999.;
@@ -474,7 +480,8 @@ struct InfoPar
   double Eloss  = 0.;
   double time   = 0.;
   double TOT    = 0.;
-  double length = 0.;
+  double tracklength = 0.;
+  double hitlength = 0.;
 };
 
 struct ResSolDAF
@@ -499,6 +506,14 @@ struct ResSolDAF
   double posX = -999.;
   double posY = -999.;
   double posZ = -999.;
+
+  double momX_PS = -999.;
+  double momY_PS = -999.;
+  double momZ_PS = -999.;
+
+  double posX_PS = -999.;
+  double posY_PS = -999.;
+  double posZ_PS = -999.;
 
   double mass  = -999.;
   double mass2 = -999.;
