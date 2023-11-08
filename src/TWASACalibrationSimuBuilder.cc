@@ -1,7 +1,6 @@
 #include "TWASACalibrationSimuBuilder.h"
 
 #include "Debug.hh"
-#include "TGeoManager.h"
 
 #include <list>
 #include <map>
@@ -829,10 +828,6 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(2) = hit.HitPosZ;
 
                   LocalHisto.h76->Fill(LayerID, atan2(shift[1], shift[0]));
-
-                  //std::cout << "PSBHit of track: " << TrackID << "\n";
-
-                  //std::cout << "PSB Det: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
               else if(IsPSBE(TypeDet))
                 {
@@ -853,11 +848,11 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 #endif
                   TGeoMatrix* g1   = gGeoManager->GetVolume("PSB")->GetNode(LayerID - 1)->GetMatrix(); // PSCE
                   TGeoMatrix* g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSB_1")->GetMatrix();    // PSB box
-                  TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();          // INNNER
+                  TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();          // INNER
                   TGeoMatrix* g3   = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();          // MFLD
                   TGeoHMatrix H1(*g1), H1_1(*g1_1), H2(*g2), H3(*g3);
                   TGeoHMatrix H = H1_1 * H1;
-                  H             = H2 * H;
+//                  H             = H2 * H;
 
                   H = H3 * H;
 #ifdef DEBUG_BUILD2
@@ -869,14 +864,20 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
                   TVector3 v(local_rot[0], local_rot[3], local_rot[6]);
                   // v is at the left border of the bar -> rotate 4.09 degree to be at the center of the bar
-                  v.RotateZ(-4.09 * TMath::DegToRad());
+//                  v.RotateZ(-4.09 * TMath::DegToRad());
                   v = v.Unit();
                   TVector3 u(v.Y(), -v.X(), 0.);
+
+                  TGeoTubeSeg* shapePSBE = dynamic_cast<TGeoTubeSeg*>(gGeoManager->GetVolume("PSBE")->GetShape());
+                  double mid_r = 0.5*(shapePSBE->GetRmin()+shapePSBE->GetRmax());
+                  shift[0] = mid_r*std::cos(v.Phi());
+                  shift[1] = mid_r*std::sin(v.Phi());
+
                   TVector3 o(shift[0], shift[1], shift[2]);
 
-                  u.SetXYZ(1,0,0);
-                  v.SetXYZ(0,1,0);
-                  o.SetXYZ(hit.HitPosX,hit.HitPosY,hit.HitPosZ);
+                  //u.SetXYZ(1,0,0);
+                  //v.SetXYZ(0,1,0);
+                  //o.SetXYZ(hit.HitPosX,hit.HitPosY,hit.HitPosZ);
 
                   genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
 
@@ -889,12 +890,12 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   TMatrixDSym hitCov(2);
                   //hitCov(0, 0) = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
                   //hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
-                  hitCov(0, 0) = 0.1;
-                  hitCov(1, 1) = 0.1;
-                  //hitCov(0, 0) = 0.5744*0.5744;
-                  //hitCov(1, 1) = 2.956*2.956;
-                  //hitCov(0, 1) = 0.00075487717;
-                  //hitCov(1, 0) = 0.00075487717;
+                  //hitCov(0, 0) = 0.1;
+                  //hitCov(1, 1) = 0.1;
+                  hitCov(0, 0) = 0.5744*0.5744;
+                  hitCov(1, 1) = 2.956*2.956;
+                  hitCov(0, 1) = 0.00075487717;
+                  hitCov(1, 0) = 0.00075487717;
 
                   measurement =
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
@@ -906,16 +907,6 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
-
-                  //std::cout << "dx en PSBE: " << TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ)) << "\n";
-/*
-                  std::cout << "HitPosX : " << hit.HitPosX << std::endl;
-                  std::cout << "HitPosY : " << hit.HitPosY << std::endl;
-                  std::cout << "HitPosZ : " << hit.HitPosZ << std::endl;
-
-                  std::cout << "ExitPosX : " << hit.ExitPosX << std::endl;
-                  std::cout << "ExitPosY : " << hit.ExitPosY << std::endl;
-                  std::cout << "ExitPosZ : " << hit.ExitPosZ << std::endl;*/
                 }
               else if(IsPSFE(TypeDet))
                 {
@@ -936,11 +927,11 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 #endif
                   TGeoMatrix* g1   = gGeoManager->GetVolume("PSF")->GetNode(LayerID - 1)->GetMatrix(); // PSCE
                   TGeoMatrix* g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSF_1")->GetMatrix();    // PSB box
-                  TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();          // INNNER
+                  TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();          // INNER
                   TGeoMatrix* g3   = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();          // MFLD
                   TGeoHMatrix H1(*g1), H1_1(*g1_1), H2(*g2), H3(*g3);
                   TGeoHMatrix H = H1_1 * H1;
-                  H             = H2 * H;
+//                  H             = H2 * H;
 
                   H = H3 * H;
 #ifdef DEBUG_BUILD2
@@ -952,20 +943,33 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
                   TVector3 v(local_rot[0], local_rot[3], local_rot[6]);
                   // v is at the left border of the bar -> rotate 3.75 degree to be at the center of the bar
-                  v.RotateZ(-3.75 * TMath::DegToRad());
+//                  v.RotateZ(-3.75 * TMath::DegToRad());
                   v = v.Unit();
 
                   TVector3 u(v.Y(), -v.X(), 0.);
+
+                  TGeoTubeSeg* shapePSFE = dynamic_cast<TGeoTubeSeg*>(gGeoManager->GetVolume("PSFE")->GetShape());
+                  double mid_r = 0.5*(shapePSFE->GetRmin()+shapePSFE->GetRmax());
+                  shift[0] = mid_r*std::cos(v.Phi());
+                  shift[1] = mid_r*std::sin(v.Phi());
+
                   TVector3 o(shift[0], shift[1], shift[2]);
                   genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
 
                   TVectorD hitCoords(2);
-                  hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // phi ! be aware ! not u-dim
-                  hitCoords(1) = gRandom->Uniform(6., 22.);     // r -> v dir
+                  //hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // phi ! be aware ! not u-dim
+                  //hitCoords(1) = gRandom->Uniform(6., 22.);     // r -> v dir
+                  hitCoords(0) = 0.; // phi ! be aware ! not u-dim
+                  hitCoords(1) = 0.;     // r -> v dir
 
                   TMatrixDSym hitCov(2);
-                  hitCov(0, 0) = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
-                  hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
+                  //hitCov(0, 0) = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
+                  //hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
+                  hitCov(0, 0) = 0.6328*0.6328;
+                  hitCov(1, 1) = 2.033*2.033;
+                  hitCov(0, 1) = 0.00051441990;
+                  hitCov(1, 0) = 0.00051441990;
+
                   measurement =
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);

@@ -30,6 +30,7 @@
 
 #include "TGeoManager.h"
 #include "TGeoElement.h"
+#include "TGeoTube.h"
 
 #include <sstream>
 
