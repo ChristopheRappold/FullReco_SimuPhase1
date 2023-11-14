@@ -526,12 +526,12 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(DoNoBeth == true)
     {
       genfit::MaterialEffects::getInstance()->setEnergyLossBetheBloch(false);
-      _logger->warn(" ** > Use No Beth-Block : noEnergyLoss !");
+      _logger->warn(" ** > Use No Bethe-Bloch : no Energy Loss!");
     }
   if(DoNoMultiScat == true)
     {
       genfit::MaterialEffects::getInstance()->setNoiseCoulomb(false);
-      _logger->warn(" ** > Use No Multiscatering noise !");
+      _logger->warn(" ** > Use No Multiscattering noise!");
     }
 
   // genfit::MaterialEffects::getInstance()->drawdEdx(-211);

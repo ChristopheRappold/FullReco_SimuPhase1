@@ -527,9 +527,9 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       double resolution_psce_z = 1.0;
       double time_res_psb      = att.psb_timeres; // ns
       double dE_res_psb        = 0.1;   // in % of dE
-      double time_res_psbe     = 0.150; // ns
+      double time_res_psbe     = 0.300; // ns
       double dE_res_psbe       = 0.1;   // in % of dE
-      double time_res_psfe     = 0.150; // ns
+      double time_res_psfe     = 0.300; // ns
       double dE_res_psfe       = 0.1;   // in % of dE
       double time_res_fiber    = 0.150; // ns
       double time_res_mdc      = 0.150; // ns
