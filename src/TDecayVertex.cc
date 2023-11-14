@@ -98,6 +98,7 @@ int TDecayVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
     OutHyp->Pvalue_Fragment      = i_Hyp.Pvalue_Fragment;
     OutHyp->Angle_MotherFragment = i_Hyp.Angle_MotherFragment;
     OutHyp->Fragment_IsFromHyp   = i_Hyp.Fragment_IsFromHyp;
+    OutHyp->RealPDG_Fragment     = i_Hyp.RealPDG_Fragment;
 
     OutHyp->PDG_Pion             = i_Hyp.PDG_Pion;
     OutHyp->Id_Pion              = i_Hyp.Id_Pion;
@@ -110,6 +111,7 @@ int TDecayVertex<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
     OutHyp->NHitsMinifiber_Pion  = i_Hyp.NHitsMinifiber_Pion;
     OutHyp->N_Pion               = i_Hyp.N_Pion;
     OutHyp->Pion_IsFromHyp       = i_Hyp.Pion_IsFromHyp;
+    OutHyp->RealPDG_Pion         = i_Hyp.RealPDG_Pion;
 
     OutHyp->Dist_Daughters       = i_Hyp.Dist_Daughters;
     OutHyp->ArmPod_Qt            = i_Hyp.ArmPod_Qt;
@@ -359,10 +361,10 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
   //Fragment tracks
 
   if(recons_from_FRS_MDC == 2)
-    FragmentMDCTracksFinder(RecoEvent.DAF_results, Fragment_pdg, RecoEvent.FragmentTracks);
+    FragmentMDCTracksFinder(RecoEvent.DAF_results, Fragment_pdg, RecoEvent.TrackInfo, RecoEvent.FragmentTracks);
 
   std::vector<KFParticle> FragmentTracks_All {};
-  std::vector<KFFitInfo> Fragment_FitInfo {};
+  std::vector<KFFitInfo> Fragment_FitInfo_All {};
   
   for(size_t i = 0; i < RecoEvent.FragmentTracks.size(); ++i)
     {
@@ -412,17 +414,19 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_FitInfo.Pvalue = 0.; //CHECK Change!
       temp_FitInfo.NHitsMDC = 0;
       temp_FitInfo.NHitsMinifiber = 0;
+      temp_FitInfo.RealPDG = RecoEvent.FragmentTracks[i].GetRealPDG();
 
 
       FragmentTracks_All.emplace_back(temp_particle);
-      Fragment_FitInfo.emplace_back(temp_FitInfo);
+      Fragment_FitInfo_All.emplace_back(temp_FitInfo);
     };
 
   if(FragmentTracks_All.size() == 0)
     return -1;
   
   std::vector<KFParticle> FragmentTracks {};
-  FragmentSelector(FragmentTracks_All, RecoEvent.PrimVtxRecons, FragmentTracks);
+  std::vector<KFFitInfo> Fragment_FitInfo {};
+  FragmentSelector(FragmentTracks_All, Fragment_FitInfo_All, RecoEvent.PrimVtxRecons, FragmentTracks, Fragment_FitInfo);
   if(FragmentTracks.size() == 0)
     return -1;
 
@@ -464,14 +468,15 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   //Real pion tracks
   std::vector<KFParticle> RealPionTracks_All {};
-  std::vector<KFFitInfo> RealPion_FitInfo {};
-  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, No_cutconditions, RealPionTracks_All, RealPion_FitInfo);
+  std::vector<KFFitInfo> RealPion_FitInfo_All {};
+  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, No_cutconditions, RealPionTracks_All, RealPion_FitInfo_All);
   LocalHisto.h_Nrealpions[pion_type]->Fill(RealPionTracks_All.size(), 1.);
   if(RealPionTracks_All.size() == 0)
     return -2;
 
   std::vector<KFParticle> RealPionTracks {};
-  PionSelector(RealPionTracks_All, RecoEvent.PrimVtxRecons, RealPionTracks, RealPion_FitInfo);
+  std::vector<KFFitInfo> RealPion_FitInfo {};
+  PionSelector(RealPionTracks_All, RealPion_FitInfo_All, RecoEvent.PrimVtxRecons, RealPionTracks, RealPion_FitInfo);
   if(RealPionTracks.size() == 0)
     return -2;
 
@@ -512,6 +517,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       TVector3 Fragment_Mom(FragmentTracks[ref_RealFragment].GetPx(), FragmentTracks[ref_RealFragment].GetPy(), FragmentTracks[ref_RealFragment].GetPz());
       temp_Hyp_Real.Angle_MotherFragment = Mother_Mom.Angle(Fragment_Mom) * 180. / M_PI;
       temp_Hyp_Real.Fragment_IsFromHyp = 1;
+      temp_Hyp_Real.RealPDG_Fragment = Fragment_FitInfo[ref_RealFragment].RealPDG;
 
       temp_Hyp_Real.PDG_Pion = RealPionTracks[i].GetPDG();
       temp_Hyp_Real.Id_Pion = RealPionTracks[i].Id();
@@ -525,6 +531,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Real.NHitsMinifiber_Pion = RealPion_FitInfo[i].NHitsMinifiber;
       temp_Hyp_Real.N_Pion = RealPionTracks.size();
       temp_Hyp_Real.Pion_IsFromHyp = 0;
+      temp_Hyp_Real.RealPDG_Pion = RealPion_FitInfo[i].RealPDG;
 
       for(itr_real = RecoEvent.DaughtersTrackDAFInit.begin(); itr_real != RecoEvent.DaughtersTrackDAFInit.end(); ++itr_real)
         {
@@ -619,6 +626,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Real.Fragment_IsFromHyp = 0;
       if(FragmentTracks[temp_id_fragment].Id() == FragmentTracks[ref_RealFragment].Id())
         temp_Hyp_Real.Fragment_IsFromHyp = 1;
+      temp_Hyp_Real.RealPDG_Fragment = Fragment_FitInfo[temp_id_fragment].RealPDG;
 
 
       temp_Hyp_Real.PDG_Pion = RealPionTracks[temp_id_pion].GetPDG();
@@ -639,6 +647,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
           if(itr_real->first == RealPionTracks[temp_id_pion].Id())
             temp_Hyp_Real.Pion_IsFromHyp = 1;
         }
+      temp_Hyp_Real.RealPDG_Pion = RealPion_FitInfo[temp_id_pion].RealPDG;
 
       temp_Hyp_Real.Mother_IsFromHyp = temp_Hyp_Real.Fragment_IsFromHyp * temp_Hyp_Real.Pion_IsFromHyp;
 
@@ -682,8 +691,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
  //Cut pion tracks
   std::vector<KFParticle> CutPionTracks_All {};
-  std::vector<KFFitInfo> CutPion_FitInfo {};
-  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, Yes_cutconditions, CutPionTracks_All, CutPion_FitInfo);
+  std::vector<KFFitInfo> CutPion_FitInfo_All {};
+  RealTracksFinder(RecoEvent.TrackDAFSim, pi_pdg, Yes_cutconditions, CutPionTracks_All, CutPion_FitInfo_All);
 
   LocalHisto.h_Ncutpions[pion_type]->Fill(CutPionTracks_All.size(), 1.);
 
@@ -691,7 +700,8 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
     return -3;
 
   std::vector<KFParticle> CutPionTracks {};
-  PionSelector(CutPionTracks_All, RecoEvent.PrimVtxRecons, CutPionTracks, CutPion_FitInfo);
+  std::vector<KFFitInfo> CutPion_FitInfo {};
+  PionSelector(CutPionTracks_All, CutPion_FitInfo_All, RecoEvent.PrimVtxRecons, CutPionTracks, CutPion_FitInfo);
   if(CutPionTracks.size() == 0)
     return -3;
 
@@ -810,6 +820,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Cut.Fragment_IsFromHyp = 0;
       if(FragmentTracks[temp_id_fragment].Id() == FragmentTracks[ref_RealFragment].Id())
         temp_Hyp_Cut.Fragment_IsFromHyp = 1;        
+      temp_Hyp_Cut.RealPDG_Fragment = Fragment_FitInfo[temp_id_fragment].RealPDG;
 
       temp_Hyp_Cut.PDG_Pion = CutPionTracks[temp_id_pion].GetPDG();
       temp_Hyp_Cut.Id_Pion = CutPionTracks[temp_id_pion].Id();
@@ -829,6 +840,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
           if(itr_cut->first == CutPionTracks[temp_id_pion].Id())
             temp_Hyp_Cut.Pion_IsFromHyp = 1;
         }
+      temp_Hyp_Cut.RealPDG_Pion = CutPion_FitInfo[temp_id_pion].RealPDG;
 
       temp_Hyp_Cut.Mother_IsFromHyp = temp_Hyp_Cut.Fragment_IsFromHyp * temp_Hyp_Cut.Pion_IsFromHyp;
 
@@ -875,14 +887,15 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
 
   //Pion tracks
   std::vector<KFParticle> PionTracks_All {};
-  std::vector<KFFitInfo> Pion_FitInfo {};
-  PionTracksFinder(RecoEvent.DAF_results, PionTracks_All, Pion_FitInfo);
+  std::vector<KFFitInfo> Pion_FitInfo_All {};
+  PionTracksFinder(RecoEvent.DAF_results, RecoEvent.TrackInfo, PionTracks_All, Pion_FitInfo_All);
   LocalHisto.h_Npions[pion_type]->Fill(PionTracks_All.size(), 1.);
   if(PionTracks_All.size() == 0)
     return -4;
 
   std::vector<KFParticle> PionTracks {};
-  PionSelector(PionTracks_All, RecoEvent.PrimVtxRecons, PionTracks, Pion_FitInfo);
+  std::vector<KFFitInfo> Pion_FitInfo {};
+  PionSelector(PionTracks_All, Pion_FitInfo_All, RecoEvent.PrimVtxRecons, PionTracks, Pion_FitInfo);
   if(PionTracks.size() == 0)
     return -4;
 
@@ -979,6 +992,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
         TVector3 Fragment_Mom(FragmentTracks[ref_RealFragment].GetPx(), FragmentTracks[ref_RealFragment].GetPy(), FragmentTracks[ref_RealFragment].GetPz());
         temp_Hyp_LV.Angle_MotherFragment = Mother_Mom.Angle(Fragment_Mom) * 180. / M_PI;
         temp_Hyp_LV.Fragment_IsFromHyp = 1;
+        temp_Hyp_LV.RealPDG_Fragment = Fragment_FitInfo[ref_RealFragment].RealPDG;
 
         temp_Hyp_LV.PDG_Pion = PionTracks[new_pionid].GetPDG();
         temp_Hyp_LV.Id_Pion = PionTracks[new_pionid].Id();
@@ -998,6 +1012,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
             if(itr_recons->first == PionTracks[new_pionid].Id())
               temp_Hyp_LV.Pion_IsFromHyp = 1;
           }
+        temp_Hyp_LV.RealPDG_Pion = Pion_FitInfo[new_pionid].RealPDG;
 
         temp_Hyp_LV.Mother_IsFromHyp = temp_Hyp_LV.Fragment_IsFromHyp * temp_Hyp_LV.Pion_IsFromHyp;
 
@@ -1150,6 +1165,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp.Fragment_IsFromHyp = 0;
       if(FragmentTracks[temp_id_fragment].Id() == FragmentTracks[ref_RealFragment].Id())
         temp_Hyp.Fragment_IsFromHyp = 1;
+      temp_Hyp.RealPDG_Fragment = Fragment_FitInfo[temp_id_fragment].RealPDG;
 
       temp_Hyp.PDG_Pion = PionTracks[temp_id_pion].GetPDG();
       temp_Hyp.Id_Pion = PionTracks[temp_id_pion].Id();
@@ -1169,6 +1185,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
           if(itr_recons->first == PionTracks[temp_id_pion].Id())
             temp_Hyp.Pion_IsFromHyp = 1;
         }
+      temp_Hyp.RealPDG_Pion = Pion_FitInfo[temp_id_pion].RealPDG;
 
       temp_Hyp.Mother_IsFromHyp = temp_Hyp.Fragment_IsFromHyp * temp_Hyp.Pion_IsFromHyp;
 
@@ -1359,6 +1376,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
       temp_Hyp_Mass.Fragment_IsFromHyp = 0;
       if(FragmentTracks[temp_id_fragment].Id() == FragmentTracks[ref_RealFragment].Id())
         temp_Hyp_Mass.Fragment_IsFromHyp = 1;
+      temp_Hyp_Mass.RealPDG_Fragment = Fragment_FitInfo[temp_id_fragment].RealPDG;
 
       temp_Hyp_Mass.PDG_Pion = PionTracks[temp_id_pion].GetPDG();
       temp_Hyp_Mass.Id_Pion = PionTracks[temp_id_pion].Id();
@@ -1378,6 +1396,7 @@ int TDecayVertex<Out>::FinderDecayVertex(FullRecoEvent& RecoEvent)
           if(itr_recons->first == PionTracks[temp_id_pion].Id())
             temp_Hyp_Mass.Pion_IsFromHyp = 1;
         }
+      temp_Hyp_Mass.RealPDG_Pion = Pion_FitInfo[temp_id_pion].RealPDG;
 
       temp_Hyp_Mass.Mother_IsFromHyp = temp_Hyp_Mass.Fragment_IsFromHyp * temp_Hyp_Mass.Pion_IsFromHyp;
 
@@ -1748,6 +1767,7 @@ void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std
           temp_FitInfo.Pvalue = 0.; //Change!
           temp_FitInfo.NHitsMDC = nHits_MDC;
           temp_FitInfo.NHitsMinifiber = nHits_MiniFiber;
+          temp_FitInfo.RealPDG = pdgParticle;
 
           if((cutConditions == 1) && ((nHits_MDC < 6) || (nHits_MiniFiber < 3) || ((nHits_PSCE == 0) && (nHits_PSBE == 0))))
             continue;
@@ -1763,6 +1783,7 @@ void TDecayVertex<Out>::RealTracksFinder(std::unordered_map<int, std::vector<std
 
 template <class Out>
 void TDecayVertex<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
+                                                  std::unordered_map<int, std::vector<InfoPar> >& TrackInfo,
                                                     std::vector<FragmentTrack>& FragmentMDCTracks)
 {
   //int temp_charge = TDatabasePDG::Instance()->GetParticle(fragment_pdg)->Charge()/3.;
@@ -1774,12 +1795,12 @@ void TDecayVertex<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDA
         {
           TVector3 tmp_pos = TVector3(itr->second.posX, itr->second.posY, itr->second.posZ);
           TVector3 tmp_mom = TVector3(itr->second.momX, itr->second.momY, itr->second.momZ);
-          std::vector<double> tmp_covmatrix = {1.e-8,
-                                                  0., 1.e-8,
-                                                  0.,    0., 1.e-8,
-                                                  0.,    0.,    0., 1.e-8,
-                                                  0.,    0.,    0.,    0., 1.e-8,
-                                                  0.,    0.,    0.,    0.,    0., 1.e-8}; //Change!
+          std::vector<double> tmp_covmatrix = {1.e-2,
+                                                  0., 1.e-2,
+                                                  0.,    0., 1.e-2,
+                                                  0.,    0.,    0., 1.e-3,
+                                                  0.,    0.,    0.,    0., 1.e-3,
+                                                  0.,    0.,    0.,    0.,    0., 1.e-3}; //Change!
 
           FragmentTrack tmp_FragmentTrack;
           tmp_FragmentTrack.SetPos(tmp_pos);
@@ -1790,6 +1811,10 @@ void TDecayVertex<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDA
           tmp_FragmentTrack.SetChi2NDF(1.); //CHECK Change!
           tmp_FragmentTrack.SetIsBest(true);
           tmp_FragmentTrack.SetPID(fragment_pdg);
+          tmp_FragmentTrack.SetTrackID(itr->first);
+
+          auto TInfo = TrackInfo.find(itr->first);
+          tmp_FragmentTrack.SetRealPDG(TInfo->second[itr->second.lastHit].pdg);
 
           FragmentMDCTracks.emplace_back(tmp_FragmentTrack);
         }
@@ -1839,7 +1864,8 @@ void TDecayVertex<Out>::FragmentMDCTracksFinder(std::unordered_map<int, ResSolDA
 */
 
 template <class Out>
-void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks)
+void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, std::vector<KFFitInfo>& Vect_FitInfo_All, TVector3& PrimVtxRecons,
+                                          std::vector<KFParticle>& FragmentTracks, std::vector<KFFitInfo>& Vect_FitInfo)
 {
 /*
   Possible cuts:
@@ -1855,7 +1881,6 @@ void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks
   double temp_chi2ndf;
   double temp_theta;
   double temp_dist;
-
 
   for(size_t i = 0; i < FragmentTracks_All.size(); ++i)
     {
@@ -1876,6 +1901,7 @@ void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks
           continue;
 
       FragmentTracks.emplace_back(FragmentTracks_All[i]);
+      Vect_FitInfo.emplace_back(Vect_FitInfo_All[i]);
     }
 
   return;
@@ -1884,8 +1910,9 @@ void TDecayVertex<Out>::FragmentSelector(std::vector<KFParticle>& FragmentTracks
 
 template <class Out>
 void TDecayVertex<Out>::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
-                                          std::vector<KFParticle>& PionTracks,
-                                          std::vector<KFFitInfo>& Vect_FitInfo)
+                                          std::unordered_map<int, std::vector<InfoPar> >& TrackInfo,
+                                            std::vector<KFParticle>& PionTracks,
+                                            std::vector<KFFitInfo>& Vect_FitInfo)
 {
   std::unordered_map<int, ResSolDAF>::iterator itr;
   for(itr = DAF_results.begin(); itr != DAF_results.end(); ++itr)
@@ -1925,6 +1952,9 @@ void TDecayVertex<Out>::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF
           temp_FitInfo.NHitsMDC = itr->second.Ncentral;
           temp_FitInfo.NHitsMinifiber = itr->second.Nmfiber;
 
+          auto TInfo = TrackInfo.find(itr->first);
+          temp_FitInfo.RealPDG = TInfo->second[itr->second.lastHit].pdg;
+
           Vect_FitInfo.emplace_back(temp_FitInfo);
         }
     }
@@ -1933,7 +1963,8 @@ void TDecayVertex<Out>::PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF
 }
 
 template <class Out>
-void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& PionTracks, std::vector<KFFitInfo>& Vect_FitInfo)
+void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, std::vector<KFFitInfo>& Vect_FitInfo_All, TVector3& PrimVtxRecons,
+                                      std::vector<KFParticle>& PionTracks, std::vector<KFFitInfo>& Vect_FitInfo)
 {
 /*
   Possible cuts:
@@ -1951,10 +1982,6 @@ void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TV
   double temp_theta;
   double temp_dist;
 
-  std::vector<KFFitInfo> copy_Vect_FitInfo;
-  copy_Vect_FitInfo = Vect_FitInfo;
-  Vect_FitInfo.clear();
-
   for(size_t i = 0; i < PionTracks_All.size(); ++i)
     {
       temp_chi2ndf = PionTracks_All[i].GetChi2() / static_cast<double>(PionTracks_All[i].GetNDF());
@@ -1969,7 +1996,7 @@ void TDecayVertex<Out>::PionSelector(std::vector<KFParticle>& PionTracks_All, TV
         continue;
 
       PionTracks.emplace_back(PionTracks_All[i]);
-      Vect_FitInfo.emplace_back(copy_Vect_FitInfo[i]);
+      Vect_FitInfo.emplace_back(Vect_FitInfo_All[i]);
     }
 
   return;

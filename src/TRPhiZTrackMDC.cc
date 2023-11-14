@@ -28,14 +28,14 @@ template<class Out>
 TRPhiZTrackMDC<Out>::TRPhiZTrackMDC(const THyphiAttributes& attribut) : TDataProcessInterface<Out>("CheckFiberTrack"), att(attribut)
 {
 
-  OutputEvents = att.CFT_OutputEvents;
+  OutputEvents = att.RF_OutputEvents;
   std::string temp_name_out       = att.Config.Get<std::string>("Output_Namefile");
   std::string temp_file_base_name = temp_name_out.substr(0, temp_name_out.find_last_of('.'));
 
   temp_file_base_name += "PhiZTest.root";
   namefilePhiZ = temp_file_base_name;
 
-  RZfit = att.CFT_RZfit;
+  RZfit = att.RPZ_RZfit;
 
   if(OutputEvents)
     {

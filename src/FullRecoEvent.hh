@@ -449,11 +449,13 @@ struct SimHit
 
   double Eloss  = 0.;
   double time   = 0.;
-  double length = 0.;
+  double tracklength = 0.;
+  double hitlength = 0.;
 };
 
 struct InfoInit
 {
+  int pdg     = -999 ;
   int charge  = -999 ;
   double time = -999.;
   double posX = -999.;
@@ -462,11 +464,15 @@ struct InfoInit
   double momX = -999.;
   double momY = -999.;
   double momZ = -999.;
+  double mass = -999.;
 };
 
 struct InfoPar
 {
   int pdg       = 0;
+  double posX   = -999.;
+  double posY   = -999.;
+  double posZ   = -999.;
   double momX   = -999.;
   double momY   = -999.;
   double momZ   = -999.;
@@ -474,7 +480,8 @@ struct InfoPar
   double Eloss  = 0.;
   double time   = 0.;
   double TOT    = 0.;
-  double length = 0.;
+  double tracklength = 0.;
+  double hitlength = 0.;
 };
 
 struct ResSolDAF
@@ -499,6 +506,14 @@ struct ResSolDAF
   double posX = -999.;
   double posY = -999.;
   double posZ = -999.;
+
+  double momX_PS = -999.;
+  double momY_PS = -999.;
+  double momZ_PS = -999.;
+
+  double posX_PS = -999.;
+  double posY_PS = -999.;
+  double posZ_PS = -999.;
 
   double mass  = -999.;
   double mass2 = -999.;
@@ -647,6 +662,7 @@ class FragmentTrack
     void SetIsBest(bool _isbest) { isbest = _isbest; };
     void SetPID(int _pid) { pid = _pid; };
     void SetTrackID(int _trackid) { trackid = _trackid; };
+    void SetRealPDG(int _realpdg) { realpdg = _realpdg; };
 
 
     TVector3 GetPos() { return pos; };
@@ -658,6 +674,7 @@ class FragmentTrack
     bool GetIsBest() { return isbest; };
     int GetPID() { return pid; };
     int GetTrackID() { return trackid; };
+    int GetRealPDG() { return realpdg; };
 
   private:
     TVector3 pos = TVector3(-999., -999., -999.);
@@ -669,6 +686,7 @@ class FragmentTrack
     bool isbest = false;
     int pid = -999;
     int trackid = -999;
+    int realpdg = 0;
 };
 
 
@@ -704,6 +722,7 @@ struct Hyp
   Double32_t Pvalue_Fragment;
   Double32_t Angle_MotherFragment;
   Int_t Fragment_IsFromHyp; // 0-> No; 1-> Yes
+  Int_t RealPDG_Fragment;
 
   Int_t PDG_Pion;
   Int_t Id_Pion;
@@ -716,6 +735,7 @@ struct Hyp
   Int_t NHitsMinifiber_Pion;
   Int_t N_Pion;
   Int_t Pion_IsFromHyp; // 0-> No; 1-> Yes
+  Int_t RealPDG_Pion;
 
   Double32_t Dist_Daughters;
   Double32_t ArmPod_Qt;
@@ -727,6 +747,7 @@ struct KFFitInfo
   Double32_t Pvalue = -1.;
   Int_t NHitsMDC = -1;
   Int_t NHitsMinifiber = -1;
+  Int_t RealPDG = 0;
 };
 
 struct CandTrack
@@ -783,11 +804,13 @@ struct MeasurementInfo
   double TOT = -9999.;
   double time = -9999.;
   double dE = -9999.;
+  int PDG = 0;
   //size_t layer = 100000;
 
   MeasurementInfo() = default;
   MeasurementInfo(double TOT_, double time_, double dE_):TOT(TOT_),time(time_),dE(dE_) {};
   void SetInfo(double TOT_, double time_, double dE_) { TOT = TOT_; time = time_; dE = dE_;};
+  void SetPDG(int PDG_) { PDG = PDG_ ;};
 };
 
 

@@ -312,6 +312,7 @@ DataML_Hyp::DataML_Hyp(const THyphiAttributes& att_, TTree* outT, TTree* outTs, 
   out_tree->Branch("Pvalue_Fragment", &Pvalue_Fragment, "Pvalue_Fragment/d");
   out_tree->Branch("Angle_MotherFragment", &Angle_MotherFragment, "Angle_MotherFragment/d");
   out_tree->Branch("Fragment_IsFromHyp", &Fragment_IsFromHyp, "Fragment_IsFromHyp/I");
+  out_tree->Branch("RealPDG_Fragment", &RealPDG_Fragment, "RealPDG_Fragment/I");
 
   out_tree->Branch("Id_Pion", &Id_Pion, "Id_Pion/I");
   out_tree->Branch("MomX_Pion", &MomX_Pion, "MomX_Pion/d");
@@ -326,6 +327,7 @@ DataML_Hyp::DataML_Hyp(const THyphiAttributes& att_, TTree* outT, TTree* outTs, 
   out_tree->Branch("NHitsMinifiber_Pion", &NHitsMinifiber_Pion, "NHitsMinifiber_Pion/I");
   out_tree->Branch("N_Pion", &N_Pion, "N_Pion/I");
   out_tree->Branch("Pion_IsFromHyp", &Pion_IsFromHyp, "Pion_IsFromHyp/I");
+  out_tree->Branch("RealPDG_Pion", &RealPDG_Pion, "RealPDG_Pion/I");
 
   out_tree->Branch("Dist_Daughters", &Dist_Daughters, "Dist_Daughters/d");
   out_tree->Branch("ArmPod_Qt", &ArmPod_Qt, "ArmPod_Qt/d");
@@ -372,6 +374,7 @@ DataML_Hyp::DataML_Hyp(const THyphiAttributes& att_, TTree* outT, TTree* outTs, 
   out_tree_signal->Branch("Pvalue_Fragment", &Pvalue_Fragment, "Pvalue_Fragment/d");
   out_tree_signal->Branch("Angle_MotherFragment", &Angle_MotherFragment, "Angle_MotherFragment/d");
   out_tree_signal->Branch("Fragment_IsFromHyp", &Fragment_IsFromHyp, "Fragment_IsFromHyp/I");
+  out_tree_signal->Branch("RealPDG_Fragment", &RealPDG_Fragment, "RealPDG_Fragment/I");
 
   out_tree_signal->Branch("Id_Pion", &Id_Pion, "Id_Pion/I");
   out_tree_signal->Branch("MomX_Pion", &MomX_Pion, "MomX_Pion/d");
@@ -386,6 +389,7 @@ DataML_Hyp::DataML_Hyp(const THyphiAttributes& att_, TTree* outT, TTree* outTs, 
   out_tree_signal->Branch("NHitsMinifiber_Pion", &NHitsMinifiber_Pion, "NHitsMinifiber_Pion/I");
   out_tree_signal->Branch("N_Pion", &N_Pion, "N_Pion/I");
   out_tree_signal->Branch("Pion_IsFromHyp", &Pion_IsFromHyp, "Pion_IsFromHyp/I");
+  out_tree_signal->Branch("RealPDG_Pion", &RealPDG_Pion, "RealPDG_Pion/I");
 
   out_tree_signal->Branch("Dist_Daughters", &Dist_Daughters, "Dist_Daughters/d");
   out_tree_signal->Branch("ArmPod_Qt", &ArmPod_Qt, "ArmPod_Qt/d");
@@ -432,6 +436,7 @@ DataML_Hyp::DataML_Hyp(const THyphiAttributes& att_, TTree* outT, TTree* outTs, 
   out_tree_background->Branch("Pvalue_Fragment", &Pvalue_Fragment, "Pvalue_Fragment/d");
   out_tree_background->Branch("Angle_MotherFragment", &Angle_MotherFragment, "Angle_MotherFragment/d");
   out_tree_background->Branch("Fragment_IsFromHyp", &Fragment_IsFromHyp, "Fragment_IsFromHyp/I");
+  out_tree_background->Branch("RealPDG_Fragment", &RealPDG_Fragment, "RealPDG_Fragment/I");
 
   out_tree_background->Branch("Id_Pion", &Id_Pion, "Id_Pion/I");
   out_tree_background->Branch("MomX_Pion", &MomX_Pion, "MomX_Pion/d");
@@ -446,6 +451,7 @@ DataML_Hyp::DataML_Hyp(const THyphiAttributes& att_, TTree* outT, TTree* outTs, 
   out_tree_background->Branch("NHitsMinifiber_Pion", &NHitsMinifiber_Pion, "NHitsMinifiber_Pion/I");
   out_tree_background->Branch("N_Pion", &N_Pion, "N_Pion/I");
   out_tree_background->Branch("Pion_IsFromHyp", &Pion_IsFromHyp, "Pion_IsFromHyp/I");
+  out_tree_background->Branch("RealPDG_Pion", &RealPDG_Pion, "RealPDG_Pion/I");
 
   out_tree_background->Branch("Dist_Daughters", &Dist_Daughters, "Dist_Daughters/d");
   out_tree_background->Branch("ArmPod_Qt", &ArmPod_Qt, "ArmPod_Qt/d");
@@ -506,6 +512,7 @@ void DataML_Hyp::FillEvent(FullRecoEvent& REvent)
       Pvalue_Fragment = REvent.Hyp_Vect[i].Pvalue_Fragment;
       Angle_MotherFragment = REvent.Hyp_Vect[i].Angle_MotherFragment;
       Fragment_IsFromHyp = REvent.Hyp_Vect[i].Fragment_IsFromHyp;
+      RealPDG_Fragment = REvent.Hyp_Vect[i].RealPDG_Fragment;
       
       Id_Pion = REvent.Hyp_Vect[i].Id_Pion;
       MomX_Pion = REvent.Hyp_Vect[i].MomE_Pion.Px();
@@ -520,6 +527,7 @@ void DataML_Hyp::FillEvent(FullRecoEvent& REvent)
       NHitsMinifiber_Pion = REvent.Hyp_Vect[i].NHitsMinifiber_Pion;
       N_Pion = REvent.Hyp_Vect[i].N_Pion;
       Pion_IsFromHyp = REvent.Hyp_Vect[i].Pion_IsFromHyp;
+      RealPDG_Pion = REvent.Hyp_Vect[i].RealPDG_Pion;
 
       Dist_Daughters = REvent.Hyp_Vect[i].Dist_Daughters;
       ArmPod_Qt = REvent.Hyp_Vect[i].ArmPod_Qt;

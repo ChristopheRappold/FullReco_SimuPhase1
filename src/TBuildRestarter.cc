@@ -284,7 +284,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempHitSim.mass    = PSCEHit->MCparticle.M();
 	  tempHitSim.Eloss   = PSCEHit->Energy;
 	  tempHitSim.time    = PSCEHit->Time;
-	  tempHitSim.length  = PSCEHit->TrackLength;
+	  tempHitSim.tracklength  = PSCEHit->TrackLength;
 	  tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
 	  auto tempTrackInfo                    = RecoEvent.TrackInfo.find(TrackID);
@@ -295,7 +295,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempTrackInfo->second[TypeDet].mass   = PSCEHit->MCparticle.M();
 	  tempTrackInfo->second[TypeDet].Eloss  = PSCEHit->Energy;
 	  tempTrackInfo->second[TypeDet].time   = PSCEHit->Time;
-	  tempTrackInfo->second[TypeDet].length = PSCEHit->TrackLength;
+	  tempTrackInfo->second[TypeDet].tracklength = PSCEHit->TrackLength;
 	}
 
       for(int it_PSBE = 0; it_PSBE < event->NPsbe; ++it_PSBE)
@@ -381,7 +381,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempHitSim.mass    = PSBEHit.MCparticle.M();
 	  tempHitSim.Eloss   = PSBEHit.Energy;
 	  tempHitSim.time    = PSBEHit.Time;
-	  tempHitSim.length  = PSBEHit.TrackLength;
+	  tempHitSim.tracklength  = PSBEHit.TrackLength;
 	  tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
 	  auto tempTrackInfo                    = RecoEvent.TrackInfo.find(TrackID);
@@ -392,7 +392,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempTrackInfo->second[TypeDet].mass   = PSBEHit.MCparticle.M();
 	  tempTrackInfo->second[TypeDet].Eloss  = PSBEHit.Energy;
 	  tempTrackInfo->second[TypeDet].time   = PSBEHit.Time;
-	  tempTrackInfo->second[TypeDet].length = PSBEHit.TrackLength;
+	  tempTrackInfo->second[TypeDet].tracklength = PSBEHit.TrackLength;
 	}
 
       for(int it_Fiber = 0; it_Fiber < event->NFiber; ++it_Fiber)
@@ -612,7 +612,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	      tempHitSim.mass    = FiberHit.MCparticle.M();
 	      tempHitSim.Eloss   = FiberHit.Energy;
 	      tempHitSim.time    = FiberHit.Time;
-	      tempHitSim.length  = FiberHit.TrackLength;
+	      tempHitSim.tracklength  = FiberHit.TrackLength;
 	      tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
 	      auto tempTrackInfo                    = RecoEvent.TrackInfo.find(TrackID);
@@ -623,7 +623,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	      tempTrackInfo->second[TypeDet].mass   = FiberHit.MCparticle.M();
 	      tempTrackInfo->second[TypeDet].Eloss  = FiberHit.Energy;
 	      tempTrackInfo->second[TypeDet].time   = FiberHit.Time;
-	      tempTrackInfo->second[TypeDet].length = FiberHit.TrackLength;
+	      tempTrackInfo->second[TypeDet].tracklength = FiberHit.TrackLength;
 	    }
 
 	  else if(restart::IsFiberM(TypeDet))
@@ -773,7 +773,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	      tempHitSim.mass    = FiberHit.MCparticle.M();
 	      tempHitSim.Eloss   = FiberHit.Energy;
 	      tempHitSim.time    = FiberHit.Time;
-	      tempHitSim.length  = FiberHit.TrackLength;
+	      tempHitSim.tracklength  = FiberHit.TrackLength;
 	      tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
 	      auto tempTrackInfo                    = RecoEvent.TrackInfo.find(TrackID);
@@ -784,7 +784,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	      tempTrackInfo->second[TypeDet].mass   = FiberHit.MCparticle.M();
 	      tempTrackInfo->second[TypeDet].Eloss  = FiberHit.Energy;
 	      tempTrackInfo->second[TypeDet].time   = FiberHit.Time;
-	      tempTrackInfo->second[TypeDet].length = FiberHit.TrackLength;
+	      tempTrackInfo->second[TypeDet].tracklength = FiberHit.TrackLength;
 	    }
 	}
 
@@ -943,7 +943,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempHitSim.mass    = MDCHit.MCparticle.M();
 	  tempHitSim.Eloss   = MDCHit.Energy;
 	  tempHitSim.time    = MDCHit.Time;
-	  tempHitSim.length  = MDCHit.TrackLength;
+	  tempHitSim.tracklength  = MDCHit.TrackLength;
 	  tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
 	  auto tempTrackInfo                   = RecoEvent.TrackInfo.find(TrackID);
@@ -1007,7 +1007,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempHitSim.mass    = TrFwdHit.MCparticle.M();
 	  tempHitSim.Eloss   = TrFwdHit.Energy;
 	  tempHitSim.time    = TrFwdHit.Time;
-	  tempHitSim.length  = TrFwdHit.TrackLength;
+	  tempHitSim.tracklength  = TrFwdHit.TrackLength;
 	  tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
 	  auto tempTrackInfo                   = RecoEvent.TrackInfo.find(TrackID);
@@ -1071,7 +1071,7 @@ int TBuildRestarter<Out>::Exec(Out* event, FullRecoEvent& RecoEvent, Out* OutTre
 	  tempHitSim.mass    = FMF2Hit.MCparticle.M();
 	  tempHitSim.Eloss   = FMF2Hit.Energy;
 	  tempHitSim.time    = FMF2Hit.Time;
-	  tempHitSim.length  = FMF2Hit.TrackLength;
+	  tempHitSim.tracklength  = FMF2Hit.TrackLength;
 	  tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
 	  auto tempTrackInfo                   = RecoEvent.TrackInfo.find(TrackID);

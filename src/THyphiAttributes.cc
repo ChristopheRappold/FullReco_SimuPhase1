@@ -80,7 +80,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   WF_perfect  = false;
   WF_PSBHits  = true;
-  WF_PSFEHits = false;
+  WF_PSBEHits = false;
 
   KF_Kalman     = false;
   KF_KalmanSqrt = true;
@@ -97,6 +97,12 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   KF_NbCentralCut   = 1;
   KF_NbMiniFiberCut = 4;
+  KF_RandInitMomX = 0.005;
+  KF_RandInitMomY = 0.005;
+  KF_RandInitMomZ = 0.005;
+
+  PID_CutorProb = false;
+  PID_minProb = 0.;
 
   RF_OutputEvents = false;
   RPZ_OutputEvents = false;
@@ -146,6 +152,15 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   cut_psb_phi = 0.4;
   cut_psb_z   = 150;
   cut_phi_fm  = 0.3;
+  psb_timeres = 0.080; //ns
+
+  t0_timeres = 0.050; //ns
+
+  if(Config.IsAvailable("psb_timeres"))
+    psb_timeres = Config.Get<double>("psb_timeres");
+  if(Config.IsAvailable("t0_timeres"))
+    t0_timeres = Config.Get<double>("t0_timeres");
+
 
   flag_dup_trackhit = true;
   flag_dup_trackhit_mdc = false;
@@ -213,8 +228,8 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     WF_perfect = Config.Get<bool>("WF_perfect");
   if(Config.IsAvailable("WF_PSBHits"))
     WF_PSBHits = Config.Get<bool>("WF_PSBHits");
-  if(Config.IsAvailable("WF_PSFEHits"))
-    WF_PSFEHits = Config.Get<bool>("WF_PSFEHits");
+  if(Config.IsAvailable("WF_PSBEHits"))
+    WF_PSBEHits = Config.Get<bool>("WF_PSBEHits");
   
   _logger->info("RZ Setting: Prolate? {} / Wire2? {} / BiasCorr? {} / ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
                 RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
@@ -252,8 +267,24 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     KF_NbCentralCut = Config.Get<int>("KF_NbCentralCut");
   if(Config.IsAvailable("KF_NbMiniFiberCut"))
     KF_NbMiniFiberCut = Config.Get<int>("KF_NbMiniFiberCut");
+  if(Config.IsAvailable("KF_RandInitMomX"))
+    KF_RandInitMomX = Config.Get<double>("KF_RandInitMomX");
+  if(Config.IsAvailable("KF_RandInitMomY"))
+    KF_RandInitMomY = Config.Get<double>("KF_RandInitMomY");
+  if(Config.IsAvailable("KF_RandInitMomZ"))
+    KF_RandInitMomZ = Config.Get<double>("KF_RandInitMomZ");
 
-  _logger->info("KF_RejectionCut : Central < : {} MiniFiber < : {}", KF_NbCentralCut, KF_NbMiniFiberCut);
+  _logger->info("KF_RejectionCut: Central < : {} MiniFiber < : {}", KF_NbCentralCut, KF_NbMiniFiberCut);
+  _logger->info("KF_RandInitMom: X: {}   Y: {}   Z: {}", KF_RandInitMomX, KF_RandInitMomY, KF_RandInitMomZ);
+
+
+  if(Config.IsAvailable("PID_CutorProb"))
+    PID_CutorProb = Config.Get<bool>("PID_CutorProb");
+  if(Config.IsAvailable("PID_minProb"))
+    PID_minProb = Config.Get<double>("PID_minProb");
+
+  _logger->info("PID_CutorProb: {}", PID_CutorProb);
+  _logger->info("PID_minProb: {}", PID_minProb);
 
   StudyCase = Config.IsAvailable("StudyCase") ? Config.Get<std::string>("StudyCase") : "None";
   // std::string temp_name_out = config.Get<std::string>("Output_Namefile");
@@ -495,12 +526,12 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   if(DoNoBeth == true)
     {
       genfit::MaterialEffects::getInstance()->setEnergyLossBetheBloch(false);
-      _logger->warn(" ** > Use No Beth-Block : noEnergyLoss !");
+      _logger->warn(" ** > Use No Bethe-Bloch : no Energy Loss!");
     }
   if(DoNoMultiScat == true)
     {
       genfit::MaterialEffects::getInstance()->setNoiseCoulomb(false);
-      _logger->warn(" ** > Use No Multiscatering noise !");
+      _logger->warn(" ** > Use No Multiscattering noise!");
     }
 
   // genfit::MaterialEffects::getInstance()->drawdEdx(-211);
@@ -909,7 +940,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.RZ_MDCBiasCorr     = RZ_MDCBiasCorr;
   out.RunTaskAttr.WF_perfect         = WF_perfect;
   out.RunTaskAttr.WF_PSBHits         = WF_PSBHits;
-  out.RunTaskAttr.WF_PSFEHits        = WF_PSFEHits;
+  out.RunTaskAttr.WF_PSBEHits        = WF_PSBEHits;
   out.RunTaskAttr.KF_Kalman          = KF_Kalman;
   out.RunTaskAttr.KF_KalmanSqrt      = KF_KalmanSqrt;
   out.RunTaskAttr.KF_KalmanRef       = KF_KalmanRef;

@@ -91,6 +91,19 @@ TKalmanFilter_DAF_PID<Out>::TKalmanFilter_DAF_PID(const THyphiAttributes& attrib
   Nb_CentralCut = att.KF_NbCentralCut;
   Nb_MiniFiberCut = att.KF_NbMiniFiberCut;
 
+  if(att.PID_CutorProb == true)
+    {
+      CutPID.insert(std::pair<int,CutMomBeta*>(-211,new CutMomBeta(0.13957,0.03,true,true)));
+      CutPID.insert(std::pair<int,CutMomBeta*>(211,new CutMomBeta(0.13957,0.5,true,false)));
+      //CutPID.insert(std::pair<int,CutMomBeta*>(211,new CutMomBeta(0.13957,0.009,true,false)));
+      CutPID.insert(std::pair<int,CutMomBeta*>(321,new CutMomBeta(0.4936,0.12,true,false)));
+      CutPID.insert(std::pair<int,CutMomBeta*>(2212,new CutMomBeta(0.938272013,0.2,true,false)));
+      CutPID.insert(std::pair<int,CutMomBeta*>(-991,new CutMomBeta(0.4936,0.02,true,true)));
+      CutPID[-991]->SetMargingLimit(.4);
+      CutPID.insert(std::pair<int,CutMomBeta*>(991,new CutMomBeta(1.90925,0.02,true,false)));
+      CutPID[991]->SetMargingLimit(.4);
+    }
+
   // Fitter->setDebugLvl(10);
 
   rep = new genfit::RKTrackRep();
@@ -258,9 +271,13 @@ int TKalmanFilter_DAF_PID<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
       OutTrack->MomMass.SetXYZM(FitRes.momX, FitRes.momY, FitRes.momZ, FitRes.mass);
       OutTrack->Mom.SetXYZ(FitRes.momX, FitRes.momY, FitRes.momZ);
 
+      OutTrack->Pos_PS.SetXYZ(FitRes.posX_PS, FitRes.posY_PS, FitRes.posY_PS);
+      OutTrack->Mom_PS.SetXYZ(FitRes.momX_PS, FitRes.momY_PS, FitRes.momZ_PS);
+
       OutTrack->BarId  = FitRes.lastHit;
       OutTrack->Charge = FitRes.charge;
       OutTrack->dE     = TInfo->second[FitRes.lastHit].Eloss;
+      OutTrack->dx     = TInfo->second[FitRes.lastHit].hitlength;
       OutTrack->Beta   = FitRes.beta;
       OutTrack->RefPoint.SetXYZ(FitRes.posX, FitRes.posY, FitRes.posZ);
       OutTrack->Pval2      = FitRes.pvalue;
@@ -271,7 +288,7 @@ int TKalmanFilter_DAF_PID<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
       OutTrack->BetaIni       = FitRes.beta2;
       OutTrack->MassIni       = FitRes.mass2;
       OutTrack->TOFIni        = FitRes.tof2;
-      OutTrack->PathLengthIni = TInfo->second[FitRes.lastHit].length; // FitRes.path_length2;
+      OutTrack->PathLengthIni = TInfo->second[FitRes.lastHit].tracklength; // FitRes.path_length2;
       OutTrack->RChiIni       = FitRes.fitter;
       if(Decay == 1)
         OutTrack->Sim2Vtx.SetXYZT(std::get<1>(IsDecay->second), std::get<2>(IsDecay->second),
@@ -551,7 +568,10 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
       genfit::AbsMeasurement* tempHit = RecoEvent.ListHits[id_firstDet][std::get<2>(*firstHit)].get();
       TVectorD& tempHitrawRef         = tempHit->getRawHitCoords();
 
-      const int PDG     = static_cast<int>(track_state.pdg);
+      int PDG     = -211; //pi minus
+      if(att.G4_simu && att.WF_perfect)
+        PDG     = static_cast<int>(track_state.pdg);
+
       auto PDG_particle = TDatabasePDG::Instance()->GetParticle(PDG);
       
       LocalHisto.h_stats->Fill("Beginning Kalman", 1.);
@@ -603,104 +623,16 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
       // Forward
 
       auto it_init   = RecoEvent.TrackDAFInit.find(id_track);
-      double init_px = gRandom->Gaus(it_init->second.momX, it_init->second.momX * 0.005);
-      double init_py = gRandom->Gaus(it_init->second.momY, it_init->second.momY * 0.005);
-      double init_pz = gRandom->Gaus(it_init->second.momZ, it_init->second.momZ * 0.005);
+      double init_px = it_init->second.momX;
+      double init_py = it_init->second.momY;
+      double init_pz = it_init->second.momZ;
+
       TVector3 init_p(init_px, init_py, init_pz);
 
-      double seed_Mom_Mag = init_p.Mag();
-      if(TMath::Abs(seed_Mom_Mag) < 1e-9)
-        {
-          att._logger->debug("!> Seed Momemtum with TVector3 is zero ! correcting ");
-
-          auto tempLastHit = id_dets.crbegin();
-          ++tempLastHit;
-          auto lastHit2 = tempLastHit;
-          const InfoPar track_stateBeforeLast(it_trackInfo.second[std::get<1>(*lastHit2)]);
-          const TVector3 init_p2(track_stateBeforeLast.momX, track_stateBeforeLast.momY, track_stateBeforeLast.momZ);
-
-          if(TMath::Abs(init_p2.Mag()) < 1e-7)
-            {
-              att._logger->error("E> Seed Momemtum with TVector3 is zero ! {} Mom:{}", PDG_particle->GetName(),
-                                 seed_Mom_Mag);
-              att._logger->error("TrackID #{} hit_id :", it_ListHits->first);
-              std::vector<std::stringstream> s1(it_ListHits->second.size() / 20 + 1);
-              std::vector<std::stringstream> s2(it_ListHits->second.size() / 20 + 1);
-              for(size_t i = 0; i < it_ListHits->second.size(); ++i)
-                {
-                  s1[i / 20] << printW(i, 3) << ", ";
-                  s2[i / 20] << printW(it_ListHits->second[i], 3) << ", ";
-                }
-              for(size_t i = 0; i < s1.size(); ++i)
-                {
-                  att._logger->error("idDet:{}", s1[i].str());
-                  att._logger->error("stat :{}", s2[i].str());
-                }
-
-              att._logger->error("Track Info :");
-              std::vector<std::stringstream> s11(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s22(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s33(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s44(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s55(it_ListHits->second.size() / 10 + 1);
-              std::vector<std::stringstream> s66(it_ListHits->second.size() / 10 + 1);
-              for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
-                {
-                  s11[i / 10] << printW(i, 9) << ", ";
-                  s22[i / 10] << printFixed(it_trackInfo.second[i].pdg, 3, 9) << ", ";
-                  s33[i / 10] << printFixed(it_trackInfo.second[i].momX, 3, 9) << ", ";
-                  s44[i / 10] << printFixed(it_trackInfo.second[i].momY, 3, 9) << ", ";
-                  s55[i / 10] << printFixed(it_trackInfo.second[i].momZ, 3, 9) << ", ";
-                  s66[i / 10] << printFixed(it_trackInfo.second[i].time, 3, 9) << ", ";
-                }
-              for(size_t i = 0; i < s1.size(); ++i)
-                {
-                  att._logger->error("idDet:{}", s11[i].str());
-                  att._logger->error("pdg  :{}", s22[i].str());
-                  att._logger->error("momX :{}", s33[i].str());
-                  att._logger->error("momY :{}", s44[i].str());
-                  att._logger->error("momZ :{}", s55[i].str());
-                  att._logger->error("time :{}", s66[i].str());
-                }
-
-              continue;
-            }
-          else
-            {
-              init_p.SetXYZ(init_p2.X(), init_p2.Y(), init_p2.Z());
-              seed_Mom_Mag = init_p.Mag();
-#ifdef DEBUG_KALMAN
-              att._logger->debug("!> Reset init_p N#{}", Nb_event);
-
-              std::vector<std::stringstream> s1(it_trackInfo.second.size() / 20 + 1);
-              std::vector<std::stringstream> s2(it_trackInfo.second.size() / 20 + 1);
-              std::vector<std::stringstream> s3(it_trackInfo.second.size() / 20 + 1);
-              for(size_t i = 0; i < it_trackInfo.second.size(); ++i)
-                {
-                  s1[i / 20] << printW(G4Sol::nameLiteralDet.begin()[i], 6) << ", ";
-                  s2[i / 20] << printW(i, 6) << ", ";
-                  s3[i / 20] << printW(it_trackInfo.second[i].pdg, 6) << ", ";
-                }
-              for(size_t i = 0; i < s1.size(); ++i)
-                {
-                  att._logger->debug("Det  :{}", s1[i].str());
-                  att._logger->debug("idDet:{}", s2[i].str());
-                  att._logger->debug("stat :{}", s3[i].str());
-                }
-              for(auto idet : id_dets)
-                  att._logger->debug("det:{} [{}] at Z:{}", std::get<1>(idet), std::get<2>(idet), std::get<0>(idet));
-#endif
-            }
-        }
 #ifdef DEBUG_KALMAN
       att._logger->debug("init mom : ");
       init_p.Print();
 #endif
-
-      const double mom_res = .0500;
-      double new_P         = gRandom->Gaus(seed_Mom_Mag, mom_res * seed_Mom_Mag);
-      TVector3 seed_p(init_p);
-      seed_p.SetMag(new_P);
 
       // Forward
       genfit::AbsTrackRep* REP = new genfit::RKTrackRep(PDG, 1);
@@ -717,7 +649,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
         CovM(i, i) = 1000.;
 
       genfit::MeasuredStateOnPlane stateRef(REP);
-      REP->setPosMomCov(stateRef, init_point, seed_p, CovM);
+      REP->setPosMomCov(stateRef, init_point, init_p, CovM);
       // remember original initial state
       const genfit::StateOnPlane stateRefOrig(stateRef.getState(), stateRef.getPlane(), REP, stateRef.getAuxInfo());
 
@@ -862,10 +794,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
             genfit::TrackPoint* tp_tmp = fitTrack->getPointWithMeasurementAndFitterInfo(0, REP);
             genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(REP));
             const genfit::MeasuredStateOnPlane& buf_state = kfi->getFittedState();
-            TVector3 v_pos;
-            TVector3 v_mom;
-            TMatrixDSym v_cov;
-            buf_state.getPosMomCov(v_pos, v_mom, v_cov);
+            TVector3 v_pos= buf_state.getPos();
             posBegin = v_pos;
           }
           catch(genfit::Exception& e){
@@ -902,8 +831,18 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
           double mass  = p * sqrt(1. / (beta * beta) - 1.);
 
           int PDG_guess = 2212;
-          if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()>0) PDG_guess =  211;
-          if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()<0) PDG_guess = -211;
+          if(att.PID_CutorProb == false)
+            {
+              if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()>0) PDG_guess =  211;
+              if(att.cut_pi->IsInside(mass*mass, p) && kfsop->getCharge()<0) PDG_guess = -211;
+            }
+          else
+            {
+              if(kfsop->getCharge()>0) PDG_guess =  ProbPIDAssign_Pos(p, beta);
+              if(kfsop->getCharge()<0) PDG_guess =  ProbPIDAssign_Neg(p, beta);
+            }
+
+          if(std::abs(PDG_guess) == 991) PDG_guess = 2212;
 
 
           // GENFIT PID
@@ -1042,10 +981,7 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
                 genfit::TrackPoint* tp_tmp = fitTrack_pid->getPointWithMeasurementAndFitterInfo(0, rep_pid);
                 genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(rep_pid));
                 const genfit::MeasuredStateOnPlane& buf_state = kfi->getFittedState();
-                TVector3 v_pos;
-                TVector3 v_mom;
-                TMatrixDSym v_cov;
-                buf_state.getPosMomCov(v_pos, v_mom, v_cov);
+                TVector3 v_pos = buf_state.getPos();
                 posBegin_pid = v_pos;
               }
               catch(genfit::Exception& e){
@@ -1078,11 +1014,17 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
               double mass_pid  = p_pid * sqrt(1. / (beta_pid * beta_pid) - 1.);
 
               int PDG_guess_pid = 2212;
-              if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()>0) PDG_guess_pid =  211;
-              if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()<0) PDG_guess_pid = -211;
+              if(att.PID_CutorProb == false)
+                {
+                  if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()>0) PDG_guess_pid =  211;
+                  if(att.cut_pi->IsInside(mass_pid*mass_pid, p_pid) && kfsop_pid->getCharge()<0) PDG_guess_pid = -211;
+                }
+              else
+                {
+                  if(kfsop_pid->getCharge()>0) PDG_guess_pid =  ProbPIDAssign_Pos(p, beta);
+                  if(kfsop_pid->getCharge()<0) PDG_guess_pid =  ProbPIDAssign_Neg(p, beta);
+                }
 
-              if(PDG_guess != PDG_guess_pid)
-                PDG_guess_pid = 0;
 
               ResSolDAF tempResults;
               tempResults.charge    = kfsop_pid->getCharge();
@@ -1101,6 +1043,34 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
               tempResults.posX = posRef_pid.X();
               tempResults.posY = posRef_pid.Y();
               tempResults.posZ = posRef_pid.Z();
+
+              TVector3 posEnd_pid;
+              TVector3 momEnd_pid;
+              try{
+                genfit::TrackPoint* tp_tmp = fitTrack_pid->getPointWithMeasurementAndFitterInfo(-1, rep_pid);
+                genfit::KalmanFitterInfo* kfi = static_cast<genfit::KalmanFitterInfo*>(tp_tmp->getFitterInfo(rep_pid));
+                const genfit::MeasuredStateOnPlane& buf_state = kfi->getFittedState();
+                TVector3 v_pos;
+                TVector3 v_mom;
+                buf_state.getPosMom(v_pos, v_mom);
+                posEnd_pid = v_pos;
+                momEnd_pid = v_mom;
+              }
+              catch(genfit::Exception& e){
+                std::cerr<<"Exception posEnd_pid, next track"<<std::endl;
+                std::cerr << e.what();
+                continue;
+              }
+
+              //std::cout << Form("- posEndPID: (%.3f, %.3f, %.3f)",   posEnd_pid.x(),   posEnd_pid.y(),   posEnd_pid.z()) << std::endl;
+
+              tempResults.momX_PS = momEnd_pid.X();
+              tempResults.momY_PS = momEnd_pid.Y();
+              tempResults.momZ_PS = momEnd_pid.Z();
+
+              tempResults.posX_PS = posEnd_pid.X();
+              tempResults.posY_PS = posEnd_pid.Y();
+              tempResults.posZ_PS = posEnd_pid.Z();
 
               for(int row = 0; row < 6; ++row)
                 for(int col = 0; col < 6; ++col)
@@ -1351,6 +1321,95 @@ int TKalmanFilter_DAF_PID<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent
     } //loop over tracks
   
   return 0;
+}
+
+
+template<class Out>
+int TKalmanFilter_DAF_PID<Out>::ProbPIDAssign_Pos(double momenta, double beta)
+{
+  double prob_beta_Pi = 0.;
+  if(momenta < PID_maxMom_piPlus) prob_beta_Pi = (*(CutPID[211]))(momenta,beta);
+  //double diff_beta_Pi = (*(CutPID[211])).GetDiff(momenta,beta);
+  //double chi2_beta_Pi = (*(CutPID[211])).GetChi2(momenta,beta);
+
+  double prob_beta_K = 0.;
+  if(momenta < PID_maxMom_kaonPlus) prob_beta_K = (*(CutPID[321]))(momenta,beta);
+  //double diff_beta_K = (*(CutPID[321])).GetDiff(momenta,beta);
+  //double chi2_beta_K = (*(CutPID[321])).GetChi2(momenta,beta);
+
+  double prob_beta_Pr = 0.;
+  if(momenta < PID_maxMom_proton) prob_beta_Pr = (*(CutPID[2212]))(momenta,beta);
+  //double diff_beta_Pr = (*(CutPID[2212])).GetDiff(momenta,beta);
+  //double chi2_beta_Pr = (*(CutPID[2212])).GetChi2(momenta,beta);
+
+  double prob_beta_Limit = (*(CutPID[991]))(momenta,beta);
+  //double diff_beta_Limit = (*(CutPID[991])).GetDiff(momenta,beta);
+  //double chi2_beta_Limit = (*(CutPID[991])).GetChi2(momenta,beta);
+
+  std::vector<int> indexToPdg = {211,321,2212,991};
+
+  //double chi2_beta_array[4] = {chi2_beta_Pi, chi2_beta_K, chi2_beta_Pr, chi2_beta_Limit};
+  //double diff_beta_array[4] = {diff_beta_Pi, diff_beta_K, diff_beta_Pr, diff_beta_Limit};
+  double prob_beta_array[4] = {prob_beta_Pi, prob_beta_K, prob_beta_Pr, prob_beta_Limit};
+  //std::cout<<" Pi:"<<prob_beta_Pi<<" K+:"<<prob_beta_K<<" p:"<<prob_beta_Pr;
+
+  double Tot_prob = prob_beta_Pi + prob_beta_K + prob_beta_Pr + prob_beta_Limit;
+  //std::cout<<" / tot :"<<Tot_prob<<std::endl;
+  double prob_pid_array[4];
+  prob_pid_array[0] = prob_beta_Pi / Tot_prob;
+  prob_pid_array[1]= prob_beta_K / Tot_prob;
+  prob_pid_array[2] = prob_beta_Pr / Tot_prob;
+  prob_pid_array[3] = prob_beta_Limit / Tot_prob;
+
+  int id_max_pid = TMath::LocMax(4,prob_pid_array);
+
+  int pid_new = indexToPdg[id_max_pid];
+  //double prob_pid = prob_pid_array[id_max_pid];
+  double prob_beta = prob_beta_array[id_max_pid];
+  //double chi2_beta = chi2_beta_array[id_max_pid];
+  //double diff_beta = diff_beta_array[id_max_pid];
+
+  if(prob_beta < att.PID_minProb) pid_new = 0;
+
+  return pid_new;
+}
+
+
+template<class Out>
+int TKalmanFilter_DAF_PID<Out>::ProbPIDAssign_Neg(double momenta, double beta)
+{
+  double prob_beta_Pi = (*(CutPID[-211]))(momenta,beta);
+  double diff_beta_Pi = (*(CutPID[-211])).GetDiff(momenta,beta);
+  double chi2_beta_Pi = (*(CutPID[-211])).GetChi2(momenta,beta);
+
+  double prob_beta_Limit = (*(CutPID[-991]))(momenta,beta);
+  double diff_beta_Limit = (*(CutPID[-991])).GetDiff(momenta,beta);
+  double chi2_beta_Limit = (*(CutPID[-991])).GetChi2(momenta,beta);
+
+  std::vector<int> indexToPdg = {-211,-991};
+
+  double chi2_beta_array[2] = {chi2_beta_Pi, chi2_beta_Limit};
+  double diff_beta_array[2] = {diff_beta_Pi, diff_beta_Limit};
+  double prob_beta_array[2] = {prob_beta_Pi, prob_beta_Limit};
+  //std::cout<<" Pi:"<<prob_beta_Pi<;
+
+  double Tot_prob = prob_beta_Pi + prob_beta_Limit ;
+  //std::cout<<" / tot :"<<Tot_prob<<std::endl;
+  double prob_pid_array[2];
+  prob_pid_array[0] = prob_beta_Pi / Tot_prob;
+  prob_pid_array[1]= prob_beta_Limit / Tot_prob;
+
+  int id_max_pid = TMath::LocMax(2,prob_pid_array);
+
+  int pid_new = indexToPdg[id_max_pid];
+  //double prob_pid = prob_pid_array[id_max_pid];
+  double prob_beta = prob_beta_array[id_max_pid];
+  //double chi2_beta = chi2_beta_array[id_max_pid];
+  //double diff_beta = diff_beta_array[id_max_pid];
+
+  if(prob_beta < att.PID_minProb) pid_new = 0;
+
+  return pid_new;
 }
 
 

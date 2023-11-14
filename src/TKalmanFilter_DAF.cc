@@ -277,7 +277,7 @@ int TKalmanFilter_DAF<Out>::Exec(FullRecoEvent& RecoEvent, Out* OutTree)
       OutTrack->BetaIni       = FitRes.beta2;
       OutTrack->MassIni       = FitRes.mass2;
       OutTrack->TOFIni        = FitRes.tof2;
-      OutTrack->PathLengthIni = TInfo->second[FitRes.lastHit].length; // FitRes.path_length2;
+      OutTrack->PathLengthIni = TInfo->second[FitRes.lastHit].tracklength; // FitRes.path_length2;
       OutTrack->RChiIni       = FitRes.fitter;
       if(Decay == 1)
         OutTrack->Sim2Vtx.SetXYZT(std::get<1>(IsDecay->second), std::get<2>(IsDecay->second),

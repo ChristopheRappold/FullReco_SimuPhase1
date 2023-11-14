@@ -364,7 +364,8 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
       psb_zpar[seg] = zpar;
     }
     printf("PSB time file done : %s\n", psb_name_time.c_str());
-  }else
+  }
+  else
   {
     printf(" ! fail to open  : %s\n", psb_name_time.c_str());
     exit(-1);
@@ -374,16 +375,16 @@ ParaManager::ParaManager(const std::unordered_map<std::string,std::string>& Para
 
 
   //  PSFE  //////
-  psfe_tcut_min = -202000; psfe_tcut_max = 194000;
+  psfe_tcut_min = -25500; psfe_tcut_max = -24300;
   psfe_rmin = 85.;         psfe_rmax = 187.5;
-  psfe_pos_z = 3040.;
+  psfe_pos_z = 3107.;
   psfe_res_phi  = 10; //mm
   psfe_ch2ns  = 0.025;
 
   //  PSBE  //////
-  psbe_tcut_min = -202000; psbe_tcut_max = 194000;
+  psbe_tcut_min = -25200; psbe_tcut_max = -24800;
   psbe_rmin = 117.;         psbe_rmax = 187.5;
-  psbe_pos_z = 2480.;
+  psbe_pos_z = 2459.3;
 
   //  T0  //////
   t0_tcut_min = -26200 ; t0_tcut_max = -25800;

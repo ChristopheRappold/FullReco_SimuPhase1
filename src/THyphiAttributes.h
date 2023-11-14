@@ -215,7 +215,7 @@ struct RunTaskAttrDef
 
   bool WF_perfect;
   bool WF_PSBHits;
-  bool WF_PSFEHits;
+  bool WF_PSBEHits;
 
   bool KF_Kalman;
   bool KF_KalmanSqrt;
@@ -345,14 +345,14 @@ inline auto InitStorage()
 				 make_column("RZ_MDCBiasCorr", &RunTaskAttrDef::RZ_MDCBiasCorr),
 				 make_column("WF_perfect", &RunTaskAttrDef::WF_perfect),
 				 make_column("WF_PSBHits", &RunTaskAttrDef::WF_PSBHits),
-				 make_column("WF_PSFEHits", &RunTaskAttrDef::WF_PSFEHits),
+				 make_column("WF_PSBEHits", &RunTaskAttrDef::WF_PSBEHits),
 				 make_column("KF_Kalman", &RunTaskAttrDef::KF_Kalman),
 				 make_column("KF_KalmanSqrt", &RunTaskAttrDef::KF_KalmanSqrt),
 				 make_column("KF_KalmanRef", &RunTaskAttrDef::KF_KalmanRef),
 				 make_column("KF_DAFRef", &RunTaskAttrDef::KF_DAFRef),
 				 make_column("KF_DAF", &RunTaskAttrDef::KF_DAF),
 				 make_column("KF_NbCentralCut", &RunTaskAttrDef::KF_NbCentralCut),
-				 make_column("KF_MbMiniFiberCut", &RunTaskAttrDef::KF_NbMiniFiberCut),
+         make_column("KF_MbMiniFiberCut", &RunTaskAttrDef::KF_NbMiniFiberCut),
 				 make_column("FlatML_namefile", &RunTaskAttrDef::FlatML_namefile),
 				 make_column("DataML_Out", &RunTaskAttrDef::DataML_Out),
 				 make_column("RF_OutputEvents", &RunTaskAttrDef::RF_OutputEvents),
@@ -407,6 +407,10 @@ class THyphiAttributes
   double cut_psb_phi;
   double cut_psb_z;
   double cut_phi_fm;
+  double psb_timeres;
+
+  // T0 Counter
+  double t0_timeres;
 
   bool flag_dup_trackhit;
   bool flag_dup_trackhit_mdc;
@@ -457,7 +461,7 @@ class THyphiAttributes
 
   bool WF_perfect;
   bool WF_PSBHits;
-  bool WF_PSFEHits;
+  bool WF_PSBEHits;
 
   bool KF_Kalman;
   bool KF_KalmanSqrt;
@@ -474,6 +478,12 @@ class THyphiAttributes
 
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
+  double KF_RandInitMomX;
+  double KF_RandInitMomY;
+  double KF_RandInitMomZ;
+
+  bool PID_CutorProb;
+  double PID_minProb;
 
   std::string StudyCase;
 
