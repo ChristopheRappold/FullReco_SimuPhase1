@@ -50,6 +50,7 @@ private:
   void SelectHists() final;
 
   int FinderGNN(FullRecoEvent& RecoEvent);
+  int FinderGNNText(FullRecoEvent& RecoEvent);
 
   static bool did_order(HitGnn a, HitGnn b){
     if(a.did != b.did) return a.did < b.did;
@@ -74,6 +75,8 @@ private:
       int id=-1, int id_s=-1, int id_d=-1, int g_s=0);
 
   torch::jit::script::Module model;
+
+  std::ifstream ifs_gnn;
 
 
 };

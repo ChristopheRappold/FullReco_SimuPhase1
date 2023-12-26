@@ -215,6 +215,9 @@ struct RunTaskAttrDef
   bool WF_PSBHits;
   bool WF_PSFEHits;
 
+  bool GNN_Text;
+  std::string GNN_Node;
+
   bool KF_Kalman;
   bool KF_KalmanSqrt;
   bool KF_KalmanRef;
@@ -342,6 +345,8 @@ inline auto InitStorage()
 				 make_column("WF_perfect", &RunTaskAttrDef::WF_perfect),
 				 make_column("WF_PSBHits", &RunTaskAttrDef::WF_PSBHits),
 				 make_column("WF_PSFEHits", &RunTaskAttrDef::WF_PSFEHits),
+				 make_column("GNN_Text", &RunTaskAttrDef::GNN_Text),
+				 make_column("GNN_Node", &RunTaskAttrDef::GNN_Node),
 				 make_column("KF_Kalman", &RunTaskAttrDef::KF_Kalman),
 				 make_column("KF_KalmanSqrt", &RunTaskAttrDef::KF_KalmanSqrt),
 				 make_column("KF_KalmanRef", &RunTaskAttrDef::KF_KalmanRef),
@@ -451,6 +456,9 @@ class THyphiAttributes
   bool WF_perfect;
   bool WF_PSBHits;
   bool WF_PSFEHits;
+
+  bool GNN_Text;
+  std::string GNN_Node;
 
   bool KF_Kalman;
   bool KF_KalmanSqrt;

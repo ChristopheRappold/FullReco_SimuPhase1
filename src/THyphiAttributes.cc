@@ -80,6 +80,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   WF_PSBHits  = true;
   WF_PSFEHits = false;
 
+  GNN_Text = false;
+  GNN_Node = "test.txt";
+
   KF_Kalman     = false;
   KF_KalmanSqrt = true;
   KF_KalmanRef  = false;
@@ -207,6 +210,11 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     WF_PSBHits = Config.Get<bool>("WF_PSBHits");
   if(Config.IsAvailable("WF_PSFEHits"))
     WF_PSFEHits = Config.Get<bool>("WF_PSFEHits");
+
+  if(Config.IsAvailable("GNN_Text"))
+    GNN_Text = Config.Get<bool>("GNN_Text");
+  if(Config.IsAvailable("GNN_Node"))
+    GNN_Node = Config.Get<std::string>("GNN_Node");
   
   _logger->info("RZ Setting: Prolate? {} / Wire2? {} / BiasCorr? {} / ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
                 RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
@@ -895,6 +903,8 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.WF_perfect         = WF_perfect;
   out.RunTaskAttr.WF_PSBHits         = WF_PSBHits;
   out.RunTaskAttr.WF_PSFEHits        = WF_PSFEHits;
+  out.RunTaskAttr.GNN_Text           = GNN_Text;
+  out.RunTaskAttr.GNN_Node           = GNN_Node;
   out.RunTaskAttr.KF_Kalman          = KF_Kalman;
   out.RunTaskAttr.KF_KalmanSqrt      = KF_KalmanSqrt;
   out.RunTaskAttr.KF_KalmanRef       = KF_KalmanRef;

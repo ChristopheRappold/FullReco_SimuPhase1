@@ -21,6 +21,7 @@ TGNNFinder<Out>::TGNNFinder(const THyphiAttributes& attribut) : TDataProcessInte
     return;
   }
   model.eval();
+  ifs_gnn.open(att.GNN_Node);
 }
 
 template<class Out>
@@ -39,7 +40,11 @@ ReturnRes::InfoM TGNNFinder<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutT
 }
 
 template<class Out>
-int TGNNFinder<Out>::Exec(FullRecoEvent& RecoEvent, Out* ) { return FinderGNN(RecoEvent); }
+int TGNNFinder<Out>::Exec(FullRecoEvent& RecoEvent, Out* ) {
+ 
+  if(att.GNN_Text)  return FinderGNNText(RecoEvent);
+  else              return FinderGNN(RecoEvent);
+}
 
 template<class Out>
 ReturnRes::InfoM TGNNFinder<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
@@ -868,6 +873,316 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   }
 
   att._logger->debug("TGNNFinder: FinderGNN end");
+  return 0;
+}
+
+
+template<class Out>
+int TGNNFinder<Out>::FinderGNNText(FullRecoEvent& RecoEvent)
+{
+  att._logger->debug("TGNNFinder: FinderGNNText start");
+  std::vector<TrackHit*> TrackHitCont;
+
+  //std::cout << "Text : " << att.GNN_Node << std::endl;
+  if(!ifs_gnn.is_open()){
+    std::cout << "GNN clust file not open" << std::endl;
+    return -1;
+  }
+
+  std::vector< std::map<int, double> > node_clust;
+
+  std::string temp_line;
+  std::getline(ifs_gnn,temp_line);
+  if(ifs_gnn.eof()){
+    std::cout << "GNN file end" << std::endl;
+    //std::ofstream ofs_err(gnn_err_filename.c_str());
+    //ofs_err << Form("GNN file end :  %s", gnn_err_filename.c_str()) << std::endl;
+    //ofs_err << Form("last ev      :  %d", ev) << std::endl;
+    return -1;
+  }
+  std::stringstream stream(temp_line);
+  int num_cl;
+  int num_hit;
+  int    layer;
+  double hitid;
+  stream >> num_cl;
+  att._logger->debug("TGNNFinder: num_cl {}",num_cl);
+  for(int i=0; i<num_cl; ++i){
+    std::map<int, double> buf_map;
+    node_clust.emplace_back(buf_map);
+    stream >> num_hit;
+    for(int j=0; j<num_hit; ++j){
+      stream >> layer >> hitid;
+      if(layer==-1){
+        att._logger->debug("TGNNFinder: GNN ev {}",(int)hitid);
+        //if(par->flag_debug) std::cout << Form("- ev : %d %.0f",ev, hitid) <<std::endl;
+        //if(hitid!=ev){
+        //  std::cout << Form("Event ID mismatch : %d %.0f",ev, hitid) << std::endl;
+        //  std::ofstream ofs_err(gnn_err_filename.c_str());
+        //  ofs_err << Form("Event ID mismatch : ev %d  gnn %.0f",ev, hitid) << std::endl;
+        //  return -1;
+        //}
+      }
+      else (node_clust.back())[layer] = hitid;
+    }
+  }
+
+  const double mm2cm = 0.1;
+  for(auto cl: node_clust){
+    int num_fiber = 0;
+    int num_mdc   = 0;
+    bool flag_psb  = false;
+    bool flag_psfe = false;
+    for(auto v: cl){
+      int layer = v.first;
+      if(1<=layer && layer<=6 ) ++num_fiber;
+      if(7<=layer && layer<=23) ++num_mdc;
+      if(layer==24) flag_psb  = true;
+      if(layer==25) flag_psfe = true;
+    }
+    if(!flag_psb && !flag_psfe) continue;
+    if(num_fiber <= 1) continue;
+    if(num_mdc   <= 3) continue;
+    att._logger->debug("TGNNFinder: Fiber {}, MDC {}, PSB {} PSFE {}",num_fiber, num_mdc, flag_psb, flag_psfe);
+
+    TrackHit *track_hit = new TrackHit();
+    PSBHitAna *psb_hit = nullptr;
+    PSFEHitAna *psfe_hit = nullptr;
+    for(auto v: cl){
+      int layer = v.first;
+      int hitid = v.second;
+
+      if(1<=layer && layer<=6){
+        int det = (layer-1)/3 + 3;
+        int lay = (layer-1)%3;
+        for(auto hit: RecoEvent.FiberHitClCont[det][lay]){
+          if(fabs(hit->GetFib()-hitid)<1.5){
+            track_hit->AddFiber(layer-1, hit->GetClFib());
+          }
+        }
+      }
+
+      if(7<=layer && layer<=23){
+        int lay = layer-7;
+        for(auto hit: RecoEvent.MDCHitCont[lay]){
+          double dif = hit->GetWir() - hitid;
+          if(fabs(dif) < 2){
+            hit->SetDif(dif);
+            track_hit->SetMDCdif(lay, hit->GetWir(), dif);
+          }
+        }
+      }
+
+      if(layer==24){
+        double r = 1000;
+        for(auto hit: RecoEvent.PSBHitCont){
+          if( (fabs(hit->GetSeg() - hitid) < 0.6) && (hit->GetR() < r) ){
+            psb_hit = hit;
+            r = hit->GetR();
+          }
+        }
+        track_hit->AddPSB(psb_hit->GetSeg());
+        track_hit->SetFlagPSB();
+      }
+
+      if(layer==25){
+        double dif_min = 1000;
+        for(auto hit: RecoEvent.PSFEHitCont){
+          double dif = fabs(hit->GetSeg() - hitid);
+          if( (fabs(dif) < 0.6) && (dif < dif_min) ){
+            psfe_hit = hit;
+            dif_min = dif;
+          }
+        }
+        track_hit->AddPSFE(psfe_hit->GetSeg());
+        track_hit->SetFlagPSFE();
+      }
+
+    }
+
+    double x1 = att.Target_PositionX;
+    double y1 = att.Target_PositionY;
+    double z1 = att.Target_PositionZ;
+    double x2 = -9999.;
+    double y2 = -9999.;
+    double z2 = -9999.;
+    if(track_hit->IsFlagPSB()){
+      x2 = ( psb_hit->GetR() * cos(psb_hit->GetPhi()) + att.psb_pos_x ) * mm2cm;
+      y2 = ( psb_hit->GetR() * sin(psb_hit->GetPhi()) + att.psb_pos_y ) * mm2cm;
+      z2 = ( psb_hit->GetZ()                          + att.psb_pos_z ) * mm2cm;
+    }
+    else if(track_hit->IsFlagPSFE()){
+      x2 = (psfe_hit->GetRmax() + psfe_hit->GetRmin())/2. * cos(psfe_hit->GetPhi()) * mm2cm;
+      y2 = (psfe_hit->GetRmax() + psfe_hit->GetRmin())/2. * sin(psfe_hit->GetPhi()) * mm2cm;
+      z2 = psfe_hit->GetZ()                                                         * mm2cm;
+    }
+
+    double a_buf = (x2 - x1) / (z2 - z1);
+    double b_buf = (y2 - y1) / (z2 - z1);
+    track_hit->SetTrackA(a_buf);
+    track_hit->SetTrackB(b_buf);
+
+    //track_hit->SetMDCLayHitCont();
+    track_hit->DeleteDupMDC();
+    //track_hit->SetDidCh();
+
+    TrackHitCont.emplace_back(track_hit);
+  }
+
+  att._logger->debug("TGNNFinder: TrackHit {}", (int)TrackHitCont.size());
+
+  for(size_t i = 0; i < TrackHitCont.size(); ++i)
+  {
+    std::vector<int> tempSetHit(G4Sol::SIZEOF_G4SOLDETTYPE, -1);
+    std::vector<InfoPar> tempSetInfo(G4Sol::SIZEOF_G4SOLDETTYPE);
+
+    //FiberHits
+    for(int j = 0; j < 6; ++j)
+    {
+      if(TrackHitCont[i]->GetFiberHit()[j] == -1) continue;
+
+      bool flag_found = false;
+      for(int k = 0; k < (int)RecoEvent.ListHits[G4Sol::MiniFiberD1_x + j].size(); ++k)
+      {
+        //printf("TrackHit: %d ; ListHists: %d \n", TrackHitCont[i]->GetFiberHit()[j], RecoEvent.ListHits[G4Sol::MiniFiberD1_x + j][k]->getHitId());
+        if(TrackHitCont[i]->GetFiberHit()[j] == RecoEvent.ListHits[G4Sol::MiniFiberD1_x + j][k]->getHitId())
+        {
+          tempSetHit[G4Sol::MiniFiberD1_x + j] = k;
+          InfoPar tmp_infopar;
+          tmp_infopar.pdg    = -211;
+          //tmp_infopar.momX   = hit.MomX;
+          //tmp_infopar.momY   = hit.MomY;
+          //tmp_infopar.momZ   = hit.MomZ;
+          //tmp_infopar.mass   = hit.Mass;
+          tmp_infopar.Eloss  = RecoEvent.ListHitsInfo[G4Sol::MiniFiberD1_x + j][k].dE;
+          tmp_infopar.time   = RecoEvent.ListHitsInfo[G4Sol::MiniFiberD1_x + j][k].time;
+          tmp_infopar.TOT    = RecoEvent.ListHitsInfo[G4Sol::MiniFiberD1_x + j][k].TOT;
+          //tmp_infopar.length = hit.TrackLength;
+          tempSetInfo[G4Sol::MiniFiberD1_x + j] = tmp_infopar;
+          flag_found = true;
+        }
+      }
+
+      if(!flag_found) printf("Error: %d-layer Fiber Hit not found in GnnFinder\n", j);
+    }
+
+    //MDCHits
+    for(int j = 0; j < 17; ++j)
+    {
+      if(TrackHitCont[i]->GetMDCHit()[j] == -1) continue;
+
+      bool flag_found = false;
+      for(int k = 0; k < (int)RecoEvent.ListHits[G4Sol::MG01 + j].size(); ++k)
+      {
+        if(TrackHitCont[i]->GetMDCHit()[j] == RecoEvent.ListHits[G4Sol::MG01 + j][k]->getHitId())
+        {
+          tempSetHit[G4Sol::MG01 + j] = k;
+          InfoPar tmp_infopar;
+          tmp_infopar.pdg    = -211;
+          //tmp_infopar.momX;
+          //tmp_infopar.momY;
+          //tmp_infopar.momZ;
+          //tmp_infopar.mass;
+          tmp_infopar.Eloss  = RecoEvent.ListHitsInfo[G4Sol::MG01 + j][k].dE;
+          tmp_infopar.time   = RecoEvent.ListHitsInfo[G4Sol::MG01 + j][k].time;
+          tmp_infopar.TOT    = RecoEvent.ListHitsInfo[G4Sol::MG01 + j][k].TOT;
+          //tmp_infopar.length = hit.TrackLength;
+          tempSetInfo[G4Sol::MG01 + j] = tmp_infopar;
+          flag_found = true;
+        }
+      }
+
+      if(!flag_found)
+        printf("Error: %d-layer MDC Hit not found in GnnFinder\n", j);
+    }
+
+    //PSBHit
+    if(att.WF_PSBHits)
+      if(TrackHitCont[i]->IsFlagPSB())
+      {
+        bool flag_found = false;
+        for(int j = 0; j < (int)RecoEvent.ListHits[G4Sol::PSCE].size(); ++j)
+        {
+          if(TrackHitCont[i]->GetPSBHit() == RecoEvent.ListHits[G4Sol::PSCE][j]->getHitId())
+          {
+            tempSetHit[G4Sol::PSCE] = j;
+            InfoPar tmp_infopar;
+            tmp_infopar.pdg    = -211;
+            //tmp_infopar.momX   = hit.MomX;
+            //tmp_infopar.momY   = hit.MomY;
+            //tmp_infopar.momZ   = hit.MomZ;
+            //tmp_infopar.mass   = hit.Mass;
+            tmp_infopar.Eloss  = RecoEvent.ListHitsInfo[G4Sol::PSCE][j].dE;
+            tmp_infopar.time   = RecoEvent.ListHitsInfo[G4Sol::PSCE][j].time;
+            //tmp_infopar.TOT    = RecoEvent.ListHitsInfo[G4Sol::PSCE][j].TOT;
+            //tmp_infopar.length = hit.TrackLength;
+            tempSetInfo[G4Sol::PSCE] = tmp_infopar;
+            flag_found = true;
+          }
+        }
+
+        if(!flag_found)
+          std::cout << "Error: PSB Hit not found in GnnFinder\n";
+      }
+
+    //PSFEHit
+    if(att.WF_PSFEHits)
+      if(TrackHitCont[i]->IsFlagPSFE())
+      {
+        bool flag_found = false;
+        for(int j = 0; j < (int)RecoEvent.ListHits[G4Sol::PSFE].size(); ++j)
+        {
+          if(TrackHitCont[i]->GetPSFEHit() == RecoEvent.ListHits[G4Sol::PSFE][j]->getHitId())
+          {
+            tempSetHit[G4Sol::PSFE] = j;
+            InfoPar tmp_infopar;
+            tmp_infopar.pdg    = -211;
+            //tmp_infopar.momX   = hit.MomX;
+            //tmp_infopar.momY   = hit.MomY;
+            //tmp_infopar.momZ   = hit.MomZ;
+            //tmp_infopar.mass   = hit.Mass;
+            tmp_infopar.Eloss  = RecoEvent.ListHitsInfo[G4Sol::PSFE][j].dE;
+            tmp_infopar.time   = RecoEvent.ListHitsInfo[G4Sol::PSFE][j].time;
+            //tmp_infopar.TOT    = RecoEvent.ListHitsInfo[G4Sol::PSFE][j].TOT;
+            //tmp_infopar.length = hit.TrackLength;
+            tempSetInfo[G4Sol::PSFE] = tmp_infopar;
+            flag_found = true;
+          }
+        }
+
+        if(!flag_found)
+          std::cout << "Error: PSFE Hit not found in GnnFinder\n";
+      }
+
+    RecoEvent.TrackDAF.insert(std::make_pair(i, tempSetHit));
+    RecoEvent.TrackInfo.insert(std::make_pair(i, tempSetInfo));
+
+    //TVector3 tmp_closepoint_Pos;
+    //double tmp_closepoint_Dist;
+    //if(!RecoEvent.FragmentTracks.empty())
+    //  CloseDist(RecoEvent.FragmentTracks[0], TrackHitCont[i], tmp_closepoint_Dist, tmp_closepoint_Pos); //CHECK!!
+
+    InfoInit tempInit;
+    tempInit.charge = -1;
+    //tempInit.posX = tmp_closepoint_Pos.X();
+    //tempInit.posY = tmp_closepoint_Pos.Y();
+    //tempInit.posZ = tmp_closepoint_Pos.Z();
+    tempInit.posX = att.Target_PositionX;
+    tempInit.posY = att.Target_PositionY;
+    tempInit.posZ = att.Target_PositionZ;
+
+    //std::cout << "InitPoint: " << tempInit.posX << "  " << tempInit.posY << "  " << tempInit.posZ << "\n";
+    double tmp_momZ = 1.;
+    tempInit.momX = tmp_momZ*TrackHitCont[i]->GetTrackA();
+    tempInit.momY = tmp_momZ*TrackHitCont[i]->GetTrackB();
+    tempInit.momZ = tmp_momZ;
+
+    RecoEvent.TrackDAFInit.insert(std::make_pair(i, tempInit));
+  }
+
+
+
+  att._logger->debug("TGNNFinder: FinderGNNText end");
   return 0;
 }
 

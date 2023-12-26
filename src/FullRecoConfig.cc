@@ -11,7 +11,7 @@
 
 static struct option optlong[] = {{"help", 0, NULL, 'h'},  {"cpu", 1, NULL, 'c'},   {"num", 1, NULL, 'n'},
                                   {"event", 1, NULL, 'e'}, {"start", 1, NULL, 's'}, {"geo", 1, NULL, 'g'},
-                                  {"log", 1, NULL, 'l'},   {"config", 1, NULL, 'f'}};
+                                  {"log", 1, NULL, 'l'},   {"config", 1, NULL, 'f'},{"gnn", 1, NULL, 'a'}};
 
 FullRecoConfig::FullRecoConfig() { SetDefault(); }
 
@@ -106,8 +106,9 @@ int FullRecoConfig::ParseCmd(int argc, char** argv)
   int Log_lvl     = 1;
   std::string nameGeo("./geo/GeoSolenoid.root");
   std::string nameConf("testconfig.cfg");
+  std::string nameGnn("test.txt");
 
-  while((option_char = getopt_long(argc, argv, "+hc:n:e:s:g:l:f:", optlong, NULL)) != EOF)
+  while((option_char = getopt_long(argc, argv, "+hc:n:e:s:g:l:f:a:", optlong, NULL)) != EOF)
     switch(option_char)
       {
       case 'h':
@@ -141,6 +142,10 @@ int FullRecoConfig::ParseCmd(int argc, char** argv)
       case 'f':
         nameConf = std::string(optarg);
         tree.put("Config", nameConf);
+        break;
+      case 'a':
+        nameGnn = std::string(optarg);
+        tree.put("GNN_Node", nameGnn);
         break;
       case '?':
       default:
