@@ -31,6 +31,7 @@ public :
   Double_t Time;
   Double_t Energy;
   Double_t TrackLength;
+  Double_t HitLength;
 
   TMcHit();
 

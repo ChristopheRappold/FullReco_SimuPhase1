@@ -36,6 +36,7 @@ THypernucleus::THypernucleus()
   Pvalue_Fragment=-1.;
   Angle_MotherFragment=-1.;
   Fragment_IsFromHyp=-1;
+  RealPDG_Fragment=0;
 
   PDG_Pion=-1;
   Id_Pion=-1;
@@ -48,6 +49,7 @@ THypernucleus::THypernucleus()
   NHitsMinifiber_Pion=-1;
   N_Pion=-1;
   Pion_IsFromHyp=-1;
+  RealPDG_Pion=0;
 
   Dist_Daughters=-1.;
   ArmPod_Qt=-1.;
@@ -86,6 +88,7 @@ THypernucleus::THypernucleus(const THypernucleus& H)
   Pvalue_Fragment=H.Pvalue_Fragment;
   Angle_MotherFragment=H.Angle_MotherFragment;
   Fragment_IsFromHyp=H.Fragment_IsFromHyp;
+  RealPDG_Fragment=H.RealPDG_Fragment;
 
   PDG_Pion=H.PDG_Pion;
   Id_Pion=H.Id_Pion;
@@ -98,6 +101,7 @@ THypernucleus::THypernucleus(const THypernucleus& H)
   NHitsMinifiber_Pion=H.NHitsMinifiber_Pion;
   N_Pion=H.N_Pion;
   Pion_IsFromHyp=H.Pion_IsFromHyp;
+  RealPDG_Pion=H.RealPDG_Pion;
 
   Dist_Daughters=H.Dist_Daughters;
   ArmPod_Qt=H.ArmPod_Qt;
@@ -147,6 +151,7 @@ void THypernucleus::Clear(Option_t *option)
   Pvalue_Fragment=-1.;
   Angle_MotherFragment=-1.;
   Fragment_IsFromHyp=-1;
+  RealPDG_Fragment=0;
 
   PDG_Pion=-1;
   Id_Pion=-1;
@@ -159,6 +164,7 @@ void THypernucleus::Clear(Option_t *option)
   NHitsMinifiber_Pion=-1;
   N_Pion=-1;
   Pion_IsFromHyp=-1;
+  RealPDG_Pion=0;
 
   Dist_Daughters=-1.;
   ArmPod_Qt=-1.;

@@ -103,12 +103,12 @@ int TFragmentFinder<Out>::FinderFragment(FullRecoEvent& RecoEvent)
           tmp_FragmentTrack.SetPos(TVector3(optics->GetX2()*0.1, optics->GetY2()*0.1, optics->GetZ2()*0.1));
           tmp_FragmentTrack.SetMom(optics->GetMomV());
 
-          std::vector<double> tmp_covmatrix = {1.e-8,
-                                                  0., 1.e-8,
-                                                  0.,    0., 1.e-8,
-                                                  0.,    0.,    0., 1.e-8,
-                                                  0.,    0.,    0.,    0., 1.e-8,
-                                                  0.,    0.,    0.,    0.,    0., 1.e-8}; //Change!
+          std::vector<double> tmp_covmatrix = {1.e-2,
+                                                  0., 1.e-2,
+                                                  0.,    0., 1.e-2,
+                                                  0.,    0.,    0., 1.e-3,
+                                                  0.,    0.,    0.,    0., 1.e-3,
+                                                  0.,    0.,    0.,    0.,    0., 1.e-3}; //Change!
           tmp_FragmentTrack.SetCovMatrix(tmp_covmatrix); //CHECK Change!
           tmp_FragmentTrack.SetTOT(RecoEvent.FiberTrackCont["dft12"][i]->GetTOT());
           tmp_FragmentTrack.SetTime(RecoEvent.FiberTrackCont["dft12"][i]->GetTime());
@@ -209,6 +209,7 @@ void TFragmentFinder<Out>::RealFragmentFinder(std::unordered_map<int, std::vecto
           tmp_FragmentTrack.SetIsBest(true);
           tmp_FragmentTrack.SetPID(fragment_pdg);
           tmp_FragmentTrack.SetTrackID(itr->first);
+          tmp_FragmentTrack.SetRealPDG(fragment_pdg);
 
           RealFragmentTracks.emplace_back(tmp_FragmentTrack);
         }

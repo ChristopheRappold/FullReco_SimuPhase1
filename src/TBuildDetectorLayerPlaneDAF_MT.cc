@@ -454,7 +454,7 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
               tempSimHit.mass    = hit.Mass;
               tempSimHit.Eloss   = hit.Energy;
               tempSimHit.time    = gRandom->Gaus(hit.Time, time_res);
-              tempSimHit.length  = hit.TrackLength;
+              tempSimHit.tracklength  = hit.TrackLength;
 	      tempTrackSim->second[TypeDet + LayerID].emplace_back(tempSimHit);
 				   
               auto tempTrackInfo                              = RecoEvent.TrackInfo.find(TrackID);
@@ -465,7 +465,7 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
               tempTrackInfo->second[TypeDet + LayerID].mass   = hit.Mass;
               tempTrackInfo->second[TypeDet + LayerID].Eloss  = hit.Energy;
               tempTrackInfo->second[TypeDet + LayerID].time   = hit.Time;
-              tempTrackInfo->second[TypeDet + LayerID].length = hit.TrackLength;
+              tempTrackInfo->second[TypeDet + LayerID].tracklength = hit.TrackLength;
 
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
               if(PDG_particle == nullptr)
@@ -957,7 +957,7 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
               tempSimHit.mass    = hit.Mass;
               tempSimHit.Eloss   = hit.Energy;
               tempSimHit.time    = hit.Time;
-              tempSimHit.length  = hit.TrackLength;
+              tempSimHit.tracklength  = hit.TrackLength;
               tempTrackSim->second[TypeDet].emplace_back(tempSimHit);
 
               auto tempTrackInfo                    = RecoEvent.TrackInfo.find(TrackID);
@@ -968,7 +968,7 @@ int TBuildDetectorLayerPlaneDAF_MT::Exec(const TG4Sol_Event& event, const std::v
               tempTrackInfo->second[TypeDet].mass   = hit.Mass;
               tempTrackInfo->second[TypeDet].Eloss  = hit.Energy;
               tempTrackInfo->second[TypeDet].time   = hit.Time;
-              tempTrackInfo->second[TypeDet].length = hit.TrackLength;
+              tempTrackInfo->second[TypeDet].tracklength = hit.TrackLength;
 
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
               if(PDG_particle == nullptr)

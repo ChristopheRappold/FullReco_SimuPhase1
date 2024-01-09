@@ -1,7 +1,6 @@
 #include "TWASACalibrationSimuBuilder.h"
 
 #include "Debug.hh"
-#include "TGeoManager.h"
 
 #include <list>
 #include <map>
@@ -376,6 +375,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       FiberHitClCont.emplace_back(buf_vv);
     }
 
+  double time_res_t0counter = att.t0_timeres; // ns
 
   for(size_t index = 0; index < event.BeamTrackID.size(); ++index)
     {
@@ -402,14 +402,16 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       int TrackID = event.BeamTrackID[index];
 
       InfoInit tempInit;
+      tempInit.pdg = pid_fromName(event.BeamNames[index]);
       tempInit.charge = event.BeamCharges[index];
-      tempInit.time = 0.;
+      tempInit.time = gRandom->Gaus(0., time_res_t0counter);
       tempInit.posX = event.InteractionPoint_X;
       tempInit.posY = event.InteractionPoint_Y;
       tempInit.posZ = event.InteractionPoint_Z;
       tempInit.momX = event.BeamMomentums_X[index];
       tempInit.momY = event.BeamMomentums_Y[index];
       tempInit.momZ = event.BeamMomentums_Z[index];
+      tempInit.mass = event.BeamMasses[index];
       RecoEvent.TrackDAFInitSim.insert(std::make_pair(TrackID, tempInit));
 
       std::vector<std::vector<SimHit> > tempSetSimHit(G4Sol::SIZEOF_G4SOLDETTYPE);
@@ -436,14 +438,16 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       int TrackID = event.DaughterTrackID[index];
 
       InfoInit tempInit;
+      tempInit.pdg = pid_fromName(event.DaughterNames[index]);
       tempInit.charge = event.DaughterCharges[index];
-      tempInit.time = event.DecayTime;
+      tempInit.time = gRandom->Gaus(event.DecayTime, time_res_t0counter);
       tempInit.posX = event.DecayVertex_X;
       tempInit.posY = event.DecayVertex_Y;
       tempInit.posZ = event.DecayVertex_Z;
       tempInit.momX = event.DaughterMomentums_X[index];
       tempInit.momY = event.DaughterMomentums_Y[index];
       tempInit.momZ = event.DaughterMomentums_Z[index];
+      tempInit.mass = event.DaughterMasses[index];
       RecoEvent.TrackDAFInitSim.insert(std::make_pair(TrackID, tempInit));
 
       RecoEvent.DaughtersTrackDAFInit.insert(std::make_pair(TrackID, tempInit));
@@ -482,6 +486,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
     OutHit->Time              = hit.Time;
     OutHit->Energy            = hit.Energy;
     OutHit->TrackLength       = hit.TrackLength;
+    OutHit->HitLength         = TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ));
 
     // std::cout<<" Out> LayerID:"<<LayerID<<" "<<HitID<<std::endl;
   };
@@ -520,6 +525,14 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       double resolution_fiber  = 0.015;
       double resolution_psce   = 1.1; // 3.8/sqrt(12.)
       double resolution_psce_z = 1.0;
+      double time_res_psb      = att.psb_timeres; // ns
+      double dE_res_psb        = 0.1;   // in % of dE
+      double time_res_psbe     = 0.300; // ns
+      double dE_res_psbe       = 0.1;   // in % of dE
+      double time_res_psfe     = 0.300; // ns
+      double dE_res_psfe       = 0.1;   // in % of dE
+      double time_res_fiber    = 0.150; // ns
+      double time_res_mdc      = 0.150; // ns
       double time_res          = 0.150; // ns
       if(nameTempBr == "FMF2_log" || nameTempBr == "HypHI_TrackFwd_log")
         {
@@ -555,18 +568,19 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
               auto tempTrackSimLayers = RecoEvent.TrackDAFSim.find(TrackID);
               SimHit tempHitSim;
-              tempHitSim.layerID = LayerID;
-              tempHitSim.hitX    = hit.HitPosX;
-              tempHitSim.hitY    = hit.HitPosY;
-              tempHitSim.hitZ    = hit.HitPosZ;
-              tempHitSim.momX    = hit.MomX;
-              tempHitSim.momY    = hit.MomY;
-              tempHitSim.momZ    = hit.MomZ;
-              tempHitSim.pdg     = pdg_code;
-              tempHitSim.mass    = hit.Mass;
-              tempHitSim.Eloss   = hit.Energy;
-              tempHitSim.time    = gRandom->Gaus(hit.Time, time_res);
-              tempHitSim.length  = hit.TrackLength;
+              tempHitSim.layerID     = LayerID;
+              tempHitSim.hitX        = hit.HitPosX;
+              tempHitSim.hitY        = hit.HitPosY;
+              tempHitSim.hitZ        = hit.HitPosZ;
+              tempHitSim.momX        = hit.MomX;
+              tempHitSim.momY        = hit.MomY;
+              tempHitSim.momZ        = hit.MomZ;
+              tempHitSim.pdg         = pdg_code;
+              tempHitSim.mass        = hit.Mass;
+              tempHitSim.Eloss       = hit.Energy;
+              tempHitSim.time        = gRandom->Gaus(hit.Time, time_res);
+              tempHitSim.tracklength = hit.TrackLength;
+              tempHitSim.hitlength   = TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ));
               tempTrackSimLayers->second[TypeDet + LayerID].emplace_back(tempHitSim);
 
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
@@ -806,15 +820,14 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res), hit.Energy);
+                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psb), gRandom->Gaus(hit.Energy, hit.Energy * dE_res_psb));
+                  measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
 
                   LocalHisto.h76->Fill(LayerID, atan2(shift[1], shift[0]));
-
-                  //std::cout << "PSB Det: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
               else if(IsPSBE(TypeDet))
                 {
@@ -835,11 +848,11 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 #endif
                   TGeoMatrix* g1   = gGeoManager->GetVolume("PSB")->GetNode(LayerID - 1)->GetMatrix(); // PSCE
                   TGeoMatrix* g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSB_1")->GetMatrix();    // PSB box
-                  TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();          // INNNER
+                  TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();          // INNER
                   TGeoMatrix* g3   = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();          // MFLD
                   TGeoHMatrix H1(*g1), H1_1(*g1_1), H2(*g2), H3(*g3);
                   TGeoHMatrix H = H1_1 * H1;
-                  H             = H2 * H;
+//                  H             = H2 * H;
 
                   H = H3 * H;
 #ifdef DEBUG_BUILD2
@@ -850,26 +863,46 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   double* local_rot = H.GetRotationMatrix();
 
                   TVector3 v(local_rot[0], local_rot[3], local_rot[6]);
-                  // v is at the left border of the bar -> rotate 3.75 degree to be at the center of the bar
-                  v.RotateZ(-3.75 * TMath::DegToRad());
+                  // v is at the left border of the bar -> rotate 4.09 degree to be at the center of the bar
+//                  v.RotateZ(-4.09 * TMath::DegToRad());
                   v = v.Unit();
-
                   TVector3 u(v.Y(), -v.X(), 0.);
+
+                  TGeoTubeSeg* shapePSBE = dynamic_cast<TGeoTubeSeg*>(gGeoManager->GetVolume("PSBE")->GetShape());
+                  double mid_r = 0.5*(shapePSBE->GetRmin()+shapePSBE->GetRmax());
+                  shift[0] = mid_r*std::cos(v.Phi());
+                  shift[1] = mid_r*std::sin(v.Phi());
+
                   TVector3 o(shift[0], shift[1], shift[2]);
+
+                  //u.SetXYZ(1,0,0);
+                  //v.SetXYZ(0,1,0);
+                  //o.SetXYZ(hit.HitPosX,hit.HitPosY,hit.HitPosZ);
+
                   genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
 
                   TVectorD hitCoords(2);
-                  hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // phi ! be aware ! not u-dim
-                  hitCoords(1) = gRandom->Uniform(6., 22.);     // r -> v dir
+                  //hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // phi ! be aware ! not u-dim
+                  //hitCoords(1) = gRandom->Uniform(6., 22.);     // r -> v dir
+                  hitCoords(0) = 0.; // phi ! be aware ! not u-dim
+                  hitCoords(1) = 0.;     // r -> v dir
 
                   TMatrixDSym hitCov(2);
-                  hitCov(0, 0) = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
-                  hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
+                  //hitCov(0, 0) = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
+                  //hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
+                  //hitCov(0, 0) = 0.1;
+                  //hitCov(1, 1) = 0.1;
+                  hitCov(0, 0) = 0.5744*0.5744;
+                  hitCov(1, 1) = 2.956*2.956;
+                  hitCov(0, 1) = 0.00075487717;
+                  hitCov(1, 0) = 0.00075487717;
+
                   measurement =
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res), hit.Energy);
+                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psbe), gRandom->Gaus(hit.Energy, hit.Energy * dE_res_psbe));
+                  measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
@@ -894,11 +927,11 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 #endif
                   TGeoMatrix* g1   = gGeoManager->GetVolume("PSF")->GetNode(LayerID - 1)->GetMatrix(); // PSCE
                   TGeoMatrix* g1_1 = gGeoManager->GetVolume("MFLD")->GetNode("PSF_1")->GetMatrix();    // PSB box
-                  TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();          // INNNER
+                  TGeoMatrix* g2   = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();          // INNER
                   TGeoMatrix* g3   = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();          // MFLD
                   TGeoHMatrix H1(*g1), H1_1(*g1_1), H2(*g2), H3(*g3);
                   TGeoHMatrix H = H1_1 * H1;
-                  H             = H2 * H;
+//                  H             = H2 * H;
 
                   H = H3 * H;
 #ifdef DEBUG_BUILD2
@@ -910,25 +943,39 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
                   TVector3 v(local_rot[0], local_rot[3], local_rot[6]);
                   // v is at the left border of the bar -> rotate 3.75 degree to be at the center of the bar
-                  v.RotateZ(-3.75 * TMath::DegToRad());
+//                  v.RotateZ(-3.75 * TMath::DegToRad());
                   v = v.Unit();
 
                   TVector3 u(v.Y(), -v.X(), 0.);
+
+                  TGeoTubeSeg* shapePSFE = dynamic_cast<TGeoTubeSeg*>(gGeoManager->GetVolume("PSFE")->GetShape());
+                  double mid_r = 0.5*(shapePSFE->GetRmin()+shapePSFE->GetRmax());
+                  shift[0] = mid_r*std::cos(v.Phi());
+                  shift[1] = mid_r*std::sin(v.Phi());
+
                   TVector3 o(shift[0], shift[1], shift[2]);
                   genfit::SharedPlanePtr plane(new genfit::DetPlane(o, u, v));
 
                   TVectorD hitCoords(2);
-                  hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // phi ! be aware ! not u-dim
-                  hitCoords(1) = gRandom->Uniform(6., 22.);     // r -> v dir
+                  //hitCoords(0) = gRandom->Uniform(-3.75, 3.75); // phi ! be aware ! not u-dim
+                  //hitCoords(1) = gRandom->Uniform(6., 22.);     // r -> v dir
+                  hitCoords(0) = 0.; // phi ! be aware ! not u-dim
+                  hitCoords(1) = 0.;     // r -> v dir
 
                   TMatrixDSym hitCov(2);
-                  hitCov(0, 0) = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
-                  hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
+                  //hitCov(0, 0) = TMath::Sq(2 * hitCoords(1) * TMath::Sin(3.75 * TMath::DegToRad())) / 12.;
+                  //hitCov(1, 1) = TMath::Sq(22. - 6.) / 12.;
+                  hitCov(0, 0) = 0.6328*0.6328;
+                  hitCov(1, 1) = 2.033*2.033;
+                  hitCov(0, 1) = 0.00051441990;
+                  hitCov(1, 0) = 0.00051441990;
+
                   measurement =
                       std::make_unique<genfit::PlanarMeasurement>(hitCoords, hitCov, int(TypeDet), LayerID, nullptr);
                   dynamic_cast<genfit::PlanarMeasurement*>(measurement.get())->setPlane(plane);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res), hit.Energy);
+                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_psfe), gRandom->Gaus(hit.Energy, hit.Energy * dE_res_psfe));
+                  measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
@@ -979,28 +1026,30 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                       default:  std::cerr << "something wrong" << std::endl; break;
                     }
 
-                  FiberHitAna* hit_ana = new FiberHitAna(i_fiber, i_layer, LayerID/2,
-                                  gRandom->Gaus(hit.Time, time_res), hit.Energy, TrackID, att.par.get());
-                  FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].emplace_back(hit_ana);
 
                   int pdg_code = pid_fromName(hit.Pname);
                   if(pdg_code == 0)
                     att._logger->debug("!> Builder : pdg_code = 0 ! {}", hit.Pname);
 
+                  FiberHitAna* hit_ana = new FiberHitAna(i_fiber, i_layer, LayerID/2,
+                                  gRandom->Gaus(hit.Time, time_res_fiber), hit.Energy, pdg_code, TrackID, att.par.get());
+                  FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].emplace_back(hit_ana);
+
                   auto tempTrackSimFibers = RecoEvent.TrackDAFSim.find(TrackID);
                   SimHit tempHitSim;
-                  tempHitSim.layerID = LayerID;
-                  tempHitSim.hitX    = hit.HitPosX;
-                  tempHitSim.hitY    = hit.HitPosY;
-                  tempHitSim.hitZ    = hit.HitPosZ;
-                  tempHitSim.momX    = hit.MomX;
-                  tempHitSim.momY    = hit.MomY;
-                  tempHitSim.momZ    = hit.MomZ;
-                  tempHitSim.pdg     = pdg_code;
-                  tempHitSim.mass    = hit.Mass;
-                  tempHitSim.Eloss   = hit.Energy;
-                  tempHitSim.time    = hit.Time;
-                  tempHitSim.length  = hit.TrackLength;
+                  tempHitSim.layerID      = LayerID;
+                  tempHitSim.hitX         = hit.HitPosX;
+                  tempHitSim.hitY         = hit.HitPosY;
+                  tempHitSim.hitZ         = hit.HitPosZ;
+                  tempHitSim.momX         = hit.MomX;
+                  tempHitSim.momY         = hit.MomY;
+                  tempHitSim.momZ         = hit.MomZ;
+                  tempHitSim.pdg          = pdg_code;
+                  tempHitSim.mass         = hit.Mass;
+                  tempHitSim.Eloss        = hit.Energy;
+                  tempHitSim.time         = hit.Time;
+                  tempHitSim.tracklength  = hit.TrackLength;
+                  tempHitSim.hitlength    = TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ));
                   tempTrackSimFibers->second[TypeDet].emplace_back(tempHitSim);
 
                   auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
@@ -1016,15 +1065,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(2) = hit.HitPosZ;
                   
                   fillOutHit(OutTree->Fiber, hit, pdg_code, charge, hitCoordsTree, TypeDet, LayerID);
-                  
-                  //if(i_fiber == 3 || i_fiber == 4)
-                  //std::cout << "Fiber Det: " << i_fiber << " layer: " << i_layer << " hit: " << LayerID/2 << " TrackID: " << TrackID << "\n";
 
-                  if(i_fiber == 3 || i_fiber == 4)
-                    {
-                      //std::cout << Form("Simu-Hit: (%.3f, %.3f, %.3f)", hit.HitPosX, hit.HitPosY, hit.HitPosZ) << std::endl;
-                      //std::cout << Form("FiberHit: (%.3f, %.3f, %.3f)", 0., 0., hit_ana->GetZ()/10.) << "\n\n";
-                    }
                   continue;
                 }
               else if(IsWire(TypeDet))
@@ -1220,12 +1261,14 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setLeftRightResolution(0);
                   dynamic_cast<genfit::WireMeasurement*>(measurement.get())->setMaxDistance(dlmax);
 
-                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res), hit.Energy); //Change check TOT?
+                  measinfo.SetInfo(-9999., gRandom->Gaus(hit.Time, time_res_mdc), hit.Energy); //Change check TOT?
+                  measinfo.SetPDG(pid_fromName(hit.Pname));
 
                   hitCoordsTree(0) = ClosestPointTrack.X();
                   hitCoordsTree(1) = ClosestPointTrack.Y();
                   hitCoordsTree(2) = ClosestPointTrack.Z();
 
+                  //std::cout << "MDCHit of track: " << TrackID << "\n";
                   //std::cout << "MDC Layer: " << TypeDet-G4Sol::MG01+1 << " hit: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
               else
@@ -1266,18 +1309,19 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
               auto tempTrackSim = RecoEvent.TrackDAFSim.find(TrackID);
               SimHit tempHitSim;
-              tempHitSim.layerID = LayerID;
-              tempHitSim.hitX    = hit.HitPosX;
-              tempHitSim.hitY    = hit.HitPosY;
-              tempHitSim.hitZ    = hit.HitPosZ;
-              tempHitSim.momX    = hit.MomX;
-              tempHitSim.momY    = hit.MomY;
-              tempHitSim.momZ    = hit.MomZ;
-              tempHitSim.pdg     = pdg_code;
-              tempHitSim.mass    = hit.Mass;
-              tempHitSim.Eloss   = hit.Energy;
-              tempHitSim.time    = hit.Time;
-              tempHitSim.length  = hit.TrackLength;
+              tempHitSim.layerID     = LayerID;
+              tempHitSim.hitX        = hit.HitPosX;
+              tempHitSim.hitY        = hit.HitPosY;
+              tempHitSim.hitZ        = hit.HitPosZ;
+              tempHitSim.momX        = hit.MomX;
+              tempHitSim.momY        = hit.MomY;
+              tempHitSim.momZ        = hit.MomZ;
+              tempHitSim.pdg         = pdg_code;
+              tempHitSim.mass        = hit.Mass;
+              tempHitSim.Eloss       = hit.Energy;
+              tempHitSim.time        = hit.Time;
+              tempHitSim.tracklength = hit.TrackLength;
+              tempHitSim.hitlength    = TMath::Sqrt(TMath::Sq(hit.ExitPosX-hit.HitPosX)+TMath::Sq(hit.ExitPosY-hit.HitPosY)+TMath::Sq(hit.ExitPosZ-hit.HitPosZ));
               tempTrackSim->second[TypeDet].emplace_back(tempHitSim);
 
               auto PDG_particle = TDatabasePDG::Instance()->GetParticle(pdg_code);
@@ -1454,9 +1498,13 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
               RecoEvent.ListHits[TypeDet[i][j]].emplace_back(measurement.release());
 
               MeasurementInfo measinfo(FiberHitClCont[i][j][k]->GetTOT(), FiberHitClCont[i][j][k]->GetTime(), FiberHitClCont[i][j][k]->GetdE());
+              measinfo.SetPDG(FiberHitClCont[i][j][k]->GetPDG());
               RecoEvent.ListHitsInfo[TypeDet[i][j]].emplace_back(measinfo);
 
               RecoEvent.ListHitsToTracks[TypeDet[i][j]].emplace_back(FiberHitClCont[i][j][k]->GetSimTrackID());
+
+              //if(i == 3 || i == 4)
+                //std::cout << "FiberHit of track: " << FiberHitClCont[i][j][k]->GetSimTrackID() << "\n";
 
               //std::cout << "FiberCl Det: " << i << " layer: " << j << " hit: " << hitID << " TrackID: " << FiberHitClCont[i][j][k]->GetSimTrackID() << "\n";
             }

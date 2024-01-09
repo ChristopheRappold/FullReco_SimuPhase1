@@ -45,19 +45,22 @@ private:
                          std::vector<KFFitInfo>& Vect_FitInfo);
 
   void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
-                                std::vector<FragmentTrack>& FragmentMDCTracks);
+                                std::unordered_map<int, std::vector<InfoPar> >& TrackInfo,
+                                  std::vector<FragmentTrack>& FragmentMDCTracks);
 
 //  void FragmentMDCTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results, int& fragment_pdg,
 //                                std::vector<KFParticle>& FragmentMDCTracks);
 
-  void FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& FragmentTracks);
+  void FragmentSelector(std::vector<KFParticle>& FragmentTracks_All, std::vector<KFFitInfo>& Vect_FitInfo_All, TVector3& PrimVtxRecons,
+                          std::vector<KFParticle>& FragmentTracks, std::vector<KFFitInfo>& Vect_FitInfo);
 
   void PionTracksFinder(std::unordered_map<int, ResSolDAF>& DAF_results,
-                        std::vector<KFParticle>& PionTracks,
-                        std::vector<KFFitInfo>& Vect_FitInfo);
+                          std::unordered_map<int, std::vector<InfoPar> >& TrackInfo,
+                            std::vector<KFParticle>& PionTracks,
+                            std::vector<KFFitInfo>& Vect_FitInfo);
 
-  void PionSelector(std::vector<KFParticle>& PionTracks_All, TVector3& PrimVtxRecons, std::vector<KFParticle>& PionTracks,
-                      std::vector<KFFitInfo>& Vect_FitInfo);
+  void PionSelector(std::vector<KFParticle>& PionTracks_All, std::vector<KFFitInfo>& Vect_FitInfo_All, TVector3& PrimVtxRecons,
+                      std::vector<KFParticle>& PionTracks, std::vector<KFFitInfo>& Vect_FitInfo);
 
   void CloseDist(KFParticle& FragmentTrack, KFParticle& PionTrack, double& distance, TVector3& centroid);
 

@@ -201,10 +201,14 @@ struct RunTaskAttrDef
 
   bool Debug_DAF;
   bool DoNoMaterial;
+  bool DoNoBeth;
+  bool DoNoMultiScat;
 
   bool PV_RealXUVComb;
   bool PV_RealPrimTrack;
-  bool CFT_RZfit;
+
+  bool RPZ_RZfit;
+  int  RPZ_MDCWireType;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
@@ -213,7 +217,7 @@ struct RunTaskAttrDef
 
   bool WF_perfect;
   bool WF_PSBHits;
-  bool WF_PSFEHits;
+  bool WF_PSBEHits;
 
   bool GNN_Text;
   std::string GNN_Node;
@@ -237,7 +241,7 @@ struct RunTaskAttrDef
   std::string DataML_Out;
 
   bool RF_OutputEvents;
-  bool CFT_OutputEvents;
+  bool RPZ_OutputEvents;
 };
 
 struct RunFullConfigDef
@@ -335,15 +339,19 @@ inline auto InitStorage()
 				 make_column("HashId", &RunTaskAttrDef::Hash),
 				 make_column("Debug_DAF", &RunTaskAttrDef::Debug_DAF),
 				 make_column("DoNoMaterial", &RunTaskAttrDef::DoNoMaterial),
+				 make_column("DoNoBeth", &RunTaskAttrDef::DoNoBeth),
+				 make_column("DoNoMultiScat", &RunTaskAttrDef::DoNoMultiScat),
 				 make_column("PV_RealXUVComb", &RunTaskAttrDef::PV_RealXUVComb),
 				 make_column("PV_RealPrimTrack", &RunTaskAttrDef::PV_RealPrimTrack),
-				 make_column("CFT_RZfit", &RunTaskAttrDef::CFT_RZfit),
+				 make_column("RPZ_RZfit", &RunTaskAttrDef::RPZ_RZfit),
+				 make_column("RPZ_MDCWireType", &RunTaskAttrDef::RPZ_MDCWireType),
 				 make_column("RZ_ChangeMiniFiber", &RunTaskAttrDef::RZ_ChangeMiniFiber),
 				 make_column("RZ_MDCProlate", &RunTaskAttrDef::RZ_MDCProlate),
 				 make_column("RZ_MDCWire2", &RunTaskAttrDef::RZ_MDCWire2),
 				 make_column("RZ_MDCBiasCorr", &RunTaskAttrDef::RZ_MDCBiasCorr),
 				 make_column("WF_perfect", &RunTaskAttrDef::WF_perfect),
 				 make_column("WF_PSBHits", &RunTaskAttrDef::WF_PSBHits),
+				 make_column("WF_PSBEHits", &RunTaskAttrDef::WF_PSBEHits),
 				 make_column("WF_PSFEHits", &RunTaskAttrDef::WF_PSFEHits),
 				 make_column("GNN_Text", &RunTaskAttrDef::GNN_Text),
 				 make_column("GNN_Node", &RunTaskAttrDef::GNN_Node),
@@ -353,11 +361,11 @@ inline auto InitStorage()
 				 make_column("KF_DAFRef", &RunTaskAttrDef::KF_DAFRef),
 				 make_column("KF_DAF", &RunTaskAttrDef::KF_DAF),
 				 make_column("KF_NbCentralCut", &RunTaskAttrDef::KF_NbCentralCut),
-				 make_column("KF_MbMiniFiberCut", &RunTaskAttrDef::KF_NbMiniFiberCut),
+         make_column("KF_MbMiniFiberCut", &RunTaskAttrDef::KF_NbMiniFiberCut),
 				 make_column("FlatML_namefile", &RunTaskAttrDef::FlatML_namefile),
 				 make_column("DataML_Out", &RunTaskAttrDef::DataML_Out),
 				 make_column("RF_OutputEvents", &RunTaskAttrDef::RF_OutputEvents),
-				 make_column("CFT_OutputEvents", &RunTaskAttrDef::CFT_OutputEvents)
+				 make_column("RPZ_OutputEvents", &RunTaskAttrDef::RPZ_OutputEvents)
 				 ),
 		      make_table(
 				 "RunFullConfig",
@@ -408,6 +416,10 @@ class THyphiAttributes
   double cut_psb_phi;
   double cut_psb_z;
   double cut_phi_fm;
+  double psb_timeres;
+
+  // T0 Counter
+  double t0_timeres;
 
   bool flag_dup_trackhit;
   bool flag_dup_trackhit_mdc;
@@ -443,10 +455,13 @@ class THyphiAttributes
   bool beam_only;
   bool Debug_DAF;
   bool DoNoMaterial;
+  bool DoNoBeth;
+  bool DoNoMultiScat;
 
   bool PV_RealXUVComb;
   bool PV_RealPrimTrack;
-  bool CFT_RZfit;
+  bool RPZ_RZfit;
+  int  RPZ_MDCWireType;
 
   bool RZ_ChangeMiniFiber;
   bool RZ_MDCProlate;
@@ -455,7 +470,7 @@ class THyphiAttributes
 
   bool WF_perfect;
   bool WF_PSBHits;
-  bool WF_PSFEHits;
+  bool WF_PSBEHits;
 
   bool GNN_Text;
   std::string GNN_Node;
@@ -475,6 +490,12 @@ class THyphiAttributes
 
   int KF_NbCentralCut;
   int KF_NbMiniFiberCut;
+  double KF_RandInitMomX;
+  double KF_RandInitMomY;
+  double KF_RandInitMomZ;
+
+  bool PID_CutorProb;
+  double PID_minProb;
 
   std::string StudyCase;
 
@@ -482,7 +503,7 @@ class THyphiAttributes
   std::string DataML_Out;
 
   bool RF_OutputEvents;
-  bool CFT_OutputEvents;
+  bool RPZ_OutputEvents;
 
   FairField* Field;
 
