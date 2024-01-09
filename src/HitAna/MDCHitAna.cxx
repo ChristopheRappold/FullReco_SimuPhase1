@@ -2,6 +2,7 @@
 #include "MDCHitAna.hh"
 #include "TString.h"
 #include "TMath.h"
+#include "TVector3.h"
 #include <iostream>
 #include <math.h>
 
@@ -17,6 +18,7 @@ MDCHitAna::MDCHitAna(MDCHit a, ParaManager *par, int tref, double t_t0){
   SetPhys(par);
   SetDriftTime(par, t_t0);
   SetDriftLength(par);
+  SetEdge(par);
   //i_dl = i_wsize/2.;
   //i_dl = 0;
   //i_res = 0.2;
@@ -125,5 +127,41 @@ void MDCHitAna::SetDriftLength(ParaManager *par){
   if(dl_buf>i_wsize) dl_buf = i_wsize;
 
   i_dl = dl_buf;
+
+}
+
+void MDCHitAna::SetEdge(ParaManager *par){
+
+  double r    = i_r;
+  double phi1 = i_phi + i_dpf;
+  double x1 = r * cos(phi1) + par->mdc_pos_x;
+  double y1 = r * sin(phi1) + par->mdc_pos_y;
+  double z1   = i_z   + i_zf;
+  double phi2 = i_phi + i_dpb;
+  double x2 = r * cos(phi2) + par->mdc_pos_x;
+  double y2 = r * sin(phi2) + par->mdc_pos_y;
+  double z2   = i_z   + i_zb;
+
+  TVector3 vec1(x1 - par->mdc_pos_x, y1 - par->mdc_pos_y, z1 - par->mdc_pos_z);
+  TVector3 vec2(x2 - par->mdc_pos_x, y2 - par->mdc_pos_y, z2 - par->mdc_pos_z);
+  vec1.RotateZ(par->mdc_rot_z * hitana::Deg2Rad);
+  vec1.RotateX(par->mdc_rot_x * hitana::Deg2Rad);
+  vec1.RotateY(par->mdc_rot_y * hitana::Deg2Rad);
+  vec2.RotateZ(par->mdc_rot_z * hitana::Deg2Rad);
+  vec2.RotateX(par->mdc_rot_x * hitana::Deg2Rad);
+  vec2.RotateY(par->mdc_rot_y * hitana::Deg2Rad);
+  x1 = vec1.x() + par->mdc_pos_x;
+  y1 = vec1.y() + par->mdc_pos_y;
+  z1 = vec1.z() + par->mdc_pos_z;
+  x2 = vec2.x() + par->mdc_pos_x;
+  y2 = vec2.y() + par->mdc_pos_y;
+  z2 = vec2.z() + par->mdc_pos_z;
+
+  edge[0] = x1;
+  edge[1] = y1;
+  edge[2] = z1;
+  edge[3] = x2;
+  edge[4] = y2;
+  edge[5] = z2;
 
 }

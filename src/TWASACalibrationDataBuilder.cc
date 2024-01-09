@@ -310,6 +310,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
 
   RecoEvent.PrimVtxRecons.SetXYZ(0., 0., att.Target_PositionZ);
 
+  att._logger->debug("TWASACalibrationDataBuilder: trigger");
   // Trigger //////////////////
   bool trig[16];
   for(int i=0; i<32; ++i)
@@ -351,6 +352,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     }
 
 
+  att._logger->debug("TWASACalibrationDataBuilder: T0");
   // T0 ana //////////////////////////////////
   std::vector<T0HitAna*> T0HitCont;
   for(int i = 0; i < 28; ++i)
@@ -412,6 +414,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
 
 
 
+  att._logger->debug("TWASACalibrationDataBuilder: PSB");
   // PSB ana //////////////////////////////////
   std::vector<PSBHitAna*> PSBHitCont;
   for(int i = 0; i < 46; ++i)
@@ -452,14 +455,19 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         }
     }
 
+  RecoEvent.PSBHitCont = PSBHitCont;
+
   for(const auto& hit_PSB : PSBHitCont)
     {
       int hitID      = hit_PSB->GetSeg();
-      TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")->GetNode(offsetGeoNameID_PSCE + hitID)->GetMatrix(); // PSCE
-      TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();           // INNER
-      TGeoMatrix* g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();           // MFLD
-      TGeoHMatrix H1(*g1), H2(*g2), H3(*g3);
-      TGeoHMatrix H = H2 * H1;
+      //TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")->GetNode(offsetGeoNameID_PSCE + hitID)->GetMatrix(); // PSCE
+      TGeoMatrix* g0 = gGeoManager->GetVolume("PSCEall")->GetNode(hitID)->GetMatrix();     // PSCE segment
+      TGeoMatrix* g1 = gGeoManager->GetVolume("INNER")->GetNode("PSCEall_1")->GetMatrix(); // PSCEall
+      TGeoMatrix* g2 = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();            // INNER
+      TGeoMatrix* g3 = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();            // MFLD
+      TGeoHMatrix H0(*g0), H1(*g1), H2(*g2), H3(*g3);
+      TGeoHMatrix H = H1 * H0;
+      H             = H2 * H;
       H             = H3 * H;
 #ifdef DEBUG_BUILD2
       H.Print();
@@ -505,6 +513,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     }
   LocalHisto.hpsb_0_2->Fill(PSBHitCont.size());
 
+  att._logger->debug("TWASACalibrationDataBuilder: PSFE");
   // PSFE ana //////////////////////////////////
   std::vector<PSFEHitAna*> PSFEHitCont;
   for(int i = 0; i < 44; ++i)
@@ -521,6 +530,8 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
             PSFEHitCont.emplace_back(hit_ana);
           }
       }
+
+  RecoEvent.PSFEHitCont = PSFEHitCont;
 
   for(const auto& hit_PSFE : PSFEHitCont)
     {
@@ -581,6 +592,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
     }
   LocalHisto.hpsfe_0_2->Fill(PSFEHitCont.size());
 
+  att._logger->debug("TWASACalibrationDataBuilder: PSBE");
   // PSBE ana //////////////////////////////////
   std::vector<PSBEHitAna*> PSBEHitCont;
   for(int i = 0; i < 38; ++i)
@@ -654,6 +666,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hpsbe_0_2->Fill(PSBEHitCont.size());
 
 
+  att._logger->debug("TWASACalibrationDataBuilder: MDC");
   // MDC ana //////////////////////////////////
   std::vector<std::vector<MDCHitAna*> > MDCHitCont;
   for(int i = 0; i < 17; ++i)
@@ -676,20 +689,29 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
       // hit_ana->Print();
     }
 
+  RecoEvent.MDCHitCont = MDCHitCont;
+
   for(int MDCLayerID = 0; MDCLayerID < 17; ++MDCLayerID)
     for(const auto& hit_MDC : MDCHitCont[MDCLayerID])
       {
         int hitID = hit_MDC->GetWir();
 
-        TGeoMatrix* g1 =
-            gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + offsetGeoNameID_MDC)->GetVolume()->GetNode(hitID)->GetMatrix(); // ME,
+        //TGeoMatrix* g1 =
+        //    gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + offsetGeoNameID_MDC)->GetVolume()->GetNode(hitID)->GetMatrix(); // ME,
                                                                                                                 // MG
-        TGeoShape* tempShape = gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + offsetGeoNameID_MDC)->GetVolume()->GetShape();
-        TGeoMatrix* g2       = gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + offsetGeoNameID_MDC)->GetMatrix(); // MD
+        //TGeoShape* tempShape = gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + offsetGeoNameID_MDC)->GetVolume()->GetShape();
+        //TGeoMatrix* g2       = gGeoManager->GetVolume("INNER")->GetNode(MDCLayerID + offsetGeoNameID_MDC)->GetMatrix(); // MD
+
+        TGeoShape* tempShape = gGeoManager->GetVolume(Form("MD%02d",MDCLayerID+1))->GetShape();
+
+        TGeoMatrix* g0 = gGeoManager->GetVolume(Form("MD%02d",MDCLayerID+1))->GetNode(hitID)->GetMatrix();   // ME, MG
+        TGeoMatrix* g1 = gGeoManager->GetVolume("MDC")->GetNode(Form("MD%02d_1",MDCLayerID+1))->GetMatrix(); // MD
+        TGeoMatrix* g2 = gGeoManager->GetVolume("INNER")->GetNode("MDC_1")->GetMatrix();                     // MDC
         TGeoMatrix* g3       = gGeoManager->GetVolume("MFLD")->GetNode(0)->GetMatrix();               // INNER
         TGeoMatrix* g4       = gGeoManager->GetVolume("WASA")->GetNode(0)->GetMatrix();               // MFLD
-        TGeoHMatrix H1(*g1), H2(*g2), H3(*g3), H4(*g4);
-        TGeoHMatrix H = H2 * H1;
+        TGeoHMatrix H0(*g0), H1(*g1), H2(*g2), H3(*g3), H4(*g4);
+        TGeoHMatrix H = H1 * H0;
+        H             = H2 * H;
         H             = H3 * H;
         H             = H4 * H;
         // double* shift = H.GetTranslation();
@@ -795,6 +817,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         }
     }
 
+  att._logger->debug("TWASACalibrationDataBuilder: Fiber");
   // Fiber ana //////////////////////////////////
   std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitCont;
   std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitClCont;
@@ -1635,6 +1658,7 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
   LocalHisto.hs4sci_2_4->Fill(s4hit->GetTOF_sc3141() , s4hit->GetdE_sc42_low());
   //s4hit->Print();
 
+  att._logger->debug("TWASACalibrationDataBuilder: MWDC");
   /// --- MWDC HIT ---- ///////////////////////////////////////////////
   int nt_mwdc = 0;
 
@@ -1743,24 +1767,24 @@ int TWASACalibrationDataBuilder::Exec(const EventWASAUnpack& event, FullRecoEven
         }
     }
 
-  {
-    int num = (int)PSBHitCont.size();
-    for(int i = 0; i < num; ++i)
-      {
-        delete PSBHitCont.back();
-        PSBHitCont.pop_back();
-      }
-  }
+  //{
+  //  int num = (int)PSBHitCont.size();
+  //  for(int i = 0; i < num; ++i)
+  //    {
+  //      delete PSBHitCont.back();
+  //      PSBHitCont.pop_back();
+  //    }
+  //}
 
-  for(int i = 0; i < 17; ++i)
-    {
-      int num = (int)MDCHitCont[i].size();
-      for(int j = 0; j < num; ++j)
-        {
-          delete MDCHitCont[i].back();
-          MDCHitCont[i].pop_back();
-        }
-    }
+  //for(int i = 0; i < 17; ++i)
+  //  {
+  //    int num = (int)MDCHitCont[i].size();
+  //    for(int j = 0; j < num; ++j)
+  //      {
+  //        delete MDCHitCont[i].back();
+  //        MDCHitCont[i].pop_back();
+  //      }
+  //  }
 
   // #ifdef DEBUG_BUILD2
   //                   std::cout << "fiber" << std::endl;

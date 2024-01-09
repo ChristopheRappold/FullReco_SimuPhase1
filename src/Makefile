@@ -26,11 +26,11 @@ DictObjSuf    = $(DictpSuf).$(ObjSuf)
 OutPutOpt     = -o
 
 #CXX           = g++
-CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUILD_DRAFT_API -DNonhomogeneousField # -fsanitize=address -fno-omit-frame-pointer #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUILD_DRAFT_API -D_GLIBCXX_USE_CXX11_ABI=1 -DNonhomogeneousField -Wno-gnu-zero-variadic-macro-arguments # -fsanitize=address -fno-omit-frame-pointer #-Wall -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 #CXXFLAGS     += -fsanitize=memory -fno-omit-frame-pointer
 #CXXFLAGS     += -fsanitize=undefined -fno-omit-frame-pointer
 #CXXFLAGS      += -fsanitize=leak -fsanitize-blacklist=$(shell root-config --etcdir)/lsan-root.supp
-LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./EventWASAUnpack -L./HitAna -L./KFParticle/install/lib -L./FairBase -L.
+LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./EventWASAUnpack -L./HitAna -L./KFParticle/install/lib -L./FairBase -L./libtorch/lib -L.
 
 LDFLAGS       = '-Wl,-rpath,$$ORIGIN/lib'
 SOFLAGS       = -shared
@@ -55,10 +55,12 @@ MSGFLAGS = -I./msgpack-c/include
 TRICKTRACKFLAGS = -I./TrickTrack/include
 KFPARTICLEFLAGS = -I./KFParticle/install/include
 ORMFLAGS = -I./sqlite_orm/include
+TORCHFLAGS = -I./libtorch/include -I./libtorch/include/torch/csrc/api/include
+
 
 CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GEANTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
-LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 $(GEANTLIBS)
-LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 $(GEANTLIBS)
+LIBS_SIM         = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 -ltorch -ltorch_cpu -lc10 $(GEANTLIBS)
+LIBS_DATA        = $(LIBS) $(ROOTLIBS) $(ROOTGLIBS) -lEG -lGeom -lPhysics -lMinuit -lEventG4Sol -lEventWASAUnpack -lHitAna -lTreePlayer -lHyphiFairBase -lMCAnaEventG4Sol -lAna_Event -lsqlite3 -ltorch -ltorch_cpu -lc10 $(GEANTLIBS)
 
 GENFIT_LIB = -lgenfit2
 SPDLOG_LIB = -lspdlog
@@ -91,8 +93,14 @@ Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TWASACalibrationSimuBuilder.cc TW
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
 
-Sources_Proc_genfit_dep = THyphiAttributes.cc FullRecoTask.cc TKalmanFilter_DAF.cc TKalmanFilter_DAF_PID.cc FullRecoTaskMT.cc TKalmanFilter_DAF_MT.cc
+Sources_Proc_genfit_dep = THyphiAttributes.cc TKalmanFilter_DAF.cc TKalmanFilter_DAF_PID.cc FullRecoTaskMT.cc TKalmanFilter_DAF_MT.cc
 Objects_Proc_genfit_dep = $(patsubst %.cc,%.o,$(Sources_Proc_genfit_dep))
+
+Sources_Proc_Torch_dep = TGNNFinder.cc
+Objects_Proc_Torch_dep = $(patsubst %.cc,%.o,$(Sources_Proc_Torch_dep))
+
+Sources_Proc_Task_dep =  FullRecoTask.cc
+Objects_Proc_Task_dep = $(patsubst %.cc,%.o,$(Sources_Proc_Task_dep))
 
 Source_Proc_genfit_ZMQ_dep = FullRecoTaskZMQ.cc TKalmanFilter_DAF_ZMQ.cc
 Objects_Proc_genfit_ZMQ_dep = $(patsubst %.cc,%.o,$(Source_Proc_genfit_ZMQ_dep))
@@ -106,13 +114,13 @@ CHK_HEADERS = $(patsubst %.cc,%.hh,$(CHK_SOURCES))
 # MathObj = MathematicalTools.o
 # MathSo = libHyphiMathTools.$(DllSuf)
 
-all: print $(MathSo) libEventG4Sol.so libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so $(Bindir)/MainSimu $(Bindir)/MainData $(Bindir)/MainMonitor 
+all: print $(MathSo) libEventG4Sol.so libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libMCEvent.so libzmq.so libmsgpack.so libtorch.so $(Bindir)/MainSimu $(Bindir)/MainData $(Bindir)/MainMonitor 
 
-$(Bindir)/MainSimu: $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_SIM) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
+$(Bindir)/MainSimu: $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_Torch_dep) $(Objects_Proc_Task_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventG4Sol.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so libtorch.so
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainSimu $(Objects_Simu) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_Torch_dep) $(Objects_Proc_Task_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_SIM) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
 
-$(Bindir)/MainData: $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so
-	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainData $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_DATA) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS) 
+$(Bindir)/MainData: $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_Torch_dep) $(Objects_Proc_Task_dep) $(Objects_Proc_genfit_ZMQ_dep) $(MathSo) libEventWASAUnpack.so libHitAna.so libFairBase.so libGenfit2_v2.so libspdlog.a libtricktrack.so libKFParticle.so libtorch.so
+	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainData $(Objects_Data) $(Objects_Comm) $(Objects_Proc) $(Objects_Proc_genfit_dep) $(Objects_Proc_Torch_dep) $(Objects_Proc_Task_dep) $(Objects_Proc_genfit_ZMQ_dep) $(LIBS_DATA) $(GENFIT_LIB) $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(TT_LIB) $(KF_LIB) $(LDFLAGS)
 
 $(Bindir)/MainMonitor: MainMonitor.o FullRecoConfig.o
 	$(CXX) $(CXXFLAGS) -o $(Bindir)/MainMonitor MainMonitor.o FullRecoConfig.o $(LIBS_SIM) -lRHTTP $(LIB_PROFILING) $(SPDLOG_LIB) $(ZMQ_LIB) $(MSG_LIB) $(LDFLAGS)
@@ -237,6 +245,13 @@ libmsgpack.so :
 	@echo "---> $@ done"
 
 
+libtorch.so :
+	ln -sf $(FromLibdir)/libtorch/lib/libtorch.so           $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libtorch_cpu.so       $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libc10.so             $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libgomp-52f2fd74.so.1 $(Bindir)/lib/
+	@echo "---> $@ done"
+
 # $(MathSo) : $(MathObj)
 # ifeq ($(PLATFORM),macosx)
 # # We need to make both the .dylib and the .so
@@ -304,15 +319,6 @@ check-syntax:
                 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(df).P; \
             rm -f $*.d
 
--include $(SourcesSimu:%.$(SrcSuf)=$(DEPDIR)/%.P)
--include $(SourcesData:%.$(SrcSuf)=$(DEPDIR)/%.P)
--include $(Sources_Comm:%.$(SrcSuf)=$(DEPDIR)/%.P)
--include $(Sources_Proc:%.$(SrcSuf)=$(DEPDIR)/%.P)
--include $(Sources_Proc_genfit_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)
--include $(Sources_Proc_genfit_ZMQ_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)
-#-include $(Sources_Proc_old_genfit:%.$(SrcSuf)=$(DEPDIR)/%.P)
-
-
 %.$(DictObjSuf): %.$(HeadSuf)
 	rm -f $*.$(DictpSuf).*; \
 	    rootcint $*.$(DictpSuf).cc -c $<; \
@@ -325,6 +331,20 @@ $(Objects_Proc_genfit_dep): %.$(ObjSuf): %.$(SrcSuf)
                 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(df).P; \
             rm -f $*.d
 
+$(Objects_Proc_Task_dep): %.$(ObjSuf): %.$(SrcSuf)
+	$(CXX) $(CXXFLAGS) $(GENFITV2FLAGS) $(TORCHFLAGS) -MD -c $<
+	@cp $*.d $(df).P; \
+            sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+                -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(df).P; \
+            rm -f $*.d
+
+$(Objects_Proc_Torch_dep): %.$(ObjSuf): %.$(SrcSuf)
+	$(CXX) $(CXXFLAGS) $(TORCHFLAGS) -MD -c $<
+	@cp $*.d $(df).P; \
+            sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+                -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(df).P; \
+            rm -f $*.d
+
 $(Objects_Proc_genfit_ZMQ_dep): %.$(ObjSuf): %.$(SrcSuf)
 	$(CXX) $(CXXFLAGS) $(GENFITV2FLAGS) $(ZMQFLAGS) $(MSGFLAGS) -MD -c $<
 	@cp $*.d $(df).P; \
@@ -332,6 +352,15 @@ $(Objects_Proc_genfit_ZMQ_dep): %.$(ObjSuf): %.$(SrcSuf)
                 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(df).P; \
             rm -f $*.d
 
+-include $(SourcesSimu:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(SourcesData:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(Sources_Comm:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(Sources_Proc:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(Sources_Proc_genfit_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(Sources_Proc_Torch_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(Sources_Proc_Task_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)
+-include $(Sources_Proc_genfit_ZMQ_dep:%.$(SrcSuf)=$(DEPDIR)/%.P)
+#-include $(Sources_Proc_old_genfit:%.$(SrcSuf)=$(DEPDIR)/%.P)
 
 $(Objects_Second): %.$(ObjSuf): %.$(SrcSuf)
 	$(CXX) $(CXXFLAGS) $(GENFITFLAGS) -MD -c $<

@@ -86,6 +86,7 @@ struct Task
   bool Task_CheckFiberTrack = false;
   bool Task_FragmentFinder = false;
   bool Task_WASAFinder = false;
+  bool Task_GNNFinder = false;
   bool Task_BayesFinder = false;
   bool Task_RiemannFinder = false;
   bool Task_FinderCM = false;
@@ -98,11 +99,11 @@ struct Task
   bool Task_DecayVtx_piplus = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ, TASKRPHIZTRACKMDC,
+    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKGNNFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ, TASKRPHIZTRACKMDC,
     TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKRPHIZTRACKMDC, TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKGNNFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKRPHIZTRACKMDC, TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -154,6 +155,7 @@ struct RunTaskDef
   bool Task_CheckFiberTrack;
   bool Task_FragmentFinder;
   bool Task_WASAFinder;
+  bool Task_GNNFinder;
   bool Task_BayesFinder;
   bool Task_RiemannFinder;
   bool Task_FinderCM;
@@ -216,6 +218,9 @@ struct RunTaskAttrDef
   bool WF_perfect;
   bool WF_PSBHits;
   bool WF_PSBEHits;
+
+  bool GNN_Text;
+  std::string GNN_Node;
 
   bool KF_Kalman;
   bool KF_KalmanSqrt;
@@ -298,6 +303,7 @@ inline auto InitStorage()
 				 make_column("Task_FlatMCOutputML", &RunTaskDef::Task_FlatMCOutputML),
 				 make_column("Task_FragmentFinder", &RunTaskDef::Task_FragmentFinder),
 				 make_column("Task_WASAFinder", &RunTaskDef::Task_WASAFinder),
+         make_column("Task_GNNFinder", &RunTaskDef::Task_GNNFinder),
 				 make_column("Task_BayesFinder", &RunTaskDef::Task_BayesFinder),
 				 make_column("Task_RiemannFinder", &RunTaskDef::Task_RiemannFinder),
 				 make_column("Task_FinderCM", &RunTaskDef::Task_FinderCM),
@@ -346,6 +352,9 @@ inline auto InitStorage()
 				 make_column("WF_perfect", &RunTaskAttrDef::WF_perfect),
 				 make_column("WF_PSBHits", &RunTaskAttrDef::WF_PSBHits),
 				 make_column("WF_PSBEHits", &RunTaskAttrDef::WF_PSBEHits),
+				 make_column("WF_PSFEHits", &RunTaskAttrDef::WF_PSFEHits),
+				 make_column("GNN_Text", &RunTaskAttrDef::GNN_Text),
+				 make_column("GNN_Node", &RunTaskAttrDef::GNN_Node),
 				 make_column("KF_Kalman", &RunTaskAttrDef::KF_Kalman),
 				 make_column("KF_KalmanSqrt", &RunTaskAttrDef::KF_KalmanSqrt),
 				 make_column("KF_KalmanRef", &RunTaskAttrDef::KF_KalmanRef),
@@ -462,6 +471,9 @@ class THyphiAttributes
   bool WF_perfect;
   bool WF_PSBHits;
   bool WF_PSBEHits;
+
+  bool GNN_Text;
+  std::string GNN_Node;
 
   bool KF_Kalman;
   bool KF_KalmanSqrt;

@@ -303,6 +303,7 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
   FiberAnalyzer* fiberana = new FiberAnalyzer();
   std::string track_type = "mft12";
 
+  att._logger->debug("TWASAFinder: Fiber PSB");
   // Fiber PSB ////
   for(size_t i=0; i<RecoEvent.FiberTrackCont[track_type].size(); ++i)
     {
@@ -358,6 +359,7 @@ int TWASAFinder<Out>::FinderWASA(FullRecoEvent& RecoEvent)
     }
 
 
+  att._logger->debug("TWASAFinder: Fiber MDC");
   // Fiber MDC ////
   std::vector<TrackHit*> TrackHitCont;
 
@@ -444,6 +446,7 @@ if(att.flag_dup_trackhit)     TrackHitCont = fiberana->DeleteDupTrackHit(TrackHi
 if(att.flag_dup_trackhit_mdc) TrackHitCont = fiberana->DeleteDupTrackHitMDC(TrackHitCont);
 if(att.flag_trackhit_inclusive) TrackHitCont = fiberana->DeleteInclusiveTrackHit(TrackHitCont);
 
+att._logger->debug(Form("TWASAFinder: TrackHitCont %d",TrackHitCont.size()));
 
 for(size_t i = 0; i < TrackHitCont.size(); ++i)
   {
@@ -621,6 +624,7 @@ for(size_t i = 0; i < TrackHitCont.size(); ++i)
     RecoEvent.TrackDAFInit.insert(std::make_pair(temp_trackid, tempInit));
   }
 
+  att._logger->debug("TWASAFinder: FinderWASA end");
   return 0;
 }
 

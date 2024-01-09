@@ -82,6 +82,9 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   WF_PSBHits  = true;
   WF_PSBEHits = false;
 
+  GNN_Text = false;
+  GNN_Node = "test.txt";
+
   KF_Kalman     = false;
   KF_KalmanSqrt = true;
   KF_KalmanRef  = false;
@@ -230,6 +233,13 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
     WF_PSBHits = Config.Get<bool>("WF_PSBHits");
   if(Config.IsAvailable("WF_PSBEHits"))
     WF_PSBEHits = Config.Get<bool>("WF_PSBEHits");
+  if(Config.IsAvailable("WF_PSFEHits"))
+    WF_PSFEHits = Config.Get<bool>("WF_PSFEHits");
+
+  if(Config.IsAvailable("GNN_Text"))
+    GNN_Text = Config.Get<bool>("GNN_Text");
+  if(Config.IsAvailable("GNN_Node"))
+    GNN_Node = Config.Get<std::string>("GNN_Node");
   
   _logger->info("RZ Setting: Prolate? {} / Wire2? {} / BiasCorr? {} / ChangeMiniF? {}", RZ_MDCProlate, RZ_MDCWire2,
                 RZ_MDCBiasCorr, RZ_ChangeMiniFiber);
@@ -773,6 +783,8 @@ void Task::Init(const FullRecoConfig& Config)
     Task_FragmentFinder = Config.Get<bool>("Task_FragmentFinder");
   if(Config.IsAvailable("Task_WASAFinder"))
     Task_WASAFinder = Config.Get<bool>("Task_WASAFinder");
+  if(Config.IsAvailable("Task_GNNFinder"))
+    Task_GNNFinder = Config.Get<bool>("Task_GNNFinder");
   if(Config.IsAvailable("Task_BayesFinder"))
     Task_BayesFinder = Config.Get<bool>("Task_BayesFinder");
 
@@ -832,6 +844,8 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKFRAGMENTFINDER);
 	  if(s == "Task_WASAFinder")
 	    Task_Order.push_back(TASKWASAFINDER);
+    if(s == "Task_GNNFinder")
+      Task_Order.push_back(TASKGNNFINDER);
 	  if(s == "Task_BayesFinder")
 	    Task_Order.push_back(TASKBAYESFINDER);
 	  if(s == "Task_RiemannFinder")
@@ -892,6 +906,7 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Task_FlatMCOutputML  = TaskConfig.Task_FlatMCOutputML;
   out.RunTask.Task_FragmentFinder  = TaskConfig.Task_FragmentFinder;
   out.RunTask.Task_WASAFinder      = TaskConfig.Task_WASAFinder;
+  out.RunTask.Task_GNNFinder       = TaskConfig.Task_GNNFinder;
   out.RunTask.Task_BayesFinder     = TaskConfig.Task_BayesFinder;
   out.RunTask.Task_RiemannFinder   = TaskConfig.Task_RiemannFinder;
   out.RunTask.Task_FinderCM        = TaskConfig.Task_FinderCM;
@@ -940,7 +955,13 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.RZ_MDCBiasCorr     = RZ_MDCBiasCorr;
   out.RunTaskAttr.WF_perfect         = WF_perfect;
   out.RunTaskAttr.WF_PSBHits         = WF_PSBHits;
+<<<<<<< src/THyphiAttributes.cc
+  out.RunTaskAttr.WF_PSFEHits        = WF_PSFEHits;
+  out.RunTaskAttr.GNN_Text           = GNN_Text;
+  out.RunTaskAttr.GNN_Node           = GNN_Node;
+=======
   out.RunTaskAttr.WF_PSBEHits        = WF_PSBEHits;
+>>>>>>> src/THyphiAttributes.cc
   out.RunTaskAttr.KF_Kalman          = KF_Kalman;
   out.RunTaskAttr.KF_KalmanSqrt      = KF_KalmanSqrt;
   out.RunTaskAttr.KF_KalmanRef       = KF_KalmanRef;

@@ -34,6 +34,9 @@
 #include "HitAna/MWDCTracking.hh"
 #include "HitAna/FiberTrackAna.hh"
 #include "HitAna/FiberHitAna.hh"
+#include "HitAna/MDCHitAna.hh"
+#include "HitAna/PSBHitAna.hh"
+#include "HitAna/PSFEHitAna.hh"
 
 #include <cassert>
 
@@ -858,7 +861,9 @@ public:
 
   std::map< std::string, std::vector<FiberTrackAna*> > FiberTrackCont;
   std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitClCont;
-
+  std::vector<std::vector<MDCHitAna*> > MDCHitCont;
+  std::vector<PSBHitAna*> PSBHitCont;
+  std::vector<PSFEHitAna*> PSFEHitCont;
 
   std::vector<std::unordered_map<size_t, double > > Si_HitsEnergyLayer;
 /*

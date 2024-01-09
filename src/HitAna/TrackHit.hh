@@ -33,6 +33,8 @@ class TrackHit
     double GetTrackZ(){return _z;};
     double GetTrackA(){return _a;};
     double GetTrackB(){return _b;};
+    void SetTrackA(double a){ _a = a; };
+    void SetTrackB(double b){ _b = b; };
     void SetChi2ndf(double chi2ndf){_chi2ndf = chi2ndf; };
     double GetChi2NDF(){return _chi2ndf;};
     void SetFlagPSB(){ _flag_psb = true; };

@@ -33,6 +33,7 @@ class MDCHitAna
     void SetDif(double dif){i_dif = dif;};
     int  GetDid(){   return i_did;};
     bool IsValid(){  return i_valid;};
+    std::array<double, 6> GetEdge(){return edge;};
     void Print();
 
   private:
@@ -59,10 +60,12 @@ class MDCHitAna
     double i_dif  = -9999.;
     int  i_did   = -1;
     bool i_valid = false;
+    std::array<double, 6> edge;
     bool GetValidMDC(ParaManager *par);
     void SetDriftTime(ParaManager *par, double t_t0);
     void SetDriftLength(ParaManager *par);
     void SetPhys(ParaManager *par);
+    void SetEdge(ParaManager *par);
 };
 
 
