@@ -106,8 +106,10 @@ TKalmanFilter_DAF_PID<Out>::TKalmanFilter_DAF_PID(const THyphiAttributes& attrib
 
   // Fitter->setDebugLvl(10);
 
-  rep = new genfit::RKTrackRep();
+  const genfit::RKParam pars ;
 
+  rep = new genfit::RKTrackRep(0,0.,pars);
+  rep->ShowParams();
   Vtracks = new genfit::Track(rep, TVector3(0., 0., 0.), TVector3(0., 0., 1.0));
 
 #ifdef DISPLAY
