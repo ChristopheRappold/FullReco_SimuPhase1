@@ -9,7 +9,9 @@
 #include "TBayesFinder.h"
 //#include "TFinderCM.h"
 #include "TFindingPerf.h"
+#ifdef WITH_GEANT4
 #include "TKalmanFilter_DAF.h"
+#endif
 #include "TKalmanFilter_DAF_PID.h"
 #include "CheckField.h"
 #include "TCheckFiberXUV.h"
@@ -146,10 +148,12 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
 	  if(Attributes.TaskConfig.Task_RPhiZTrackMDC)
 	    list_processMC.emplace_back(new TRPhiZTrackMDC<TEOut>(Attributes));
 	  break;
+#ifdef WITH_GEANT4
 	case Task::TASKKALMANDAF:
 	  if(Attributes.TaskConfig.Task_KalmanDAF)
 	    list_processMC.emplace_back(new TKalmanFilter_DAF<TEOut>(Attributes));
-	  break;
+          break;
+#endif
 	case Task::TASKKALMANDAFPID:
 	  if(Attributes.TaskConfig.Task_KalmanDAFPID)
 	    list_processMC.emplace_back(new TKalmanFilter_DAF_PID<TEOut>(Attributes));

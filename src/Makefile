@@ -44,9 +44,12 @@ ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
 
-GEANTCFLAGS := $(shell geant4-config --cflags)
-#GEANTCFLAGS := -DG4UI_USE_TCSH -Wwrite-strings -Wpointer-arith -Woverloaded-virtual -Wno-variadic-macros -Wshadow -pipe -pthread -ftls-model=initial-exec -std=c++17 -I/home/christophe/Geant4/geant4/include/Geant4
-GEANTLIBS   := $(shell geant4-config --libs)
+ifeq ($(WITH_GEANT4),1)
+	GEANTCFLAGS := $(shell geant4-config --cflags)
+  #GEANTCFLAGS := -DG4UI_USE_TCSH -Wwrite-strings -Wpointer-arith -Woverloaded-virtual -Wno-variadic-macros -Wshadow -pipe -pthread -ftls-model=initial-exec -std=c++17 -I/home/christophe/Geant4/geant4/include/Geant4
+	GEANTLIBS   := $(shell geant4-config --libs)
+	CXXFLAGS += -DWITH_GEANT4
+endif
 
 GENFITV2FLAGS = -I./Genfit2_v2/include
 SPDLOGFLAGS = -I./spdlog/include
@@ -90,10 +93,16 @@ Objects_Comm = $(patsubst %.cc,%.o,$(Sources_Comm))
  
 Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TWASACalibrationSimuBuilder.cc TWASACalibrationDataBuilder.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc TCheckFiberTrack.cc TCheckFiberXUV.cc TFragmentFinder.cc TWASAFinder.cc TRPhiZTrackMDC.cc #TFinderCM.cc TPrimaryVertex_Si.cc
 
+
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
 
-Sources_Proc_genfit_dep = THyphiAttributes.cc TKalmanFilter_DAF.cc TKalmanFilter_DAF_PID.cc FullRecoTaskMT.cc TKalmanFilter_DAF_MT.cc
+Sources_Proc_genfit_dep = THyphiAttributes.cc FullRecoTask.cc TKalmanFilter_DAF_PID.cc FullRecoTaskMT.cc TKalmanFilter_DAF_MT.cc
+
+ifeq ($(WITH_GEANT4E),1)
+	Sources_Proc_genfit_dep += TKalmanFilter_DAF.cc
+endif
+
 Objects_Proc_genfit_dep = $(patsubst %.cc,%.o,$(Sources_Proc_genfit_dep))
 
 Sources_Proc_Torch_dep = TGNNFinder.cc
