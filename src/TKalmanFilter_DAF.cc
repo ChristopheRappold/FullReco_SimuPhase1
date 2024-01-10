@@ -994,8 +994,8 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
 #ifdef DEBUG_KALMAN2
               att._logger->debug(" / chi2 ={} / ndf ={}", chi2, ndf);
 #endif
-
-              {
+	      try
+	      {
                 unsigned int np = fitTrack->getNumPointsWithMeasurement();
                 //std::cout << "np : " << np << std::endl;
                 for(unsigned int i = 0; i < np; ++i)
@@ -1068,6 +1068,13 @@ int TKalmanFilter_DAF<Out>::Kalman_Filter_FromTrack(FullRecoEvent& RecoEvent)
                       }
                   }
               }
+              catch(genfit::Exception& e)
+                {
+                  att._logger->info("could not get residual ! ");
+                  att._logger->info(e.what());
+                  LocalHisto.h_stats->Fill("Exc:Residual", 1.);
+                  continue;
+                }
 
               // double p_value = TMath::Prob(chi2,ndf);
               // double p_value = MathKalman::Prob()(chi2,ndf);
