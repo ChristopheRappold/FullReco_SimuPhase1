@@ -11,6 +11,8 @@
 #include "StateOnPlane.h"
 
 #include "TVector3.h"
+#include "Math/Point3D.h"
+#include "Math/Vector3D.h"
 
 #include <numeric>
 #include <set>
@@ -28,7 +30,7 @@ template<class Out>
 TRPhiZTrackMDC<Out>::TRPhiZTrackMDC(const THyphiAttributes& attribut) : TDataProcessInterface<Out>("CheckFiberTrack"), att(attribut)
 {
 
-  OutputEvents = att.RF_OutputEvents;
+  OutputEvents = att.RPZ_OutputEvents;
   std::string temp_name_out       = att.Config.Get<std::string>("Output_Namefile");
   std::string temp_file_base_name = temp_name_out.substr(0, temp_name_out.find_last_of('.'));
 
@@ -36,6 +38,7 @@ TRPhiZTrackMDC<Out>::TRPhiZTrackMDC(const THyphiAttributes& attribut) : TDataPro
   namefilePhiZ = temp_file_base_name;
 
   RZfit = att.RPZ_RZfit;
+  MDCWireType = att.RPZ_MDCWireType;
 
   if(OutputEvents)
     {
@@ -119,7 +122,7 @@ void TRPhiZTrackMDC<Out>::SelectHists()
 }
 
 template<class Out>
-int TRPhiZTrackMDC<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
+int TRPhiZTrackMDC<Out>::CheckTrackFinding(FullRecoEvent& RecoEvent)
 {
 
   int ntrack = -1;
@@ -316,7 +319,7 @@ int TRPhiZTrackMDC<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 
 	}
 
-      std::vector<std::tuple<double,double,double,double> > graphFits(17);
+      std::vector<std::tuple<double,double,double,double,double,double> > graphFits(17);
       if(RZfit && graphInterRZ->GetN() !=0)
 	{
 	  att._logger->debug("RZfit : IntersectRZ:{} | mg_trackRZ: {}", graphInterRZ->GetN(), mg_trackRZ->GetListOfGraphs()->GetEntries());
@@ -358,6 +361,8 @@ int TRPhiZTrackMDC<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 	  graphRZfit1->SetNameTitle("FitIntRZ","FitIntRZ");
 	  auto graphRZfit2 = std::make_unique<TGraphErrors>();
 	  graphRZfit2->SetNameTitle("FitErrRZ","FitErrRZ");
+	  auto graphPZfit2 = std::make_unique<TGraphErrors>();
+	  graphPZfit2->SetNameTitle("FitErrPZ","FitErrPZ");
 
 	  for( auto [id_mg, id_det] : id_detMG)
 	    {
@@ -367,8 +372,17 @@ int TRPhiZTrackMDC<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 	      graphRZfit2->SetPoint(graphRZfit2->GetN(),meanZ,meanR);
 	      graphRZfit2->SetPointError(graphRZfit2->GetN()-1,errZ,errR);
 
+	      double meanPhi = dynamic_cast<TGraphErrors*>(listPZ->At(id_mg))->Eval(meanZ);
+	      double errPhi1 = dynamic_cast<TGraphErrors*>(listPZ->At(id_mg))->Eval(meanZ+errZ);
+	      double errPhi2 = dynamic_cast<TGraphErrors*>(listPZ->At(id_mg))->Eval(meanZ-errZ);
+	      double errPhi = 0.5*(TMath::Sq(meanPhi-errPhi1)+TMath::Sq(meanPhi-errPhi2));
+	      errPhi = TMath::Sqrt(errPhi);
+
+	      graphPZfit2->SetPoint(graphPZfit2->GetN(),meanZ,meanPhi);
+	      graphPZfit2->SetPointError(graphPZfit2->GetN()-1,errZ,errPhi);
+
 	      int id_det_reduced = id_det - G4Sol::MG01;
-	      graphFits[id_det_reduced] = {meanZ,meanR,errZ,errR};
+	      graphFits[id_det_reduced] = {meanZ,meanR,errZ,errR,meanPhi,errPhi};
 	    }
 
 	  graphRZfit1->SetMarkerStyle(23);
@@ -379,10 +393,16 @@ int TRPhiZTrackMDC<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 	  graphRZfit2->SetMarkerSize(1.2);
 	  graphRZfit2->SetMarkerColor(7);
 
+	  graphPZfit2->SetMarkerStyle(23);
+	  graphPZfit2->SetMarkerSize(1.2);
+	  graphPZfit2->SetMarkerColor(7);
+
 	  if(OutputEvents && graphRZfit1->GetN()!=0)
 	    {
 	      mg_trackRZ->Add(graphRZfit1.release(),"P");
 	      mg_trackRZ->Add(graphRZfit2.release(),"P");
+	      mg_trackPhiZ->Add(graphPZfit2.release(),"P");
+
 	    }
 	}
 
@@ -445,6 +465,149 @@ int TRPhiZTrackMDC<Out>::CheckTrackFinding(const FullRecoEvent& RecoEvent)
 
       if(OutputEvents && graphResultZ->GetN()!=0)
 	mg_trackRZ->Add(graphResultZ.release(),"P");
+
+      for(size_t id_det = G4Sol::MG01; id_det <= G4Sol::MG17; ++id_det)
+        RecoEvent.OldListHits[id_det].resize(RecoEvent.ListHits[id_det].size());
+
+      if(MDCWireType == 0)
+	{
+	  for(size_t iM = 1; iM<id_detMG.size();++iM)
+	    {
+
+	      int id_detN = std::get<1>(id_detMG[iM]);
+	      int id_hit = it_ListHits->second[id_detN];
+
+	      int id_det_reduced = id_detN - G4Sol::MG01;
+	      auto [meanZ,meanR,errZ,errR,meanPhi,errPhi] = graphFits[id_det_reduced];
+
+	      auto TempSeg = RecoEvent.SegmentHit1Ds[id_detN][id_hit];
+
+	      TVector3 wire_side1(TempSeg[0][0],TempSeg[0][1],TempSeg[0][2]);
+	      TVector3 wire_side2(TempSeg[TempSeg.size()-1][0],TempSeg[TempSeg.size()-1][1],TempSeg[TempSeg.size()-1][2]);
+
+	      TVector3 WireDir = wire_side2 - wire_side1;
+	      TVector3 VecWire = WireDir;
+	      VecWire *= 1. / (wire_side2.Z() - wire_side1.Z());
+
+	      //TVector3 PosAtWire = wire_side1 + VecWire * (Mean_CrossRZ[0] - wire_side1.Z());
+
+	      ROOT::Math::Cylindrical3D<double> vecCyl(meanR,meanZ,meanPhi);
+	      ROOT::Math::Cartesian3D<double> vecCar(vecCyl);
+
+
+	      TVectorD hitCoordsNew(3);
+	      hitCoordsNew(0) = vecCar.x();
+	      hitCoordsNew(1) = vecCar.y();
+	      hitCoordsNew(2) = vecCar.z();
+
+	      TMatrixDSym hitCovNew(3);
+	      hitCovNew.Zero();
+	      hitCovNew(0, 0) = errR;
+	      hitCovNew(1, 1) = errZ;
+	      hitCovNew(2, 2) = errPhi;
+
+	      hitCovNew *= TMath::Sqrt(2 * hitCovNew.GetNcols());
+
+	      std::vector<ROOT::Math::XYZVector> vecCarAll;
+	      ROOT::Math::XYZVector meanVecCar(0.,0.,0.);
+	      for(int iC = 0; iC < hitCovNew.GetNcols(); ++iC)
+		{
+		  ROOT::Math::RhoZPhiVector vecCyltemp(meanR-hitCovNew(0,iC),meanZ-hitCovNew(1,iC),meanPhi-hitCovNew(2,iC));
+
+		  ROOT::Math::XYZVector vecCartemp(vecCyltemp);
+		  vecCarAll.push_back(vecCartemp);
+		  meanVecCar += vecCartemp;
+		  ROOT::Math::RhoZPhiPoint vecCyltemp2(meanR+hitCovNew(0,iC),meanZ+hitCovNew(1,iC),meanPhi+hitCovNew(2,iC));
+
+		  ROOT::Math::XYZVector vecCartemp2(vecCyltemp);
+		  vecCarAll.push_back(vecCartemp2);
+		  meanVecCar += vecCartemp2;
+		}
+
+	      meanVecCar *= 1./static_cast<double>(vecCarAll.size());
+
+	      TMatrixD hitCov(3,3);
+	      hitCov.Zero();
+	      for(auto tempV : vecCarAll)
+		{
+		  TMatrixD temp1(3, 1);
+		  temp1(0, 0) = tempV.x() - meanVecCar.x();
+		  temp1(1, 0) = tempV.y() - meanVecCar.y();
+		  temp1(2, 0) = tempV.z() - meanVecCar.z();
+		  auto temp2 = temp1;
+		  temp2.T();
+		  hitCov += temp1 * temp2;
+		}
+
+              TMatrixDSym hitCovSymNew(3);
+              hitCovSymNew.Zero();
+              hitCovSymNew(0, 0) = hitCov(0, 0);
+              hitCovSymNew(0, 1) = hitCov(0, 1);
+              hitCovSymNew(0, 2) = hitCov(0, 2);
+              hitCovSymNew(1, 1) = hitCov(1, 1);
+              hitCovSymNew(1, 2) = hitCov(1, 2);
+              hitCovSymNew(2, 2) = hitCov(2, 2);
+
+	      RecoEvent.OldListHits[id_detN][id_hit] = std::make_unique<genfit::ProlateSpacepointMeasurement>(
+						       hitCoordsNew, hitCovSymNew, id_detN, id_hit, nullptr);
+              dynamic_cast<genfit::ProlateSpacepointMeasurement*>(RecoEvent.OldListHits[id_detN][id_hit].get())
+                  ->setLargestErrorDirection(WireDir);
+
+	      RecoEvent.OldListHits[id_detN][id_hit].swap(RecoEvent.ListHits[id_detN][id_hit]);
+
+	    }
+	}
+      else if(MDCWireType == 1)
+	{
+	  for(size_t iM = 1; iM<id_detMG.size();++iM)
+	    {
+
+	      int id_detN = std::get<1>(id_detMG[iM]);
+	      int id_hit = it_ListHits->second[id_detN];
+
+	      int id_det_reduced = id_detN - G4Sol::MG01;
+	      auto [meanZ,meanR,errZ,errR,meanPhi,errPhi] = graphFits[id_det_reduced];
+
+	      auto TempSeg = RecoEvent.SegmentHit1Ds[id_detN][id_hit];
+
+	      TVector3 wire_side1(TempSeg[0][0],TempSeg[0][1],TempSeg[0][2]);
+	      TVector3 wire_side2(TempSeg[TempSeg.size()-1][0],TempSeg[TempSeg.size()-1][1],TempSeg[TempSeg.size()-1][2]);
+
+	      TVector3 WireDir = wire_side2 - wire_side1;
+	      TVector3 VecWire = WireDir;
+	      VecWire *= 1. / (wire_side2.Z() - wire_side1.Z());
+
+	      double meanX =  meanR * std::cos(meanPhi);
+	      double meanY = meanR * std::sin(meanPhi);
+
+	      TVector3 PosAtWire = wire_side1 + VecWire * (meanZ - wire_side1.Z());
+	      double newDist = TMath::Hypot(PosAtWire.X()-meanX,PosAtWire.Y()-meanY);
+
+	      TVectorD hitCoordsNew(8);
+	      hitCoordsNew(0) = wire_side1[0];
+	      hitCoordsNew(1) = wire_side1[1];
+	      hitCoordsNew(2) = wire_side1[2];
+	      hitCoordsNew(3) = wire_side2[0];
+	      hitCoordsNew(4) = wire_side2[1];
+	      hitCoordsNew(5) = wire_side2[2];
+	      hitCoordsNew(6) = newDist;
+	      hitCoordsNew(7) = meanZ - wire_side1[2];
+
+              TMatrixDSym hitCovNew(8);
+	      const double resolution_dl  = 0.02 ;
+              hitCovNew(6, 6) =  resolution_dl* resolution_dl;
+	      hitCovNew(7, 7) = errZ;
+
+              RecoEvent.OldListHits[id_detN][id_hit] =
+                  std::make_unique<genfit::WirePointMeasurement>(hitCoordsNew, hitCovNew, id_detN, id_hit, nullptr);
+
+	      RecoEvent.OldListHits[id_detN][id_hit].swap(RecoEvent.ListHits[id_detN][id_hit]);
+
+            }
+
+	}
+
+
 
       auto simTrackPhiZ = std::make_unique<TGraphErrors>();
       simTrackPhiZ->SetNameTitle("simTrackPhiZ","simTrackPhiZ");

@@ -216,8 +216,13 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   if(Config.IsAvailable("RPZ_RZfit"))
     RPZ_RZfit = Config.Get<bool>("RPZ_RZfit");
+  else
+    RPZ_RZfit = 1;
   if(Config.IsAvailable("RPZ_MDCWireType"))
     RPZ_MDCWireType = Config.Get<int>("RPZ_MDCWireType");
+  else
+    RPZ_MDCWireType = 1;
+
   if(Config.IsAvailable("RZ_ChangeMiniFiber"))
     RZ_ChangeMiniFiber = Config.Get<bool>("RZ_ChangeMiniFiber");
   if(Config.IsAvailable("RZ_MDCProlate"))

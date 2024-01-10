@@ -54,7 +54,7 @@ class TRPhiZTrackMDC final :  public TDataProcessInterface<Out>
 
   ReturnRes::InfoM SoftExit(int) override;
   void SelectHists() final;
-  int CheckTrackFinding(const FullRecoEvent& RecoEvent);
+  int CheckTrackFinding(FullRecoEvent& RecoEvent);
 
   bool OutputEvents = false;
 
@@ -66,6 +66,7 @@ class TRPhiZTrackMDC final :  public TDataProcessInterface<Out>
   TMultiGraph* mg_trackRZ;
 
   bool RZfit = false;
+  int MDCWireType = 0;
 
   int tempEvent;
   struct LocalHists
