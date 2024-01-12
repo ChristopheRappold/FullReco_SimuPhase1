@@ -960,13 +960,10 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTaskAttr.RZ_MDCBiasCorr     = RZ_MDCBiasCorr;
   out.RunTaskAttr.WF_perfect         = WF_perfect;
   out.RunTaskAttr.WF_PSBHits         = WF_PSBHits;
-<<<<<<< src/THyphiAttributes.cc
+  out.RunTaskAttr.WF_PSBEHits        = WF_PSBEHits;
   out.RunTaskAttr.WF_PSFEHits        = WF_PSFEHits;
   out.RunTaskAttr.GNN_Text           = GNN_Text;
   out.RunTaskAttr.GNN_Node           = GNN_Node;
-=======
-  out.RunTaskAttr.WF_PSBEHits        = WF_PSBEHits;
->>>>>>> src/THyphiAttributes.cc
   out.RunTaskAttr.KF_Kalman          = KF_Kalman;
   out.RunTaskAttr.KF_KalmanSqrt      = KF_KalmanSqrt;
   out.RunTaskAttr.KF_KalmanRef       = KF_KalmanRef;

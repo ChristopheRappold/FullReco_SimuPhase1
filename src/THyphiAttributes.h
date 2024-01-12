@@ -218,6 +218,7 @@ struct RunTaskAttrDef
   bool WF_perfect;
   bool WF_PSBHits;
   bool WF_PSBEHits;
+  bool WF_PSFEHits;
 
   bool GNN_Text;
   std::string GNN_Node;
@@ -471,6 +472,7 @@ class THyphiAttributes
   bool WF_perfect;
   bool WF_PSBHits;
   bool WF_PSBEHits;
+  bool WF_PSFEHits;
 
   bool GNN_Text;
   std::string GNN_Node;

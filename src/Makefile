@@ -97,7 +97,7 @@ Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TWASACalibrationSimuBuilder.cc TW
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
 Objects_Proc = $(patsubst %.cc,%.o,$(Sources_Proc))
 
-Sources_Proc_genfit_dep = THyphiAttributes.cc FullRecoTask.cc TKalmanFilter_DAF_PID.cc FullRecoTaskMT.cc TKalmanFilter_DAF_MT.cc
+Sources_Proc_genfit_dep = THyphiAttributes.cc TKalmanFilter_DAF_PID.cc FullRecoTaskMT.cc TKalmanFilter_DAF_MT.cc
 
 ifeq ($(WITH_GEANT4E),1)
 	Sources_Proc_genfit_dep += TKalmanFilter_DAF.cc
