@@ -59,6 +59,7 @@ TRICKTRACKFLAGS = -I./TrickTrack/include
 KFPARTICLEFLAGS = -I./KFParticle/install/include
 ORMFLAGS = -I./sqlite_orm/include
 TORCHFLAGS = -I./libtorch/include -I./libtorch/include/torch/csrc/api/include
+Found_TorchGPU := $(shell find ./libtorch/lib/ -name libtorch_cuda.so)
 
 
 CXXFLAGS     += $(MSGFLAGS) $(ZMQFLAGS) $(SPDLOGFLAGS) $(ROOTCFLAGS) $(GEANTCFLAGS) $(GENFITV2FLAGS) $(TRICKTRACKFLAGS) $(KFPARTICLEFLAGS) $(ORMFLAGS) -I/opt/local/include -I/usr/include/eigen3 #-I./boost
@@ -255,10 +256,27 @@ libmsgpack.so :
 
 
 libtorch.so :
+ifeq ($(Found_TorchGPU),)
+# file libtorch_cuda does not exist
 	ln -sf $(FromLibdir)/libtorch/lib/libtorch.so           $(Bindir)/lib/
 	ln -sf $(FromLibdir)/libtorch/lib/libtorch_cpu.so       $(Bindir)/lib/
 	ln -sf $(FromLibdir)/libtorch/lib/libc10.so             $(Bindir)/lib/
 	ln -sf $(FromLibdir)/libtorch/lib/libgomp-52f2fd74.so.1 $(Bindir)/lib/
+else
+# file libtorch_cuda exist
+	ln -sf $(FromLibdir)/libtorch/lib/libtorch.so                 $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libtorch_cuda.so            $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libc10_cuda.so              $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libgomp-52f2fd74.so.1       $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libcudart-9335f6a2.so.12    $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libnvToolsExt-847d78f2.so.1 $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libcudnn.so.8               $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libc10.so                   $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libtorch_cpu.so             $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libcublas-37d11411.so.12    $(Bindir)/lib/
+	ln -sf $(FromLibdir)/libtorch/lib/libcublasLt-f97bfc2c.so.12  $(Bindir)/lib/
+endif
+
 	@echo "---> $@ done"
 
 # $(MathSo) : $(MathObj)
