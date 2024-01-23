@@ -12,7 +12,8 @@ TGNNFinder<Out>::TGNNFinder(const THyphiAttributes& attribut) : TDataProcessInte
   att._logger->info("TGNNFinder::TGNNFinder");
   //torch::jit::script::Module model;
   try{
-    model = torch::jit::load("scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt");
+    model = torch::jit::load(att.GNN_Model);
+			     //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt");
                              //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt"
     std::cout << "model is loaded" << std::endl;
   }

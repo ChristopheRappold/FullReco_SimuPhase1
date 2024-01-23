@@ -222,6 +222,7 @@ struct RunTaskAttrDef
 
   bool GNN_Text;
   std::string GNN_Node;
+  std::string GNN_Model;
 
   bool KF_Kalman;
   bool KF_KalmanSqrt;
@@ -356,6 +357,7 @@ inline auto InitStorage()
 				 make_column("WF_PSFEHits", &RunTaskAttrDef::WF_PSFEHits),
 				 make_column("GNN_Text", &RunTaskAttrDef::GNN_Text),
 				 make_column("GNN_Node", &RunTaskAttrDef::GNN_Node),
+				 make_column("GNN_Model", &RunTaskAttrDef::GNN_Model),
 				 make_column("KF_Kalman", &RunTaskAttrDef::KF_Kalman),
 				 make_column("KF_KalmanSqrt", &RunTaskAttrDef::KF_KalmanSqrt),
 				 make_column("KF_KalmanRef", &RunTaskAttrDef::KF_KalmanRef),
@@ -476,6 +478,7 @@ class THyphiAttributes
 
   bool GNN_Text;
   std::string GNN_Node;
+  std::string GNN_Model;
 
   bool KF_Kalman;
   bool KF_KalmanSqrt;
