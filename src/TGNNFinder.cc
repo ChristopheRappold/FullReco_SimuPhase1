@@ -21,7 +21,9 @@ TGNNFinder<Out>::TGNNFinder(const THyphiAttributes& attribut) : TDataProcessInte
     return;
   }
   model.eval();
-  ifs_gnn.open(att.GNN_Node);
+
+  if(att.GNN_Text)
+    ifs_gnn.open(att.GNN_Node);
 }
 
 template<class Out>
@@ -42,15 +44,17 @@ ReturnRes::InfoM TGNNFinder<Out>::operator()(FullRecoEvent& RecoEvent, Out* OutT
 template<class Out>
 int TGNNFinder<Out>::Exec(FullRecoEvent& RecoEvent, Out* ) {
  
-  if(att.GNN_Text)  return FinderGNNText(RecoEvent);
-  else              return FinderGNN(RecoEvent);
+  if(att.GNN_Text)
+    return FinderGNNText(RecoEvent);
+  else
+    return FinderGNN(RecoEvent);
 }
 
 template<class Out>
 ReturnRes::InfoM TGNNFinder<Out>::SoftExit(int result_full) { return ReturnRes::Fine; }
 
 
-  template<class Out>
+template<class Out>
 void TGNNFinder<Out>::SelectHists() {}
 
 

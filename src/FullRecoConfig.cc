@@ -87,7 +87,7 @@ int FullRecoConfig::ParseCmd(int argc, char** argv)
     std::cout << "!> Example of use:\n";
     std::cout << "!> " << argv[0];
     std::cout << "[-g Geofile] [--geo Geofile] [-c nb_cpu] [--cpu nb_cpu] [-n fraction] [--num fraction] [-s start_ev] "
-                 "[--start start_ev] [-e nb_event] [--event nb_event] [-l lvllog] [--log lvllog] [-h]  OutputFile "
+                 "[--start start_ev] [-e nb_event] [--event nb_event] [-l lvllog] [--log lvllog] [-a gnntext] [--gnn gnntext] [-h]  OutputFile "
                  "RootInputFile \n";
     std::cout << "\n";
   };
