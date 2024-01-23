@@ -1,7 +1,8 @@
 #ifndef HIT_GNN_STRUCT_HH
 #define HIT_GNN_STRUCT_HH
 
-typedef struct{
+struct HitGnn
+{
   double did    = -1;
   double lid    = -1;
   double phi    = -999;
@@ -17,6 +18,6 @@ typedef struct{
   double clsize = 1;
   double cls    = -1;
   double cle    = -1;
-} HitGnn;
+};
 
 #endif
