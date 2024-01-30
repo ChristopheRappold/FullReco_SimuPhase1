@@ -75,6 +75,7 @@ private:
       int id=-1, int id_s=-1, int id_d=-1, int g_s=0);
 
   torch::jit::script::Module model;
+  torch::Device device = torch::kCPU;
 
   std::ifstream ifs_gnn;
 

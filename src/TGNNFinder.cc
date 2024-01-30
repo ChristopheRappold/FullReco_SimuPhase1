@@ -11,20 +11,45 @@ TGNNFinder<Out>::TGNNFinder(const THyphiAttributes& attribut) : TDataProcessInte
 {
   att._logger->info("TGNNFinder::TGNNFinder");
   //torch::jit::script::Module model;
-  try{
-    model = torch::jit::load(att.GNN_Model);
-			     //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt");
-                             //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt"
-    std::cout << "model is loaded" << std::endl;
-  }
-  catch(const c10::Error& e){
-    std::cerr << "error loading the model\n";
-    return;
-  }
-  model.eval();
+  device = torch::kCPU;
+  if (torch::cuda::is_available())
+    {
+      att._logger->info("CUDA is available! Training on GPU.");
+      device = torch::kCUDA;
+    }
 
+  //device = torch::kCPU;
+  att._logger->info("TGNNFinder: load from text ? {}",att.GNN_Text);
+  
   if(att.GNN_Text)
     ifs_gnn.open(att.GNN_Node);
+  else
+    {
+      try
+	{
+	  att._logger->info("GNN Model: {}",att.GNN_Model);
+	  c10::InferenceMode guard;
+	  model = torch::jit::load(att.GNN_Model);
+	  //model.load_jit(att.GNN_Model);
+	  model.to(device);
+	  //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt");
+	  //"scripted_model/scripted_model_m7_l4_5_h180_480_b25_e50_d040_lr000004_v04_div0005.pt"
+	  auto temp = *(model.parameters().begin());
+	  std::cout << "model is loaded | device :" << temp.device().str()<<"\n";
+	}
+      catch(const c10::Error& e)
+	{
+	  std::cerr << "error loading the model\n";
+	  return;
+	}
+      model.eval();
+
+      for( auto temp : model.parameters())
+	att._logger->debug("model parameters | device : {}",temp.device().str());
+      for( auto temp : model.named_parameters())
+	att._logger->debug("model named_parameters | device : {}", temp.value.device().str());
+
+    }
 }
 
 template<class Out>
@@ -62,7 +87,7 @@ void TGNNFinder<Out>::SelectHists() {}
 template<class Out>
 int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
 {
-
+  c10::InferenceMode guard;
   double mm2cm = 0.1;
 
   //torch::jit::script::Module model;
@@ -333,7 +358,10 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   att._logger->debug("TGNNFinder: clustering     {}",hitgnn_cont.size());
 
 
-  torch::Tensor input_node = torch::full({(int)hitgnn_cont.size(), 13}, -999, torch::TensorOptions().dtype(torch::kFloat));
+  torch::Tensor input_node = torch::full({(int)hitgnn_cont.size(), 13}, -999, torch::TensorOptions().dtype(torch::kFloat).device(device));
+
+  att._logger->debug("TGNNFinder: input_node device    {}",input_node.device().str() );
+  
   for(int i=0; i<(int)hitgnn_cont.size(); ++i){
     int dtype = -1;
     int layer_buf = hitgnn_cont[i].did;
@@ -401,7 +429,10 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
     }
   }
 
-  torch::Tensor edge_index_buf = torch::full({2, (int)gnn_src.size()}, -999, torch::TensorOptions().dtype(torch::kInt));
+  torch::Tensor edge_index_buf = torch::full({2, (int)gnn_src.size()}, -999, torch::TensorOptions().dtype(torch::kInt).device(device));
+
+  att._logger->debug("TGNNFinder: edhe_index_buf device    {}",edge_index_buf.device().str());
+
   for(int i=0; i<(int)gnn_src.size(); ++i){
     edge_index_buf[0][i] = gnn_src[i];
     edge_index_buf[1][i] = gnn_dst[i];
@@ -415,11 +446,15 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   inputs.push_back(input_node);
   inputs.push_back(edge_index_buf);
 
-  auto gnn_output = model.forward(inputs).toTuple();
+  att._logger->debug("TGNNFinder: inputs device    {} {}",inputs[0].toTensor().device().str(),inputs[1].toTensor().device().str());
+
+  auto gnn_output_model = model.forward({input_node,edge_index_buf});
+  auto gnn_output = gnn_output_model.toTuple();
+  //auto gnn_output = model.forward(inputs).toTuple();
   auto gnn_output_n = gnn_output->elements()[0].toTensor();
   auto gnn_output_e = gnn_output->elements()[1].toTensor();
 
-  att._logger->debug("TGNNFinder: GNN output");
+  att._logger->debug("TGNNFinder: GNN output device {} {}",gnn_output_n.device().str(),gnn_output_e.device().str());
 
   //std::cout << "gnn_output_n : " << gnn_output_n << std::endl;
   //std::cout << "gnn_output_e : " << gnn_output_e << std::endl;
@@ -429,14 +464,14 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   //std::cout << "gnn_pred_e_buf : " << gnn_pred_e_buf << std::endl;
 
   // bidir
-  torch::Tensor edge_index = torch::full({2, (int)gnn_src.size()/2}, -999, torch::TensorOptions().dtype(torch::kInt));
+  torch::Tensor edge_index = torch::full({2, (int)gnn_src.size()/2}, -999, torch::TensorOptions().dtype(torch::kInt).device(device));
   for(int i=0; i<(int)gnn_src.size(); ++i){
     if(i%2!=0) continue;
     edge_index[0][i/2] = gnn_src[i];
     edge_index[1][i/2] = gnn_dst[i];
   }
 
-  auto gnn_pred_e = torch::full({(int)gnn_src.size()/2, 1}, -999, torch::TensorOptions().dtype(torch::kFloat));
+  auto gnn_pred_e = torch::full({(int)gnn_src.size()/2, 1}, -999, torch::TensorOptions().dtype(torch::kFloat).device(device));
   for(int i=0; i<(int)gnn_src.size()/2; ++i){
     gnn_pred_e[i] = (gnn_pred_e_buf[i*2] + gnn_pred_e_buf[i*2 +1])/2.;
   }
@@ -453,7 +488,7 @@ int TGNNFinder<Out>::FinderGNN(FullRecoEvent& RecoEvent)
   torch::Tensor gnn_label_e = gnn_pred_e > 100;
   torch::Tensor gnn_label_n = gnn_pred_n > threshold_n;
 
-  torch::Tensor gnn_label_g_bce = torch::full({(int)gnn_src.size()/2, 1}, 0, torch::TensorOptions().dtype(torch::kFloat));
+  torch::Tensor gnn_label_g_bce = torch::full({(int)gnn_src.size()/2, 1}, 0, torch::TensorOptions().dtype(torch::kFloat).device(device));
 
   std::tuple< std::map<int, std::set<int> >, torch::Tensor, torch::Tensor, bool > ret = get_label_g(
       input_node, edge_index, gnn_label_n, gnn_label_e, gnn_label_g, gnn_label_g_bce, gnn_pred_e);
@@ -1267,7 +1302,7 @@ std::tuple< std::map<int, std::set<int> >, torch::Tensor, torch::Tensor, bool > 
       std::set<int> s{i};
       gnn_label_g_buf[i] = s;
     }
-    torch::Tensor gnn_label_g_bce_buf = torch::zeros( {gnn_label_g_bce.size(0), 1}, torch::TensorOptions().dtype(torch::kFloat) );
+    torch::Tensor gnn_label_g_bce_buf = torch::zeros( {gnn_label_g_bce.size(0), 1}, torch::TensorOptions().dtype(torch::kFloat).device(input_node.device()) );
     ret = std::make_tuple( gnn_label_g_buf, gnn_label_e, gnn_label_g_bce_buf, false);
     return ret;
   }
