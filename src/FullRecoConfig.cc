@@ -146,6 +146,7 @@ int FullRecoConfig::ParseCmd(int argc, char** argv)
       case 'a':
         nameGnn = std::string(optarg);
         tree.put("GNN_Node", nameGnn);
+	tree.put("GNN_Text", true);
         break;
       case '?':
       default:
