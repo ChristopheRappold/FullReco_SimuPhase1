@@ -465,7 +465,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
 
   if(Wasa_FieldMap)
     {
-      double signDir = Wasa_Side ? 1.0 : -1.0;
+      double signDir = Wasa_Side == 1 ? 1.0 : -1.0;
       Field = new WasaSolenoidFieldMap("WasaFieldMap", "WasaFieldMap", Wasa_FieldMapName, Field_Strength, signDir);
     }
   else
@@ -599,6 +599,7 @@ int THyphiAttributes::Init_Para()
     }
   else
     {
+      Wasa_Side = 1;
       Wasa_FieldMap = true;
       Wasa_FieldMapName = "./field/MagField_default.dat";
       Field_Strength   = Config.IsAvailable("Field_Strength")   ? Config.Get<double>("Field_Strength")   : -1.;
