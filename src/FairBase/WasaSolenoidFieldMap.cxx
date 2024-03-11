@@ -48,7 +48,7 @@ void WasaSolenoidFieldMap::SetMaxField(double maxF)
 
 void WasaSolenoidFieldMap::Init()
 {
-  FieldMap->SetScale(maxField);
+  FieldMap->SetScale(std::fabs(maxField));
   FieldMap->InitializeParameter();
 
   fRmin = FieldMap->MinMax_R[0];
@@ -99,7 +99,7 @@ void WasaSolenoidFieldMap::GetBxyz(const Double_t point[3], Double_t* bField)
   Double_t pos[3];
 
   pos[0] = signDir*(point[0] - fPosX);
-  pos[1] = signDir*(point[1] - fPosY);
+  pos[1] = (point[1] - fPosY);
   pos[2] = signDir*(point[2] - fPosZ);
 
   Double_t R = TMath::Hypot(pos[0],pos[1]);
@@ -109,6 +109,8 @@ void WasaSolenoidFieldMap::GetBxyz(const Double_t point[3], Double_t* bField)
     return;
 
   FieldMap->Wfld(pos,bField); // it is already in kGauss
+  bField[0] *= signDir;
+  bField[2] *= signDir;
 
 }
 
