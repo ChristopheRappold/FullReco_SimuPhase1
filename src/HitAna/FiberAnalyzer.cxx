@@ -19,16 +19,16 @@ std::vector< std::vector< std::vector< FiberHitAna* > > > FiberAnalyzer::Cluster
     std::vector<FiberHitAna*> buf_v;
     std::vector< std::vector<FiberHitAna*> > buf_vv;
     for(int j=0; j<3; ++j){
-      buf_vv.emplace_back(buf_v);
+      buf_vv.push_back(buf_v);
     }
-    buf_cont.emplace_back(buf_vv);
+    buf_cont.push_back(buf_vv);
   }
 
   for(int i=0; i<7; ++i){
     for(int j=0; j<3; ++j){
       for(int k=0; k<(int)cont[i][j].size(); ++k){
         FiberHitAna *buf_hit = new FiberHitAna(cont[i][j][k]);
-        buf_cont[i][j].emplace_back(buf_hit);
+        buf_cont[i][j].push_back(buf_hit);
         //cont[i][j][k]->Print();
       }
     }
@@ -122,7 +122,7 @@ std::vector< std::vector< FiberHitXUV* > > FiberAnalyzer::FindHit(std::vector< s
   std::vector< std::vector< FiberHitXUV* > > buf_cont;
   for(int i=0; i<7; ++i){
     std::vector<FiberHitXUV*> buf_v;
-    buf_cont.emplace_back(buf_v);
+    buf_cont.push_back(buf_v);
   }
 
   for(int det=0; det<7; ++det){
@@ -194,7 +194,7 @@ std::vector< std::vector< FiberHitXUV* > > FiberAnalyzer::FindHit(std::vector< s
           if((fabs(hit_xu_y-999)<1.)||(fabs(hit_xv_y+999)<1.)) continue;
           if(fabs(hit_xu_y-hit_xv_y) > cut_d) continue;
           FiberHitXUV *buf_hit = new FiberHitXUV(buf_x, buf_y, buf_d, cont[det][ix][i], cont[det][iu][used_j], cont[det][iv][used_k], id++);
-          buf_cont[det].emplace_back(buf_hit);
+          buf_cont[det].push_back(buf_hit);
 
         } // for k
       } // for j
@@ -204,7 +204,7 @@ std::vector< std::vector< FiberHitXUV* > > FiberAnalyzer::FindHit(std::vector< s
       //double buf_y = (hit_xu_y+hit_xv_y)/2.;
       //double buf_d = hit_xu_y-hit_xv_y;
       //FiberHitXUV *buf_hit = new FiberHitXUV(buf_x, buf_y, buf_d, cont[det][ix][i], cont[det][iu][used_j], cont[det][iv][used_k], id++);
-      //buf_cont[det].emplace_back(buf_hit);
+      //buf_cont[det].push_back(buf_hit);
 
       flag_x.insert(i);
       flag_u.insert(used_j);
@@ -251,7 +251,7 @@ std::vector< FiberTrackAna* > FiberAnalyzer::DeleteDup( std::vector< FiberTrackA
   std::vector< std::set<int> > used_hit;
   for(int i=0; i<num_det; ++i){
     std::set<int> buf_set;
-    used_hit.emplace_back(buf_set);
+    used_hit.push_back(buf_set);
   }
   int num_cont = cont.size();
   for(int i=0; i<num_cont; ++i){
@@ -262,7 +262,7 @@ std::vector< FiberTrackAna* > FiberAnalyzer::DeleteDup( std::vector< FiberTrackA
       if(used_hit[j].size()>0 && used_hit[j].find(id)!=used_hit[j].end()) flag = false;
     }
     if(flag){
-      buf_cont.emplace_back(cont[i]);
+      buf_cont.push_back(cont[i]);
       for(int j=0; j<(int)buf_xuv.size(); ++j){
         int id = buf_xuv[j]->GetID();
         used_hit[j].insert(id);
@@ -293,7 +293,7 @@ std::vector< FiberTrackAna* > FiberAnalyzer::DeleteDupCombi( std::vector< FiberT
   std::vector< std::set<int> > used_hit;
   for(int i=0; i<num_lay; ++i){
     std::set<int> buf_set;
-    used_hit.emplace_back(buf_set);
+    used_hit.push_back(buf_set);
   }
   int num_cont = cont.size();
   for(int i=0; i<num_cont; ++i){
@@ -307,7 +307,7 @@ std::vector< FiberTrackAna* > FiberAnalyzer::DeleteDupCombi( std::vector< FiberT
       if(used_hit[buf_id].size()>0 && used_hit[buf_id].find(fib)!=used_hit[buf_id].end()) flag = false;
     }
     if(flag){
-      buf_cont.emplace_back(cont[i]);
+      buf_cont.push_back(cont[i]);
       for(int j=0; j<(int)buf_hit.size(); ++j){
         int fib = buf_hit[j]->GetFib();
         int det = buf_hit[j]->GetDet();
@@ -347,9 +347,9 @@ std::vector< FiberTrackAna* > FiberAnalyzer::DeleteSame( std::vector< FiberTrack
         }
       }
     }
-    if(!flag_same) buf_cont.emplace_back(cont[i]);
+    if(!flag_same) buf_cont.push_back(cont[i]);
     else if(flag){
-      buf_cont.emplace_back(cont[i]);
+      buf_cont.push_back(cont[i]);
     }
     else delete cont[i];
   }
@@ -403,7 +403,7 @@ std::vector< FiberTrackAna* > FiberAnalyzer::DeleteInclusive( std::vector< Fiber
       cont.erase(cont.begin() + i);
       i--;
     }
-    else buf_cont.emplace_back(cont[i]);
+    else buf_cont.push_back(cont[i]);
 
   }
 
@@ -439,7 +439,7 @@ std::vector< TrackHit* > FiberAnalyzer::DeleteInclusiveTrackHit( std::vector< Tr
       cont.erase(cont.begin() + i);
       i--;
     }
-    else buf_cont.emplace_back(cont[i]);
+    else buf_cont.push_back(cont[i]);
 
   }
 
@@ -489,7 +489,7 @@ std::vector< TrackHit* > FiberAnalyzer::DeleteDupTrackHit( std::vector< TrackHit
     }
 
     if(flag){
-      buf_cont.emplace_back(cont[i]);
+      buf_cont.push_back(cont[i]);
       for(size_t i=0;i<6;++i)
       {
         if(_fiberhit[i]==-1) continue;
@@ -544,7 +544,7 @@ std::vector< TrackHit* > FiberAnalyzer::DeleteDupTrackHitMDC( std::vector< Track
     }
 
     if(flag){
-      buf_cont.emplace_back(cont[i]);
+      buf_cont.push_back(cont[i]);
       for(size_t i=0;i<17;++i)
       {
         if(_mdchit_bestdif[i]==-1) continue;
@@ -584,7 +584,7 @@ std::vector< FiberHitXUV* > FiberAnalyzer::DeleteDupXUV( std::vector< FiberHitXU
     }
 
     if(flag){
-      buf_cont.emplace_back(cont[i]);
+      buf_cont.push_back(cont[i]);
       for(int j=0; j<3; ++j){
         int fib = hit->GetHit(j)->GetFib();
         int did = hit->GetHit(j)->GetDid();
@@ -697,12 +697,12 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
           for(int j=0; j<(int)FiberXUVCont[1].size(); ++j)
             {
               std::vector<FiberHitXUV*>   buf_xuv;
-              buf_xuv.emplace_back(FiberXUVCont[0][i]);
-              buf_xuv.emplace_back(FiberXUVCont[1][j]);
+              buf_xuv.push_back(FiberXUVCont[0][i]);
+              buf_xuv.push_back(FiberXUVCont[1][j]);
               FiberTrackAna *track = new FiberTrackAna(buf_xuv, par);
 
-              if(!par->flag_uft12_combi)                      buf_track.emplace_back(track);
-              else if(track->GetChi2() < par->cut_chi2_uft12) buf_track.emplace_back(track);
+              if(!par->flag_uft12_combi)                      buf_track.push_back(track);
+              else if(track->GetChi2() < par->cut_chi2_uft12) buf_track.push_back(track);
             }
         }
       if((int)buf_track.size()>0) FiberTrackCont["uft12"] = DeleteDup(buf_track);
@@ -738,12 +738,12 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
           for(int j=0; j<(int)FiberXUVCont[4].size(); ++j)
             {
               std::vector<FiberHitXUV*>   buf_xuv;
-              buf_xuv.emplace_back(FiberXUVCont[2][h]);
-              buf_xuv.emplace_back(FiberXUVCont[3][i]);
-              buf_xuv.emplace_back(FiberXUVCont[4][j]);
+              buf_xuv.push_back(FiberXUVCont[2][h]);
+              buf_xuv.push_back(FiberXUVCont[3][i]);
+              buf_xuv.push_back(FiberXUVCont[4][j]);
               FiberTrackAna *track = new FiberTrackAna(buf_xuv, par);
               //track->CorrectMFT(par);
-              buf_track.emplace_back(track);
+              buf_track.push_back(track);
             }
 
       FiberTrackCont["uft3mft12"] = DeleteDup(buf_track);
@@ -758,8 +758,8 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
     for(int i=0; i<(int)FiberXUVCont[3].size(); ++i){
       for(int j=0; j<(int)FiberXUVCont[4].size(); ++j){
         std::vector<FiberHitXUV*>   buf_xuv;
-        buf_xuv.emplace_back(FiberXUVCont[3][i]);
-        buf_xuv.emplace_back(FiberXUVCont[4][j]);
+        buf_xuv.push_back(FiberXUVCont[3][i]);
+        buf_xuv.push_back(FiberXUVCont[4][j]);
         FiberTrackAna *track = new FiberTrackAna(buf_xuv, par);
         if(par->flag_mft12_posang){
           track->CorrectMFT(par);
@@ -769,8 +769,8 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
           double buf_b = track->GetB();
           if( fabs(buf_x * 0.003 - buf_a)>0.3 || fabs(buf_y * 0.003 - buf_b)>0.3 ){ delete track; continue;}
         }
-        if(!par->flag_mft12_combi)                      buf_track.emplace_back(track);
-        else if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track);
+        if(!par->flag_mft12_combi)                      buf_track.push_back(track);
+        else if(track->GetChi2() < par->cut_chi2_mft12) buf_track.push_back(track);
       }
     }
 
@@ -808,12 +808,12 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
               for(int f=-1; f<(int)FiberHitClCont[4][2].size(); ++f){
                 std::vector<FiberHitAna*> buf_hit;
                 int count = 0;
-                if(a>-1 && !FiberHitClCont[3][0][a]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[3][0][a]); count++;}
-                if(b>-1 && !FiberHitClCont[3][1][b]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[3][1][b]); count++;}
-                if(c>-1 && !FiberHitClCont[3][2][c]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[3][2][c]); count++;}
-                if(d>-1 && !FiberHitClCont[4][0][d]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][0][d]); count++;}
-                if(e>-1 && !FiberHitClCont[4][1][e]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][1][e]); count++;}
-                if(f>-1 && !FiberHitClCont[4][2][f]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[4][2][f]); count++;}
+                if(a>-1 && !FiberHitClCont[3][0][a]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[3][0][a]); count++;}
+                if(b>-1 && !FiberHitClCont[3][1][b]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[3][1][b]); count++;}
+                if(c>-1 && !FiberHitClCont[3][2][c]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[3][2][c]); count++;}
+                if(d>-1 && !FiberHitClCont[4][0][d]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[4][0][d]); count++;}
+                if(e>-1 && !FiberHitClCont[4][1][e]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[4][1][e]); count++;}
+                if(f>-1 && !FiberHitClCont[4][2][f]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[4][2][f]); count++;}
                 if(count<4) continue;
                 FiberTrackAna *track = new FiberTrackAna(buf_hit, par);
                 track->SetFlagCombi();
@@ -826,9 +826,9 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
                   if( fabs(buf_x * 0.003 - buf_a)>0.3 || fabs(buf_y * 0.003 - buf_b)>0.3 ){ delete track; continue;}
                 }
                 switch(track->GetNlayer()){
-                  case 4: buf_track.emplace_back(track); break;
-                  case 5: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
-                  case 6: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+                  case 4: buf_track.push_back(track); break;
+                  case 5: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.push_back(track); else delete track; break;
+                  case 6: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.push_back(track); else delete track; break;
                   default: break;
                 }
               }
@@ -899,7 +899,7 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
     }
 
     for(auto v : buf_track){
-      FiberTrackCont["mft12"].emplace_back(v);
+      FiberTrackCont["mft12"].push_back(v);
     }
 
     FiberTrackCont["mft12"] = DeleteSame(FiberTrackCont["mft12"]);
@@ -918,21 +918,21 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
       for(auto v2: FiberHitClCont[4][0]){
         double pos1 = v1->GetPos();
         double pos2 = v2->GetPos();
-        if( fabs(pos1 - pos2) < 20 ) pair_x.emplace_back(std::make_pair(v1, v2));
+        if( fabs(pos1 - pos2) < 20 ) pair_x.push_back(std::make_pair(v1, v2));
       }
     }
     for(auto v1: FiberHitClCont[3][1]){
       for(auto v2: FiberHitClCont[4][2]){
         double pos1 = v1->GetPos();
         double pos2 = v2->GetPos();
-        if( fabs(pos1 - pos2) < 20 ) pair_u.emplace_back(std::make_pair(v1, v2));
+        if( fabs(pos1 - pos2) < 20 ) pair_u.push_back(std::make_pair(v1, v2));
       }
     }
     for(auto v1: FiberHitClCont[3][2]){
       for(auto v2: FiberHitClCont[4][1]){
         double pos1 = v1->GetPos();
         double pos2 = v2->GetPos();
-        if( fabs(pos1 - pos2) < 20 ) pair_v.emplace_back(std::make_pair(v1, v2));
+        if( fabs(pos1 - pos2) < 20 ) pair_v.push_back(std::make_pair(v1, v2));
       }
     }
 
@@ -951,11 +951,11 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
             std::vector<FiberHitAna*> buf_hit;
             int count = 0;
             if( a>-1 && !pair_x[a].first->IsUsed() && !pair_x[a].second->IsUsed() ){
-              buf_hit.emplace_back(pair_x[a].first); buf_hit.emplace_back(pair_x[a].second); count+=2; }
+              buf_hit.push_back(pair_x[a].first); buf_hit.push_back(pair_x[a].second); count+=2; }
             if( b>-1 && !pair_u[b].first->IsUsed() && !pair_u[b].second->IsUsed() ){
-              buf_hit.emplace_back(pair_u[b].first); buf_hit.emplace_back(pair_u[b].second); count+=2; }
+              buf_hit.push_back(pair_u[b].first); buf_hit.push_back(pair_u[b].second); count+=2; }
             if( c>-1 && !pair_v[c].first->IsUsed() && !pair_v[c].second->IsUsed() ){
-              buf_hit.emplace_back(pair_v[c].first); buf_hit.emplace_back(pair_v[c].second); count+=2; }
+              buf_hit.push_back(pair_v[c].first); buf_hit.push_back(pair_v[c].second); count+=2; }
             if(count<4) continue;
             FiberTrackAna *track = new FiberTrackAna(buf_hit, par);
             track->SetFlagPair();
@@ -968,9 +968,9 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
               if( fabs(buf_x * 0.003 - buf_a)>0.3 || fabs(buf_y * 0.003 - buf_b)>0.3 ){ delete track; continue;}
             }
             switch(track->GetNlayer()){
-              case 4: buf_track.emplace_back(track); break;
-              case 5: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
-              case 6: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.emplace_back(track); else delete track; break;
+              case 4: buf_track.push_back(track); break;
+              case 5: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.push_back(track); else delete track; break;
+              case 6: if(track->GetChi2() < par->cut_chi2_mft12) buf_track.push_back(track); else delete track; break;
               default: break;
             }
 
@@ -1038,7 +1038,7 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
       }
 
       for(auto v : buf_track){
-        FiberTrackCont["mft12"].emplace_back(v);
+        FiberTrackCont["mft12"].push_back(v);
       }
 
       FiberTrackCont["mft12"] = DeleteSame(FiberTrackCont["mft12"]);
@@ -1066,8 +1066,8 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
     for(int i=0; i<(int)FiberXUVCont[5].size(); ++i){
       for(int j=0; j<(int)FiberXUVCont[6].size(); ++j){
         std::vector<FiberHitXUV*>   buf_xuv;
-        buf_xuv.emplace_back(FiberXUVCont[5][i]);
-        buf_xuv.emplace_back(FiberXUVCont[6][j]);
+        buf_xuv.push_back(FiberXUVCont[5][i]);
+        buf_xuv.push_back(FiberXUVCont[6][j]);
         FiberTrackAna *track = new FiberTrackAna(buf_xuv, par);
         if(par->flag_dft12_cut){
           double tot_mean = track->GetTOT();
@@ -1082,8 +1082,8 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
           if( tot_mean < par->cut_dft12_tot_max ) flag_cut = true;
           if(flag_cut){ delete track; continue; }
         }
-        if(!par->flag_dft12_combi)                      buf_track.emplace_back(track);
-        else if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track);
+        if(!par->flag_dft12_combi)                      buf_track.push_back(track);
+        else if(track->GetChi2() < par->cut_chi2_dft12) buf_track.push_back(track);
       }
     }
     if((int)buf_track.size()>0) FiberTrackCont["dft12"] = DeleteDup(buf_track);
@@ -1116,12 +1116,12 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
               for(int f=-1; f<(int)FiberHitClCont[6][2].size(); ++f){
                 std::vector<FiberHitAna*> buf_hit;
                 int count = 0;
-                if(a>-1 && !FiberHitClCont[5][0][a]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[5][0][a]); count++;}
-                if(b>-1 && !FiberHitClCont[5][1][b]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[5][1][b]); count++;}
-                if(c>-1 && !FiberHitClCont[5][2][c]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[5][2][c]); count++;}
-                if(d>-1 && !FiberHitClCont[6][0][d]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][0][d]); count++;}
-                if(e>-1 && !FiberHitClCont[6][1][e]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][1][e]); count++;}
-                if(f>-1 && !FiberHitClCont[6][2][f]->IsUsed() ) {buf_hit.emplace_back(FiberHitClCont[6][2][f]); count++;}
+                if(a>-1 && !FiberHitClCont[5][0][a]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[5][0][a]); count++;}
+                if(b>-1 && !FiberHitClCont[5][1][b]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[5][1][b]); count++;}
+                if(c>-1 && !FiberHitClCont[5][2][c]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[5][2][c]); count++;}
+                if(d>-1 && !FiberHitClCont[6][0][d]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[6][0][d]); count++;}
+                if(e>-1 && !FiberHitClCont[6][1][e]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[6][1][e]); count++;}
+                if(f>-1 && !FiberHitClCont[6][2][f]->IsUsed() ) {buf_hit.push_back(FiberHitClCont[6][2][f]); count++;}
                 if(count<4) continue;
                 FiberTrackAna *track = new FiberTrackAna(buf_hit, par);
 
@@ -1140,9 +1140,9 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
                 }
 
                 switch(track->GetNlayer()){
-                  case 4: buf_track.emplace_back(track); break;
-                  case 5: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
-                  case 6: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.emplace_back(track); else delete track; break;
+                  case 4: buf_track.push_back(track); break;
+                  case 5: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.push_back(track); else delete track; break;
+                  case 6: if(track->GetChi2() < par->cut_chi2_dft12) buf_track.push_back(track); else delete track; break;
                   default: break;
                 }
               }
@@ -1162,7 +1162,7 @@ std::map< std::string, std::vector<FiberTrackAna*> > FiberAnalyzer::FiberTrackin
     }
 
     for(auto v : buf_track){
-      FiberTrackCont["dft12"].emplace_back(v);
+      FiberTrackCont["dft12"].push_back(v);
     }
     nt_dft12 = FiberTrackCont["dft12"].size();
 
