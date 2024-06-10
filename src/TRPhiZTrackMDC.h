@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "TMultiGraph.h"
+#include "TF1.h"
 
 template<class Out>
 using TDataProcessInterface = TDataProcess<FullRecoEvent,Out>;
@@ -63,21 +64,34 @@ class TRPhiZTrackMDC final :  public TDataProcessInterface<Out>
   TTree* t_phiZ = nullptr;
 
   TMultiGraph* mg_trackPhiZ;
+  TMultiGraph* mg_trackPhiZNoCorr;
   TMultiGraph* mg_trackRZ;
 
   bool RZfit = false;
   int MDCWireType = 0;
 
+  TF1 pol = TF1("RZfitfunction","pol1",250,300);
+
   int tempEvent;
   struct LocalHists
   {
+    TH2F* h_RPhiZMDC_Chi2;
+    TH2F* h_RPhiZMDC_Status;
     TH2F* h_ResidualMDC_dZ1;
     TH2F* h_ResidualMDC_dZ2;
     TH2F* h_RPhiZMDC_Sigma;
+    TH2F* h_RPhiZMDC_Sigma2;
     TH2F* h_ResidualMDC_dZ_PSB;
     TH2F* h_ResidualMDC_dZ_PSBE;
     TH2F* h_ResidualMDC_dZ_PSFE;
     TH2F* h_ResidualMDC_dZ_More6;
+
+    TH2F* h_PullMDC_dZ1;
+    TH2F* h_PullMDC_dZ2;
+    TH2F* h_PullMDC_dZ_PSB;
+    TH2F* h_PullMDC_dZ_PSBE;
+    TH2F* h_PullMDC_dZ_PSFE;
+    TH2F* h_PullMDC_dZ_More6;
 
   };
   LocalHists LocalHisto;
