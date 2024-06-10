@@ -54,6 +54,8 @@ void FullRecoEvent::Clear(int toclean)
   TracksFound.clear();
   IdHitsToMeasurement.clear();
 
+  paramFitRZ.clear();
+
   TrackMother.clear();
   DaughtersTrackDAFInit.clear();
 

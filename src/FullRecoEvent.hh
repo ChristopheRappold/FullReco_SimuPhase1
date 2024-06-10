@@ -340,7 +340,7 @@ public:
     double Dmass      = 0.;
     if(TempElement == nullptr)
       {
-        spdlog::get("Console")->info("E> no element ! {} {} {}", AtomMass, id_Elem, fmt::ptr(TempElement));
+        spdlog::get("Console")->debug("E> no element ! {} {} {}", AtomMass, id_Elem, fmt::ptr(TempElement));
         if(AtomMass == 23 && id_Elem == 14)
           Dmass = 23.073 * 1e-3; // MeV -> GeV
         else
@@ -767,6 +767,15 @@ struct CandTrack
   CandTrack(const std::vector<int>& Hits, bool R, int Q, const std::vector<double>& P, const TMatrixD& C, double chi2_1, double chi2_2):orderedHitIds(Hits),Rfitted(R),q(Q),par(P),Cov(C),chi2_circle(chi2_1),chi2_line(chi2_2) {};
 };
 
+struct ParamFitsRZ
+{
+  double p0;
+  double p1;
+  TMatrixD cov;
+
+  inline double extrapR(double Z) const {return p0 + p1*Z;}
+};
+
 // struct OutTrack
 // {
 //   std::string type;
@@ -847,6 +856,8 @@ public:
 
   std::vector<CandTrack> TracksFound;
   std::vector<IdHit> IdHitsToMeasurement;
+
+  std::unordered_map<int, ParamFitsRZ> paramFitRZ;
 
   std::unordered_map<int, std::tuple<int, double, double, double, double> > TrackMother;
   std::unordered_map<int, InfoInit> DaughtersTrackDAFInit;
