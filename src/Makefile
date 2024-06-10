@@ -30,7 +30,7 @@ CXXFLAGS      = -Wall -O3 -march=native -fPIC -g -DSPDLOG_COMPILED_LIB -DZMQ_BUI
 #CXXFLAGS     += -fsanitize=memory -fno-omit-frame-pointer
 #CXXFLAGS     += -fsanitize=undefined -fno-omit-frame-pointer
 #CXXFLAGS      += -fsanitize=leak -fsanitize-blacklist=$(shell root-config --etcdir)/lsan-root.supp
-LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib/spdlog -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./EventWASAUnpack -L./HitAna -L./KFParticle/install/lib -L./FairBase -L./libtorch/lib -L.
+LIBS          = -L./TrickTrack/lib -Lmsgpack-c -Llibzmq/lib -Lspdlog/lib -L./Genfit2_v2/lib -L./Ana_Event -L./EventG4Sol -L./EventWASAUnpack -L./HitAna -L./KFParticle/install/lib -L./FairBase -L./libtorch/lib -L.
 
 LDFLAGS       = '-Wl,-rpath,$$ORIGIN/lib'
 SOFLAGS       = -shared
@@ -92,7 +92,7 @@ Sources_Comm = FullRecoEvent.cc FullRecoEventZMQ.cc FullRecoConfig.cc Ana_Hist.c
 Headers_Comm = $(patsubst %.cc,%.hh,$(Sources_Comm))
 Objects_Comm = $(patsubst %.cc,%.o,$(Sources_Comm))
  
-Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TWASACalibrationSimuBuilder.cc TWASACalibrationDataBuilder.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc TCheckFiberTrack.cc TCheckFiberXUV.cc TFragmentFinder.cc TWASAFinder.cc TRPhiZTrackMDC.cc #TFinderCM.cc TPrimaryVertex_Si.cc
+Sources_Proc =  TBuildDetectorLayerPlaneDAF.cc TWASACalibrationSimuBuilder.cc TWASACalibrationDataBuilder.cc TBuildRestarter.cc CheckField.cc TBuildDetectorLayerPlaneDAF_MT.cc TMergerOutput_MT.cc TBuildDetectorLayerPlaneDAF_ZMQ.cc TMergerOutput_ZMQ.cc TBayesFinder.cc TCheckRZ.cc TFlatMCOutputML.cc TPrimaryVertex.cc TDecayVertex.cc TRiemannFinder.cc TFindingPerf.cc TCheckFiberTrack.cc TCheckFiberXUV.cc TFragmentFinder.cc TWASAFinder.cc TRPhiZTrackMDC.cc TTrackSeed.cc TImproveHits.cc TImproveHitsFiber.cc #TFinderCM.cc TPrimaryVertex_Si.cc
 
 
 Headers_Proc = $(patsubst %.cc,%.h,$(Sources_Proc))
