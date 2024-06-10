@@ -246,7 +246,10 @@ private :
   void SelectHists() final;
 
 private:
-  
+
+  std::unique_ptr<FiberAnalyzer> fiberana;
+
+
   //std::vector<std::vector<GFAbsRecoHit*> > ListAllHits;
   std::unordered_map<int,int> orderDetectors;
   std::unordered_map<int,std::string> orderDetName;

@@ -75,6 +75,7 @@ TWASACalibrationSimuBuilder::TWASACalibrationSimuBuilder(const THyphiAttributes&
   if(index_lastMDC == -1 && index_firstPSCE == -1) offsetGeoNameID_PSCE = 0;
   else offsetGeoNameID_PSCE = index_firstPSCE - index_lastMDC + offsetGeoNameID_MDC -1;
 
+  fiberana = std::make_unique<FiberAnalyzer>();
 
   att._logger->info("Builder: geometry type: {} | offsets MDC {} PSCE {}",newGeoExp,offsetGeoNameID_MDC,offsetGeoNameID_PSCE);
 
@@ -360,13 +361,13 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
   RecoEvent.DecayVertex[2] = event.DecayVertex_Z;
 
   // Fiber ana //////////////////////////////////
-  std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitCont;
-  std::vector<std::vector<std::vector<FiberHitAna*> > > FiberHitClCont;
+  std::vector<std::vector<std::vector<FiberHitAna* > > > FiberHitCont;
+  std::vector<std::vector<std::vector<FiberHitAna* > > > FiberHitClCont;
 
   for(int i = 0; i < 7; ++i)
     {
-      std::vector<FiberHitAna*> buf_v;
-      std::vector<std::vector<FiberHitAna*> > buf_vv;
+      std::vector<FiberHitAna* > buf_v;
+      std::vector<std::vector<FiberHitAna* > > buf_vv;
       for(int j = 0; j < 3; ++j)
         {
           buf_vv.emplace_back(buf_v);
@@ -463,10 +464,13 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
   OutTree->Nmc = OutTree->fMC_Particle->GetEntries();
 
   RecoEvent.ListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
+  RecoEvent.SegmentHit1Ds.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.ListHitsInfo.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.ListHitsToTracks.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   RecoEvent.OldListHits.resize(G4Sol::SIZEOF_G4SOLDETTYPE);
   //RecoEvent.Si_HitsEnergyLayer.resize(8);
+
+  const int nGraph = 50;
 
   auto fillOutHit = [](TClonesArray* out, const TG4Sol_Hit& hit, int PDG, double charge, const TVectorD& hitR,
                        int LayerID, int HitID) {
@@ -506,6 +510,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
       auto tempPair                                       = orderDetectors.find(iDet);
       G4Sol::SolDet TypeDet                               = G4Sol::SolDet(tempPair->second);
       std::unique_ptr<genfit::AbsMeasurement> measurement = nullptr;
+      std::array<std::array<float,6>, nGraph> TempSegmentHit1D;
       MeasurementInfo measinfo;
 
       //printf("iDet: %d , nameTempBr:  , TypeDet: %d \n", iDet, G4Sol::FiberD5_v, TypeDet);
@@ -572,7 +577,13 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
               tempHitSim.hitX        = hit.HitPosX;
               tempHitSim.hitY        = hit.HitPosY;
               tempHitSim.hitZ        = hit.HitPosZ;
-              tempHitSim.momX        = hit.MomX;
+              tempHitSim.hitXexit    = hit.ExitPosX;
+              tempHitSim.hitYexit    = hit.ExitPosY;
+              tempHitSim.hitZexit    = hit.ExitPosZ;
+	      tempHitSim.hitXmid     = hitCoordsTree(0);
+	      tempHitSim.hitYmid     = hitCoordsTree(1);
+	      tempHitSim.hitZmid     = hitCoordsTree(2);
+	      tempHitSim.momX        = hit.MomX;
               tempHitSim.momY        = hit.MomY;
               tempHitSim.momZ        = hit.MomZ;
               tempHitSim.pdg         = pdg_code;
@@ -610,7 +621,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
               int indexInBranch = std::distance(tempHits->begin(), it_hit);
 #else
               const TG4Sol_Hit& hit = *(dynamic_cast<TG4Sol_Hit*>(tempHits->At(it_hit)));
-              // int indexInBranch     = it_hit;
+              int indexInBranch     = it_hit;
 #endif
               int TrackID = hit.TrackID;
               int LayerID = hit.LayerID;
@@ -828,6 +839,29 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(2) = hit.HitPosZ;
 
                   LocalHisto.h76->Fill(LayerID, atan2(shift[1], shift[0]));
+
+		  auto TempShape = gGeoManager->GetVolume("PSCE")->GetShape();
+                  Double_t minX,maxX;
+		  TempShape->GetAxisRange(2,minX,maxX);
+                  Double_t minY,maxY;
+		  TempShape->GetAxisRange(3,minY,maxY);
+		  Double_t edge1 = hit.HitPosZ-resolution_psce_z;//shift[2]+minZ;
+		  Double_t edge2 = hit.HitPosZ+resolution_psce_z;//shift[2]+maxZ;
+
+		  for(int SegI = 0; SegI<nGraph;++SegI)
+		    {
+		      double tempI = 1/(static_cast<double>(nGraph)-1.);
+		      // mean
+		      TempSegmentHit1D[SegI][0] = shift[0];
+		      TempSegmentHit1D[SegI][1] = shift[1];
+		      TempSegmentHit1D[SegI][2] = edge1 + SegI*tempI*(edge2-edge1);
+		      // sigma
+		      TempSegmentHit1D[SegI][3] = TMath::Sqrt(TMath::Sq(shift[0]*maxX)+TMath::Sq(shift[1]*maxY))/TMath::Hypot(shift[0],shift[1]);
+		      TempSegmentHit1D[SegI][4] = TMath::Sqrt(TMath::Sq(shift[0]*maxY)+TMath::Sq(shift[1]*maxX))/(TMath::Sq(shift[0])+TMath::Sq(shift[1]));
+		      TempSegmentHit1D[SegI][5] = 0.;
+		    }
+
+
                 }
               else if(IsPSBE(TypeDet))
                 {
@@ -907,6 +941,27 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
+
+		  Double_t TempPhi = v.Phi();
+		  TVector3 edge1(6.,0.,0.), edge2(22.,0.,0.);
+		  edge1.RotateZ(TempPhi);
+		  edge2.RotateZ(TempPhi);
+
+		  for(int SegI = 0; SegI<nGraph;++SegI)
+		    {
+		      double tempI = 1/(static_cast<double>(nGraph)-1.);
+		      // mean
+		      TempSegmentHit1D[SegI][0] = edge1.X() + SegI*tempI*(edge2.X()-edge1.X());
+		      TempSegmentHit1D[SegI][1] = edge1.Y() + SegI*tempI*(edge2.Y()-edge1.Y());
+		      TempSegmentHit1D[SegI][2] = o.Z();
+		      // sigma
+		      TempSegmentHit1D[SegI][3] = 3.75 * TMath::DegToRad();
+		      TempSegmentHit1D[SegI][4] = 0.;
+		      TempSegmentHit1D[SegI][5] = 0.;
+		    }
+
+
+
                 }
               else if(IsPSFE(TypeDet))
                 {
@@ -980,6 +1035,26 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(0) = hit.HitPosX;
                   hitCoordsTree(1) = hit.HitPosY;
                   hitCoordsTree(2) = hit.HitPosZ;
+
+		  Double_t TempPhi = v.Phi();
+		  TVector3 edge1(6.,0.,0.), edge2(22.,0.,0.);
+		  edge1.RotateZ(TempPhi);
+		  edge2.RotateZ(TempPhi);
+
+		  for(int SegI = 0; SegI<nGraph;++SegI)
+		    {
+		      double tempI = 1/(static_cast<double>(nGraph)-1.);
+		      //mean
+		      TempSegmentHit1D[SegI][0] = edge1.X() + SegI*tempI*(edge2.X()-edge1.X());
+		      TempSegmentHit1D[SegI][1] = edge1.Y() + SegI*tempI*(edge2.Y()-edge1.Y());
+		      TempSegmentHit1D[SegI][2] = o.Z();
+		      // sigma
+		      TempSegmentHit1D[SegI][3] = 3.75 * TMath::DegToRad();
+                      TempSegmentHit1D[SegI][4] = 0.;
+		      TempSegmentHit1D[SegI][5] = 0.;
+		    }
+
+
                 }
               else if(IsFiber(TypeDet))
                 {
@@ -1033,7 +1108,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
                   FiberHitAna* hit_ana = new FiberHitAna(i_fiber, i_layer, LayerID/2,
                                   gRandom->Gaus(hit.Time, time_res_fiber), hit.Energy, pdg_code, TrackID, att.par.get());
-                  FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].emplace_back(hit_ana);
+                  FiberHitCont[hit_ana->GetDet()][hit_ana->GetLay()].push_back(hit_ana);
 
                   auto tempTrackSimFibers = RecoEvent.TrackDAFSim.find(TrackID);
                   SimHit tempHitSim;
@@ -1041,7 +1116,10 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   tempHitSim.hitX         = hit.HitPosX;
                   tempHitSim.hitY         = hit.HitPosY;
                   tempHitSim.hitZ         = hit.HitPosZ;
-                  tempHitSim.momX         = hit.MomX;
+		  tempHitSim.hitXexit    = hit.ExitPosX;
+		  tempHitSim.hitYexit    = hit.ExitPosY;
+		  tempHitSim.hitZexit    = hit.ExitPosZ;
+		  tempHitSim.momX         = hit.MomX;
                   tempHitSim.momY         = hit.MomY;
                   tempHitSim.momZ         = hit.MomZ;
                   tempHitSim.pdg          = pdg_code;
@@ -1268,6 +1346,31 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
                   hitCoordsTree(1) = ClosestPointTrack.Y();
                   hitCoordsTree(2) = ClosestPointTrack.Z();
 
+		  for(int SegI = 0; SegI<nGraph;++SegI)
+		    {
+		      const double stepI = 1./(static_cast<double>(nGraph)-1.);
+
+		      if(TMath::Abs(hitCoords(0)-hitCoords(3))<1e-3) // parallel wire
+			{
+			  TempSegmentHit1D[SegI][0] = hitCoords(0);
+			  TempSegmentHit1D[SegI][1] = hitCoords(1);
+			  TempSegmentHit1D[SegI][2] = hitCoords(2)+SegI*stepI*(hitCoords(5)-hitCoords(2));
+
+			}
+		      else
+			{
+			  TempSegmentHit1D[SegI][0] = hitCoords(0)+SegI*stepI*(hitCoords(3)-hitCoords(0));
+			  TempSegmentHit1D[SegI][1] = hitCoords(1)+SegI*stepI*(hitCoords(4)-hitCoords(1));
+			  TempSegmentHit1D[SegI][2] = hitCoords(2)+SegI*stepI*(hitCoords(5)-hitCoords(2));
+			}
+		      // sigma
+		      TempSegmentHit1D[SegI][3] = dlmax;
+		      TempSegmentHit1D[SegI][4] = TMath::ATan2(dlmax,TMath::Hypot(TempSegmentHit1D[SegI][0],TempSegmentHit1D[SegI][1]));
+		      TempSegmentHit1D[SegI][5] = 0.;
+		    }
+
+
+
                   //std::cout << "MDCHit of track: " << TrackID << "\n";
                   //std::cout << "MDC Layer: " << TypeDet-G4Sol::MG01+1 << " hit: " << LayerID << " TrackID: " << TrackID << "\n";
                 }
@@ -1301,6 +1404,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 
               RecoEvent.ListHits[TypeDet].emplace_back(measurement.release());
               RecoEvent.ListHitsInfo[TypeDet].emplace_back(measinfo);
+	      RecoEvent.SegmentHit1Ds[TypeDet].emplace_back(TempSegmentHit1D);
               RecoEvent.ListHitsToTracks[TypeDet].emplace_back(TrackID);
 
               int pdg_code = pid_fromName(hit.Pname);
@@ -1313,6 +1417,12 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
               tempHitSim.hitX        = hit.HitPosX;
               tempHitSim.hitY        = hit.HitPosY;
               tempHitSim.hitZ        = hit.HitPosZ;
+	      tempHitSim.hitXexit    = hit.ExitPosX;
+              tempHitSim.hitYexit    = hit.ExitPosY;
+              tempHitSim.hitZexit    = hit.ExitPosZ;
+	      tempHitSim.hitXmid = hitCoordsTree(0);
+	      tempHitSim.hitYmid = hitCoordsTree(1);
+	      tempHitSim.hitZmid = hitCoordsTree(2);
               tempHitSim.momX        = hit.MomX;
               tempHitSim.momY        = hit.MomY;
               tempHitSim.momZ        = hit.MomZ;
@@ -1375,7 +1485,7 @@ int TWASACalibrationSimuBuilder::Exec(const TG4Sol_Event& event, const std::vect
 */
 
   // Fiber ana //////////////////////////////////
-  FiberAnalyzer* fiberana = new FiberAnalyzer();
+  //std::unique_ptr<FiberAnalyzer> fiberana = std::make_unique<FiberAnalyzer>();
   FiberHitClCont          = fiberana->Clusterize(FiberHitCont, att.WF_perfect);
 
   RecoEvent.FiberHitClCont = FiberHitClCont;
