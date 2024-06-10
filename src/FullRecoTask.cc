@@ -27,6 +27,10 @@
 #include "TDecayVertex.h"
 #include "TRiemannFinder.h"
 #include "TFindingPerf.h"
+#include "TImproveHits.h"
+#include "TImproveHitsFiber.h"
+#include "TTrackSeed.h"
+
 #include <list>
 //#include "TKalmanFilter_FRS.h"
 
@@ -147,6 +151,18 @@ FullRecoTask<TEOut>::FullRecoTask(const FullRecoConfig& config, const DataSimExp
 	case Task::TASKRPHIZTRACKMDC:
 	  if(Attributes.TaskConfig.Task_RPhiZTrackMDC)
 	    list_processMC.emplace_back(new TRPhiZTrackMDC<TEOut>(Attributes));
+	  break;
+	case Task::TASKTRACKSEED:
+	  if(Attributes.TaskConfig.Task_TrackSeed)
+	    list_processMC.emplace_back(new TTrackSeed<TEOut>(Attributes));
+	  break;
+	case Task::TASKIMPROVEHITS:
+	  if(Attributes.TaskConfig.Task_ImproveHits)
+	    list_processMC.emplace_back(new TImproveHits<TEOut>(Attributes));
+	  break;
+	case Task::TASKIMPROVEHITSFIBER:
+	  if(Attributes.TaskConfig.Task_ImproveHitsFiber)
+	    list_processMC.emplace_back(new TImproveHitsFiber<TEOut>(Attributes));
 	  break;
 #ifdef WITH_GEANT4
 	case Task::TASKKALMANDAF:

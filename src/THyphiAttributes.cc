@@ -81,6 +81,7 @@ THyphiAttributes::THyphiAttributes(const FullRecoConfig& config, const DataSimEx
   WF_perfect  = false;
   WF_PSBHits  = true;
   WF_PSBEHits = false;
+  WF_PSFEHits = false;
 
   GNN_Text = false;
   GNN_Node = "test.txt";
@@ -809,8 +810,14 @@ void Task::Init(const FullRecoConfig& Config)
   if(Config.IsAvailable("Task_CheckRZ"))
     Task_CheckRZ = Config.Get<bool>("Task_CheckRZ");
 
+  if(Config.IsAvailable("Task_ImproveHitsFiber"))
+    Task_ImproveHitsFiber = Config.Get<bool>("Task_ImproveHitsFiber");
   if(Config.IsAvailable("Task_RPhiZTrackMDC"))
-    Task_CheckRZ = Config.Get<bool>("Task_RPhiZTrackMDC");
+    Task_RPhiZTrackMDC = Config.Get<bool>("Task_RPhiZTrackMDC");
+  if(Config.IsAvailable("Task_TrackSeed"))
+    Task_TrackSeed = Config.Get<bool>("Task_TrackSeed");
+  if(Config.IsAvailable("Task_ImproveHits"))
+    Task_ImproveHits = Config.Get<bool>("Task_ImproveHits");
 
   if(Config.IsAvailable("Task_KalmanDAF"))
     Task_KalmanDAF = Config.Get<bool>("Task_KalmanDAF");
@@ -853,8 +860,8 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKFRAGMENTFINDER);
 	  if(s == "Task_WASAFinder")
 	    Task_Order.push_back(TASKWASAFINDER);
-    if(s == "Task_GNNFinder")
-      Task_Order.push_back(TASKGNNFINDER);
+	  if(s == "Task_GNNFinder")
+	    Task_Order.push_back(TASKGNNFINDER);
 	  if(s == "Task_BayesFinder")
 	    Task_Order.push_back(TASKBAYESFINDER);
 	  if(s == "Task_RiemannFinder")
@@ -865,8 +872,14 @@ void Task::Init(const FullRecoConfig& Config)
 	    Task_Order.push_back(TASKFINDERCM);
 	  if(s == "Task_CheckRZ")
 	    Task_Order.push_back(TASKCHECKRZ);
+	  if(s == "Task_ImproveHitsFiber")
+	    Task_Order.push_back(TASKIMPROVEHITSFIBER);
 	  if(s == "Task_RPhiZTrackMDC")
 	    Task_Order.push_back(TASKRPHIZTRACKMDC);
+	  if(s == "Task_TrackSeed")
+	    Task_Order.push_back(TASKTRACKSEED);
+	  if(s == "Task_ImproveHits")
+	    Task_Order.push_back(TASKIMPROVEHITS);
 	  if(s == "Task_KalmanDAF")
 	    Task_Order.push_back(TASKKALMANDAF);
 	  if(s == "Task_KalmanDAFPID")
@@ -921,6 +934,10 @@ void THyphiAttributes::SetOut(AttrOut& out) const
   out.RunTask.Task_FinderCM        = TaskConfig.Task_FinderCM;
   out.RunTask.Task_FindingPerf     = TaskConfig.Task_FindingPerf;
   out.RunTask.Task_CheckRZ         = TaskConfig.Task_CheckRZ;
+  out.RunTask.Task_ImproveHitsFiber= TaskConfig.Task_ImproveHitsFiber;
+  out.RunTask.Task_RPhiZTrackMDC   = TaskConfig.Task_RPhiZTrackMDC;
+  out.RunTask.Task_TrackSeed       = TaskConfig.Task_TrackSeed;
+  out.RunTask.Task_ImproveHits     = TaskConfig.Task_ImproveHits;
   out.RunTask.Task_KalmanDAF       = TaskConfig.Task_KalmanDAF;
   out.RunTask.Task_KalmanDAFPID    = TaskConfig.Task_KalmanDAFPID;
   out.RunTask.Task_DecayVtx        = TaskConfig.Task_DecayVtx;

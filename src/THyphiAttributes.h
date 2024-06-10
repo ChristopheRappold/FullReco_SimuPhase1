@@ -92,18 +92,20 @@ struct Task
   bool Task_FinderCM = false;
   bool Task_FindingPerf = false;
   bool Task_CheckRZ = true;
+  bool Task_ImproveHitsFiber = false;
   bool Task_RPhiZTrackMDC = false;
+  bool Task_TrackSeed = false;
+  bool Task_ImproveHits = false;
   bool Task_KalmanDAF = true;
   bool Task_KalmanDAFPID = true;
   bool Task_DecayVtx = false;
   bool Task_DecayVtx_piplus = false;
   enum Task_Id
   {
-    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKGNNFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ, TASKRPHIZTRACKMDC,
-    TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, NBTASKID
+    TASKRESTART = 0, TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKFLATMCOUTPUTML, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKGNNFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDERCM, TASKFINDINGPERF, TASKCHECKRZ, TASKIMPROVEHITSFIBER, TASKRPHIZTRACKMDC, TASKTRACKSEED, TASKIMPROVEHITS, TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, NBTASKID
   };
 
-  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKGNNFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKRPHIZTRACKMDC, TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, TASKFLATMCOUTPUTML};
+  std::vector<Task_Id> Task_Order = {TASKCHECKFIELD, TASKFIBERHITFINDER, TASKPRIMARYVTX, TASKPRIMARYVTX_SI, TASKCHECKFIBERXUV, TASKCHECKFIBERTRACK, TASKFRAGMENTFINDER, TASKWASAFINDER, TASKGNNFINDER, TASKBAYESFINDER, TASKRIEMANNFINDER, TASKFINDINGPERF, TASKCHECKRZ, TASKIMPROVEHITSFIBER, TASKRPHIZTRACKMDC, TASKTRACKSEED, TASKIMPROVEHITS, TASKKALMANDAF, TASKKALMANDAFPID, TASKDECAYVTX, TASKDECAYVTX_PIPLUS, TASKFLATMCOUTPUTML};
 
   void Init(const FullRecoConfig& Config);
 };
@@ -161,7 +163,10 @@ struct RunTaskDef
   bool Task_FinderCM;
   bool Task_FindingPerf;
   bool Task_CheckRZ;
+  bool Task_ImproveHitsFiber;
   bool Task_RPhiZTrackMDC;
+  bool Task_TrackSeed;
+  bool Task_ImproveHits;
   bool Task_KalmanDAF;
   bool Task_KalmanDAFPID;
   bool Task_DecayVtx;
@@ -305,17 +310,20 @@ inline auto InitStorage()
 				 make_column("Task_FlatMCOutputML", &RunTaskDef::Task_FlatMCOutputML),
 				 make_column("Task_FragmentFinder", &RunTaskDef::Task_FragmentFinder),
 				 make_column("Task_WASAFinder", &RunTaskDef::Task_WASAFinder),
-         make_column("Task_GNNFinder", &RunTaskDef::Task_GNNFinder),
+				 make_column("Task_GNNFinder", &RunTaskDef::Task_GNNFinder),
 				 make_column("Task_BayesFinder", &RunTaskDef::Task_BayesFinder),
 				 make_column("Task_RiemannFinder", &RunTaskDef::Task_RiemannFinder),
 				 make_column("Task_FinderCM", &RunTaskDef::Task_FinderCM),
 				 make_column("Task_FindingPerf", &RunTaskDef::Task_FindingPerf),
 				 make_column("Task_CheckRZ", &RunTaskDef::Task_CheckRZ),
+				 make_column("Task_ImproveHitsFiber", &RunTaskDef::Task_ImproveHitsFiber),
 				 make_column("Task_RPhiZTrackMDC", &RunTaskDef::Task_RPhiZTrackMDC),
+				 make_column("Task_TrackSeed", &RunTaskDef::Task_TrackSeed),
+				 make_column("Task_ImproveHits", &RunTaskDef::Task_ImproveHits),
 				 make_column("Task_KalmanDAF", &RunTaskDef::Task_KalmanDAF),
 				 make_column("Task_KalmanDAFPID", &RunTaskDef::Task_KalmanDAFPID),
 				 make_column("Task_DecayVtx", &RunTaskDef::Task_DecayVtx),
-         make_column("Task_DecayVtx_piPlus", &RunTaskDef::Task_DecayVtx_piplus),
+				 make_column("Task_DecayVtx_piPlus", &RunTaskDef::Task_DecayVtx_piplus),
 				 make_column("Task_ReStart", &RunTaskDef::Task_ReStart)
 				 ),
 		      make_table(
@@ -364,7 +372,7 @@ inline auto InitStorage()
 				 make_column("KF_DAFRef", &RunTaskAttrDef::KF_DAFRef),
 				 make_column("KF_DAF", &RunTaskAttrDef::KF_DAF),
 				 make_column("KF_NbCentralCut", &RunTaskAttrDef::KF_NbCentralCut),
-         make_column("KF_MbMiniFiberCut", &RunTaskAttrDef::KF_NbMiniFiberCut),
+				 make_column("KF_MbMiniFiberCut", &RunTaskAttrDef::KF_NbMiniFiberCut),
 				 make_column("FlatML_namefile", &RunTaskAttrDef::FlatML_namefile),
 				 make_column("DataML_Out", &RunTaskAttrDef::DataML_Out),
 				 make_column("RF_OutputEvents", &RunTaskAttrDef::RF_OutputEvents),
