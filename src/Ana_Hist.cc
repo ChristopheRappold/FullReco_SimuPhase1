@@ -22,7 +22,7 @@ Ana_Hist::~Ana_Hist()
 }
 
 /********************************************************************/
-Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Hough, bool Simu,
+Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Riemann, bool Seed, bool Hough, bool Simu,
                     bool Builder, bool PrimVtx, bool PrimVtx_Si, bool DecayVtx, bool DecayVtx_piplus,
                     bool FragmentFinder, bool WASAFinder)
 {
@@ -32,6 +32,7 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
   EnableState[DCPROJ] = DCproject;
   EnableState[FINDING] = Finding;
   EnableState[RIEMANN] = Riemann;
+  EnableState[SEED] = Seed;
   EnableState[HOUGH] = Hough;
   EnableState[SIMU] = Simu;
   EnableState[BUILDER] = Builder;
@@ -372,6 +373,25 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       HistRegisteredByDir.insert(std::make_pair("RiemannFinder", std::make_tuple(HistReg,0)));
     }
 
+  if(EnableState[SEED])
+    {
+      std::vector<std::vector<TH1*>*> HistReg;
+
+      h_SeedRiemannChi2.emplace_back(new TH2F("h_SeedRiemannChi2","h_SeedRiemannChi2",5,0,5,120,-10,20));
+      HistReg.emplace_back(&h_RiemannChi2.store);
+
+      h_SeedRiemannResidus.emplace_back(new TH2F("h_SeedRiemannResidus","h_SeedRiemannResidus",100,0,100,100,-10,10));
+      HistReg.emplace_back(&h_RiemannResidus.store);
+
+      h_ImproveHitsResidus.emplace_back(new TH2F("h_ImproveHitsResidus","h_ImproveHitsResidus",100,0,100,1000,-10,10));
+      HistReg.emplace_back(&h_ImproveHitsResidus.store);
+
+      h_ImproveHitsResidus2.emplace_back(new TH2F("h_ImproveHitsResidusZoom","h_ImproveHitsResidusZoom",100,0,100,1000,-1,1));
+      HistReg.emplace_back(&h_ImproveHitsResidus2.store);
+
+      HistRegisteredByDir.insert(std::make_pair("SeedRiemann", std::make_tuple(HistReg,0)));
+    }
+
   if(EnableState[SIMU])
     {
       std::vector<std::vector<TH1*>*> HistReg;
@@ -496,6 +516,12 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
       h_ResidualFiberDzDtheta.emplace_back(new TH2F("h_ResidualDzDtheta","h_ResidualDzDtheta",300,0,300,500,-10,10));
       HistReg.emplace_back(&h_ResidualFiberDzDtheta.store);
 
+      h_RPhiZMDC_Chi2.emplace_back(new TH2F("h_RPhiZMDC_Chi2","h_RPhiZMDC_Chi2",20,0,20,1000,0,100));
+      HistReg.emplace_back(&h_RPhiZMDC_Chi2.store);
+
+      h_RPhiZMDC_Status.emplace_back(new TH2F("h_RPhiZMDC_Status","h_RPhiZMDC_Status",20,0,20,20,0,20));
+      HistReg.emplace_back(&h_RPhiZMDC_Status.store);
+
       h_ResidualMDC_dZ1.emplace_back(new TH2F("h_ResidualMDC_SimdZ","h_ResidualMDC_SimdZ",20,0,20,1000,-50,50));
       HistReg.emplace_back(&h_ResidualMDC_dZ1.store);
 
@@ -504,6 +530,9 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
 
       h_RPhiZMDC_Sigma.emplace_back(new TH2F("h_RPhiZMDC_Sigma","h_RPhiZMDC_Sigma",20,0,20,1000,-50,50));
       HistReg.emplace_back(&h_RPhiZMDC_Sigma.store);
+
+      h_RPhiZMDC_Sigma2.emplace_back(new TH2F("h_RPhiZMDC_Sigma2","h_RPhiZMDC_Sigma2",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_RPhiZMDC_Sigma2.store);
 
       h_ResidualMDC_dZ_PSB.emplace_back(new TH2F("h_ResidualMDC_SimdZ_PSB","h_ResidualMDC_SimdZ_PSB",20,0,20,1000,-50,50));
       HistReg.emplace_back(&h_ResidualMDC_dZ_PSB.store);
@@ -516,6 +545,25 @@ Ana_Hist::Ana_Hist(bool Daf, bool Vertex, bool DCproject, bool Finding, bool Rie
 
       h_ResidualMDC_dZ_More6.emplace_back(new TH2F("h_ResidualMDC_SimdZ_More6","h_ResidualMDC_SimdZ_More6",20,0,20,1000,-50,50));
       HistReg.emplace_back(&h_ResidualMDC_dZ_More6.store);
+
+
+      h_PullMDC_dZ1.emplace_back(new TH2F("h_PullMDC_SimdZ","h_PullMDC_SimdZ",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_PullMDC_dZ1.store);
+
+      h_PullMDC_dZ2.emplace_back(new TH2F("h_PullMDC_RealdZ","h_PullMDC_RealdZ",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_PullMDC_dZ2.store);
+
+      h_PullMDC_dZ_PSB.emplace_back(new TH2F("h_PullMDC_SimdZ_PSB","h_PullMDC_SimdZ_PSB",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_PullMDC_dZ_PSB.store);
+
+      h_PullMDC_dZ_PSBE.emplace_back(new TH2F("h_PullMDC_SimdZ_PSBE","h_PullMDC_SimdZ_PSBE",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_PullMDC_dZ_PSBE.store);
+
+      h_PullMDC_dZ_PSFE.emplace_back(new TH2F("h_PullMDC_SimdZ_PSFE","h_PullMDC_SimdZ_PSFE",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_PullMDC_dZ_PSFE.store);
+
+      h_PullMDC_dZ_More6.emplace_back(new TH2F("h_PullMDC_SimdZ_More6","h_PullMDC_SimdZ_More6",20,0,20,1000,-50,50));
+      HistReg.emplace_back(&h_PullMDC_dZ_More6.store);
 
       HistRegisteredByDir.insert(std::make_pair("Simu", std::make_tuple(HistReg,0)));
       HistRegisteredByDir.insert(std::make_pair("Simu_Eff", std::make_tuple(HistRegEff,2)));
@@ -1468,11 +1516,11 @@ int Ana_Hist::Write(TFile* out_file)
   {
     TString nameAll("Proj_All");
     TH1D* h_All = h->ProjectionX(nameAll,1,1);
-    h_All->Sumw2();
+    //h_All->Sumw2();
 
     TString nameAcc("Proj_Acc");
     TH1D* h_Acc = h->ProjectionX(nameAcc,2,2);
-    h_Acc->Sumw2();
+    //h_Acc->Sumw2();
 
     TString nameH = h->GetName();
     Int_t nBins = h->GetXaxis()->GetNbins();

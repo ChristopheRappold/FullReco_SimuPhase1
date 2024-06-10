@@ -207,7 +207,7 @@ int main(int argc, char** argv)
       config.Add("Start_Event", Start_event);
       config.Add("Stop_Event", Stop_event);
 
-      Ana_Hist ListHisto(true /*Daf*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Riemann*/, false /*Hough*/,
+      Ana_Hist ListHisto(true /*Daf*/, false /*Oldvertex*/, false /*DCproject*/, true /*Finding*/, true /*Riemann*/, true /*Seed*/, false /*Hough*/,
                   false /*Simu*/, true /*Builder*/, true /*PrimVtx*/, false /*PrimVtx_Si*/, true /*DecayVtx*/, true /*DecayVtx_pi+*/,
                   true /*FragmentFinder*/, true /*WASAFinder*/);
 

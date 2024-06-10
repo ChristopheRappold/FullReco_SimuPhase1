@@ -30,6 +30,7 @@ enum StateHist : int
   DCPROJ,
   FINDING,
   RIEMANN,
+  SEED,
   HOUGH,
   SIMU,
   BUILDER,
@@ -166,6 +167,12 @@ class Ana_Hist
   // Riemann Finder
   Hist<TH2F> h_RiemannChi2;
   Hist<TH2F> h_RiemannResidus;
+
+  // Riemann Finder
+  Hist<TH2F> h_SeedRiemannChi2;
+  Hist<TH2F> h_SeedRiemannResidus;
+  Hist<TH2F> h_ImproveHitsResidus;
+  Hist<TH2F> h_ImproveHitsResidus2;
 
 
   // PerfFinder
@@ -628,10 +635,14 @@ class Ana_Hist
   Hist<TH2F> h_ResidualFiberDzDphi;
   Hist<TH2F> h_ResidualFiberDzDtheta;
 
+  Hist<TH2F> h_RPhiZMDC_Chi2;
+  Hist<TH2F> h_RPhiZMDC_Status;
+
   Hist<TH2F> h_ResidualMDC_dZ1;
   Hist<TH2F> h_ResidualMDC_dZ2;
 
   Hist<TH2F> h_RPhiZMDC_Sigma;
+  Hist<TH2F> h_RPhiZMDC_Sigma2;
 
 
   Hist<TH2F> h_ResidualMDC_dZ_PSB;
@@ -639,9 +650,18 @@ class Ana_Hist
   Hist<TH2F> h_ResidualMDC_dZ_PSFE;
   Hist<TH2F> h_ResidualMDC_dZ_More6;
 
+  Hist<TH2F> h_PullMDC_dZ1;
+  Hist<TH2F> h_PullMDC_dZ2;
+
+  Hist<TH2F> h_PullMDC_dZ_PSB;
+  Hist<TH2F> h_PullMDC_dZ_PSBE;
+  Hist<TH2F> h_PullMDC_dZ_PSFE;
+  Hist<TH2F> h_PullMDC_dZ_More6;
+
+
   std::unordered_map<std::string, std::tuple<std::vector<std::vector<TH1*>*>, int> > HistRegisteredByDir;
 
-  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Hough = true, bool Simu = false,
+  Ana_Hist(bool Daf = true, bool Vertex = true, bool DCproject = true, bool Finding = true, bool Riemann = true, bool Seed = true, bool Hough = true, bool Simu = false,
             bool Builder = false, bool PrimVtx = true, bool PrimVtx_Si = false, bool DecayVtx = true,  bool DecayVtx_piplus = true,
             bool FragmentFinder = true, bool WASAFinder = true);
   ~Ana_Hist();
